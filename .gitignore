@@ -1,0 +1,13 @@
+# Ignore ALL node_modules (root + nested)
+node_modules/
+apps/frontend/node_modules/
+# PNPM-specific files
+.pnpm-store/
+.pnpm-debug.log
+
+# Next.js/Node.js files
+apps/frontend/.next/
+apps/frontend/dist/
+apps/frontend/next-env.d.ts
+
+.env
