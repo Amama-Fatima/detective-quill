@@ -1,26 +1,60 @@
-"use server";
-
-import { createServerClient } from "@supabase/ssr";
+import { type CookieOptions, createServerClient } from "@supabase/ssr";
+import { getCookie, setCookie } from "cookies-next";
 import { cookies } from "next/headers";
+import { type NextRequest, type NextResponse } from "next/server";
 
-export async function createClient() {
-  const cookieStore = await cookies();
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+export function createSupabaseReqResClient(
+  req: NextRequest,
+  res: NextResponse
+) {
   return createServerClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!,
+    SUPABASE_URL as string,
+    SUPABASE_ANON_KEY as string,
     {
       cookies: {
-        getAll() {
-          return cookieStore.getAll();
+        get(name: string) {
+          return getCookie(name, { req, res });
         },
-        setAll(cookiesToSet) {
+        set(name: string, value: string, options: CookieOptions) {
+          setCookie(name, value, { req, res, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          setCookie(name, "", { req, res, ...options });
+        },
+      },
+    }
+  );
+}
+
+export const createClient = async (
+  cookieStorePromise: ReturnType<typeof cookies>
+) => {
+  const cookieStore = await cookieStorePromise;
+  return createServerClient(
+    SUPABASE_URL as string,
+    SUPABASE_ANON_KEY as string,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // The `setAll` method was called from a Server Component.
+            cookieStore.set({ name, value, ...options });
+          } catch (error) {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: "", ...options });
+          } catch (error) {
+            // The `delete` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
             // user sessions.
           }
@@ -28,4 +62,9 @@ export async function createClient() {
       },
     }
   );
-}
+};
+export const createSupabaseServerClient = async () => {
+  const cookieStorePromise = cookies();
+  const supabase = await createClient(cookieStorePromise);
+  return supabase;
+};

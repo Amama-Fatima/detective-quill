@@ -1,15 +1,33 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { createSupabaseBrowserClient } from "@/supabase/browser-client";
 import { Chrome } from "lucide-react";
 
 interface SocialAuthProps {
   mode: "signin" | "signup";
+  props?: { nextUrl?: string };
 }
 
-export function SocialAuth({ mode }: SocialAuthProps) {
-  const handleGoogleAuth = () => {
-    // Implement Google OAuth logic here
+export function SocialAuth({ mode, props }: SocialAuthProps) {
+  const handleGoogleAuth = async () => {
+    try {
+      const supabaseBrowserClient = createSupabaseBrowserClient();
+      await supabaseBrowserClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${location.origin}/api/auth/callback?next=${
+            props?.nextUrl || ""
+          }`,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error during Google auth:", error);
+    }
     console.log("Google auth clicked");
   };
 

@@ -11,3 +11,4 @@ apps/frontend/dist/
 apps/frontend/next-env.d.ts
 
 .env
+apps/frontend/.env

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react";
 import { SignUpFormValues, signUpSchema } from "@/lib/schema";
+import { createSupabaseBrowserClient } from "@/supabase/browser-client";
 
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,15 +54,22 @@ export function SignUpForm() {
 
   const passwordStrength = getPasswordStrength(password);
 
-  const onSubmit = async (values: SignUpFormValues) => {
+  const onSubmit = async (formData: SignUpFormValues) => {
+    console.log("Form data:", formData);
     setIsLoading(true);
     setError("");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-      console.log("Sign up:", values);
+      const supabaseBrowserClient = createSupabaseBrowserClient();
+      const { data, error } = await supabaseBrowserClient.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+      });
+      console.log("Sign up:", formData);
+      console.log("Supabase response:", data, error);
     } catch (err) {
       setError("Something went wrong. Please try again.");
+      console.error("Error during sign up:", err);
     } finally {
       setIsLoading(false);
     }
@@ -217,7 +225,7 @@ export function SignUpForm() {
 
         <Button
           type="submit"
-          className="w-full h-11 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+          className="w-full h-11 hover:cursor-pointer"
           disabled={isLoading}
         >
           {isLoading ? (
