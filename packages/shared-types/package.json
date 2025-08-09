@@ -1,0 +1,23 @@
+{
+  "name": "@detective-quill/shared-types",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": {
+      "types": "./index.ts",
+      "default": "./index.ts"
+    },
+    "./database": {
+      "types": "./database.types.ts",
+      "default": "./database.types.ts"
+    },
+    "./api": {
+      "types": "./api.types.ts",
+      "default": "./api.types.ts"
+    }
+  },
+  "files": [
+    "*.ts"
+  ]
+}
