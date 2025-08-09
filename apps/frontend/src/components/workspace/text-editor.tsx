@@ -23,6 +23,9 @@ import {
   Eye,
   SplitSquareVertical,
   Trash2,
+  Save,
+  Check,
+  Edit3,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -50,8 +53,11 @@ export type TextEditorProps = {
   value?: string;
   onChange?: (next: string) => void;
   onDelete?: () => void;
+  onSave?: () => void;
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
+  isDirty?: boolean;
+  isSaving?: boolean;
 };
 
 export function TextEditor({
@@ -59,8 +65,11 @@ export function TextEditor({
   value = "",
   onChange = () => {},
   onDelete = () => {},
+  onSave = () => {},
   viewMode: controlledView = "split",
   onViewModeChange = () => {},
+  isDirty = false,
+  isSaving = false,
 }: TextEditorProps) {
   const [internal, setInternal] = useState(value);
   const [viewMode, setViewMode] = useState<ViewMode>(controlledView);
@@ -185,7 +194,10 @@ export function TextEditor({
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const mod = e.metaKey || e.ctrlKey;
-    if (mod && e.key.toLowerCase() === "b") {
+    if (mod && e.key.toLowerCase() === "s") {
+      e.preventDefault();
+      onSave();
+    } else if (mod && e.key.toLowerCase() === "b") {
       e.preventDefault();
       applyInlineWrap("**");
     } else if (mod && e.key.toLowerCase() === "i") {
@@ -215,13 +227,12 @@ export function TextEditor({
   // propagate controlled view mode changes
   useEffect(() => {
     onViewModeChange(viewMode);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewMode]);
+  }, [viewMode, onViewModeChange]);
 
   const preview = useMemo(
     () => (
       <ScrollArea className="h-full">
-        <article className="prose prose-neutral dark:prose-invert max-w-none px-4 py-4">
+        <article className="prose prose-neutral dark:prose-invert max-w-none px-6 py-6">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{internal}</ReactMarkdown>
         </article>
       </ScrollArea>
@@ -229,300 +240,7 @@ export function TextEditor({
     [internal]
   );
 
-  return (
-    <TooltipProvider delayDuration={200}>
-      <div className="flex h-full flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b px-3 py-2">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="truncate text-sm font-medium">{fileName}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={viewMode === "edit" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("edit")}
-                >
-                  {"Edit"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Edit only</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={viewMode === "preview" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("preview")}
-                >
-                  <Eye className="mr-1 h-4 w-4" />
-                  {"Preview"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Preview only</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={viewMode === "split" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("split")}
-                >
-                  <SplitSquareVertical className="mr-1 h-4 w-4" />
-                  {"Split"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Side-by-side</TooltipContent>
-            </Tooltip>
-            <Separator orientation="vertical" className="mx-2 h-6" />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onDelete}
-              aria-label="Delete file"
-            >
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-1 border-b px-2 py-1.5">
-          <ToolbarButton
-            tooltip="Heading 1 (Cmd/Ctrl + 1)"
-            onClick={() => applyHeading(1)}
-          >
-            <Heading1 className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            tooltip="Heading 2 (Cmd/Ctrl + 2)"
-            onClick={() => applyHeading(2)}
-          >
-            <Heading2 className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            tooltip="Heading 3 (Cmd/Ctrl + 3)"
-            onClick={() => applyHeading(3)}
-          >
-            <Heading3 className="h-4 w-4" />
-          </ToolbarButton>
-          <Separator orientation="vertical" className="mx-1 h-6" />
-          <ToolbarButton
-            tooltip="Bold (Cmd/Ctrl + B)"
-            onClick={() => applyInlineWrap("**")}
-          >
-            <Bold className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            tooltip="Italic (Cmd/Ctrl + I)"
-            onClick={() => applyInlineWrap("*")}
-          >
-            <Italic className="h-4 w-4" />
-          </ToolbarButton>
-          <Separator orientation="vertical" className="mx-1 h-6" />
-          <ToolbarButton
-            tooltip="Bullet list"
-            onClick={() => applyLinePrefix("- ")}
-          >
-            <List className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            tooltip="Numbered list"
-            onClick={() => applyLinePrefix("1. ")}
-          >
-            <ListOrdered className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            tooltip="Blockquote (Cmd/Ctrl + E)"
-            onClick={() => applyLinePrefix("> ")}
-          >
-            <Quote className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton
-            tooltip="Code block (Cmd/Ctrl + K)"
-            onClick={applyCodeBlock}
-          >
-            <Code className="h-4 w-4" />
-          </ToolbarButton>
-          <ToolbarButton tooltip="Horizontal rule" onClick={applyHr}>
-            <Minus className="h-4 w-4" />
-          </ToolbarButton>
-          <Separator orientation="vertical" className="mx-1 h-6" />
-          <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Insert link">
-                <LinkIcon className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>{"Insert Link"}</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-3">
-                <div className="grid gap-1.5">
-                  <label className="text-sm font-medium" htmlFor="link-text">
-                    {"Text"}
-                  </label>
-                  <Input
-                    id="link-text"
-                    value={linkText}
-                    onChange={(e) => setLinkText(e.target.value)}
-                    placeholder="Link text"
-                  />
-                </div>
-                <div className="grid gap-1.5">
-                  <label className="text-sm font-medium" htmlFor="link-url">
-                    {"URL"}
-                  </label>
-                  <Input
-                    id="link-url"
-                    value={linkUrl}
-                    onChange={(e) => setLinkUrl(e.target.value)}
-                    placeholder="https://example.com"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={() => {
-                    const text = linkText.trim() || "link";
-                    const url = linkUrl.trim() || "https://";
-                    insertAtCursor(`[${text}](${url})`);
-                    setLinkText("");
-                    setLinkUrl("");
-                    setLinkOpen(false);
-                  }}
-                >
-                  {"Insert"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={imageOpen} onOpenChange={setImageOpen}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Insert image">
-                <ImageIcon className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>{"Insert Image"}</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-3">
-                <div className="grid gap-1.5">
-                  <label className="text-sm font-medium" htmlFor="img-alt">
-                    {"Alt"}
-                  </label>
-                  <Input
-                    id="img-alt"
-                    value={imageAlt}
-                    onChange={(e) => setImageAlt(e.target.value)}
-                    placeholder="Alt text"
-                  />
-                </div>
-                <div className="grid gap-1.5">
-                  <label className="text-sm font-medium" htmlFor="img-url">
-                    {"URL"}
-                  </label>
-                  <Input
-                    id="img-url"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://example.com/image.png"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={() => {
-                    const alt = imageAlt.trim() || "image";
-                    const url = imageUrl.trim() || "https://";
-                    insertAtCursor(`![${alt}](${url})`);
-                    setImageAlt("");
-                    setImageUrl("");
-                    setImageOpen(false);
-                  }}
-                >
-                  {"Insert"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Content */}
-        <div className="flex min-h-0 flex-1">
-          {/* Small screens: tabs */}
-          <div className="w-full md:hidden">
-            <Tabs
-              value={viewMode === "preview" ? "preview" : "edit"}
-              onValueChange={(v) =>
-                setViewMode(v === "preview" ? "preview" : "edit")
-              }
-              className="h-full"
-            >
-              <TabsList className="w-full justify-start rounded-none border-b">
-                <TabsTrigger value="edit" className="rounded-none">
-                  {"Edit"}
-                </TabsTrigger>
-                <TabsTrigger value="preview" className="rounded-none">
-                  {"Preview"}
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="edit" className="m-0 h-[calc(100vh-160px)]">
-                <EditorArea
-                  textareaRef={textareaRef}
-                  value={internal}
-                  setValue={commit}
-                  onKeyDown={onKeyDown}
-                />
-              </TabsContent>
-              <TabsContent
-                value="preview"
-                className="m-0 h-[calc(100vh-160px)]"
-              >
-                {preview}
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* md+ screens: split or single pane */}
-          <div className="hidden h-[calc(100vh-160px)] w-full md:flex">
-            {viewMode !== "preview" && (
-              <div
-                className={cn(
-                  "h-full",
-                  viewMode === "split" ? "w-1/2 border-r" : "w-full"
-                )}
-              >
-                <EditorArea
-                  textareaRef={textareaRef}
-                  value={internal}
-                  setValue={commit}
-                  onKeyDown={onKeyDown}
-                />
-              </div>
-            )}
-            {viewMode !== "edit" && (
-              <div
-                className={cn(
-                  "h-full",
-                  viewMode === "split" ? "w-1/2" : "w-full"
-                )}
-              >
-                {preview}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </TooltipProvider>
-  );
-
-  function insertAtCursor(text: string) {
+  const insertAtCursor = (text: string) => {
     const el = textareaRef.current;
     if (!el) return;
     const { selectionStart, selectionEnd, value: val } = el;
@@ -533,71 +251,414 @@ export function TextEditor({
       const pos = selectionStart + text.length;
       el.setSelectionRange(pos, pos);
     });
-  }
-}
+  };
 
-function ToolbarButton({
-  tooltip,
-  onClick,
-  children,
-}: {
-  tooltip: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClick}
-          aria-label={tooltip}
-        >
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
-    </Tooltip>
-  );
-}
+  const insertLink = () => {
+    const linkMarkdown = `[${linkText}](${linkUrl})`;
+    insertAtCursor(linkMarkdown);
+    setLinkOpen(false);
+    setLinkText("");
+    setLinkUrl("");
+  };
 
-function EditorArea({
-  textareaRef,
-  value,
-  setValue,
-  onKeyDown,
-}: {
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
-  value: string;
-  setValue: (v: string) => void;
-  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-}) {
-  // Save on Cmd/Ctrl+S
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
-        e.preventDefault();
-        // Let parent persistence effect handle save; localStorage update is already debounced by state
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+  const insertImage = () => {
+    const imageMarkdown = `![${imageAlt}](${imageUrl})`;
+    insertAtCursor(imageMarkdown);
+    setImageOpen(false);
+    setImageAlt("");
+    setImageUrl("");
+  };
 
   return (
-    <ScrollArea className="h-full">
-      <textarea
-        ref={textareaRef}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={onKeyDown}
-        spellCheck={false}
-        className="h-[calc(100vh-180px)] w-full resize-none bg-background px-4 py-4 font-mono text-sm outline-none"
-        placeholder="# Start typing markdown..."
-      />
-    </ScrollArea>
+    <TooltipProvider delayDuration={200}>
+      <div className="flex h-full flex-col bg-background">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b px-4 py-3 bg-card/50">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Edit3 className="h-4 w-4 text-muted-foreground" />
+              <span className="truncate text-sm font-medium">{fileName}</span>
+              {isDirty && (
+                <div className="flex items-center gap-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                  <span className="text-xs text-muted-foreground">Unsaved</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-muted rounded-md p-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={viewMode === "edit" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("edit")}
+                    className="h-8"
+                  >
+                    Edit
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit only</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={viewMode === "preview" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("preview")}
+                    className="h-8"
+                  >
+                    <Eye className="mr-1 h-3 w-3" />
+                    Preview
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Preview only</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={viewMode === "split" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("split")}
+                    className="h-8"
+                  >
+                    <SplitSquareVertical className="mr-1 h-3 w-3" />
+                    Split
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Side-by-side</TooltipContent>
+              </Tooltip>
+            </div>
+
+            <Separator orientation="vertical" className="h-6" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={isDirty ? "default" : "outline"}
+                  size="sm"
+                  onClick={onSave}
+                  disabled={isSaving || !isDirty}
+                  className={cn("gap-2", isSaving && "animate-pulse")}
+                >
+                  {isSaving ? (
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  ) : isDirty ? (
+                    <Save className="h-3 w-3" />
+                  ) : (
+                    <Check className="h-3 w-3" />
+                  )}
+                  {isSaving ? "Saving..." : isDirty ? "Save" : "Saved"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isDirty ? "Save changes (Cmd/Ctrl + S)" : "File is up to date"}
+              </TooltipContent>
+            </Tooltip>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onDelete}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Toolbar */}
+        <div className="border-b bg-card/30 px-4 py-2">
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyInlineWrap("**")}
+                  className="h-8 w-8 p-0"
+                >
+                  <Bold className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Bold (Ctrl+B)</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyInlineWrap("*")}
+                  className="h-8 w-8 p-0"
+                >
+                  <Italic className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Italic (Ctrl+I)</TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="mx-2 h-6" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyHeading(1)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Heading1 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Heading 1 (Ctrl+1)</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyHeading(2)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Heading2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Heading 2 (Ctrl+2)</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyHeading(3)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Heading3 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Heading 3 (Ctrl+3)</TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="mx-2 h-6" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyLinePrefix("- ")}
+                  className="h-8 w-8 p-0"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Bullet List</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyLinePrefix("1. ")}
+                  className="h-8 w-8 p-0"
+                >
+                  <ListOrdered className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Numbered List</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyLinePrefix("> ")}
+                  className="h-8 w-8 p-0"
+                >
+                  <Quote className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Quote (Ctrl+E)</TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="mx-2 h-6" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => applyInlineWrap("`")}
+                  className="h-8 w-8 p-0"
+                >
+                  <Code className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Inline Code</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={applyCodeBlock}
+                  className="h-8 w-8 p-0"
+                >
+                  <Code className="h-4 w-4" />
+                  <span className="sr-only">Code Block</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Code Block (Ctrl+K)</TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="mx-2 h-6" />
+
+            <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
+              <DialogTrigger asChild>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <LinkIcon className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Insert Link (Ctrl+L)</TooltipContent>
+                </Tooltip>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Insert Link</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Link Text</label>
+                    <Input
+                      value={linkText}
+                      onChange={(e) => setLinkText(e.target.value)}
+                      placeholder="Display text"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">URL</label>
+                    <Input
+                      value={linkUrl}
+                      onChange={(e) => setLinkUrl(e.target.value)}
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setLinkOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={insertLink} disabled={!linkText || !linkUrl}>
+                    Insert Link
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={imageOpen} onOpenChange={setImageOpen}>
+              <DialogTrigger asChild>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <ImageIcon className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Insert Image</TooltipContent>
+                </Tooltip>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Insert Image</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Alt Text</label>
+                    <Input
+                      value={imageAlt}
+                      onChange={(e) => setImageAlt(e.target.value)}
+                      placeholder="Image description"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Image URL</label>
+                    <Input
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setImageOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={insertImage} disabled={!imageUrl}>
+                    Insert Image
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={applyHr}
+                  className="h-8 w-8 p-0"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Horizontal Rule</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* Editor Content */}
+        <div className="flex-1 flex overflow-hidden">
+          {viewMode === "edit" && (
+            <div className="flex-1 flex flex-col">
+              <textarea
+                ref={textareaRef}
+                value={internal}
+                onChange={(e) => commit(e.target.value)}
+                onKeyDown={onKeyDown}
+                className="flex-1 resize-none border-0 bg-transparent p-6 font-mono text-sm leading-relaxed focus:outline-none focus:ring-0"
+                placeholder="Start writing your markdown..."
+              />
+            </div>
+          )}
+
+          {viewMode === "preview" && <div className="flex-1">{preview}</div>}
+
+          {viewMode === "split" && (
+            <>
+              <div className="flex-1 flex flex-col border-r">
+                <textarea
+                  ref={textareaRef}
+                  value={internal}
+                  onChange={(e) => commit(e.target.value)}
+                  onKeyDown={onKeyDown}
+                  className="flex-1 resize-none border-0 bg-transparent p-6 font-mono text-sm leading-relaxed focus:outline-none focus:ring-0"
+                  placeholder="Start writing your markdown..."
+                />
+              </div>
+              <div className="flex-1">{preview}</div>
+            </>
+          )}
+        </div>
+      </div>
+    </TooltipProvider>
   );
 }
-
-export default TextEditor;

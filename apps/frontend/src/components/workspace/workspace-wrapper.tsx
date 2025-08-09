@@ -1,37 +1,29 @@
-"use client";
-
 import { Suspense } from "react";
-import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
+import { Workspace } from "@/components/workspace/workspace";
+import { FileText } from "lucide-react";
 
-const Workspace = dynamic(
-  () => import("./workspace").then((m) => m.Workspace),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin" />
-        <span className="ml-2 text-sm text-muted-foreground">
-          {"Loading editor..."}
-        </span>
+function WorkspaceLoader() {
+  return (
+    <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="rounded-full bg-muted p-6">
+          <FileText className="h-12 w-12 animate-pulse text-muted-foreground" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Loading Workspace...</h2>
+          <p className="text-sm text-muted-foreground">
+            Setting up your markdown editor
+          </p>
+        </div>
       </div>
-    ),
-  }
-);
+    </div>
+  );
+}
 
 export default function WorkspaceWrapper() {
   return (
-    <main className="min-h-screen">
-      <Suspense
-        fallback={
-          <div className="flex h-[80vh] items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span className="ml-2 text-sm text-muted-foreground">
-              {"Loading editor..."}
-            </span>
-          </div>
-        }
-      >
+    <main className="h-screen bg-background">
+      <Suspense fallback={<WorkspaceLoader />}>
         <Workspace />
       </Suspense>
     </main>
