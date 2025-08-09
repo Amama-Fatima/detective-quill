@@ -19,6 +19,7 @@ import {
   MoreVertical,
   FileText,
   PanelLeft,
+  PanelRight,
   Check,
 } from "lucide-react";
 import { TextEditor, type ViewMode } from "@/components/workspace/text-editor";
@@ -373,52 +374,67 @@ export function Workspace() {
                 </TooltipContent>
               </Tooltip>
             )}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden"
-            >
-              <PanelLeft className="h-4 w-4" />
-            </Button>
+
+            {/* Sidebar toggle button - now visible on all screen sizes */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="gap-2"
+                >
+                  {sidebarOpen ? (
+                    <PanelLeft className="h-4 w-4" />
+                  ) : (
+                    <PanelRight className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </header>
 
         {/* Body */}
-        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] min-h-0">
-          {/* Sidebar */}
-          <aside
-            className={cn(
-              "border-r bg-card/50",
-              sidebarOpen ? "block" : "hidden md:block"
-            )}
-          >
-            <div className="flex items-center justify-between p-3 border-b bg-card">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Files</span>
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                  {files.length}
-                </span>
+        <div
+          className={cn(
+            "grid min-h-0 transition-all duration-200",
+            sidebarOpen ? "grid-cols-[300px_1fr]" : "grid-cols-1"
+          )}
+        >
+          {/* Sidebar - Now conditionally rendered based on sidebarOpen state */}
+          {sidebarOpen && (
+            <aside className="border-r bg-card/50">
+              <div className="flex items-center justify-between p-3 border-b bg-card">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Files</span>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                    {files.length}
+                  </span>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={createFile}
+                      className="h-7 w-7"
+                    >
+                      <FilePlus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>New file</TooltipContent>
+                </Tooltip>
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={createFile}
-                    className="h-7 w-7"
-                  >
-                    <FilePlus className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>New file</TooltipContent>
-              </Tooltip>
-            </div>
-            <ScrollArea className="h-[calc(100vh-120px)]">
-              <FileTreeComponent />
-            </ScrollArea>
-          </aside>
+              <ScrollArea className="h-[calc(100vh-120px)]">
+                <FileTreeComponent />
+              </ScrollArea>
+            </aside>
+          )}
 
           {/* Editor */}
           <section className="min-h-[calc(100vh-80px)] bg-background">
