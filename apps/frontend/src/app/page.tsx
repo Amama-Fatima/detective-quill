@@ -1,3 +1,4 @@
+import Test from "@/components/test";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
@@ -98,7 +99,7 @@ export default function Home() {
           />
           Go to nextjs.org →
         </a>
-        <Button variant={"secondary"}>Click</Button>
+        <Test />
       </footer>
     </div>
   );
