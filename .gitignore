@@ -1,6 +1,7 @@
 # Ignore ALL node_modules (root + nested)
 node_modules/
 apps/frontend/node_modules/
+apps/backend/node_modules/
 # PNPM-specific files
 .pnpm-store/
 .pnpm-debug.log
