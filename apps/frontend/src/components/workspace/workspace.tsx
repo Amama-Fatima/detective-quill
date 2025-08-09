@@ -11,7 +11,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   FilePlus,
   FolderTree,
@@ -69,7 +68,7 @@ export function Workspace() {
   const [files, setFiles] = useState<MarkdownFile[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("split");
 
@@ -182,56 +181,6 @@ export function Workspace() {
         {/* Top bar */}
         <header className="flex items-center justify-between border-b px-3 py-2">
           <div className="flex items-center gap-2">
-            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Toggle file tree"
-                >
-                  <PanelLeft className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-80">
-                <div className="flex h-full flex-col">
-                  <div className="flex items-center gap-2 p-3 border-b">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <Input
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Search files"
-                      className="h-8"
-                    />
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={createFile}
-                          aria-label="New file"
-                        >
-                          <FilePlus className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>New file</TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <ScrollArea className="flex-1">
-                    <FileTree
-                      files={filteredFiles}
-                      selectedId={selectedId ?? undefined}
-                      onSelect={(id) => {
-                        setSelectedId(id);
-                        setSidebarOpen(false);
-                      }}
-                      onRename={renameFile}
-                      onDelete={deleteFile}
-                    />
-                  </ScrollArea>
-                </div>
-              </SheetContent>
-            </Sheet>
-
             <FolderTree className="h-5 w-5 text-muted-foreground hidden md:block" />
             <div className="hidden md:flex items-center gap-2">
               <div className="relative">

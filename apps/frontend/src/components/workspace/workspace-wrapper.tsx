@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 
 const Workspace = dynamic(
-  () => import("../../components/workspace/workspace").then((m) => m.Workspace),
+  () => import("./workspace").then((m) => m.Workspace),
   {
     ssr: false,
     loading: () => (
@@ -19,13 +19,7 @@ const Workspace = dynamic(
   }
 );
 
-// export const metadata = {
-//   title: "Markdown Text Editor",
-//   description:
-//     "An Obsidian-like Markdown editor with file tree and split preview.",
-// };
-
-export default function Page() {
+export default function WorkspaceWrapper() {
   return (
     <main className="min-h-screen">
       <Suspense
