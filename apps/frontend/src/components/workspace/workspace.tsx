@@ -30,6 +30,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { File, Folder, Tree } from "@/components/magicui/file-tree";
 
 const STORAGE_KEY = "v0-markdown-files";
@@ -103,6 +113,12 @@ export function Workspace() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [savingFiles, setSavingFiles] = useState<Set<string>>(new Set());
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [renamingFile, setRenamingFile] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [newFileName, setNewFileName] = useState("");
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -205,6 +221,8 @@ export function Workspace() {
   }
 
   function renameFile(id: string, name: string) {
+    if (!name.trim()) return;
+
     if (!name.endsWith(".md")) {
       name = `${name}.md`;
     }
@@ -213,6 +231,27 @@ export function Workspace() {
     );
     setFiles(updatedFiles);
     persistFiles(updatedFiles);
+  }
+
+  function openRenameDialog(file: MarkdownFile) {
+    setRenamingFile({ id: file.id, name: file.name });
+    setNewFileName(file.name.replace(".md", ""));
+    setRenameDialogOpen(true);
+  }
+
+  function handleRename() {
+    if (renamingFile && newFileName.trim()) {
+      renameFile(renamingFile.id, newFileName.trim());
+      setRenameDialogOpen(false);
+      setRenamingFile(null);
+      setNewFileName("");
+    }
+  }
+
+  function cancelRename() {
+    setRenameDialogOpen(false);
+    setRenamingFile(null);
+    setNewFileName("");
   }
 
   function updateContent(id: string, content: string) {
@@ -297,11 +336,7 @@ export function Workspace() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-32">
-                    <DropdownMenuItem
-                      onClick={() =>
-                        renameFile(file.id, file.name.replace(".md", ""))
-                      }
-                    >
+                    <DropdownMenuItem onClick={() => openRenameDialog(file)}>
                       Rename
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -323,6 +358,50 @@ export function Workspace() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-background">
+        {/* Rename Dialog */}
+        <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Rename File</DialogTitle>
+              <DialogDescription>
+                Enter a new name for your markdown file. The .md extension will
+                be added automatically.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="filename" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="filename"
+                  value={newFileName}
+                  onChange={(e) => setNewFileName(e.target.value)}
+                  className="col-span-3"
+                  placeholder="Enter filename..."
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleRename();
+                    } else if (e.key === "Escape") {
+                      e.preventDefault();
+                      cancelRename();
+                    }
+                  }}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={cancelRename}>
+                Cancel
+              </Button>
+              <Button onClick={handleRename} disabled={!newFileName.trim()}>
+                Rename
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         {/* Top bar */}
         <header className="flex items-center justify-between border-b px-4 py-3 bg-card">
           <div className="flex items-center gap-3">
