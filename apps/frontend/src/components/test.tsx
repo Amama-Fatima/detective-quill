@@ -3,8 +3,9 @@
 import { createSupabaseBrowserClient } from "@/supabase/browser-client";
 import React, { useEffect } from "react";
 
+const supabaseBrowserClient = createSupabaseBrowserClient();
+
 const Test = () => {
-  const supabaseBrowserClient = createSupabaseBrowserClient();
   const [session, setSession] = React.useState(null);
   useEffect(() => {
     async function getSession() {

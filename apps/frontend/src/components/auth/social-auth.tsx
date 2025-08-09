@@ -10,9 +10,10 @@ interface SocialAuthProps {
 }
 
 export function SocialAuth({ mode, props }: SocialAuthProps) {
+  const supabaseBrowserClient = createSupabaseBrowserClient();
+
   const handleGoogleAuth = async () => {
     try {
-      const supabaseBrowserClient = createSupabaseBrowserClient();
       await supabaseBrowserClient.auth.signInWithOAuth({
         provider: "google",
         options: {
