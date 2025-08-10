@@ -17,6 +17,9 @@ importers:
 
   apps/backend:
     dependencies:
+      '@detective-quill/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.6(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -111,6 +114,9 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@detective-quill/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@hookform/resolvers':
         specifier: ^5.2.1
         version: 5.2.1(react-hook-form@7.62.0(react@19.1.0))

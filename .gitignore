@@ -9,6 +9,7 @@ apps/backend/node_modules/
 # Next.js/Node.js files
 apps/frontend/.next/
 apps/frontend/dist/
+apps/backend/dist/
 apps/frontend/next-env.d.ts
 
 .env
