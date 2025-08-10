@@ -1,14 +1,24 @@
 "use client";
 
-import { getChapters } from "@/lib/api/chapters";
+import { createChapter, getChapters } from "@/lib/api/chapters";
 import { createSupabaseBrowserClient } from "@/supabase/browser-client";
-import { ChapterWithProject } from "@detective-quill/shared-types";
+import {
+  ChapterWithProject,
+  CreateChapterDto,
+} from "@detective-quill/shared-types";
 import React, { useEffect, useState } from "react";
+
+const chapterData: CreateChapterDto = {
+  projectTitle: "and",
+  title: "New Chapter",
+  content: "This is the content of the new chapter.",
+  chapterOrder: 5,
+};
 
 const TestPage = () => {
   const supabaseBrowserClient = createSupabaseBrowserClient();
   const [session, setSession] = useState<any | null>(null);
-  const [chapters, setChapters] = useState<ChapterWithProject[]>([]);
+  const [chapters, setChapters] = useState<any | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
     async function getSession() {
@@ -34,7 +44,8 @@ const TestPage = () => {
       setError("");
 
       try {
-        const response = await getChapters("and", session.access_token);
+        const response = await createChapter(chapterData, session.access_token);
+        console.log("Create Chapter Response:", response);
 
         if (response.success) {
           setChapters(response.data);

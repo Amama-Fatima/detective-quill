@@ -1,8 +1,11 @@
-// apps/backend/src/chapters/chapters.controller.ts
 import {
   Controller,
   Get,
+  Post,
+  Put,
+  Body,
   Query,
+  Param,
   UseGuards,
   Req,
   BadRequestException,
@@ -11,6 +14,10 @@ import { AuthGuard } from "../auth/auth.guard";
 import {
   type GetChaptersQuery,
   type GetChaptersResponse,
+  type CreateChapterDto,
+  type CreateChapterResponse,
+  type UpdateChapterDto,
+  type UpdateChapterResponse,
 } from "@detective-quill/shared-types";
 import { ChaptersService } from "./chapters.service";
 
@@ -49,6 +56,76 @@ export class ChaptersController {
         success: false,
         data: [],
         message: error.message || "Failed to fetch chapters",
+      };
+    }
+  }
+
+  @Post()
+  async createChapter(
+    @Body() createChapterDto: CreateChapterDto,
+    @Req() request: any
+  ): Promise<CreateChapterResponse> {
+    const { projectTitle, title, content, chapterOrder } = createChapterDto;
+    const userId = request.user.id;
+
+    if (!projectTitle || !title || chapterOrder === undefined) {
+      throw new BadRequestException(
+        "Project title, chapter title, and chapter order are required"
+      );
+    }
+
+    try {
+      const chapter = await this.chaptersService.createChapter(
+        userId,
+        projectTitle,
+        { title, content: content || "", chapterOrder },
+        request.accessToken
+      );
+
+      return {
+        success: true,
+        data: chapter,
+        message: `Chapter "${title}" created successfully`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null as any, // Will be handled by the error case
+        message: error.message || "Failed to create chapter",
+      };
+    }
+  }
+
+  @Put(":id")
+  async updateChapter(
+    @Param("id") chapterId: string,
+    @Body() updateChapterDto: Omit<UpdateChapterDto, "id">,
+    @Req() request: any
+  ): Promise<UpdateChapterResponse> {
+    const userId = request.user.id;
+
+    if (!chapterId) {
+      throw new BadRequestException("Chapter ID is required");
+    }
+
+    try {
+      const chapter = await this.chaptersService.updateChapter(
+        userId,
+        chapterId,
+        updateChapterDto,
+        request.accessToken
+      );
+
+      return {
+        success: true,
+        data: chapter,
+        message: "Chapter updated successfully",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null as any, // Will be handled by the error case
+        message: error.message || "Failed to update chapter",
       };
     }
   }
