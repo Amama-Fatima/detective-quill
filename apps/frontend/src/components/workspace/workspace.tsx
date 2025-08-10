@@ -59,7 +59,8 @@ export type ChapterFile = {
   isDirty?: boolean;
   isNew?: boolean; // Flag to indicate if this is a new chapter not yet saved to DB
   chapterOrder: number;
-  originalChapter?: ChapterWithProject; // Store original chapter data
+  originalChapter?: ChapterWithProject;
+  slug: string; // Store original chapter data
 };
 
 interface WorkspaceProps {

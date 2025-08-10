@@ -1,15 +1,6 @@
-import WorkspaceWrapper from "@/components/workspace/workspace-wrapper";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Markdown Text Editor",
-  description:
-    "An Obsidian-like Markdown editor with file tree and split preview.",
-};
-
-export default function Page() {
-  return (
-    <main className="min-h-screen">
-      <WorkspaceWrapper />
-    </main>
-  );
+export default function WorkspacePage() {
+  // Redirect to a default project or show project selection
+  redirect("/workspace/default-project");
 }
