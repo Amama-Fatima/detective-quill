@@ -5,17 +5,22 @@ import {
   ConflictException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
-import { type ChapterWithProject } from "@detective-quill/shared-types";
+import {
+  type ChapterWithProject,
+  type Folder,
+  type FolderWithChildren,
+  type WorkspaceData,
+} from "@detective-quill/shared-types";
 
 @Injectable()
 export class ChaptersService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async getChaptersByUserAndProjectTitle(
+  async getWorkspaceData(
     userId: string,
     projectTitle: string,
     accessToken: string
-  ): Promise<ChapterWithProject[]> {
+  ): Promise<WorkspaceData> {
     const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
     // First, find the project by title and verify ownership
@@ -39,7 +44,7 @@ export class ChaptersService {
       throw new ForbiddenException("You do not have access to this project");
     }
 
-    // Now fetch chapters for this project
+    // Fetch chapters with folder information
     const { data: chapters, error: chaptersError } = await supabase
       .from("chapters")
       .select(
@@ -49,17 +54,41 @@ export class ChaptersService {
           id,
           title,
           user_id
+        ),
+        folder:folders (
+          id,
+          name
         )
       `
       )
       .eq("project_id", project.id)
-      .order("created_at", { ascending: true });
+      .order("chapter_order", { ascending: true });
 
     if (chaptersError) {
       throw new Error(`Failed to fetch chapters: ${chaptersError.message}`);
     }
 
-    return chapters || [];
+    // Fetch folders with hierarchy
+    const { data: folders, error: foldersError } = await supabase
+      .from("folders")
+      .select("*")
+      .eq("project_id", project.id)
+      .order("folder_order", { ascending: true });
+
+    if (foldersError) {
+      throw new Error(`Failed to fetch folders: ${foldersError.message}`);
+    }
+
+    // Build folder hierarchy
+    const folderHierarchy = this.buildFolderHierarchy(
+      folders || [],
+      chapters || []
+    );
+
+    return {
+      chapters: chapters || [],
+      folders: folderHierarchy,
+    };
   }
 
   async createChapter(
@@ -69,6 +98,7 @@ export class ChaptersService {
       title: string;
       content: string;
       chapterOrder: number;
+      folderId?: string | null;
     },
     accessToken: string
   ): Promise<ChapterWithProject> {
@@ -93,6 +123,20 @@ export class ChaptersService {
 
     if (project.user_id !== userId) {
       throw new ForbiddenException("You do not have access to this project");
+    }
+
+    // Verify folder exists if specified
+    if (chapterData.folderId) {
+      const { data: folder, error: folderError } = await supabase
+        .from("folders")
+        .select("id, project_id")
+        .eq("id", chapterData.folderId)
+        .eq("project_id", project.id)
+        .single();
+
+      if (folderError || !folder) {
+        throw new NotFoundException("Specified folder not found");
+      }
     }
 
     // Check if chapter order already exists
@@ -120,6 +164,7 @@ export class ChaptersService {
         title: chapterData.title,
         content: chapterData.content,
         chapter_order: chapterData.chapterOrder,
+        folder_id: chapterData.folderId,
         word_count: wordCount,
       })
       .select(
@@ -129,6 +174,10 @@ export class ChaptersService {
           id,
           title,
           user_id
+        ),
+        folder:folders (
+          id,
+          name
         )
       `
       )
@@ -152,6 +201,7 @@ export class ChaptersService {
       content?: string;
       chapterOrder?: number;
       isPublished?: boolean;
+      folderId?: string | null;
     },
     accessToken: string
   ): Promise<ChapterWithProject> {
@@ -182,6 +232,20 @@ export class ChaptersService {
 
     if (existingChapter.project.user_id !== userId) {
       throw new ForbiddenException("You do not have access to this chapter");
+    }
+
+    // Verify folder exists if specified
+    if (updateData.folderId) {
+      const { data: folder, error: folderError } = await supabase
+        .from("folders")
+        .select("id, project_id")
+        .eq("id", updateData.folderId)
+        .eq("project_id", existingChapter.project_id)
+        .single();
+
+      if (folderError || !folder) {
+        throw new NotFoundException("Specified folder not found");
+      }
     }
 
     // If updating chapter order, check for conflicts
@@ -222,6 +286,9 @@ export class ChaptersService {
     if (updateData.isPublished !== undefined) {
       updatePayload.is_published = updateData.isPublished;
     }
+    if (updateData.folderId !== undefined) {
+      updatePayload.folder_id = updateData.folderId;
+    }
 
     // Update the chapter
     const { data: updatedChapter, error: updateError } = await supabase
@@ -235,6 +302,10 @@ export class ChaptersService {
           id,
           title,
           user_id
+        ),
+        folder:folders (
+          id,
+          name
         )
       `
       )
@@ -255,9 +326,53 @@ export class ChaptersService {
     return updatedChapter;
   }
 
+  private buildFolderHierarchy(
+    folders: Folder[],
+    chapters: ChapterWithProject[]
+  ): FolderWithChildren[] {
+    const folderMap = new Map<string, FolderWithChildren>();
+    const rootFolders: FolderWithChildren[] = [];
+
+    // Initialize folder map
+    folders.forEach((folder) => {
+      folderMap.set(folder.id, {
+        ...folder,
+        children: [],
+        chapters: chapters.filter((chapter) => chapter.folder_id === folder.id),
+      });
+    });
+
+    // Build hierarchy
+    folders.forEach((folder) => {
+      const folderWithChildren = folderMap.get(folder.id);
+      if (!folderWithChildren) return;
+
+      if (folder.parent_id) {
+        const parent = folderMap.get(folder.parent_id);
+        if (parent) {
+          parent.children!.push(folderWithChildren);
+        }
+      } else {
+        rootFolders.push(folderWithChildren);
+      }
+    });
+
+    return rootFolders;
+  }
+
   private calculateWordCount(content: string): number {
     if (!content || content.trim() === "") {
       return 0;
+    }
+
+    // For JSON content from BlockNote, we need to extract text
+    try {
+      const blocks = JSON.parse(content);
+      if (Array.isArray(blocks)) {
+        return this.extractWordCountFromBlocks(blocks);
+      }
+    } catch {
+      // Fallback to treating as plain text
     }
 
     // Remove markdown syntax and count words
@@ -271,6 +386,29 @@ export class ChaptersService {
     }
 
     return plainText.split(/\s+/).length;
+  }
+
+  private extractWordCountFromBlocks(blocks: any[]): number {
+    let wordCount = 0;
+
+    blocks.forEach((block) => {
+      if (block.content && Array.isArray(block.content)) {
+        block.content.forEach((contentItem: any) => {
+          if (contentItem.type === "text" && contentItem.text) {
+            wordCount += contentItem.text
+              .split(/\s+/)
+              .filter((word: string) => word.length > 0).length;
+          }
+        });
+      }
+
+      // Recursively count words in nested blocks
+      if (block.children && Array.isArray(block.children)) {
+        wordCount += this.extractWordCountFromBlocks(block.children);
+      }
+    });
+
+    return wordCount;
   }
 
   private async updateProjectWordCount(

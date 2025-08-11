@@ -16,6 +16,8 @@ interface TextEditorContainerProps {
   chapterName: string;
 }
 
+type FocusMode = "normal" | "app" | "browser";
+
 export function TextEditorContainer({
   projectName,
   chapterName,
@@ -24,6 +26,7 @@ export function TextEditorContainer({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [session, setSession] = useState<any | null>(null);
+  const [focusMode, setFocusMode] = useState<FocusMode>("normal");
 
   const router = useRouter();
   const supabaseBrowserClient = createSupabaseBrowserClient();
@@ -82,11 +85,11 @@ export function TextEditorContainer({
             router.push(`/workspace/${projectName}`);
           }
         } else {
-          toast.error(response.message || "Failed to load chapter is in here");
+          toast.error(response.message || "Failed to load chapter");
         }
       } catch (error) {
         console.error("Error fetching chapter:", error);
-        toast.error("Failed to load chapter in here");
+        toast.error("Failed to load chapter");
       } finally {
         setLoading(false);
       }
@@ -161,6 +164,24 @@ export function TextEditorContainer({
     toast.info("Delete functionality will be implemented");
   };
 
+  const handleFocusModeChange = (mode: FocusMode) => {
+    setFocusMode(mode);
+
+    // Hide/show body overflow for app focus mode
+    if (mode === "app") {
+      document.body.style.overflow = "hidden";
+    } else if (mode === "normal") {
+      document.body.style.overflow = "";
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -196,12 +217,10 @@ export function TextEditorContainer({
       value={file.content}
       onChange={updateContent}
       onDelete={deleteFile}
-      // viewMode={viewMode}
-      // onViewModeChange={setViewMode}
       isDirty={file.isDirty}
       isSaving={saving}
       onSave={saveFile}
+      onFocusModeChange={handleFocusModeChange}
     />
-    // <div>hello!</div>
   );
 }

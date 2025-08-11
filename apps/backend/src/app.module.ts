@@ -4,6 +4,7 @@ import { AppService } from "./app.service";
 import { ChaptersModule } from "./chapters/chapters.module";
 import { SupabaseModule } from "./supabase/supabase.module";
 import { ConfigModule } from "@nestjs/config";
+import { FoldersModule } from "./folders/folders.module";
 
 @Module({
   controllers: [AppController],
@@ -15,6 +16,7 @@ import { ConfigModule } from "@nestjs/config";
     }),
     SupabaseModule,
     ChaptersModule,
+    FoldersModule,
   ],
 })
 export class AppModule {}
