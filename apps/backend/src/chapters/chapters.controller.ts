@@ -18,6 +18,7 @@ import {
   type CreateChapterResponse,
   type UpdateChapterDto,
   type UpdateChapterResponse,
+  type GetWorkspaceResponse,
 } from "@detective-quill/shared-types";
 import { ChaptersService } from "./chapters.service";
 
@@ -26,6 +27,7 @@ import { ChaptersService } from "./chapters.service";
 export class ChaptersController {
   constructor(private readonly chaptersService: ChaptersService) {}
 
+  // Updated to use the new workspace data endpoint
   @Get()
   async getChapters(
     @Query() query: GetChaptersQuery,
@@ -39,17 +41,16 @@ export class ChaptersController {
     }
 
     try {
-      const chapters =
-        await this.chaptersService.getChaptersByUserAndProjectTitle(
-          userId,
-          projectTitle,
-          request.accessToken
-        );
+      const workspaceData = await this.chaptersService.getWorkspaceData(
+        userId,
+        projectTitle,
+        request.accessToken
+      );
 
       return {
         success: true,
-        data: chapters,
-        message: `Found ${chapters.length} chapters for project "${projectTitle}"`,
+        data: workspaceData.chapters,
+        message: `Found ${workspaceData.chapters.length} chapters for project "${projectTitle}"`,
       };
     } catch (error) {
       return {
@@ -60,12 +61,47 @@ export class ChaptersController {
     }
   }
 
+  // New endpoint for getting complete workspace data (chapters + folders)
+  @Get("workspace")
+  async getWorkspaceData(
+    @Query() query: GetChaptersQuery,
+    @Req() request: any
+  ): Promise<GetWorkspaceResponse> {
+    const { projectTitle } = query;
+    const userId = request.user.id;
+
+    if (!projectTitle) {
+      throw new BadRequestException("Project title is required");
+    }
+
+    try {
+      const workspaceData = await this.chaptersService.getWorkspaceData(
+        userId,
+        projectTitle,
+        request.accessToken
+      );
+
+      return {
+        success: true,
+        data: workspaceData,
+        message: `Found ${workspaceData.chapters.length} chapters and ${workspaceData.folders.length} folders for project "${projectTitle}"`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: { chapters: [], folders: [] },
+        message: error.message || "Failed to fetch workspace data",
+      };
+    }
+  }
+
   @Post()
   async createChapter(
     @Body() createChapterDto: CreateChapterDto,
     @Req() request: any
   ): Promise<CreateChapterResponse> {
-    const { projectTitle, title, content, chapterOrder } = createChapterDto;
+    const { projectTitle, title, content, chapterOrder, folderId } =
+      createChapterDto;
     const userId = request.user.id;
 
     if (!projectTitle || !title || chapterOrder === undefined) {
@@ -78,7 +114,12 @@ export class ChaptersController {
       const chapter = await this.chaptersService.createChapter(
         userId,
         projectTitle,
-        { title, content: content || "", chapterOrder },
+        {
+          title,
+          content: content || "",
+          chapterOrder,
+          folderId: folderId || null, // Add folder support
+        },
         request.accessToken
       );
 
@@ -90,7 +131,7 @@ export class ChaptersController {
     } catch (error) {
       return {
         success: false,
-        data: null as any, // Will be handled by the error case
+        data: null as any,
         message: error.message || "Failed to create chapter",
       };
     }
@@ -112,7 +153,14 @@ export class ChaptersController {
       const chapter = await this.chaptersService.updateChapter(
         userId,
         chapterId,
-        updateChapterDto,
+        {
+          ...updateChapterDto,
+          // Handle folderId properly (can be null to remove from folder)
+          folderId:
+            updateChapterDto.folderId !== undefined
+              ? updateChapterDto.folderId
+              : undefined,
+        },
         request.accessToken
       );
 
@@ -124,7 +172,7 @@ export class ChaptersController {
     } catch (error) {
       return {
         success: false,
-        data: null as any, // Will be handled by the error case
+        data: null as any,
         message: error.message || "Failed to update chapter",
       };
     }
