@@ -86,7 +86,6 @@ export function CreateChapterDialog({
               : "Enter a title and choose a location for your new chapter."}
           </DialogDescription>
         </DialogHeader>
-
         <div className="grid gap-6 py-4">
           {/* Chapter Title */}
           <div className="space-y-2">
@@ -110,7 +109,6 @@ export function CreateChapterDialog({
               className="w-full"
             />
           </div>
-
           {/* Folder Selection */}
           <div className="space-y-2">
             <Label htmlFor="folder">Location</Label>
@@ -123,7 +121,7 @@ export function CreateChapterDialog({
                 <SelectValue placeholder="Choose a folder or leave in root" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">
+                <SelectItem value="root">
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span>Root (No folder)</span>
@@ -146,7 +144,6 @@ export function CreateChapterDialog({
               </p>
             )}
           </div>
-
           {/* Preview */}
           {title && (
             <div className="rounded-lg bg-muted/30 p-3 space-y-2">
@@ -171,7 +168,6 @@ export function CreateChapterDialog({
             </div>
           )}
         </div>
-
         <DialogFooter className="flex gap-2">
           <Button variant="outline" onClick={handleClose} disabled={creating}>
             Cancel
