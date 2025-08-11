@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { TextEditorContainer } from "@/components/workspace/text-editor-container";
+import { TextEditorContainer } from "@/components/workspace/editor/text-editor-container";
 
 interface ChapterPageProps {
   params: {

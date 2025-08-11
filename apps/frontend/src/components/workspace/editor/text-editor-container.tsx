@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { TextEditor } from "@/components/workspace/text-editor";
+import { TextEditor } from "@/components/workspace/editor/text-editor";
 import { createSupabaseBrowserClient } from "@/supabase/browser-client";
 import { getChapters, updateChapter } from "@/lib/api/chapters";
 import { UpdateChapterDto } from "@detective-quill/shared-types";
