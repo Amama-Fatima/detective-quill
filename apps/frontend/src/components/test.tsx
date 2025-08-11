@@ -4,7 +4,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 
 // Dynamically import the editor with no SSR
-const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
+const BlockNoteEditor = dynamic(() => import("./workspace/block-note-editor"), {
   ssr: false,
   loading: () => <div>Loading editor...</div>,
 });

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { TextEditor, type ViewMode } from "@/components/workspace/text-editor";
+import { TextEditor } from "@/components/workspace/text-editor";
 import { createSupabaseBrowserClient } from "@/supabase/browser-client";
 import { getChapters, updateChapter } from "@/lib/api/chapters";
 import { UpdateChapterDto } from "@detective-quill/shared-types";
@@ -24,7 +24,6 @@ export function TextEditorContainer({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [session, setSession] = useState<any | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>("split");
 
   const router = useRouter();
   const supabaseBrowserClient = createSupabaseBrowserClient();
@@ -129,7 +128,6 @@ export function TextEditorContainer({
         title,
         content: file.content,
       };
-
       const response = await updateChapter(
         file.originalChapter.id,
         updateData,
@@ -198,11 +196,12 @@ export function TextEditorContainer({
       value={file.content}
       onChange={updateContent}
       onDelete={deleteFile}
-      viewMode={viewMode}
-      onViewModeChange={setViewMode}
+      // viewMode={viewMode}
+      // onViewModeChange={setViewMode}
       isDirty={file.isDirty}
       isSaving={saving}
       onSave={saveFile}
     />
+    // <div>hello!</div>
   );
 }
