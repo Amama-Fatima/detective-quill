@@ -10,8 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FileText, MoreVertical } from "lucide-react";
-import { RenameChapterDialog } from "./rename-chapter-dialog";
 import { ChapterFile } from "@/lib/types/workspace";
+import { RenameChapterDialog } from "./rename-chapter-dialog";
 
 interface FileTreeItemProps {
   file: ChapterFile;

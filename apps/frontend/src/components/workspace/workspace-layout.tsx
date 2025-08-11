@@ -7,7 +7,7 @@ import { createSupabaseBrowserClient } from "@/supabase/browser-client";
 import { getChapters } from "@/lib/api/chapters";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { EnhancedFileTree } from "./file-tree";
+import { EnhancedFileTree } from "./file-tree/file-tree";
 import { ChapterFile } from "@/lib/types/workspace";
 import { Json } from "@detective-quill/shared-types";
 

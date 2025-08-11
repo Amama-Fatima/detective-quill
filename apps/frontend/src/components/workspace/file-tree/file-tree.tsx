@@ -32,7 +32,7 @@ import {
   Tree,
   TreeViewElement,
   Folder as TreeFolder,
-} from "../magicui/file-tree";
+} from "../../magicui/file-tree";
 
 interface EnhancedFileTreeProps {
   files: ChapterFile[];
