@@ -24,7 +24,7 @@ export default function WorkspaceWrapper() {
   return (
     <main className="h-screen bg-background">
       <Suspense fallback={<WorkspaceLoader />}>
-        <Workspace />
+        <Workspace projectTitle="add" />
       </Suspense>
     </main>
   );

@@ -22,9 +22,24 @@ export interface ChapterWithProject extends Chapter {
   project: Pick<Project, "id" | "title" | "user_id">;
 }
 
-export type GetChaptersResponse = ApiResponse<ChapterWithProject[]>;
+export interface CreateChapterDto {
+  projectTitle: string;
+  title: string;
+  content: string;
+  chapterOrder: number;
+}
 
-// DTO for the endpoint
+export interface UpdateChapterDto {
+  id: string;
+  title?: string;
+  content?: string;
+  chapterOrder?: number;
+  isPublished?: boolean;
+}
 export interface GetChaptersQuery {
   projectTitle: string;
 }
+
+export type CreateChapterResponse = ApiResponse<ChapterWithProject>;
+export type UpdateChapterResponse = ApiResponse<ChapterWithProject>;
+export type GetChaptersResponse = ApiResponse<ChapterWithProject[]>;

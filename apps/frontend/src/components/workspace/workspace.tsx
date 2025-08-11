@@ -21,6 +21,7 @@ import {
   PanelLeft,
   PanelRight,
   Check,
+  Loader2,
 } from "lucide-react";
 import { TextEditor, type ViewMode } from "@/components/workspace/text-editor";
 import { cn } from "@/lib/utils";
@@ -41,78 +42,39 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { File, Folder, Tree } from "@/components/magicui/file-tree";
+import { createSupabaseBrowserClient } from "@/supabase/browser-client";
+import { getChapters, createChapter, updateChapter } from "@/lib/api/chapters";
+import {
+  ChapterWithProject,
+  CreateChapterDto,
+  UpdateChapterDto,
+} from "@detective-quill/shared-types";
+import { toast } from "sonner"; // or your preferred toast library
 
-const STORAGE_KEY = "v0-markdown-files";
-
-export type MarkdownFile = {
+export type ChapterFile = {
   id: string;
   name: string;
   content: string;
   updatedAt: string;
   isDirty?: boolean;
+  isNew?: boolean; // Flag to indicate if this is a new chapter not yet saved to DB
+  chapterOrder: number;
+  originalChapter?: ChapterWithProject;
+  slug: string; // Store original chapter data
 };
 
-function createInitialFiles(): MarkdownFile[] {
-  const now = new Date().toISOString();
-  return [
-    {
-      id: crypto.randomUUID(),
-      name: "Welcome.md",
-      content: `# Welcome to Your Markdown Workspace
-
-This is your enhanced markdown workspace with improved features:
-
-## ✨ New Features
-- **URL-based routing** - Each file has its own URL
-- **Individual save buttons** - Save files independently  
-- **Improved file tree** - Using Magic UI components
-- **Better visual feedback** - See unsaved changes at a glance
-
-## 🚀 Getting Started
-- Use the toolbar to insert markdown (headings, bold, lists, code, etc.)
-- Toggle between Edit, Preview, and Split view modes
-- Files are automatically saved to localStorage
-- Click the save button to persist changes immediately
-
-## ⌨️ Keyboard Shortcuts
-- **Cmd/Ctrl + B** - Bold text
-- **Cmd/Ctrl + I** - Italic text  
-- **Cmd/Ctrl + 1-3** - Headings
-- **Cmd/Ctrl + L** - Insert link
-- **Cmd/Ctrl + S** - Save file
-
-Happy writing! 🎉`,
-      updatedAt: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      name: "Tasks.md",
-      content: `# My Tasks
-
-## 📋 Todo List
-- [ ] Write a blog post about markdown
-- [x] Try the new split view feature
-- [ ] Add custom styling
-- [ ] Share workspace with team
-
-## 🎯 Project Goals
-- [ ] Complete documentation
-- [ ] Add export functionality
-- [ ] Implement collaboration features
-
-## 📸 Sample Image
-![Markdown Logo](https://picsum.photos/seed/markdown/600/300)`,
-      updatedAt: now,
-    },
-  ];
+interface WorkspaceProps {
+  projectTitle: string; // Pass this as a prop to specify which project's chapters to load
 }
 
-export function Workspace() {
-  const [files, setFiles] = useState<MarkdownFile[]>([]);
+export function Workspace({ projectTitle = "and" }: WorkspaceProps) {
+  const [files, setFiles] = useState<ChapterFile[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("split");
   const [savingFiles, setSavingFiles] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<any | null>(null);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [renamingFile, setRenamingFile] = useState<{
     id: string;
@@ -122,41 +84,78 @@ export function Workspace() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  const supabaseBrowserClient = createSupabaseBrowserClient();
 
-  // Load files from localStorage on mount
+  // Get session on mount
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed: MarkdownFile[] = JSON.parse(raw);
-        setFiles(parsed);
+    async function getSession() {
+      try {
+        const { data, error } = await supabaseBrowserClient.auth.getSession();
+        if (error) {
+          console.error("Error fetching session:", error);
+          toast.error("Failed to get session");
+          return;
+        }
+        setSession(data.session);
+      } catch (error) {
+        console.error("Error fetching session:", error);
+        toast.error("Failed to get session");
+      }
+    }
+    getSession();
+  }, []);
 
-        // Check URL for file selection
-        const fileParam = searchParams.get("file");
-        if (fileParam) {
-          const file = parsed.find((f) => f.id === fileParam);
-          if (file) {
-            setSelectedId(file.id);
+  // Load chapters from database
+  useEffect(() => {
+    if (!session?.access_token) return;
+
+    const fetchChapters = async () => {
+      setLoading(true);
+      try {
+        const response = await getChapters(projectTitle, session.access_token);
+
+        if (response.success) {
+          const chapterFiles: ChapterFile[] = response.data.map((chapter) => ({
+            id: chapter.id,
+            name: `${chapter.title}.md`,
+            content: chapter.content || "",
+            updatedAt: chapter.updated_at,
+            isDirty: false,
+            isNew: false,
+            chapterOrder: chapter.chapter_order,
+            originalChapter: chapter,
+          }));
+
+          // Sort by chapter order
+          chapterFiles.sort((a, b) => a.chapterOrder - b.chapterOrder);
+
+          setFiles(chapterFiles);
+
+          // Check URL for file selection
+          const fileParam = searchParams.get("file");
+          if (fileParam) {
+            const file = chapterFiles.find((f) => f.id === fileParam);
+            if (file) {
+              setSelectedId(file.id);
+            } else {
+              setSelectedId(chapterFiles[0]?.id ?? null);
+            }
           } else {
-            setSelectedId(parsed[0]?.id ?? null);
+            setSelectedId(chapterFiles[0]?.id ?? null);
           }
         } else {
-          setSelectedId(parsed[0]?.id ?? null);
+          toast.error(response.message || "Failed to load chapters");
         }
-      } else {
-        const initial = createInitialFiles();
-        setFiles(initial);
-        setSelectedId(initial[0].id);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-        router.replace(`?file=${initial[0].id}`, { scroll: false });
+      } catch (error) {
+        console.error("Error fetching chapters:", error);
+        toast.error("Failed to load chapters");
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      const initial = createInitialFiles();
-      setFiles(initial);
-      setSelectedId(initial[0].id);
-      router.replace(`?file=${initial[0].id}`, { scroll: false });
-    }
-  }, [searchParams, router]);
+    };
+
+    fetchChapters();
+  }, [session, projectTitle, searchParams]);
 
   // Update URL when file selection changes
   useEffect(() => {
@@ -164,15 +163,6 @@ export function Workspace() {
       router.replace(`?file=${selectedId}`, { scroll: false });
     }
   }, [selectedId, router]);
-
-  // Persist files to localStorage
-  const persistFiles = useCallback((filesToSave: MarkdownFile[]) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(filesToSave));
-    } catch {
-      // ignore storage errors
-    }
-  }, []);
 
   const selectedFile = useMemo(
     () => files.find((f) => f.id === selectedId) ?? null,
@@ -190,21 +180,40 @@ export function Workspace() {
   }, [files]);
 
   function createFile() {
+    if (!session?.access_token) {
+      toast.error("No session available");
+      return;
+    }
+
     const now = new Date().toISOString();
-    const newFile: MarkdownFile = {
-      id: crypto.randomUUID(),
-      name: "Untitled.md",
+    const nextOrder = Math.max(...files.map((f) => f.chapterOrder), 0) + 1;
+
+    const newFile: ChapterFile = {
+      id: crypto.randomUUID(), // Temporary ID until saved to DB
+      name: "Untitled Chapter.md",
       content: "",
       updatedAt: now,
-      isDirty: false,
+      isDirty: true,
+      isNew: true,
+      chapterOrder: nextOrder,
     };
+
     const updatedFiles = [newFile, ...files];
     setFiles(updatedFiles);
     setSelectedId(newFile.id);
-    persistFiles(updatedFiles);
   }
 
   function deleteFile(id: string) {
+    // TODO: Implement delete chapter API call if the file is not new
+    const file = files.find((f) => f.id === id);
+    if (file && !file.isNew) {
+      // Call delete chapter API here
+      console.log(
+        "TODO: Delete chapter from database",
+        file.originalChapter?.id
+      );
+    }
+
     const updatedFiles = files.filter((f) => f.id !== id);
     setFiles(updatedFiles);
 
@@ -217,7 +226,6 @@ export function Workspace() {
         router.replace("/", { scroll: false });
       }
     }
-    persistFiles(updatedFiles);
   }
 
   function renameFile(id: string, name: string) {
@@ -226,14 +234,21 @@ export function Workspace() {
     if (!name.endsWith(".md")) {
       name = `${name}.md`;
     }
+
     const updatedFiles = files.map((f) =>
-      f.id === id ? { ...f, name, updatedAt: new Date().toISOString() } : f
+      f.id === id
+        ? {
+            ...f,
+            name,
+            updatedAt: new Date().toISOString(),
+            isDirty: true, // Mark as dirty since title changed
+          }
+        : f
     );
     setFiles(updatedFiles);
-    persistFiles(updatedFiles);
   }
 
-  function openRenameDialog(file: MarkdownFile) {
+  function openRenameDialog(file: ChapterFile) {
     setRenamingFile({ id: file.id, name: file.name });
     setNewFileName(file.name.replace(".md", ""));
     setRenameDialogOpen(true);
@@ -270,32 +285,119 @@ export function Workspace() {
   }
 
   async function saveFile(id: string) {
+    if (!session?.access_token) {
+      toast.error("No session available");
+      return;
+    }
+
+    const file = files.find((f) => f.id === id);
+    if (!file) return;
+
     setSavingFiles((prev) => new Set(prev).add(id));
 
-    // Simulate save delay for better UX feedback
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    try {
+      const title = file.name.replace(".md", "");
 
-    const updatedFiles = files.map((f) =>
-      f.id === id ? { ...f, isDirty: false } : f
-    );
-    setFiles(updatedFiles);
-    persistFiles(updatedFiles);
+      if (file.isNew) {
+        // Create new chapter
+        const createChapterData: CreateChapterDto = {
+          projectTitle,
+          title,
+          content: file.content,
+          chapterOrder: file.chapterOrder,
+        };
 
-    setSavingFiles((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(id);
-      return newSet;
-    });
+        const response = await createChapter(
+          createChapterData,
+          session.access_token
+        );
+
+        if (response.success && response.data) {
+          // Update the file with the new chapter data
+          const updatedFiles = files.map((f) =>
+            f.id === id
+              ? {
+                  ...f,
+                  id: response.data!.id, // Use the actual chapter ID from database
+                  isDirty: false,
+                  isNew: false,
+                  originalChapter: response.data,
+                }
+              : f
+          );
+          setFiles(updatedFiles);
+
+          // Update selected ID if this was the selected file
+          if (selectedId === id) {
+            setSelectedId(response.data.id);
+            router.replace(`?file=${response.data.id}`, { scroll: false });
+          }
+
+          toast.success("Chapter created successfully");
+        } else {
+          toast.error(response.message || "Failed to create chapter");
+        }
+      } else {
+        // Update existing chapter
+        if (!file.originalChapter) {
+          toast.error("No original chapter data found");
+          return;
+        }
+
+        const updateChapterData: Omit<UpdateChapterDto, "id"> = {
+          title,
+          content: file.content,
+        };
+
+        const response = await updateChapter(
+          file.originalChapter.id,
+          updateChapterData,
+          session.access_token
+        );
+
+        if (response.success && response.data) {
+          const updatedFiles = files.map((f) =>
+            f.id === id
+              ? {
+                  ...f,
+                  isDirty: false,
+                  originalChapter: response.data,
+                }
+              : f
+          );
+          setFiles(updatedFiles);
+          toast.success("Chapter updated successfully");
+        } else {
+          toast.error(response.message || "Failed to update chapter");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving chapter:", error);
+      toast.error("Failed to save chapter");
+    } finally {
+      setSavingFiles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
   }
 
   const FileTreeComponent = () => (
     <div className="p-3">
-      {files.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-sm text-muted-foreground">
+            Loading chapters...
+          </span>
+        </div>
+      ) : files.length === 0 ? (
         <div className="text-center text-muted-foreground py-8">
           <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No files yet</p>
+          <p className="text-sm">No chapters yet</p>
           <Button size="sm" onClick={createFile} className="mt-2">
-            Create your first file
+            Create your first chapter
           </Button>
         </div>
       ) : (
@@ -314,12 +416,20 @@ export function Workspace() {
                 selectedId === file.id ? "bg-muted" : "bg-transparent"
               )}
             >
-              <div className="flex items-center justify-between w-full">
+              <div
+                className="flex items-center justify-between w-full"
+                onClick={() => setSelectedId(file.id)}
+              >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                   <span className="truncate text-sm">{file.name}</span>
                   {file.isDirty && (
                     <div className="h-1.5 w-1.5 rounded-full bg-orange-500 shrink-0" />
+                  )}
+                  {file.isNew && (
+                    <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full">
+                      New
+                    </span>
                   )}
                 </div>
                 <DropdownMenu>
@@ -355,6 +465,15 @@ export function Workspace() {
     </div>
   );
 
+  if (loading && !session) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-lg">Loading workspace...</span>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider delayDuration={200}>
       <div className="grid h-screen w-full grid-rows-[auto_1fr] bg-background">
@@ -362,23 +481,23 @@ export function Workspace() {
         <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Rename File</DialogTitle>
+              <DialogTitle>Rename Chapter</DialogTitle>
               <DialogDescription>
-                Enter a new name for your markdown file. The .md extension will
-                be added automatically.
+                Enter a new title for your chapter. The .md extension will be
+                added automatically.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="filename" className="text-right">
-                  Name
+                  Title
                 </Label>
                 <Input
                   id="filename"
                   value={newFileName}
                   onChange={(e) => setNewFileName(e.target.value)}
                   className="col-span-3"
-                  placeholder="Enter filename..."
+                  placeholder="Enter chapter title..."
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -402,17 +521,25 @@ export function Workspace() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
         {/* Top bar */}
         <header className="flex items-center justify-between border-b px-4 py-3 bg-card">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <FolderTree className="h-5 w-5 text-primary" />
-              <h1 className="text-lg font-semibold">Markdown Workspace</h1>
+              <h1 className="text-lg font-semibold">
+                {projectTitle} - Chapters
+              </h1>
             </div>
             <Separator orientation="vertical" className="h-6" />
-            <Button size="sm" onClick={createFile} className="gap-2">
+            <Button
+              size="sm"
+              onClick={createFile}
+              className="gap-2"
+              disabled={!session}
+            >
               <FilePlus className="h-4 w-4" />
-              New File
+              New Chapter
             </Button>
           </div>
 
@@ -425,7 +552,9 @@ export function Workspace() {
                     size="sm"
                     onClick={() => saveFile(selectedFile.id)}
                     disabled={
-                      savingFiles.has(selectedFile.id) || !selectedFile.isDirty
+                      savingFiles.has(selectedFile.id) ||
+                      !selectedFile.isDirty ||
+                      !session
                     }
                     className={cn(
                       "gap-2 transition-all",
@@ -433,7 +562,7 @@ export function Workspace() {
                     )}
                   >
                     {savingFiles.has(selectedFile.id) ? (
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : selectedFile.isDirty ? (
                       <Save className="h-4 w-4" />
                     ) : (
@@ -442,19 +571,22 @@ export function Workspace() {
                     {savingFiles.has(selectedFile.id)
                       ? "Saving..."
                       : selectedFile.isDirty
-                      ? "Save"
+                      ? selectedFile.isNew
+                        ? "Create"
+                        : "Save"
                       : "Saved"}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   {selectedFile.isDirty
-                    ? "Save changes (Cmd/Ctrl + S)"
-                    : "File is up to date"}
+                    ? selectedFile.isNew
+                      ? "Create chapter in database (Cmd/Ctrl + S)"
+                      : "Save changes (Cmd/Ctrl + S)"
+                    : "Chapter is up to date"}
                 </TooltipContent>
               </Tooltip>
             )}
 
-            {/* Sidebar toggle button - now visible on all screen sizes */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -484,13 +616,13 @@ export function Workspace() {
             sidebarOpen ? "grid-cols-[300px_1fr]" : "grid-cols-1"
           )}
         >
-          {/* Sidebar - Now conditionally rendered based on sidebarOpen state */}
+          {/* Sidebar */}
           {sidebarOpen && (
             <aside className="border-r bg-card/50">
               <div className="flex items-center justify-between p-3 border-b bg-card">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Files</span>
+                  <span className="text-sm font-medium">Chapters</span>
                   <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                     {files.length}
                   </span>
@@ -502,11 +634,12 @@ export function Workspace() {
                       variant="ghost"
                       onClick={createFile}
                       className="h-7 w-7"
+                      disabled={!session}
                     >
                       <FilePlus className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>New file</TooltipContent>
+                  <TooltipContent>New chapter</TooltipContent>
                 </Tooltip>
               </div>
               <ScrollArea className="h-[calc(100vh-120px)]">
@@ -536,15 +669,22 @@ export function Workspace() {
                   <FileText className="h-12 w-12 text-muted-foreground" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-semibold">No file selected</h2>
+                  <h2 className="text-2xl font-semibold">
+                    No chapter selected
+                  </h2>
                   <p className="text-muted-foreground max-w-sm">
-                    Create a new file or select an existing one from the sidebar
-                    to start editing.
+                    Create a new chapter or select an existing one from the
+                    sidebar to start editing.
                   </p>
                 </div>
-                <Button onClick={createFile} size="lg" className="gap-2">
+                <Button
+                  onClick={createFile}
+                  size="lg"
+                  className="gap-2"
+                  disabled={!session}
+                >
                   <FilePlus className="h-5 w-5" />
-                  Create your first file
+                  Create your first chapter
                 </Button>
               </div>
             )}
