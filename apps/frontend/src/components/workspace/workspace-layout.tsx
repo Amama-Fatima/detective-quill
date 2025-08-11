@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { FileTree } from "@/components/workspace/file-tree";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { createSupabaseBrowserClient } from "@/supabase/browser-client";
 import { getChapters } from "@/lib/api/chapters";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { EnhancedFileTree } from "./file-tree";
 import { ChapterFile } from "@/lib/types/workspace";
+import { Json } from "@detective-quill/shared-types";
 
 interface WorkspaceLayoutProps {
-  children: React.ReactNode;
+  children: React.ReactElement;
   projectName: string;
 }
 
@@ -23,6 +24,9 @@ export function WorkspaceLayout({
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [focusMode, setFocusMode] = useState<"normal" | "app" | "browser">(
+    "normal"
+  );
 
   const router = useRouter();
   const params = useParams();
@@ -47,6 +51,13 @@ export function WorkspaceLayout({
     getSession();
   }, []);
 
+  // Helper function to convert Json to string
+  const jsonToString = (content: Json | null): string => {
+    if (content === null) return "";
+    if (typeof content === "string") return content;
+    return JSON.stringify(content);
+  };
+
   // Load chapters from database
   useEffect(() => {
     if (!session?.access_token) return;
@@ -61,12 +72,13 @@ export function WorkspaceLayout({
             id: chapter.id,
             name: `${chapter.title}.md`,
             slug: chapter.title.toLowerCase().replace(/\s+/g, "-"),
-            content: chapter.content || "",
+            content: jsonToString(chapter.content), // Convert Json to string
             updatedAt: chapter.updated_at,
             isDirty: false,
             isNew: false,
             chapterOrder: chapter.chapter_order,
             originalChapter: chapter,
+            folder: chapter.folder?.id || null, // Extract folder ID
           }));
 
           // Sort by chapter order
@@ -95,18 +107,30 @@ export function WorkspaceLayout({
     setFiles(updatedFiles);
   };
 
+  // Handle focus mode changes from editor
+  const handleFocusModeChange = (mode: "normal" | "app" | "browser") => {
+    setFocusMode(mode);
+  };
+
+  // Hide sidebar in focus modes
+  const showSidebar = sidebarOpen && focusMode === "normal";
+
   return (
     <div className="flex h-screen w-full bg-background">
-      {sidebarOpen && (
-        <aside className={cn("w-80 border-r bg-card/50 flex flex-col")}>
+      {showSidebar && (
+        <aside
+          className={cn(
+            "w-80 border-r bg-gradient-to-b from-card/50 to-card/30 flex flex-col shadow-sm transition-all duration-300"
+          )}
+        >
           <WorkspaceHeader
             projectName={projectName}
             filesCount={files.length}
             onCreateFile={() => {
-              // This will be handled by FileTree component
+              // This will be handled by EnhancedFileTree component
             }}
           />
-          <FileTree
+          <EnhancedFileTree
             files={files}
             onFilesChange={updateFiles}
             projectName={projectName}
@@ -117,20 +141,29 @@ export function WorkspaceLayout({
       )}
 
       <main className="flex-1 flex flex-col min-w-0">
-        <div className="flex items-center justify-between border-b px-4 py-2 bg-card/30">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-muted rounded-md transition-colors"
-            >
-              {sidebarOpen ? "←" : "→"}
-            </button>
-            <span className="text-sm text-muted-foreground">
-              {projectName} / {params.chapterName}
-            </span>
+        {focusMode === "normal" && (
+          <div className="flex items-center justify-between border-b px-4 py-2 bg-card/30">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 hover:bg-muted rounded-md transition-colors"
+                title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+              >
+                {sidebarOpen ? "←" : "→"}
+              </button>
+              <span className="text-sm text-muted-foreground">
+                {projectName} / {params.chapterName}
+              </span>
+            </div>
           </div>
+        )}
+
+        {/* Pass focus mode handler to children */}
+        <div className="flex-1">
+          {React.cloneElement(children, {
+            onFocusModeChange: handleFocusModeChange,
+          })}
         </div>
-        {children}
       </main>
     </div>
   );

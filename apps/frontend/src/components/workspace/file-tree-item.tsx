@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FileText, MoreVertical } from "lucide-react";
 import { RenameChapterDialog } from "./rename-chapter-dialog";
-import { ChapterFile } from "./workspace";
+import { ChapterFile } from "@/lib/types/workspace";
 
 interface FileTreeItemProps {
   file: ChapterFile;
