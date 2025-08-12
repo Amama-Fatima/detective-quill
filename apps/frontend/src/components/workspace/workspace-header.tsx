@@ -32,7 +32,7 @@ export function WorkspaceHeader({
           </span>
         </div>
 
-        <Button size="sm" onClick={onCreateFile} className="gap-2">
+        <Button size="sm" onClick={onCreateFile} className="gap-2 cursor-pointer">
           <FilePlus className="h-4 w-4" />
           New
         </Button>

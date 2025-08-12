@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
-import { createSupabaseBrowserClient } from "@/supabase/browser-client";
-import { getChapters } from "@/lib/api/chapters";
-import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
+import { useChapters } from "@/hooks/use-chapters";
 import { cn } from "@/lib/utils";
 import { EnhancedFileTree } from "./file-tree/file-tree";
 import { ChapterFile } from "@/lib/types/workspace";
-import { Json } from "@detective-quill/shared-types";
 
 interface WorkspaceLayoutProps {
   children: React.ReactElement;
@@ -20,91 +18,27 @@ export function WorkspaceLayout({
   children,
   projectName,
 }: WorkspaceLayoutProps) {
-  const [files, setFiles] = useState<ChapterFile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<any | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [focusMode, setFocusMode] = useState<"normal" | "app" | "browser">(
     "normal"
   );
+  const [chapterFiles, setChapterFiles] = useState<ChapterFile[]>([]);
 
-  const router = useRouter();
+  const {
+    chapterFiles: initialFiles,
+    loading,
+    error,
+    refetch,
+  } = useChapters({ projectName });
+  const { session } = useAuth();
   const params = useParams();
-  const supabaseBrowserClient = createSupabaseBrowserClient();
 
-  // Get session on mount
   useEffect(() => {
-    async function getSession() {
-      try {
-        const { data, error } = await supabaseBrowserClient.auth.getSession();
-        if (error) {
-          console.error("Error fetching session:", error);
-          toast.error("Failed to get session");
-          return;
-        }
-        setSession(data.session);
-      } catch (error) {
-        console.error("Error fetching session:", error);
-        toast.error("Failed to get session");
-      }
-    }
-    getSession();
-  }, []);
+    setChapterFiles(initialFiles);
+  }, [initialFiles]);
 
-  // Helper function to convert Json to string
-  const jsonToString = (content: Json | null): string => {
-    if (content === null) return "";
-    if (typeof content === "string") return content;
-    return JSON.stringify(content);
-  };
-
-  // Load chapters from database
-  useEffect(() => {
-    if (!session?.access_token) return;
-
-    const fetchChapters = async () => {
-      setLoading(true);
-      try {
-        const response = await getChapters(projectName, session.access_token);
-
-        if (response.success) {
-          const chapterFiles: ChapterFile[] = response.data.map((chapter) => ({
-            id: chapter.id,
-            name: `${chapter.title}.md`,
-            slug: chapter.title.toLowerCase().replace(/\s+/g, "-"),
-            content: jsonToString(chapter.content), // Convert Json to string
-            updatedAt: chapter.updated_at,
-            isDirty: false,
-            isNew: false,
-            chapterOrder: chapter.chapter_order,
-            originalChapter: chapter,
-            folder: chapter.folder?.id || null, // Extract folder ID
-          }));
-
-          // Sort by chapter order
-          chapterFiles.sort((a, b) => a.chapterOrder - b.chapterOrder);
-          setFiles(chapterFiles);
-
-          // Redirect to first chapter if no chapter is selected
-          if (!params.chapterName && chapterFiles.length > 0) {
-            router.replace(`/workspace/${projectName}/${chapterFiles[0].slug}`);
-          }
-        } else {
-          toast.error(response.message || "Failed to load chapters");
-        }
-      } catch (error) {
-        console.error("Error fetching chapters:", error);
-        toast.error("Failed to load chapters");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChapters();
-  }, [session, projectName, params.chapterName, router]);
-
-  const updateFiles = (updatedFiles: ChapterFile[]) => {
-    setFiles(updatedFiles);
+  const updateChapterFiles = (updatedFiles: ChapterFile[]) => {
+    setChapterFiles(updatedFiles);
   };
 
   // Handle focus mode changes from editor
@@ -114,6 +48,14 @@ export function WorkspaceLayout({
 
   // Hide sidebar in focus modes
   const showSidebar = sidebarOpen && focusMode === "normal";
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="flex h-screen w-full bg-background">
@@ -125,14 +67,14 @@ export function WorkspaceLayout({
         >
           <WorkspaceHeader
             projectName={projectName}
-            filesCount={files.length}
+            filesCount={chapterFiles.length}
             onCreateFile={() => {
               // This will be handled by EnhancedFileTree component
             }}
           />
           <EnhancedFileTree
-            files={files}
-            onFilesChange={updateFiles}
+            files={chapterFiles}
+            onFilesChange={updateChapterFiles}
             projectName={projectName}
             session={session}
             loading={loading}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { createSupabaseBrowserClient } from "@/supabase/browser-client";
+import { useAuth } from "@/context/auth-context";
 import { getChapters } from "@/lib/api/chapters";
 import { toast } from "sonner";
 import { BookOpen, Plus } from "lucide-react";
@@ -15,19 +15,10 @@ interface ProjectLandingProps {
 
 export function ProjectLanding({ projectName }: ProjectLandingProps) {
   const [loading, setLoading] = useState(true);
-  const [chapters, setChapters] = useState<ChapterFile[]>([]);
-  const [session, setSession] = useState<any>(null);
+  const [chapterFiles, setChapterFiles] = useState<ChapterFile[]>([]);
 
   const router = useRouter();
-  const supabaseBrowserClient = createSupabaseBrowserClient();
-
-  useEffect(() => {
-    async function getSession() {
-      const { data } = await supabaseBrowserClient.auth.getSession();
-      setSession(data.session);
-    }
-    getSession();
-  }, []);
+  const { session } = useAuth();
 
   useEffect(() => {
     if (!session?.access_token) return;

@@ -2,6 +2,7 @@
 
 import { ChapterWithProject, Folder } from "@detective-quill/shared-types";
 
+// TODO: see the differnce between schema and types and if this can be shifted to the schema file
 export interface FolderStructure {
   id: string;
   name: string;

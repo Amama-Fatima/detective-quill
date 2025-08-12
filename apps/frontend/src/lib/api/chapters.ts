@@ -6,6 +6,8 @@ import {
   UpdateChapterResponse,
 } from "@detective-quill/shared-types";
 
+// TODO: add parsing of api response using schemas in here
+
 export async function getChapters(
   projectTitle: string,
   accessToken: string

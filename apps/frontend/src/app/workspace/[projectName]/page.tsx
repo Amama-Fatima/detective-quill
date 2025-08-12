@@ -7,6 +7,7 @@ interface ProjectPageProps {
   };
 }
 
+// TODO: remove await in await params
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { projectName } = await params;
 
