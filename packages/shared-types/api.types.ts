@@ -1,13 +1,12 @@
 import { Database } from "./database.types";
 
-export type Chapter = Database["public"]["Tables"]["chapters"]["Row"];
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
-export type Folder = Database["public"]["Tables"]["folders"]["Row"];
 
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
+export interface ApiResponse<T = any> {
   success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
 }
 
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {
@@ -18,75 +17,78 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   };
 }
 
-// Specific response types for chapters endpoint
-export interface ChapterWithProject extends Chapter {
-  project: Pick<Project, "id" | "title" | "user_id">;
-  folder?: Pick<Folder, "id" | "name"> | null;
-}
-
-// Folder with nested structure
-export interface FolderWithChildren extends Folder {
-  children?: FolderWithChildren[];
-  chapters?: ChapterWithProject[];
-}
-
-// DTOs for API requests
-export interface CreateChapterDto {
-  projectTitle: string;
+// Project DTOs
+export interface CreateProjectDto {
   title: string;
-  content: string;
-  chapterOrder: number;
-  folderId?: string | null; // Added folder support
+  description?: string;
 }
 
-export interface UpdateChapterDto {
-  id: string;
+export interface UpdateProjectDto {
   title?: string;
-  content?: string;
-  chapterOrder?: number;
-  isPublished?: boolean;
-  folderId?: string | null; // Added folder support
+  description?: string;
+  is_active?: boolean;
 }
 
-export interface CreateFolderDto {
-  projectTitle: string;
-  name: string;
-  parentId?: string | null;
-  folderOrder?: number;
+// Project response types
+export interface ProjectResponse extends Project {}
+
+export interface ProjectStats {
+  totalFiles: number;
+  totalFolders: number;
+  totalWordCount: number;
+  lastModified: string;
 }
 
-export interface UpdateFolderDto {
+export interface ProjectListResponse {
+  projects: ProjectResponse[];
+  total: number;
+}
+
+// API Response wrappers
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface DeleteResponse {
+  message: string;
+}
+
+// File system node types
+export interface FsNode {
   id: string;
+  project_id: string;
+  parent_id: string | null;
+  name: string;
+  node_type: "folder" | "file";
+  description: string | null;
+  sort_order: number;
+  depth: number;
+  path: string | null;
+  content: string | null;
+  file_extension: string | null;
+  word_count: number;
+  created_at: string;
+  updated_at: string;
+  is_deleted: boolean;
+}
+
+export interface CreateFsNodeDto {
+  project_id: string;
+  parent_id?: string;
+  name: string;
+  node_type: "folder" | "file";
+  description?: string;
+  content?: string;
+  file_extension?: string;
+}
+
+export interface UpdateFsNodeDto {
   name?: string;
-  parentId?: string | null;
-  folderOrder?: number;
+  description?: string;
+  content?: string;
+  parent_id?: string;
+  sort_order?: number;
 }
-
-// Query types
-export interface GetChaptersQuery {
-  projectTitle: string;
-  includeFolders?: boolean; // Option to include folder structure
-}
-
-export interface GetFoldersQuery {
-  projectTitle: string;
-  includeChildren?: boolean;
-}
-
-// Response types
-export type CreateChapterResponse = ApiResponse<ChapterWithProject>;
-export type UpdateChapterResponse = ApiResponse<ChapterWithProject>;
-export type GetChaptersResponse = ApiResponse<ChapterWithProject[]>;
-
-export type CreateFolderResponse = ApiResponse<Folder>;
-export type UpdateFolderResponse = ApiResponse<Folder>;
-export type GetFoldersResponse = ApiResponse<FolderWithChildren[]>;
-export type DeleteFolderResponse = ApiResponse<{ deleted: boolean }>;
-
-// Combined response for workspace data
-export interface WorkspaceData {
-  chapters: ChapterWithProject[];
-  folders: FolderWithChildren[];
-}
-
-export type GetWorkspaceResponse = ApiResponse<WorkspaceData>;
