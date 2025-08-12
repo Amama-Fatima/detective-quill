@@ -10,7 +10,7 @@ import { EnhancedFileTree } from "./file-tree/file-tree";
 import { ChapterFile } from "@/lib/types/workspace";
 
 interface WorkspaceLayoutProps {
-  children: React.ReactElement;
+  children: React.ReactNode;
   projectName: string;
 }
 
