@@ -3,7 +3,8 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { SupabaseModule } from "./supabase/supabase.module";
 import { ConfigModule } from "@nestjs/config";
-import { ProjectsService } from './projects/projects.service';
+import { ProjectsService } from "./projects/projects.service";
+import { ProjectsModule } from "./projects/projects.module";
 
 @Module({
   controllers: [AppController],
@@ -14,6 +15,7 @@ import { ProjectsService } from './projects/projects.service';
       envFilePath: ".env",
     }),
     SupabaseModule,
+    ProjectsModule,
   ],
 })
 export class AppModule {}
