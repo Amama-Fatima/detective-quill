@@ -40,7 +40,7 @@ import { formatDistanceToNow } from "date-fns";
 
 interface ProjectCardProps {
   project: ProjectResponse;
-  onOpen: (projectId: string) => void;
+  onOpen: (projectTitle: string) => void;
   onUpdate: (
     projectId: string,
     data: { title: string; description: string }
@@ -162,7 +162,7 @@ export function ProjectCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onOpen(project.id)}>
+                <DropdownMenuItem onClick={() => onOpen(project.title)}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open Project
                 </DropdownMenuItem>

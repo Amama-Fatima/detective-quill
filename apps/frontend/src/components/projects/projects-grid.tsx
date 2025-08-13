@@ -7,7 +7,7 @@ import { FolderOpen } from "lucide-react";
 interface ProjectsGridProps {
   projects: ProjectResponse[];
   loading: boolean;
-  onOpenProject: (projectId: string) => void;
+  onOpenProject: (projectTitle: string) => void;
   onUpdateProject: (
     projectId: string,
     data: { title: string; description: string }
