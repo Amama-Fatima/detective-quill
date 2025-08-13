@@ -243,7 +243,6 @@ export class FsNodesService {
     return data;
   }
 
-  // ✅ ENHANCED: Cascade delete using get_node_children function
   async deleteNode(
     nodeId: string,
     userId: string,
@@ -256,30 +255,49 @@ export class FsNodesService {
     // Verify node exists and user owns it
     const node = await this.getNode(nodeId, userId, accessToken);
 
-    // If it's a folder and has children, handle accordingly
+    // If it's a folder, check for children and handle cascade
     if (node.node_type === "folder") {
-      const children = await this.getNodeChildren(nodeId, userId, accessToken);
+      // Get all children recursively using the database function
+      const { data: allChildren, error: childrenError } = await supabase.rpc(
+        "get_node_children",
+        { node_uuid: nodeId }
+      );
 
-      if (children.length > 0 && !cascadeDelete) {
+      if (childrenError) {
         throw new BadRequestException(
-          `Folder contains ${children.length} items. Use cascadeDelete=true to delete all contents.`
+          `Failed to check folder contents: ${childrenError.message}`
         );
       }
 
-      // If cascade delete, delete all children first
-      if (cascadeDelete) {
-        for (const child of children) {
-          await this.deleteNode(
-            child.id,
-            userId,
-            accessToken,
-            hardDelete,
-            true
-          );
+      const children = allChildren || [];
+
+      if (children.length > 0 && !cascadeDelete) {
+        throw new BadRequestException(
+          `Folder "${node.name}" contains ${children.length} items. Use cascadeDelete=true to delete all contents.`
+        );
+      }
+
+      // If cascade delete, delete all children first (in reverse order to handle nested folders)
+      if (cascadeDelete && children.length > 0) {
+        // Sort by depth descending to delete deepest items first
+        const sortedChildren = children.sort(
+          (a, b) => (b.depth || 0) - (a.depth || 0)
+        );
+
+        for (const child of sortedChildren) {
+          if (hardDelete) {
+            await supabase.from("fs_nodes").delete().eq("id", child.id);
+          } else {
+            await supabase
+              .from("fs_nodes")
+              .update({ is_deleted: true })
+              .eq("id", child.id);
+          }
         }
       }
     }
 
+    // Delete/soft-delete the main node
     if (hardDelete) {
       const { error } = await supabase
         .from("fs_nodes")
@@ -292,7 +310,12 @@ export class FsNodesService {
         );
       }
 
-      return { message: "Node permanently deleted" };
+      return {
+        message:
+          node.node_type === "folder"
+            ? "Folder and all contents permanently deleted"
+            : "File permanently deleted",
+      };
     } else {
       const { error } = await supabase
         .from("fs_nodes")
@@ -305,7 +328,12 @@ export class FsNodesService {
         );
       }
 
-      return { message: "Node moved to trash" };
+      return {
+        message:
+          node.node_type === "folder"
+            ? "Folder and all contents moved to trash"
+            : "File moved to trash",
+      };
     }
   }
 
