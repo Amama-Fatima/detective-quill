@@ -1,3 +1,5 @@
+// src/components/workspace/workspace-header.tsx
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +34,11 @@ export function WorkspaceHeader({
           </span>
         </div>
 
-        <Button size="sm" onClick={onCreateFile} className="gap-2 cursor-pointer">
+        <Button
+          size="sm"
+          onClick={onCreateFile}
+          className="gap-2 cursor-pointer"
+        >
           <FilePlus className="h-4 w-4" />
           New
         </Button>
