@@ -44,7 +44,7 @@ export class FsNodesService {
         .single();
 
       if (parentError || !parent) {
-        throw new BadRequestException("Parent node not found");
+        throw new BadRequestException("Parent node not found. No id provided");
       }
 
       if (parent.project_id !== createNodeDto.project_id) {

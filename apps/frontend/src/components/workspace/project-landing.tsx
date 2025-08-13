@@ -1,49 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/auth-context";
-import { getChapters } from "@/lib/api/chapters";
 import { toast } from "sonner";
 import { BookOpen, Plus } from "lucide-react";
-import { ChapterFile } from "@/lib/types/workspace";
 
 interface ProjectLandingProps {
   projectName: string;
 }
 
 export function ProjectLanding({ projectName }: ProjectLandingProps) {
-  const [loading, setLoading] = useState(true);
-  const [chapterFiles, setChapterFiles] = useState<ChapterFile[]>([]);
-
-  const router = useRouter();
-  const { session } = useAuth();
-
-  useEffect(() => {
-    if (!session?.access_token) return;
-
-    const fetchChapters = async () => {
-      try {
-        const response = await getChapters(projectName, session.access_token);
-        if (response.success && response.data.length > 0) {
-          // If chapters exist, redirect to the first one
-          const firstChapter = response.data.sort(
-            (a, b) => a.chapter_order - b.chapter_order
-          )[0];
-          const slug = firstChapter.title.toLowerCase().replace(/\s+/g, "-");
-          router.replace(`/workspace/${projectName}/${slug}`);
-        } else {
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Error fetching chapters:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchChapters();
-  }, [session, projectName, router]);
+  const [loading, setLoading] = useState(false);
 
   if (loading) {
     return (

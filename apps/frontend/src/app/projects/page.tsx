@@ -88,8 +88,8 @@ export default function ProjectsPage() {
     return await createProject(data);
   };
 
-  const handleOpenProject = (projectTitle: string) => {
-    router.push(`/workspace/${projectTitle}/text-editor`);
+  const handleOpenProject = (projectId: string) => {
+    router.push(`/workspace/${projectId}/text-editor`);
   };
 
   const toggleSortOrder = () => {

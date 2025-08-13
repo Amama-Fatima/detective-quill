@@ -4,41 +4,61 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { useAuth } from "@/context/auth-context";
-import { useChapters } from "@/hooks/use-chapters";
+import { useFsNodes } from "@/hooks/use-fs-nodes";
 import { cn } from "@/lib/utils";
-import { EnhancedFileTree } from "./file-tree/file-tree";
-import { ChapterFile } from "@/lib/types/workspace";
+import { FileTree } from "./file-tree/file-tree";
+import { FsNodeTreeResponse } from "@detective-quill/shared-types";
+import { getProject } from "@/lib/backend-calls/projects";
+import { toast } from "sonner";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
-  projectName: string;
+  projectId: string;
 }
 
-export function WorkspaceLayout({
-  children,
-  projectName,
-}: WorkspaceLayoutProps) {
+export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [focusMode, setFocusMode] = useState<"normal" | "app" | "browser">(
     "normal"
   );
-  const [chapterFiles, setChapterFiles] = useState<ChapterFile[]>([]);
+  const [projectName, setProjectName] = useState<string>("");
+  const [projectLoading, setProjectLoading] = useState(true);
 
   const {
-    chapterFiles: initialFiles,
-    loading,
+    nodes,
+    loading: nodesLoading,
     error,
     refetch,
-  } = useChapters({ projectName });
+    setNodes,
+  } = useFsNodes({ projectId });
   const { session } = useAuth();
   const params = useParams();
 
+  // Fetch project details
   useEffect(() => {
-    setChapterFiles(initialFiles);
-  }, [initialFiles]);
+    const fetchProject = async () => {
+      if (!session?.access_token || !projectId) return;
 
-  const updateChapterFiles = (updatedFiles: ChapterFile[]) => {
-    setChapterFiles(updatedFiles);
+      try {
+        const response = await getProject(projectId, session.access_token);
+        if (response.success && response.data) {
+          setProjectName(response.data.title);
+        } else {
+          toast.error("Failed to load project");
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+        toast.error("Failed to load project");
+      } finally {
+        setProjectLoading(false);
+      }
+    };
+
+    fetchProject();
+  }, [projectId, session?.access_token]);
+
+  const updateNodes = (updatedNodes: FsNodeTreeResponse[]) => {
+    setNodes(updatedNodes);
   };
 
   // Handle focus mode changes from editor
@@ -49,7 +69,36 @@ export function WorkspaceLayout({
   // Hide sidebar in focus modes
   const showSidebar = sidebarOpen && focusMode === "normal";
 
-  if (loading) {
+  // Count files and folders
+  const { filesCount, foldersCount } = React.useMemo(() => {
+    const countNodes = (
+      nodeList: FsNodeTreeResponse[]
+    ): { files: number; folders: number } => {
+      let files = 0;
+      let folders = 0;
+
+      nodeList.forEach((node) => {
+        if (node.node_type === "file") {
+          files++;
+        } else {
+          folders++;
+        }
+
+        if (node.children) {
+          const childCounts = countNodes(node.children);
+          files += childCounts.files;
+          folders += childCounts.folders;
+        }
+      });
+
+      return { files, folders };
+    };
+
+    const counts = countNodes(nodes);
+    return { filesCount: counts.files, foldersCount: counts.folders };
+  }, [nodes]);
+
+  if (projectLoading || nodesLoading) {
     return <div>Loading...</div>;
   }
 
@@ -67,17 +116,19 @@ export function WorkspaceLayout({
         >
           <WorkspaceHeader
             projectName={projectName}
-            filesCount={chapterFiles.length}
+            filesCount={filesCount}
+            foldersCount={foldersCount}
             onCreateFile={() => {
-              // This will be handled by EnhancedFileTree component
+              // This will be handled by FileTree component
             }}
           />
-          <EnhancedFileTree
-            files={chapterFiles}
-            onFilesChange={updateChapterFiles}
+          <FileTree
+            nodes={nodes}
+            onNodesChange={updateNodes}
+            projectId={projectId}
             projectName={projectName}
             session={session}
-            loading={loading}
+            loading={nodesLoading}
           />
         </aside>
       )}
@@ -94,7 +145,7 @@ export function WorkspaceLayout({
                 {sidebarOpen ? "←" : "→"}
               </button>
               <span className="text-sm text-muted-foreground">
-                {projectName} / {params.chapterName}
+                {projectName} / {params.nodeId}
               </span>
             </div>
           </div>
@@ -102,7 +153,7 @@ export function WorkspaceLayout({
 
         {/* Pass focus mode handler to children */}
         <div className="flex-1">
-          {React.cloneElement(children, {
+          {React.cloneElement(children as React.ReactElement, {
             onFocusModeChange: handleFocusModeChange,
           })}
         </div>

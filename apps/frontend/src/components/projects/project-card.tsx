@@ -162,7 +162,7 @@ export function ProjectCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onOpen(project.title)}>
+                <DropdownMenuItem onClick={() => onOpen(project.id)}>
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open Project
                 </DropdownMenuItem>
