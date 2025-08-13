@@ -7,10 +7,13 @@ import {
   createFsNode,
   updateFsNode,
   deleteFsNode,
+  moveFsNode,
 } from "@/lib/backend-calls/fs-nodes";
 import {
   CreateFsNodeDto,
   FsNodeTreeResponse,
+  FsNodeResponse,
+  UpdateFsNodeDto,
 } from "@detective-quill/shared-types";
 import { toast } from "sonner";
 import {
@@ -22,6 +25,8 @@ import {
   File as FileIcon,
   Folder,
   FolderOpen,
+  Edit,
+  FolderX,
 } from "lucide-react";
 import { WorkspaceFile, TreeViewElement } from "@/lib/types/workspace";
 import {
@@ -39,6 +44,8 @@ import {
   Folder as TreeFolder,
 } from "../../magicui/file-tree";
 import { CreateNodeDialog } from "./create-node-dialog";
+import { RenameDialog } from "./rename-dialog";
+import { MoveDialog } from "./move-dialog";
 
 interface FileTreeProps {
   nodes: FsNodeTreeResponse[];
@@ -58,8 +65,13 @@ export function FileTree({
   loading,
 }: FileTreeProps) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [moving, setMoving] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [selectedNode, setSelectedNode] = useState<FsNodeResponse | null>(null);
   const [createType, setCreateType] = useState<"file" | "folder">("file");
 
   const router = useRouter();
@@ -76,35 +88,6 @@ export function FileTree({
     });
 
     return nodes.map(convertNode);
-  }, [nodes]);
-
-  // Count files and folders
-  const { fileCount, folderCount } = useMemo(() => {
-    const countNodes = (
-      nodeList: FsNodeTreeResponse[]
-    ): { files: number; folders: number } => {
-      let files = 0;
-      let folders = 0;
-
-      nodeList.forEach((node) => {
-        if (node.node_type === "file") {
-          files++;
-        } else {
-          folders++;
-        }
-
-        if (node.children) {
-          const childCounts = countNodes(node.children);
-          files += childCounts.files;
-          folders += childCounts.folders;
-        }
-      });
-
-      return { files, folders };
-    };
-
-    const counts = countNodes(nodes);
-    return { fileCount: counts.files, folderCount: counts.folders };
   }, [nodes]);
 
   const handleNodeSelect = (nodeId: string) => {
@@ -139,15 +122,15 @@ export function FileTree({
           `${nodeType === "file" ? "File" : "Folder"} created successfully`
         );
 
-        // Refresh the tree - you could optimize this by updating locally
-        window.location.reload(); // Simple approach, or implement proper state update
+        // Refresh the page to update the tree
+        window.location.reload();
 
         setCreateDialogOpen(false);
         setSelectedFolder(null);
 
         // Navigate to file if it's a file
         if (nodeType === "file") {
-          router.push(`/workspace/${projectName}/${response.data.id}`);
+          router.push(`/workspace/${projectId}/${response.data.id}`);
         }
       } else {
         toast.error(response.error || `Failed to create ${nodeType}`);
@@ -160,17 +143,113 @@ export function FileTree({
     }
   };
 
+  const handleRenameNode = async (newName: string) => {
+    if (!selectedNode || !session?.access_token) return;
+
+    setRenaming(true);
+    try {
+      const updateData: UpdateFsNodeDto = {
+        name: newName,
+      };
+
+      const response = await updateFsNode(
+        selectedNode.id,
+        updateData,
+        session.access_token
+      );
+
+      if (response.success) {
+        toast.success(
+          `${
+            selectedNode.node_type === "file" ? "File" : "Folder"
+          } renamed successfully`
+        );
+
+        // Refresh the page to update the tree
+        window.location.reload();
+      } else {
+        toast.error(response.error || "Failed to rename");
+      }
+    } catch (error) {
+      console.error("Error renaming node:", error);
+      toast.error("Failed to rename");
+    } finally {
+      setRenaming(false);
+      setSelectedNode(null);
+    }
+  };
+
+  const handleMoveNode = async (newParentId: string | null) => {
+    if (!selectedNode || !session?.access_token) return;
+
+    setMoving(true);
+    try {
+      // Get the new sort order (add to end of new parent)
+      const siblings = nodes.filter((n) => n.parent_id === newParentId);
+      const newSortOrder =
+        siblings.length > 0
+          ? Math.max(...siblings.map((s) => s.sort_order || 0)) + 1
+          : 1;
+
+      const response = await moveFsNode(
+        selectedNode.id,
+        newParentId,
+        newSortOrder,
+        session.access_token
+      );
+
+      if (response.success) {
+        toast.success(
+          `${
+            selectedNode.node_type === "file" ? "File" : "Folder"
+          } moved successfully`
+        );
+
+        // Refresh the page to update the tree
+        window.location.reload();
+      } else {
+        toast.error(response.error || "Failed to move");
+      }
+    } catch (error) {
+      console.error("Error moving node:", error);
+      toast.error("Failed to move");
+    } finally {
+      setMoving(false);
+      setSelectedNode(null);
+    }
+  };
+
   const handleDeleteNode = async (nodeId: string) => {
     if (!session?.access_token) return;
 
-    if (!confirm("Are you sure you want to delete this item?")) return;
+    const nodeToDelete = findNodeById(nodes, nodeId);
+    if (!nodeToDelete) return;
+
+    const confirmMessage =
+      nodeToDelete.node_type === "folder"
+        ? `Are you sure you want to delete the folder "${nodeToDelete.name}" and all its contents?`
+        : `Are you sure you want to delete "${nodeToDelete.name}"?`;
+
+    if (!confirm(confirmMessage)) return;
 
     try {
-      const response = await deleteFsNode(nodeId, session.access_token);
+      // TODO: Maybe Use cascade delete for folders. Currently, folders dont have delete, rename and move functionality. will need to implement this in the future maybe
+      const response = await deleteFsNode(
+        nodeId,
+        session.access_token,
+        false // soft delete
+        // nodeToDelete.node_type === "folder" // cascade for folders
+      );
 
       if (response.success) {
         toast.success("Item deleted successfully");
-        window.location.reload(); // Simple approach
+
+        // If we're viewing the deleted file, navigate back to project
+        if (selectedNodeId === nodeId) {
+          router.push(`/workspace/${projectId}`);
+        } else {
+          window.location.reload();
+        }
       } else {
         toast.error(response.error || "Failed to delete item");
       }
@@ -184,6 +263,16 @@ export function FileTree({
     setCreateType(type);
     setSelectedFolder(folderId || null);
     setCreateDialogOpen(true);
+  };
+
+  const openRenameDialog = (node: FsNodeResponse) => {
+    setSelectedNode(node);
+    setRenameDialogOpen(true);
+  };
+
+  const openMoveDialog = (node: FsNodeResponse) => {
+    setSelectedNode(node);
+    setMoveDialogOpen(true);
   };
 
   if (loading) {
@@ -252,11 +341,12 @@ export function FileTree({
                 element={element}
                 selectedNodeId={selectedNodeId}
                 onNodeSelect={handleNodeSelect}
-                onFolderContextMenu={setSelectedFolder}
                 onCreateFile={(folderId) => openCreateDialog("file", folderId)}
                 onCreateFolder={(folderId) =>
                   openCreateDialog("folder", folderId)
                 }
+                onRenameNode={openRenameDialog}
+                onMoveNode={openMoveDialog}
                 onDeleteNode={handleDeleteNode}
                 nodes={nodes}
               />
@@ -265,7 +355,7 @@ export function FileTree({
         )}
       </div>
 
-      {/* Create Dialog */}
+      {/* Dialogs */}
       <CreateNodeDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
@@ -277,70 +367,46 @@ export function FileTree({
         }
         availableFolders={getFolderNodes(nodes)}
       />
+
+      <RenameDialog
+        open={renameDialogOpen}
+        onOpenChange={setRenameDialogOpen}
+        onSubmit={handleRenameNode}
+        node={selectedNode}
+        loading={renaming}
+      />
+
+      <MoveDialog
+        open={moveDialogOpen}
+        onOpenChange={setMoveDialogOpen}
+        onSubmit={handleMoveNode}
+        node={selectedNode}
+        availableFolders={getFolderNodes(nodes)}
+        loading={moving}
+      />
     </div>
   );
 }
 
-// Helper functions
-function findNodeById(
-  nodes: FsNodeTreeResponse[],
-  nodeId: string
-): FsNodeTreeResponse | null {
-  for (const node of nodes) {
-    if (node.id === nodeId) return node;
-    if (node.children) {
-      const found = findNodeById(node.children, nodeId);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-function getFolderNodes(
-  nodes: FsNodeTreeResponse[]
-): Array<{ id: string; name: string; path: string }> {
-  const folders: Array<{ id: string; name: string; path: string }> = [];
-
-  const traverse = (nodeList: FsNodeTreeResponse[], parentPath = "") => {
-    nodeList.forEach((node) => {
-      if (node.node_type === "folder") {
-        const currentPath = parentPath
-          ? `${parentPath}/${node.name}`
-          : node.name;
-        folders.push({
-          id: node.id,
-          name: node.name,
-          path: currentPath,
-        });
-
-        if (node.children) {
-          traverse(node.children, currentPath);
-        }
-      }
-    });
-  };
-
-  traverse(nodes);
-  return folders;
-}
-
-// Recursive Tree Item Component
+// Updated TreeItem component with rename and move actions
 function TreeItem({
   element,
   selectedNodeId,
   onNodeSelect,
-  onFolderContextMenu,
   onCreateFile,
   onCreateFolder,
+  onRenameNode,
+  onMoveNode,
   onDeleteNode,
   nodes,
 }: {
   element: TreeViewElement;
   selectedNodeId: string;
   onNodeSelect: (nodeId: string) => void;
-  onFolderContextMenu: (folderId: string) => void;
   onCreateFile: (folderId: string) => void;
   onCreateFolder: (folderId: string) => void;
+  onRenameNode: (node: FsNodeResponse) => void;
+  onMoveNode: (node: FsNodeResponse) => void;
   onDeleteNode: (nodeId: string) => void;
   nodes: FsNodeTreeResponse[];
 }) {
@@ -361,9 +427,10 @@ function TreeItem({
             element={child}
             selectedNodeId={selectedNodeId}
             onNodeSelect={onNodeSelect}
-            onFolderContextMenu={onFolderContextMenu}
             onCreateFile={onCreateFile}
             onCreateFolder={onCreateFolder}
+            onRenameNode={onRenameNode}
+            onMoveNode={onMoveNode}
             onDeleteNode={onDeleteNode}
             nodes={nodes}
           />
@@ -436,14 +503,25 @@ function TreeItem({
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem>Rename</DropdownMenuItem>
-              <DropdownMenuItem>Move to...</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem
+                onClick={() => node && onRenameNode(node as FsNodeResponse)}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Rename
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => node && onMoveNode(node as FsNodeResponse)}
+              >
+                <FolderX className="h-4 w-4 mr-2" />
+                Move to...
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => onDeleteNode(element.id)}
               >
+                <FileText className="h-4 w-4 mr-2" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -452,4 +530,47 @@ function TreeItem({
       </File>
     );
   }
+}
+
+// Helper functions (unchanged)
+function findNodeById(
+  nodes: FsNodeTreeResponse[],
+  nodeId: string
+): FsNodeTreeResponse | null {
+  for (const node of nodes) {
+    if (node.id === nodeId) return node;
+    if (node.children) {
+      const found = findNodeById(node.children, nodeId);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function getFolderNodes(
+  nodes: FsNodeTreeResponse[]
+): Array<{ id: string; name: string; path: string }> {
+  const folders: Array<{ id: string; name: string; path: string }> = [];
+
+  const traverse = (nodeList: FsNodeTreeResponse[], parentPath = "") => {
+    nodeList.forEach((node) => {
+      if (node.node_type === "folder") {
+        const currentPath = parentPath
+          ? `${parentPath}/${node.name}`
+          : node.name;
+        folders.push({
+          id: node.id,
+          name: node.name,
+          path: currentPath,
+        });
+
+        if (node.children) {
+          traverse(node.children, currentPath);
+        }
+      }
+    });
+  };
+
+  traverse(nodes);
+  return folders;
 }
