@@ -19,7 +19,7 @@ export function ProfileHeader({
     user.user_metadata?.user_name || user.email?.split("@")[0] || "user";
 
   return (
-    <div className="border-b bg-white">
+    <div className="border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">

@@ -1,174 +1,100 @@
+// src/app/projects/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useAuth } from "@/context/auth-context";
-import {
-  ProjectResponse,
-  CreateProjectDto,
-} from "@detective-quill/shared-types";
-import {
-  createProject,
-  getProjects,
-  deleteProject,
-  updateProject,
-} from "@/lib/backend-calls/projects";
-import { toast } from "sonner";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
+import { useProjects } from "@/hooks/use-projects";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import {
+  Search,
+  SortAsc,
+  SortDesc,
+  Calendar,
+  // AlphabeticalSort,
+  Filter,
+} from "lucide-react";
+import { CreateProjectDto } from "@detective-quill/shared-types";
+import { ProfileHeader } from "@/components/profile-section/profile-header";
+import { ProjectsGrid } from "@/components/projects/projects-grid";
+import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
+
+type SortOption = "updated" | "created" | "title";
+type SortOrder = "asc" | "desc";
 
 export default function ProjectsPage() {
-  const { session, loading: authLoading } = useAuth();
+  const { session, loading: authLoading, user } = useAuth();
   const router = useRouter();
+  const {
+    projects,
+    loading: projectsLoading,
+    creating,
+    createProject,
+    updateProject,
+    deleteProject,
+  } = useProjects();
 
-  const [projects, setProjects] = useState<ProjectResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("updated");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
-  // Form state
-  const [newProject, setNewProject] = useState<CreateProjectDto>({
-    title: "",
-    description: "",
-  });
+  // Filter and sort projects
+  const filteredAndSortedProjects = projects
+    .filter(
+      (project) =>
+        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (project.description
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ??
+          false)
+    )
+    .sort((a, b) => {
+      let aValue: string | Date;
+      let bValue: string | Date;
 
-  // Editing state
-  const [editingProject, setEditingProject] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{
-    title: string;
-    description: string;
-  }>({
-    title: "",
-    description: "",
-  });
-
-  // Fetch projects
-  const fetchProjects = async () => {
-    if (!session?.access_token) return;
-
-    try {
-      setLoading(true);
-      const response = await getProjects(session.access_token);
-
-      if (response.success && response.data) {
-        setProjects(response.data);
-      } else {
-        toast.error(response.error || "Failed to fetch projects");
+      switch (sortBy) {
+        case "title":
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case "created":
+          aValue = new Date(a.created_at ?? 0);
+          bValue = new Date(b.created_at ?? 0);
+          break;
+        case "updated":
+        default:
+          aValue = new Date(a.updated_at ?? a.created_at ?? 0);
+          bValue = new Date(b.updated_at ?? b.created_at ?? 0);
+          break;
       }
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      toast.error("Failed to fetch projects");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  // Create project
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!session?.access_token) return;
-
-    if (!newProject.title.trim()) {
-      toast.error("Project title is required");
-      return;
-    }
-
-    try {
-      setCreating(true);
-      const response = await createProject(newProject, session.access_token);
-
-      if (response.success && response.data) {
-        toast.success("Project created successfully");
-        setProjects((prev) => [response.data!, ...prev]);
-        setNewProject({ title: "", description: "" });
-        setShowCreateForm(false);
-      } else {
-        toast.error(response.error || "Failed to create project");
-      }
-    } catch (error) {
-      console.error("Error creating project:", error);
-      toast.error("Failed to create project");
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  // Delete project
-  const handleDeleteProject = async (projectId: string) => {
-    if (!session?.access_token) return;
-
-    if (!confirm("Are you sure you want to delete this project?")) return;
-
-    try {
-      const response = await deleteProject(projectId, session.access_token);
-
-      if (response.success) {
-        toast.success("Project deleted successfully");
-        setProjects((prev) => prev.filter((p) => p.id !== projectId));
-      } else {
-        toast.error(response.error || "Failed to delete project");
-      }
-    } catch (error) {
-      console.error("Error deleting project:", error);
-      toast.error("Failed to delete project");
-    }
-  };
-
-  // Update project
-  const handleUpdateProject = async (projectId: string) => {
-    if (!session?.access_token) return;
-
-    if (!editForm.title.trim()) {
-      toast.error("Project title is required");
-      return;
-    }
-
-    try {
-      const response = await updateProject(
-        projectId,
-        { title: editForm.title, description: editForm.description },
-        session.access_token
-      );
-
-      if (response.success && response.data) {
-        toast.success("Project updated successfully");
-        setProjects((prev) =>
-          prev.map((p) => (p.id === projectId ? response.data! : p))
-        );
-        setEditingProject(null);
-      } else {
-        toast.error(response.error || "Failed to update project");
-      }
-    } catch (error) {
-      console.error("Error updating project:", error);
-      toast.error("Failed to update project");
-    }
-  };
-
-  // Start editing
-  const startEditing = (project: ProjectResponse) => {
-    setEditingProject(project.id);
-    setEditForm({
-      title: project.title,
-      description: project.description || "",
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
     });
+
+  const handleCreateProject = async (data: CreateProjectDto) => {
+    return await createProject(data);
   };
 
-  // Cancel editing
-  const cancelEditing = () => {
-    setEditingProject(null);
-    setEditForm({ title: "", description: "" });
-  };
-
-  // Open project (navigate to project detail page)
-  const openProject = (projectId: string) => {
+  const handleOpenProject = (projectId: string) => {
     router.push(`/projects/${projectId}`);
   };
 
-  // Effects
-  useEffect(() => {
-    if (!authLoading && session) {
-      fetchProjects();
-    }
-  }, [session, authLoading]);
+  const toggleSortOrder = () => {
+    setSortOrder((current) => (current === "asc" ? "desc" : "asc"));
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -177,215 +103,125 @@ export default function ProjectsPage() {
     }
   }, [session, authLoading, router]);
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
 
-  if (!session) {
+  if (!session || !user) {
     return null; // Will redirect
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Projects</h1>
-          <p className="mt-2 text-gray-600">
-            Manage your writing projects and stories
-          </p>
-        </div>
+    <div className="min-h-screen">
+      <ProfileHeader
+        user={user}
+        projectCount={projects.length}
+        onCreateProject={() => setShowCreateDialog(true)}
+      />
 
-        {/* Create Project Section */}
-        <div className="bg-white rounded-lg shadow mb-8 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {showCreateForm ? "Create New Project" : "Add Project"}
-            </h2>
-            <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              {showCreateForm ? "Cancel" : "New Project"}
-            </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Navigation Tabs */}
+        <Tabs defaultValue="projects" className="w-full">
+          <div className="border-b">
+            <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsTrigger value="projects" className="flex items-center gap-2">
+                Projects
+                <Badge variant="secondary" className="ml-1">
+                  {projects.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="archived" disabled className="opacity-50">
+                Archived
+              </TabsTrigger>
+            </TabsList>
           </div>
 
-          {showCreateForm && (
-            <form onSubmit={handleCreateProject} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="title"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Project Title *
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={newProject.title}
-                  onChange={(e) =>
-                    setNewProject((prev) => ({
-                      ...prev,
-                      title: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter project title"
-                  required
-                />
+          <TabsContent value="projects" className="space-y-6">
+            {/* Filters and Search */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex flex-1 items-center gap-4 max-w-md">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search projects..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+              <div className="flex items-center gap-2">
+                <Select
+                  value={sortBy}
+                  onValueChange={(value: SortOption) => setSortBy(value)}
                 >
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  value={newProject.description}
-                  onChange={(e) =>
-                    setNewProject((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Describe your project (optional)"
-                />
-              </div>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="updated">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Last updated
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="created">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Created
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="title">
+                      <div className="flex items-center">
+                        {/* <AlphabeticalSort className="h-4 w-4 mr-2" /> */}
+                        Name
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleSortOrder}
+                  className="px-3"
                 >
-                  {creating ? "Creating..." : "Create Project"}
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-
-        {/* Projects List */}
-        <div className="space-y-4">
-          {projects.length === 0 ? (
-            <div className="bg-white rounded-lg shadow p-8 text-center">
-              <div className="text-gray-500 text-lg">
-                No projects yet. Create your first project to get started!
+                  {sortOrder === "desc" ? (
+                    <SortDesc className="h-4 w-4" />
+                  ) : (
+                    <SortAsc className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </div>
-          ) : (
-            projects.map((project) => (
-              <div key={project.id} className="bg-white rounded-lg shadow p-6">
-                {editingProject === project.id ? (
-                  // Edit form
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      value={editForm.title}
-                      onChange={(e) =>
-                        setEditForm((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
-                      }
-                      className="w-full text-xl font-semibold px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <textarea
-                      value={editForm.description}
-                      onChange={(e) =>
-                        setEditForm((prev) => ({
-                          ...prev,
-                          description: e.target.value,
-                        }))
-                      }
-                      rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Project description"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleUpdateProject(project.id)}
-                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  // Display mode
-                  <div>
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                          {project.title}
-                        </h3>
-                        {project.description && (
-                          <p className="text-gray-600 mb-3">
-                            {project.description}
-                          </p>
-                        )}
-                        <div className="text-sm text-gray-500">
-                          Created:{" "}
-                          {project.created_at
-                            ? new Date(project.created_at).toLocaleDateString()
-                            : "Unknown"}
-                          {project.updated_at !== project.created_at && (
-                            <span className="ml-4">
-                              Updated:{" "}
-                              {project.updated_at
-                                ? new Date(
-                                    project.updated_at
-                                  ).toLocaleDateString()
-                                : "Unknown"}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="flex gap-2 flex-wrap">
-                      <button
-                        onClick={() => openProject(project.id)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                      >
-                        Open
-                      </button>
-                      <button
-                        onClick={() => startEditing(project)}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        onClick={() => handleDeleteProject(project.id)}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+            {/* Projects Grid */}
+            <ProjectsGrid
+              projects={filteredAndSortedProjects}
+              loading={projectsLoading}
+              onOpenProject={handleOpenProject}
+              onUpdateProject={updateProject}
+              onDeleteProject={deleteProject}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
+
+      {/* Create Project Dialog */}
+      <CreateProjectDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onCreate={handleCreateProject}
+        creating={creating}
+      />
     </div>
   );
 }
