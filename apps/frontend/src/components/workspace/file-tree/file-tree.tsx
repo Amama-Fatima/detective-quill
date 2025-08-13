@@ -27,6 +27,7 @@ import {
   FolderOpen,
   Edit,
   FolderX,
+  Search,
 } from "lucide-react";
 import { WorkspaceFile, TreeViewElement } from "@/lib/types/workspace";
 import {
@@ -46,6 +47,7 @@ import {
 import { CreateNodeDialog } from "./create-node-dialog";
 import { RenameDialog } from "./rename-dialog";
 import { MoveDialog } from "./move-dialog";
+import { SearchInput } from "./search-input";
 
 interface FileTreeProps {
   nodes: FsNodeTreeResponse[];
@@ -73,6 +75,7 @@ export function FileTree({
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<FsNodeResponse | null>(null);
   const [createType, setCreateType] = useState<"file" | "folder">("file");
+  const [searchExpanded, setSearchExpanded] = useState(false);
 
   const router = useRouter();
   const params = useParams();
@@ -92,6 +95,20 @@ export function FileTree({
 
   const handleNodeSelect = (nodeId: string) => {
     router.push(`/workspace/${projectId}/${nodeId}`);
+  };
+
+  const handleSearchSelect = (nodeId: string) => {
+    // Navigate to the selected node
+    const node = findNodeById(nodes, nodeId);
+    if (node) {
+      if (node.node_type === "file") {
+        router.push(`/workspace/${projectId}/${nodeId}`);
+      } else {
+        // For folders, we could expand them in the tree
+        // For now, just show a toast
+        toast.info(`Folder: ${node.name}`);
+      }
+    }
   };
 
   const handleCreateNode = async (
@@ -233,12 +250,11 @@ export function FileTree({
     if (!confirm(confirmMessage)) return;
 
     try {
-      // TODO: Maybe Use cascade delete for folders. Currently, folders dont have delete, rename and move functionality. will need to implement this in the future maybe
+      // Use soft delete
       const response = await deleteFsNode(
         nodeId,
         session.access_token,
         false // soft delete
-        // nodeToDelete.node_type === "folder" // cascade for folders
       );
 
       if (response.success) {
@@ -290,7 +306,7 @@ export function FileTree({
     <div className="flex flex-col h-full">
       {/* Action Buttons */}
       <div className="p-3 border-b bg-card/20">
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" className="flex-1 gap-2">
@@ -309,7 +325,28 @@ export function FileTree({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSearchExpanded(!searchExpanded)}
+            className={cn(
+              "transition-colors",
+              searchExpanded && "bg-primary/10 text-primary"
+            )}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
         </div>
+
+        {/* Search Input */}
+        {searchExpanded && (
+          <SearchInput
+            nodes={nodes}
+            onResultSelect={handleSearchSelect}
+            className="mb-2"
+          />
+        )}
       </div>
 
       {/* File Tree */}
@@ -388,7 +425,7 @@ export function FileTree({
   );
 }
 
-// Updated TreeItem component with rename and move actions
+// TreeItem component remains the same as in your original code
 function TreeItem({
   element,
   selectedNodeId,
