@@ -6,12 +6,14 @@ import { FolderTree, FilePlus, FileText } from "lucide-react";
 interface WorkspaceHeaderProps {
   projectName: string;
   filesCount: number;
+  foldersCount: number;
   onCreateFile: () => void;
 }
 
 export function WorkspaceHeader({
   projectName,
   filesCount,
+  foldersCount,
   onCreateFile,
 }: WorkspaceHeaderProps) {
   return (
@@ -24,15 +26,28 @@ export function WorkspaceHeader({
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Chapters</span>
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-            {filesCount}
-          </span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Files</span>
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+              {filesCount}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <FolderTree className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Folders</span>
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+              {foldersCount}
+            </span>
+          </div>
         </div>
 
-        <Button size="sm" onClick={onCreateFile} className="gap-2 cursor-pointer">
+        <Button
+          size="sm"
+          onClick={onCreateFile}
+          className="gap-2 cursor-pointer"
+        >
           <FilePlus className="h-4 w-4" />
           New
         </Button>

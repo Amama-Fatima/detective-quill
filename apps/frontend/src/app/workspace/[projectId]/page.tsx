@@ -2,18 +2,17 @@ import { ProjectLanding } from "@/components/workspace/project-landing";
 import { Suspense } from "react";
 
 interface ProjectPageProps {
-  params: {
-    projectName: string;
-  };
+  params: Promise<{
+    projectId: string;
+  }>;
 }
 
-// TODO: remove await in await params
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { projectName } = await params;
+  const { projectId } = await params;
 
   return (
     <Suspense fallback={<ProjectLandingSkeleton />}>
-      <ProjectLanding projectName={projectName} />
+      <ProjectLanding projectId={projectId} />
     </Suspense>
   );
 }

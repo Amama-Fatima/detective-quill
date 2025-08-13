@@ -3,8 +3,15 @@
 import { useState, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { createChapter } from "@/lib/api/chapters";
-import { CreateChapterDto } from "@detective-quill/shared-types";
+import {
+  createFsNode,
+  updateFsNode,
+  deleteFsNode,
+} from "@/lib/backend-calls/fs-nodes";
+import {
+  CreateFsNodeDto,
+  FsNodeTreeResponse,
+} from "@detective-quill/shared-types";
 import { toast } from "sonner";
 import {
   FileText,
@@ -16,8 +23,7 @@ import {
   Folder,
   FolderOpen,
 } from "lucide-react";
-import { CreateChapterDialog } from "./create-chapter-dialog";
-import { ChapterFile, FolderStructure } from "@/lib/types/workspace";
+import { WorkspaceFile, TreeViewElement } from "@/lib/types/workspace";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,122 +32,90 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { CreateFolderDialog } from "./create-folder-dialog";
 import {
   File,
   Tree,
-  TreeViewElement,
+  TreeViewElement as TreeElement,
   Folder as TreeFolder,
 } from "../../magicui/file-tree";
+import { CreateNodeDialog } from "./create-node-dialog";
 
-interface EnhancedFileTreeProps {
-  files: ChapterFile[];
-  onFilesChange: (files: ChapterFile[]) => void;
+interface FileTreeProps {
+  nodes: FsNodeTreeResponse[];
+  onNodesChange: (nodes: FsNodeTreeResponse[]) => void;
+  projectId: string;
   projectName: string;
   session: any;
   loading: boolean;
 }
 
-// Sample folder structure - this would come from your database
-const sampleFolders: FolderStructure[] = [
-  { id: "part-1", name: "Part I: The Beginning", parentId: null, order: 1 },
-  { id: "part-2", name: "Part II: The Journey", parentId: null, order: 2 },
-  {
-    id: "characters",
-    name: "Character Development",
-    parentId: "part-1",
-    order: 1,
-  },
-  { id: "world-building", name: "World Building", parentId: null, order: 3 },
-];
-
-export function EnhancedFileTree({
-  files,
-  onFilesChange,
+export function FileTree({
+  nodes,
+  onNodesChange,
+  projectId,
   projectName,
   session,
   loading,
-}: EnhancedFileTreeProps) {
-  const [createChapterOpen, setCreateChapterOpen] = useState(false);
-  const [createFolderOpen, setCreateFolderOpen] = useState(false);
+}: FileTreeProps) {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [createType, setCreateType] = useState<"file" | "folder">("file");
 
   const router = useRouter();
   const params = useParams();
-  const selectedChapterName = params.chapterName as string;
+  const selectedNodeId = params.nodeId as string;
 
-  // Build tree structure from files and folders
+  // Convert nodes to tree elements
   const treeElements: TreeViewElement[] = useMemo(() => {
-    const folders = sampleFolders; // This would come from your API
-    const elements: TreeViewElement[] = [];
-
-    // Create folder map for easy lookup
-    const folderMap = new Map<string, TreeViewElement>();
-
-    // First, create all folder elements
-    folders.forEach((folder) => {
-      const folderElement: TreeViewElement = {
-        id: folder.id,
-        name: folder.name,
-        isSelectable: false,
-        children: [],
-      };
-      folderMap.set(folder.id, folderElement);
+    const convertNode = (node: FsNodeTreeResponse): TreeViewElement => ({
+      id: node.id,
+      name: node.name,
+      isSelectable: node.node_type === "file",
+      children: node.children?.map(convertNode) || [],
     });
 
-    // Build folder hierarchy
-    folders.forEach((folder) => {
-      const folderElement = folderMap.get(folder.id);
-      if (!folderElement) return;
+    return nodes.map(convertNode);
+  }, [nodes]);
 
-      if (folder.parentId) {
-        const parent = folderMap.get(folder.parentId);
-        if (parent) {
-          parent.children = parent.children || [];
-          parent.children.push(folderElement);
-        }
-      } else {
-        elements.push(folderElement);
-      }
-    });
+  // Count files and folders
+  const { fileCount, folderCount } = useMemo(() => {
+    const countNodes = (
+      nodeList: FsNodeTreeResponse[]
+    ): { files: number; folders: number } => {
+      let files = 0;
+      let folders = 0;
 
-    // Add files to appropriate folders or root
-    files.forEach((file) => {
-      const fileElement: TreeViewElement = {
-        id: file.slug,
-        name: file.name.replace(".md", ""),
-        isSelectable: true,
-      };
-
-      if (file.folder) {
-        const targetFolder = folderMap.get(file.folder);
-        if (targetFolder) {
-          targetFolder.children = targetFolder.children || [];
-          targetFolder.children.push(fileElement);
+      nodeList.forEach((node) => {
+        if (node.node_type === "file") {
+          files++;
         } else {
-          // Folder not found, add to root
-          elements.push(fileElement);
+          folders++;
         }
-      } else {
-        // No folder specified, add to root
-        elements.push(fileElement);
-      }
-    });
 
-    return elements;
-  }, [files, sampleFolders]);
+        if (node.children) {
+          const childCounts = countNodes(node.children);
+          files += childCounts.files;
+          folders += childCounts.folders;
+        }
+      });
 
-  const selectedFile = useMemo(
-    () => files.find((f) => f.slug === selectedChapterName),
-    [files, selectedChapterName]
-  );
+      return { files, folders };
+    };
 
-  const handleFileSelect = (slug: string) => {
-    router.push(`/workspace/${projectName}/${slug}`);
+    const counts = countNodes(nodes);
+    return { fileCount: counts.files, folderCount: counts.folders };
+  }, [nodes]);
+
+  const handleNodeSelect = (nodeId: string) => {
+    router.push(`/workspace/${projectId}/${nodeId}`);
   };
 
-  const handleCreateChapter = async (title: string, folderId?: string) => {
+  const handleCreateNode = async (
+    name: string,
+    nodeType: "file" | "folder",
+    parentId?: string
+  ) => {
     if (!session?.access_token) {
       toast.error("No session available");
       return;
@@ -149,60 +123,67 @@ export function EnhancedFileTree({
 
     setCreating(true);
     try {
-      const nextOrder = Math.max(...files.map((f) => f.chapterOrder), 0) + 1;
-      const slug = title.toLowerCase().replace(/\s+/g, "-");
-
-      const createChapterData: CreateChapterDto = {
-        projectTitle: projectName,
-        title,
-        content: "",
-        chapterOrder: nextOrder,
-        folderId: folderId || selectedFolder || null, // Use correct property name
+      const createNodeData: CreateFsNodeDto = {
+        project_id: projectId,
+        parent_id: parentId || selectedFolder || undefined,
+        name,
+        node_type: nodeType,
+        content: nodeType === "file" ? "" : undefined,
+        file_extension: nodeType === "file" ? "md" : undefined,
       };
 
-      const response = await createChapter(
-        createChapterData,
-        session.access_token
-      );
+      const response = await createFsNode(createNodeData, session.access_token);
 
       if (response.success && response.data) {
-        const newFile: ChapterFile = {
-          id: response.data.id,
-          name: `${title}.md`,
-          slug,
-          content: "",
-          updatedAt: response.data.updated_at,
-          isDirty: false,
-          isNew: false,
-          chapterOrder: nextOrder,
-          originalChapter: response.data,
-          folder: folderId || selectedFolder,
-        };
-
-        const updatedFiles = [...files, newFile].sort(
-          (a, b) => a.chapterOrder - b.chapterOrder
+        toast.success(
+          `${nodeType === "file" ? "File" : "Folder"} created successfully`
         );
-        onFilesChange(updatedFiles);
 
-        router.push(`/workspace/${projectName}/${slug}`);
-        toast.success("Chapter created successfully");
-        setCreateChapterOpen(false);
+        // Refresh the tree - you could optimize this by updating locally
+        window.location.reload(); // Simple approach, or implement proper state update
+
+        setCreateDialogOpen(false);
         setSelectedFolder(null);
+
+        // Navigate to file if it's a file
+        if (nodeType === "file") {
+          router.push(`/workspace/${projectName}/${response.data.id}`);
+        }
       } else {
-        toast.error(response.message || "Failed to create chapter");
+        toast.error(response.error || `Failed to create ${nodeType}`);
       }
     } catch (error) {
-      console.error("Error creating chapter:", error);
-      toast.error("Failed to create chapter");
+      console.error(`Error creating ${nodeType}:`, error);
+      toast.error(`Failed to create ${nodeType}`);
     } finally {
       setCreating(false);
     }
   };
 
-  const handleCreateFolder = async (name: string) => {
-    // TODO: Implement folder creation API
-    toast.success(`Folder "${name}" created`);
-    setCreateFolderOpen(false);
+  const handleDeleteNode = async (nodeId: string) => {
+    if (!session?.access_token) return;
+
+    if (!confirm("Are you sure you want to delete this item?")) return;
+
+    try {
+      const response = await deleteFsNode(nodeId, session.access_token);
+
+      if (response.success) {
+        toast.success("Item deleted successfully");
+        window.location.reload(); // Simple approach
+      } else {
+        toast.error(response.error || "Failed to delete item");
+      }
+    } catch (error) {
+      console.error("Error deleting node:", error);
+      toast.error("Failed to delete item");
+    }
+  };
+
+  const openCreateDialog = (type: "file" | "folder", folderId?: string) => {
+    setCreateType(type);
+    setSelectedFolder(folderId || null);
+    setCreateDialogOpen(true);
   };
 
   if (loading) {
@@ -210,7 +191,7 @@ export function EnhancedFileTree({
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         <span className="ml-2 text-sm text-muted-foreground">
-          Loading chapters...
+          Loading project...
         </span>
       </div>
     );
@@ -229,11 +210,11 @@ export function EnhancedFileTree({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => setCreateChapterOpen(true)}>
+              <DropdownMenuItem onClick={() => openCreateDialog("file")}>
                 <FileText className="h-4 w-4 mr-2" />
-                New Chapter
+                New File
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCreateFolderOpen(true)}>
+              <DropdownMenuItem onClick={() => openCreateDialog("folder")}>
                 <FolderPlus className="h-4 w-4 mr-2" />
                 New Folder
               </DropdownMenuItem>
@@ -247,19 +228,19 @@ export function EnhancedFileTree({
         {treeElements.length === 0 ? (
           <div className="text-center text-muted-foreground py-8 px-4">
             <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm mb-4">No chapters yet</p>
+            <p className="text-sm mb-4">No files or folders yet</p>
             <Button
               size="sm"
-              onClick={() => setCreateChapterOpen(true)}
+              onClick={() => openCreateDialog("file")}
               className="w-full"
             >
-              Create your first chapter
+              Create your first file
             </Button>
           </div>
         ) : (
           <Tree
             className="h-full p-2"
-            initialSelectedId={selectedChapterName}
+            initialSelectedId={selectedNodeId}
             elements={treeElements}
             indicator={true}
             openIcon={<FolderOpen className="h-4 w-4" />}
@@ -269,54 +250,102 @@ export function EnhancedFileTree({
               <TreeItem
                 key={element.id}
                 element={element}
-                selectedChapterName={selectedChapterName}
-                onFileSelect={handleFileSelect}
+                selectedNodeId={selectedNodeId}
+                onNodeSelect={handleNodeSelect}
                 onFolderContextMenu={setSelectedFolder}
-                files={files}
+                onCreateFile={(folderId) => openCreateDialog("file", folderId)}
+                onCreateFolder={(folderId) =>
+                  openCreateDialog("folder", folderId)
+                }
+                onDeleteNode={handleDeleteNode}
+                nodes={nodes}
               />
             ))}
           </Tree>
         )}
       </div>
 
-      {/* Dialogs */}
-      <CreateChapterDialog
-        open={createChapterOpen}
-        onOpenChange={setCreateChapterOpen}
-        onSubmit={handleCreateChapter}
+      {/* Create Dialog */}
+      <CreateNodeDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSubmit={handleCreateNode}
         creating={creating}
+        nodeType={createType}
         folderName={
-          selectedFolder
-            ? sampleFolders.find((f) => f.id === selectedFolder)?.name
-            : undefined
+          selectedFolder ? findNodeById(nodes, selectedFolder)?.name : undefined
         }
-      />
-
-      <CreateFolderDialog
-        open={createFolderOpen}
-        onOpenChange={setCreateFolderOpen}
-        onSubmit={handleCreateFolder}
+        availableFolders={getFolderNodes(nodes)}
       />
     </div>
   );
 }
 
+// Helper functions
+function findNodeById(
+  nodes: FsNodeTreeResponse[],
+  nodeId: string
+): FsNodeTreeResponse | null {
+  for (const node of nodes) {
+    if (node.id === nodeId) return node;
+    if (node.children) {
+      const found = findNodeById(node.children, nodeId);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function getFolderNodes(
+  nodes: FsNodeTreeResponse[]
+): Array<{ id: string; name: string; path: string }> {
+  const folders: Array<{ id: string; name: string; path: string }> = [];
+
+  const traverse = (nodeList: FsNodeTreeResponse[], parentPath = "") => {
+    nodeList.forEach((node) => {
+      if (node.node_type === "folder") {
+        const currentPath = parentPath
+          ? `${parentPath}/${node.name}`
+          : node.name;
+        folders.push({
+          id: node.id,
+          name: node.name,
+          path: currentPath,
+        });
+
+        if (node.children) {
+          traverse(node.children, currentPath);
+        }
+      }
+    });
+  };
+
+  traverse(nodes);
+  return folders;
+}
+
 // Recursive Tree Item Component
 function TreeItem({
   element,
-  selectedChapterName,
-  onFileSelect,
+  selectedNodeId,
+  onNodeSelect,
   onFolderContextMenu,
-  files,
+  onCreateFile,
+  onCreateFolder,
+  onDeleteNode,
+  nodes,
 }: {
   element: TreeViewElement;
-  selectedChapterName: string;
-  onFileSelect: (slug: string) => void;
+  selectedNodeId: string;
+  onNodeSelect: (nodeId: string) => void;
   onFolderContextMenu: (folderId: string) => void;
-  files: ChapterFile[];
+  onCreateFile: (folderId: string) => void;
+  onCreateFolder: (folderId: string) => void;
+  onDeleteNode: (nodeId: string) => void;
+  nodes: FsNodeTreeResponse[];
 }) {
-  const file = files.find((f) => f.slug === element.id);
-  const isSelected = selectedChapterName === element.id;
+  const node = findNodeById(nodes, element.id);
+  const isSelected = selectedNodeId === element.id;
 
   if (element.isSelectable === false) {
     // This is a folder
@@ -330,34 +359,48 @@ function TreeItem({
           <TreeItem
             key={child.id}
             element={child}
-            selectedChapterName={selectedChapterName}
-            onFileSelect={onFileSelect}
+            selectedNodeId={selectedNodeId}
+            onNodeSelect={onNodeSelect}
             onFolderContextMenu={onFolderContextMenu}
-            files={files}
+            onCreateFile={onCreateFile}
+            onCreateFolder={onCreateFolder}
+            onDeleteNode={onDeleteNode}
+            nodes={nodes}
           />
         ))}
 
         {/* Folder Actions */}
         <div className="ml-6 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-6 text-xs"
-            onClick={() => onFolderContextMenu(element.id)}
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Add Chapter
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 text-xs"
+              onClick={() => onCreateFile(element.id)}
+            >
+              <FileText className="h-3 w-3 mr-1" />
+              File
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 text-xs"
+              onClick={() => onCreateFolder(element.id)}
+            >
+              <FolderPlus className="h-3 w-3 mr-1" />
+              Folder
+            </Button>
+          </div>
         </div>
       </TreeFolder>
     );
   } else {
-    // This is a file - use asChild to avoid nested buttons
+    // This is a file
     return (
       <File
         value={element.id}
         isSelect={isSelected}
-        handleSelect={onFileSelect}
+        handleSelect={onNodeSelect}
         className={cn(
           "px-2 py-1 group flex items-center justify-between",
           isSelected && "bg-primary/10 text-primary"
@@ -366,18 +409,15 @@ function TreeItem({
         asChild
       >
         <div
-          onClick={() => onFileSelect(element.id)}
+          onClick={() => onNodeSelect(element.id)}
           className="flex items-center justify-between w-full cursor-pointer"
         >
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <FileIcon className="h-4 w-4" />
             <span className="truncate">{element.name}</span>
-            {file?.isDirty && (
-              <div className="h-1.5 w-1.5 rounded-full bg-orange-500 shrink-0" />
-            )}
-            {file?.isNew && (
-              <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full">
-                New
+            {node?.word_count && node.word_count > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {node.word_count} words
               </span>
             )}
           </div>
@@ -400,7 +440,10 @@ function TreeItem({
               <DropdownMenuItem>Rename</DropdownMenuItem>
               <DropdownMenuItem>Move to...</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => onDeleteNode(element.id)}
+              >
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

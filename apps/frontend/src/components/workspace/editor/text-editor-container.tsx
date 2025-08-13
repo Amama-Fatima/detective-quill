@@ -1,173 +1,143 @@
-// File: src/components/workspace/text-editor-container.tsx
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TextEditor } from "@/components/workspace/editor/text-editor";
-import { createSupabaseBrowserClient } from "@/supabase/browser-client";
-import { getChapters, updateChapter } from "@/lib/api/chapters";
-import { UpdateChapterDto } from "@detective-quill/shared-types";
+import { useAuth } from "@/context/auth-context";
+import {
+  getFsNode,
+  updateFsNode,
+  deleteFsNode,
+} from "@/lib/backend-calls/fs-nodes";
+import { UpdateFsNodeDto, FsNodeResponse } from "@detective-quill/shared-types";
 import { toast } from "sonner";
 import { FileText, Loader2 } from "lucide-react";
-import { ChapterFile } from "@/lib/types/workspace";
 
 interface TextEditorContainerProps {
-  projectName: string;
-  chapterName: string;
+  projectId: string;
+  nodeId: string;
 }
 
 type FocusMode = "normal" | "app" | "browser";
 
 export function TextEditorContainer({
-  projectName,
-  chapterName,
+  projectId,
+  nodeId,
 }: TextEditorContainerProps) {
-  const [file, setFile] = useState<ChapterFile | null>(null);
+  const [node, setNode] = useState<FsNodeResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [session, setSession] = useState<any | null>(null);
-  const [focusMode, setFocusMode] = useState<FocusMode>("normal");
+  const [content, setContent] = useState("");
+  const [originalContent, setOriginalContent] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
 
+  const { session } = useAuth();
   const router = useRouter();
-  const supabaseBrowserClient = createSupabaseBrowserClient();
 
-  // Get session
+  // Load specific node
   useEffect(() => {
-    async function getSession() {
-      try {
-        const { data, error } = await supabaseBrowserClient.auth.getSession();
-        if (error) {
-          console.error("Error fetching session:", error);
-          toast.error("Failed to get session");
-          return;
-        }
-        setSession(data.session);
-      } catch (error) {
-        console.error("Error fetching session:", error);
-        toast.error("Failed to get session");
-      }
-    }
-    getSession();
-  }, []);
+    const fetchNode = async () => {
+      if (!session?.access_token || !nodeId) return;
 
-  // Load specific chapter
-  useEffect(() => {
-    if (!session?.access_token || !chapterName) return;
-
-    const fetchChapter = async () => {
       setLoading(true);
       try {
-        const response = await getChapters(projectName, session.access_token);
+        const response = await getFsNode(nodeId, session.access_token);
 
-        if (response.success) {
-          const chapters = response.data;
-          const targetChapter = chapters.find(
-            (chapter) =>
-              chapter.title.toLowerCase().replace(/\s+/g, "-") === chapterName
-          );
+        if (response.success && response.data) {
+          const nodeData = response.data;
 
-          if (targetChapter) {
-            const chapterFile: ChapterFile = {
-              id: targetChapter.id,
-              name: `${targetChapter.title}.md`,
-              slug: targetChapter.title.toLowerCase().replace(/\s+/g, "-"),
-              content: targetChapter.content || "",
-              updatedAt: targetChapter.updated_at,
-              isDirty: false,
-              isNew: false,
-              chapterOrder: targetChapter.chapter_order,
-              originalChapter: targetChapter,
-            };
-
-            setFile(chapterFile);
-          } else {
-            toast.error("Chapter not found");
-            router.push(`/workspace/${projectName}`);
+          // Check if it's a file (can't edit folders)
+          if (nodeData.node_type !== "file") {
+            toast.error("Cannot edit folders");
+            router.push(`/workspace/${projectId}`);
+            return;
           }
+
+          setNode(nodeData);
+          const nodeContent = nodeData.content || "";
+          setContent(nodeContent);
+          setOriginalContent(nodeContent);
+          setIsDirty(false);
         } else {
-          toast.error(response.message || "Failed to load chapter");
+          toast.error("File not found");
+          router.push(`/workspace/${projectId}`);
         }
       } catch (error) {
-        console.error("Error fetching chapter:", error);
-        toast.error("Failed to load chapter");
+        console.error("Error fetching node:", error);
+        toast.error("Failed to load file");
+        router.push(`/workspace/${projectId}`);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchChapter();
-  }, [session, projectName, chapterName, router]);
+    fetchNode();
+  }, [nodeId, session?.access_token, projectId, router]);
 
-  const updateContent = (content: string) => {
-    if (!file) return;
+  // Track content changes
+  useEffect(() => {
+    setIsDirty(content !== originalContent);
+  }, [content, originalContent]);
 
-    setFile((prev) =>
-      prev
-        ? {
-            ...prev,
-            content,
-            updatedAt: new Date().toISOString(),
-            isDirty: true,
-          }
-        : null
-    );
+  const updateContent = (newContent: string) => {
+    setContent(newContent);
   };
 
   const saveFile = async () => {
-    if (!file || !session?.access_token) {
-      toast.error("Cannot save: missing file or session");
-      return;
-    }
-
-    if (!file.originalChapter) {
-      toast.error("Cannot save: no original chapter data");
+    if (!node || !session?.access_token || !isDirty) {
       return;
     }
 
     setSaving(true);
     try {
-      const title = file.name.replace(".md", "");
-      const updateData: Omit<UpdateChapterDto, "id"> = {
-        title,
-        content: file.content,
+      const updateData: UpdateFsNodeDto = {
+        content: content,
       };
-      const response = await updateChapter(
-        file.originalChapter.id,
+
+      const response = await updateFsNode(
+        nodeId,
         updateData,
         session.access_token
       );
 
       if (response.success && response.data) {
-        setFile((prev) =>
-          prev
-            ? {
-                ...prev,
-                isDirty: false,
-                originalChapter: response.data,
-              }
-            : null
-        );
-        toast.success("Chapter saved successfully");
+        setNode(response.data);
+        setOriginalContent(content);
+        setIsDirty(false);
+        toast.success("File saved successfully");
       } else {
-        toast.error(response.message || "Failed to save chapter");
+        toast.error(response.error || "Failed to save file");
       }
     } catch (error) {
-      console.error("Error saving chapter:", error);
-      toast.error("Failed to save chapter");
+      console.error("Error saving file:", error);
+      toast.error("Failed to save file");
     } finally {
       setSaving(false);
     }
   };
 
-  const deleteFile = () => {
-    // TODO: Implement delete functionality
-    toast.info("Delete functionality will be implemented");
+  const deleteFile = async () => {
+    if (!node || !session?.access_token) return;
+
+    if (!confirm(`Are you sure you want to delete "${node.name}"?`)) return;
+
+    try {
+      const response = await deleteFsNode(nodeId, session.access_token);
+
+      if (response.success) {
+        toast.success("File deleted successfully");
+        router.push(`/workspace/${projectId}`);
+      } else {
+        toast.error(response.error || "Failed to delete file");
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      toast.error("Failed to delete file");
+    }
   };
 
   const handleFocusModeChange = (mode: FocusMode) => {
-    setFocusMode(mode);
-
-    // Hide/show body overflow for app focus mode
+    // Handle focus mode changes if needed
     if (mode === "app") {
       document.body.style.overflow = "hidden";
     } else if (mode === "normal") {
@@ -182,18 +152,29 @@ export function TextEditorContainer({
     };
   }, []);
 
+  // Auto-save functionality (optional)
+  useEffect(() => {
+    if (!isDirty || saving) return;
+
+    const autoSaveTimer = setTimeout(() => {
+      saveFile();
+    }, 2000); // Auto-save after 2 seconds of inactivity
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [content, isDirty, saving]);
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Loading chapter...</p>
+          <p className="text-sm text-muted-foreground">Loading file...</p>
         </div>
       </div>
     );
   }
 
-  if (!file) {
+  if (!node) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="flex flex-col items-center gap-4 text-center">
@@ -201,9 +182,9 @@ export function TextEditorContainer({
             <FileText className="h-12 w-12 text-muted-foreground" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Chapter not found</h2>
+            <h2 className="text-xl font-semibold">File not found</h2>
             <p className="text-sm text-muted-foreground">
-              The chapter you're looking for doesn't exist or has been deleted.
+              The file you're looking for doesn't exist or has been deleted.
             </p>
           </div>
         </div>
@@ -213,11 +194,11 @@ export function TextEditorContainer({
 
   return (
     <TextEditor
-      fileName={file.name}
-      value={file.content}
+      fileName={node.name}
+      value={content}
       onChange={updateContent}
       onDelete={deleteFile}
-      isDirty={file.isDirty}
+      isDirty={isDirty}
       isSaving={saving}
       onSave={saveFile}
       onFocusModeChange={handleFocusModeChange}

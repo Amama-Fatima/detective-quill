@@ -1,4 +1,3 @@
-// File: src/app/workspace/[projectName]/layout.tsx
 import { WorkspaceLayout } from "@/components/workspace/workspace-layout";
 import { Suspense } from "react";
 
@@ -7,20 +6,20 @@ export const metadata = {
   description: "Markdown editor workspace with file management",
 };
 
-interface WorkspaceLayoutProps {
+interface WorkspaceLayoutPageProps {
   children: React.ReactNode;
-  params: Promise<{ projectName: string }>; // params is now a Promise
+  params: Promise<{ projectId: string }>; // params is now a Promise
 }
 
 export default async function Layout({
   children,
   params,
-}: WorkspaceLayoutProps) {
-  const { projectName } = await params;
+}: WorkspaceLayoutPageProps) {
+  const { projectId } = await params;
 
   return (
     <Suspense fallback={<WorkspaceLayoutSkeleton />}>
-      <WorkspaceLayout projectName={projectName}>{children}</WorkspaceLayout>
+      <WorkspaceLayout projectId={projectId}>{children}</WorkspaceLayout>
     </Suspense>
   );
 }

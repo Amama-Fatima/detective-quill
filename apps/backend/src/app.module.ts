@@ -5,6 +5,7 @@ import { SupabaseModule } from "./supabase/supabase.module";
 import { ConfigModule } from "@nestjs/config";
 import { ProjectsService } from "./projects/projects.service";
 import { ProjectsModule } from "./projects/projects.module";
+import { FsNodesModule } from "./fs-nodes/fs-nodes.module";
 
 @Module({
   controllers: [AppController],
@@ -16,6 +17,7 @@ import { ProjectsModule } from "./projects/projects.module";
     }),
     SupabaseModule,
     ProjectsModule,
+    FsNodesModule,
   ],
 })
 export class AppModule {}

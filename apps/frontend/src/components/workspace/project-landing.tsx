@@ -1,49 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
-import { getChapters } from "@/lib/api/chapters";
+import { getProject } from "@/lib/backend-calls/projects";
+import { ProjectResponse } from "@detective-quill/shared-types";
 import { toast } from "sonner";
-import { BookOpen, Plus } from "lucide-react";
-import { ChapterFile } from "@/lib/types/workspace";
+import { FileText, FolderOpen, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ProjectLandingProps {
-  projectName: string;
+  projectId: string;
 }
 
-export function ProjectLanding({ projectName }: ProjectLandingProps) {
+export function ProjectLanding({ projectId }: ProjectLandingProps) {
+  const [project, setProject] = useState<ProjectResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [chapterFiles, setChapterFiles] = useState<ChapterFile[]>([]);
-
-  const router = useRouter();
   const { session } = useAuth();
 
   useEffect(() => {
-    if (!session?.access_token) return;
+    const fetchProject = async () => {
+      if (!session?.access_token || !projectId) return;
 
-    const fetchChapters = async () => {
       try {
-        const response = await getChapters(projectName, session.access_token);
-        if (response.success && response.data.length > 0) {
-          // If chapters exist, redirect to the first one
-          const firstChapter = response.data.sort(
-            (a, b) => a.chapter_order - b.chapter_order
-          )[0];
-          const slug = firstChapter.title.toLowerCase().replace(/\s+/g, "-");
-          router.replace(`/workspace/${projectName}/${slug}`);
+        const response = await getProject(projectId, session.access_token);
+        if (response.success && response.data) {
+          setProject(response.data);
         } else {
-          setLoading(false);
+          toast.error("Failed to load project");
         }
       } catch (error) {
-        console.error("Error fetching chapters:", error);
+        console.error("Error fetching project:", error);
+        toast.error("Failed to load project");
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchChapters();
-  }, [session, projectName, router]);
+    fetchProject();
+  }, [projectId, session?.access_token]);
 
   if (loading) {
     return (
@@ -59,37 +53,51 @@ export function ProjectLanding({ projectName }: ProjectLandingProps) {
     );
   }
 
+  if (!project) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="rounded-full bg-muted p-6">
+            <FileText className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Project not found</h2>
+            <p className="text-sm text-muted-foreground">
+              The project you're looking for doesn't exist or you don't have
+              access to it.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full items-center justify-center">
       <div className="text-center space-y-6 max-w-md">
-        <div className="rounded-full bg-muted p-8 mx-auto w-fit">
-          <BookOpen className="h-16 w-16 text-muted-foreground" />
+        <div className="rounded-full bg-primary/10 p-8">
+          <FolderOpen className="h-16 w-16 text-primary mx-auto" />
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold">{projectName}</h1>
-          <p className="text-muted-foreground">
-            Start writing your story by creating your first chapter.
-          </p>
+          <h1 className="text-2xl font-bold">{project.title}</h1>
+          {project.description && (
+            <p className="text-muted-foreground">{project.description}</p>
+          )}
         </div>
 
-        <div className="space-y-3">
-          <Button
-            size="lg"
-            className="gap-2"
-            onClick={() => {
-              // This will be handled by the sidebar's create chapter functionality
-              // For now, we can show a message
-              toast.info("Use the sidebar to create a new chapter");
-            }}
-          >
-            <Plus className="h-5 w-5" />
-            Create First Chapter
-          </Button>
-
+        <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Or use the sidebar to manage your chapters
+            Select a file from the sidebar to start editing, or create a new
+            file to begin writing.
           </p>
+
+          <div className="flex justify-center">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create your first file
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -92,3 +92,38 @@ export interface UpdateFsNodeDto {
   parent_id?: string;
   sort_order?: number;
 }
+
+export interface CreateFsNodeDto {
+  project_id: string;
+  parent_id?: string;
+  name: string;
+  node_type: "folder" | "file";
+  description?: string;
+  content?: string;
+  file_extension?: string;
+  sort_order?: number;
+}
+
+export interface UpdateFsNodeDto {
+  name?: string;
+  description?: string;
+  content?: string;
+  parent_id?: string;
+  sort_order?: number;
+}
+
+export interface FsNodeResponse extends FsNode {}
+
+export interface FsNodeTreeResponse {
+  id: string;
+  name: string;
+  node_type: "folder" | "file";
+  parent_id: string | null;
+  children?: FsNodeTreeResponse[];
+  content?: string;
+  word_count: number;
+  path: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
