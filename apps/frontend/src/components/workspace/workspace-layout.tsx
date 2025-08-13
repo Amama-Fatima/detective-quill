@@ -37,6 +37,12 @@ export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
   // Fetch project details
   useEffect(() => {
     const fetchProject = async () => {
+      if (!session?.access_token) {
+        console.log("No session found, skipping project fetch");
+      }
+      if (!projectId) {
+        console.log("projectId not found");
+      }
       if (!session?.access_token || !projectId) return;
 
       try {
@@ -99,7 +105,7 @@ export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
   }, [nodes]);
 
   if (projectLoading || nodesLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading... in workspace</div>;
   }
 
   if (error) {
@@ -144,9 +150,20 @@ export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
               >
                 {sidebarOpen ? "←" : "→"}
               </button>
-              <span className="text-sm text-muted-foreground">
-                {projectName} / {params.nodeId}
-              </span>
+
+              {/* Enhanced Breadcrumbs */}
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <span>{projectName}</span>
+                {params.nodeId && (
+                  <>
+                    <span>/</span>
+                    <span className="text-foreground font-medium">
+                      {/* This will show the file path - you can enhance this to show full path */}
+                      {params.nodeId}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}

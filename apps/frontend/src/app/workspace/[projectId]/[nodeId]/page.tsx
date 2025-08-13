@@ -1,23 +1,19 @@
 import { Suspense } from "react";
 import { TextEditorContainer } from "@/components/workspace/editor/text-editor-container";
 
-interface ChapterPageProps {
-  params: {
-    projectName: string;
-    chapterName: string;
-  };
+interface NodePageProps {
+  params: Promise<{
+    projectId: string;
+    nodeId: string;
+  }>;
 }
 
-export default async function ChapterPage({ params }: ChapterPageProps) {
-  const { projectName, chapterName } = await params;
+export default async function NodePage({ params }: NodePageProps) {
+  const { projectId, nodeId } = await params;
 
   return (
     <Suspense fallback={<EditorSkeleton />}>
-      <TextEditorContainer
-        projectName={projectName}
-        chapterName={chapterName}
-      />
-      {/* hello */}
+      <TextEditorContainer projectId={projectId} nodeId={nodeId} />
     </Suspense>
   );
 }

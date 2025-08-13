@@ -8,14 +8,14 @@ export const metadata = {
 
 interface WorkspaceLayoutPageProps {
   children: React.ReactNode;
-  params: Promise<{ projectName: string }>; // params is now a Promise
+  params: Promise<{ projectId: string }>; // params is now a Promise
 }
 
 export default async function Layout({
   children,
   params,
 }: WorkspaceLayoutPageProps) {
-  const { projectName: projectId } = await params;
+  const { projectId } = await params;
 
   return (
     <Suspense fallback={<WorkspaceLayoutSkeleton />}>

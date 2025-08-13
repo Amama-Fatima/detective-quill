@@ -108,7 +108,7 @@ export function FileTree({
   }, [nodes]);
 
   const handleNodeSelect = (nodeId: string) => {
-    router.push(`/workspace/${projectName}/${nodeId}`);
+    router.push(`/workspace/${projectId}/${nodeId}`);
   };
 
   const handleCreateNode = async (
