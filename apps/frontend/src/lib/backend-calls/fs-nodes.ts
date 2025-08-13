@@ -80,9 +80,15 @@ export async function updateFsNode(
 export async function deleteFsNode(
   nodeId: string,
   accessToken: string,
-  hardDelete: boolean = false
+  hardDelete: boolean = false,
+  cascadeDelete: boolean = false
 ): Promise<ApiResponse<DeleteResponse>> {
-  const query = hardDelete ? "?hard=true" : "";
+  const queryParams = new URLSearchParams();
+  if (hardDelete) queryParams.append("hard", "true");
+  if (cascadeDelete) queryParams.append("cascade", "true");
+
+  const query = queryParams.toString() ? `?${queryParams.toString()}` : "";
+
   return makeAuthenticatedRequest<DeleteResponse>(
     `/fs-nodes/${nodeId}${query}`,
     accessToken,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ import {
   Edit,
   FolderX,
   Search,
+  Trash2,
 } from "lucide-react";
 import { WorkspaceFile, TreeViewElement } from "@/lib/types/workspace";
 import {
@@ -76,6 +77,7 @@ export function FileTree({
   const [selectedNode, setSelectedNode] = useState<FsNodeResponse | null>(null);
   const [createType, setCreateType] = useState<"file" | "folder">("file");
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const [hoveredFolder, setHoveredFolder] = useState<string | null>(null);
 
   const router = useRouter();
   const params = useParams();
@@ -98,14 +100,11 @@ export function FileTree({
   };
 
   const handleSearchSelect = (nodeId: string) => {
-    // Navigate to the selected node
     const node = findNodeById(nodes, nodeId);
     if (node) {
       if (node.node_type === "file") {
         router.push(`/workspace/${projectId}/${nodeId}`);
       } else {
-        // For folders, we could expand them in the tree
-        // For now, just show a toast
         toast.info(`Folder: ${node.name}`);
       }
     }
@@ -139,13 +138,10 @@ export function FileTree({
           `${nodeType === "file" ? "File" : "Folder"} created successfully`
         );
 
-        // Refresh the page to update the tree
         window.location.reload();
-
         setCreateDialogOpen(false);
         setSelectedFolder(null);
 
-        // Navigate to file if it's a file
         if (nodeType === "file") {
           router.push(`/workspace/${projectId}/${response.data.id}`);
         }
@@ -181,8 +177,6 @@ export function FileTree({
             selectedNode.node_type === "file" ? "File" : "Folder"
           } renamed successfully`
         );
-
-        // Refresh the page to update the tree
         window.location.reload();
       } else {
         toast.error(response.error || "Failed to rename");
@@ -201,8 +195,22 @@ export function FileTree({
 
     setMoving(true);
     try {
-      // Get the new sort order (add to end of new parent)
-      const siblings = nodes.filter((n) => n.parent_id === newParentId);
+      const flattenNodes = (
+        nodeList: FsNodeTreeResponse[]
+      ): FsNodeTreeResponse[] => {
+        const flattened: FsNodeTreeResponse[] = [];
+        const traverse = (nodes: FsNodeTreeResponse[]) => {
+          nodes.forEach((node) => {
+            flattened.push(node);
+            if (node.children) traverse(node.children);
+          });
+        };
+        traverse(nodeList);
+        return flattened;
+      };
+
+      const allNodes = flattenNodes(nodes);
+      const siblings = allNodes.filter((n) => n.parent_id === newParentId);
       const newSortOrder =
         siblings.length > 0
           ? Math.max(...siblings.map((s) => s.sort_order || 0)) + 1
@@ -221,8 +229,6 @@ export function FileTree({
             selectedNode.node_type === "file" ? "File" : "Folder"
           } moved successfully`
         );
-
-        // Refresh the page to update the tree
         window.location.reload();
       } else {
         toast.error(response.error || "Failed to move");
@@ -242,25 +248,46 @@ export function FileTree({
     const nodeToDelete = findNodeById(nodes, nodeId);
     if (!nodeToDelete) return;
 
-    const confirmMessage =
-      nodeToDelete.node_type === "folder"
-        ? `Are you sure you want to delete the folder "${nodeToDelete.name}" and all its contents?`
-        : `Are you sure you want to delete "${nodeToDelete.name}"?`;
+    let confirmMessage: string;
+    let cascadeDelete = false;
+
+    if (nodeToDelete.node_type === "folder") {
+      const countChildren = (node: FsNodeTreeResponse): number => {
+        let count = 0;
+        if (node.children) {
+          count += node.children.length;
+          node.children.forEach((child) => {
+            count += countChildren(child);
+          });
+        }
+        return count;
+      };
+
+      const childCount = countChildren(nodeToDelete);
+
+      if (childCount > 0) {
+        confirmMessage = `Are you sure you want to delete the folder "${nodeToDelete.name}" and all ${childCount} items inside it?\n\nThis action cannot be undone.`;
+        cascadeDelete = true;
+      } else {
+        confirmMessage = `Are you sure you want to delete the empty folder "${nodeToDelete.name}"?`;
+      }
+    } else {
+      confirmMessage = `Are you sure you want to delete the file "${nodeToDelete.name}"?`;
+    }
 
     if (!confirm(confirmMessage)) return;
 
     try {
-      // Use soft delete
       const response = await deleteFsNode(
         nodeId,
         session.access_token,
-        false // soft delete
+        false,
+        cascadeDelete
       );
 
       if (response.success) {
-        toast.success("Item deleted successfully");
+        toast.success(response.data?.message || "Item deleted successfully");
 
-        // If we're viewing the deleted file, navigate back to project
         if (selectedNodeId === nodeId) {
           router.push(`/workspace/${projectId}`);
         } else {
@@ -339,7 +366,6 @@ export function FileTree({
           </Button>
         </div>
 
-        {/* Search Input */}
         {searchExpanded && (
           <SearchInput
             nodes={nodes}
@@ -386,6 +412,8 @@ export function FileTree({
                 onMoveNode={openMoveDialog}
                 onDeleteNode={handleDeleteNode}
                 nodes={nodes}
+                hoveredFolder={hoveredFolder}
+                setHoveredFolder={setHoveredFolder}
               />
             ))}
           </Tree>
@@ -425,7 +453,7 @@ export function FileTree({
   );
 }
 
-// TreeItem component remains the same as in your original code
+// ✅ SOLUTION: Custom TreeItem that works with MagicUI's limitations
 function TreeItem({
   element,
   selectedNodeId,
@@ -436,6 +464,8 @@ function TreeItem({
   onMoveNode,
   onDeleteNode,
   nodes,
+  hoveredFolder,
+  setHoveredFolder,
 }: {
   element: TreeViewElement;
   selectedNodeId: string;
@@ -446,60 +476,122 @@ function TreeItem({
   onMoveNode: (node: FsNodeResponse) => void;
   onDeleteNode: (nodeId: string) => void;
   nodes: FsNodeTreeResponse[];
+  hoveredFolder: string | null;
+  setHoveredFolder: (id: string | null) => void;
 }) {
   const node = findNodeById(nodes, element.id);
   const isSelected = selectedNodeId === element.id;
+  const isHovered = hoveredFolder === element.id;
 
   if (element.isSelectable === false) {
-    // This is a folder
+    // This is a folder - SOLUTION: Custom wrapper around TreeFolder
     return (
-      <TreeFolder
-        value={element.id}
-        element={element.name}
-        className="px-2 py-1 group"
+      <div
+        className="relative group"
+        onMouseEnter={() => setHoveredFolder(element.id)}
+        onMouseLeave={() => setHoveredFolder(null)}
       >
-        {element.children?.map((child) => (
-          <TreeItem
-            key={child.id}
-            element={child}
-            selectedNodeId={selectedNodeId}
-            onNodeSelect={onNodeSelect}
-            onCreateFile={onCreateFile}
-            onCreateFolder={onCreateFolder}
-            onRenameNode={onRenameNode}
-            onMoveNode={onMoveNode}
-            onDeleteNode={onDeleteNode}
-            nodes={nodes}
-          />
-        ))}
+        <TreeFolder
+          value={element.id}
+          element={element.name}
+          className="px-2 py-1"
+        >
+          {element.children?.map((child) => (
+            <TreeItem
+              key={child.id}
+              element={child}
+              selectedNodeId={selectedNodeId}
+              onNodeSelect={onNodeSelect}
+              onCreateFile={onCreateFile}
+              onCreateFolder={onCreateFolder}
+              onRenameNode={onRenameNode}
+              onMoveNode={onMoveNode}
+              onDeleteNode={onDeleteNode}
+              nodes={nodes}
+              hoveredFolder={hoveredFolder}
+              setHoveredFolder={setHoveredFolder}
+            />
+          ))}
 
-        {/* Folder Actions */}
-        <div className="ml-6 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-6 text-xs"
-              onClick={() => onCreateFile(element.id)}
-            >
-              <FileText className="h-3 w-3 mr-1" />
-              File
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-6 text-xs"
-              onClick={() => onCreateFolder(element.id)}
-            >
-              <FolderPlus className="h-3 w-3 mr-1" />
-              Folder
-            </Button>
+          {/* Folder Creation Actions */}
+          <div
+            className={cn(
+              "ml-6 mt-1 transition-opacity duration-200",
+              isHovered ? "opacity-100" : "opacity-0"
+            )}
+          >
+            <div className="flex gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 text-xs"
+                onClick={() => onCreateFile(element.id)}
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                File
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 text-xs"
+                onClick={() => onCreateFolder(element.id)}
+              >
+                <FolderPlus className="h-3 w-3 mr-1" />
+                Folder
+              </Button>
+            </div>
           </div>
+        </TreeFolder>
+
+        {/* ✅ SOLUTION: Context Menu positioned absolutely outside TreeFolder */}
+        <div
+          className={cn(
+            "absolute top-1 right-2 transition-opacity duration-200",
+            isHovered ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              >
+                <MoreHorizontal className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem
+                onClick={() => node && onRenameNode(node as FsNodeResponse)}
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Rename
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => node && onMoveNode(node as FsNodeResponse)}
+              >
+                <FolderX className="h-4 w-4 mr-2" />
+                Move to...
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => onDeleteNode(element.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </TreeFolder>
+      </div>
     );
   } else {
-    // This is a file
+    // This is a file (unchanged)
     return (
       <File
         value={element.id}
@@ -558,7 +650,7 @@ function TreeItem({
                 className="text-destructive"
                 onClick={() => onDeleteNode(element.id)}
               >
-                <FileText className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
