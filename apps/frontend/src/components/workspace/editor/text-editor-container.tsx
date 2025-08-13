@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { TextEditor } from "@/components/workspace/editor/text-editor";
-import { createSupabaseBrowserClient } from "@/supabase/browser-client";
+import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { getChapters, updateChapter } from "@/lib/api/chapters";
 import { UpdateChapterDto } from "@detective-quill/shared-types";
 import { toast } from "sonner";
@@ -29,7 +29,6 @@ export function TextEditorContainer({
   const [focusMode, setFocusMode] = useState<FocusMode>("normal");
 
   const router = useRouter();
-  const supabaseBrowserClient = createSupabaseBrowserClient();
 
   // Get session
   useEffect(() => {
