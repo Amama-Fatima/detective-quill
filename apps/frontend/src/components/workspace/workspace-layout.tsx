@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { useAuth } from "@/context/auth-context";
 import { useFsNodes } from "@/hooks/use-fs-nodes";
+import { useFocusModeStore } from "@/stores/use-focus-mode-store"; // Import the store directly
 import { cn } from "@/lib/utils";
 import { FileTree } from "./file-tree/file-tree";
 import {
@@ -22,13 +23,12 @@ interface WorkspaceLayoutProps {
 
 export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [focusMode, setFocusMode] = useState<"normal" | "app" | "browser">(
-    "normal"
-  );
   const [projectName, setProjectName] = useState<string>("");
   const [projectLoading, setProjectLoading] = useState(true);
   const [currentNode, setCurrentNode] = useState<FsNodeResponse | null>(null);
   const [nodeLoading, setNodeLoading] = useState(false);
+
+  const focusMode = useFocusModeStore((state) => state.focusMode);
 
   const {
     nodes,
@@ -95,13 +95,9 @@ export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
     setNodes(updatedNodes);
   };
 
-  // Handle focus mode changes from editor
-  const handleFocusModeChange = (mode: "normal" | "app" | "browser") => {
-    setFocusMode(mode);
-  };
-
-  // Hide sidebar in focus modes
-  const showSidebar = sidebarOpen && focusMode === "normal";
+  // Hide sidebar and header in focus modes
+  const showSidebar = sidebarOpen && focusMode === "NORMAL";
+  const showHeader = focusMode === "NORMAL";
 
   // Count files and folders
   const { filesCount, foldersCount } = React.useMemo(() => {
@@ -214,7 +210,8 @@ export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
       )}
 
       <main className="flex-1 flex flex-col min-w-0">
-        {focusMode === "normal" && (
+        {/* Only show header in normal mode */}
+        {showHeader && (
           <div className="flex items-center justify-between border-b px-4 py-2 bg-card/30">
             <div className="flex items-center gap-2">
               <button
@@ -241,12 +238,8 @@ export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
           </div>
         )}
 
-        {/* Pass focus mode handler to children */}
-        <div className="flex-1">
-          {React.cloneElement(children as React.ReactElement, {
-            onFocusModeChange: handleFocusModeChange,
-          })}
-        </div>
+        {/* Children don't need any special props anymore */}
+        <div className="flex-1">{children}</div>
       </main>
     </div>
   );

@@ -1,48 +1,30 @@
-import { FOCUS_MODES } from "@/constants/editor";
-import { useState, useEffect } from "react";
-
-export type FocusMode = keyof typeof FOCUS_MODES;
+// hooks/use-focus-mode.ts
+import { FocusMode, useFocusModeStore } from "@/stores/use-focus-mode-store";
+import { useEffect } from "react";
 
 interface UseFocusModeProps {
   onFocusModeChange?: (mode: FocusMode) => void;
 }
 
-export const useFocusMode = ({ onFocusModeChange }: UseFocusModeProps = {}) => {
-  const [focusMode, setFocusMode] = useState<FocusMode>("NORMAL");
-  const [isFullscreen, setIsFullscreen] = useState(false);
+export const useFocusMode = (props: UseFocusModeProps = {}) => {
+  const {
+    focusMode,
+    isFullscreen,
+    setFocusMode,
+    setIsFullscreen,
+    toggleAppFocus,
+    toggleBrowserFullscreen,
+    exitFocusMode,
+  } = useFocusModeStore();
 
-  const toggleAppFocus = () => {
-    const newMode = focusMode === "APP" ? "NORMAL" : "APP";
-    setFocusMode(newMode);
-    onFocusModeChange?.(newMode);
-  };
+  const { onFocusModeChange } = props;
 
-  const toggleBrowserFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-        setFocusMode("BROWSER");
-        setIsFullscreen(true);
-        onFocusModeChange?.("BROWSER");
-      } else {
-        await document.exitFullscreen();
-        setFocusMode("NORMAL");
-        setIsFullscreen(false);
-        onFocusModeChange?.("NORMAL");
-      }
-    } catch (error) {
-      console.error("Fullscreen error:", error);
+  // Call the callback when focus mode changes
+  useEffect(() => {
+    if (onFocusModeChange) {
+      onFocusModeChange(focusMode);
     }
-  };
-
-  const exitFocusMode = async () => {
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
-    }
-    setFocusMode("NORMAL");
-    setIsFullscreen(false);
-    onFocusModeChange?.("NORMAL");
-  };
+  }, [focusMode, onFocusModeChange]);
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -50,14 +32,13 @@ export const useFocusMode = ({ onFocusModeChange }: UseFocusModeProps = {}) => {
       if (!document.fullscreenElement && focusMode === "BROWSER") {
         setFocusMode("NORMAL");
         setIsFullscreen(false);
-        onFocusModeChange?.("NORMAL");
       }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [focusMode, onFocusModeChange]);
+  }, [focusMode, setFocusMode, setIsFullscreen]);
 
   return {
     focusMode,

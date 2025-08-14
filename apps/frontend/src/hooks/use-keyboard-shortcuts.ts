@@ -1,21 +1,21 @@
+import { useFocusModeStore } from "@/stores/use-focus-mode-store";
 import { useCallback } from "react";
-import { KEYBOARD_SHORTCUTS } from "../constants/editor";
+
+const KEYBOARD_SHORTCUTS = {
+  SAVE: "s",
+  FOCUS_MODE: "k",
+  FULLSCREEN: "f",
+  ESCAPE: "Escape",
+} as const;
 
 interface UseKeyboardShortcutsProps {
   onSave: () => void;
-  toggleAppFocus: () => void;
-  toggleBrowserFullscreen: () => void;
-  exitFocusMode: () => void;
-  focusMode: string;
 }
 
-export const useKeyboardShortcuts = ({
-  onSave,
-  toggleAppFocus,
-  toggleBrowserFullscreen,
-  exitFocusMode,
-  focusMode,
-}: UseKeyboardShortcutsProps) => {
+export const useKeyboardShortcuts = ({ onSave }: UseKeyboardShortcutsProps) => {
+  const { focusMode, toggleAppFocus, toggleBrowserFullscreen, exitFocusMode } =
+    useFocusModeStore();
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
@@ -46,7 +46,7 @@ export const useKeyboardShortcuts = ({
       }
 
       // Escape to exit focus modes
-      if (e.key === KEYBOARD_SHORTCUTS.ESCAPE && focusMode !== "normal") {
+      if (e.key === KEYBOARD_SHORTCUTS.ESCAPE && focusMode !== "NORMAL") {
         exitFocusMode();
       }
     },

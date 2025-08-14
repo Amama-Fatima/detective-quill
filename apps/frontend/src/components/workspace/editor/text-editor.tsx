@@ -24,8 +24,6 @@ import dynamic from "next/dynamic";
 import { useFocusMode } from "@/hooks/use-focus-mode";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
-// Custom hooks and utilities
-
 // Dynamically import BlockNote editor with no SSR
 const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
   ssr: false,
@@ -44,7 +42,6 @@ export type TextEditorProps = {
   onSave?: () => void;
   isDirty?: boolean;
   isSaving?: boolean;
-  onFocusModeChange?: (mode: "NORMAL" | "APP" | "BROWSER") => void;
 };
 
 export function TextEditor({
@@ -55,25 +52,20 @@ export function TextEditor({
   onSave = () => {},
   isDirty = false,
   isSaving = false,
-  onFocusModeChange = () => {},
 }: TextEditorProps) {
   const [internal, setInternal] = useState(value);
 
-  // Custom hooks
+  // Custom hooks - now using Zustand for global state
   const {
     focusMode,
     isFullscreen,
     toggleAppFocus,
     toggleBrowserFullscreen,
     exitFocusMode,
-  } = useFocusMode({ onFocusModeChange });
+  } = useFocusMode();
 
   const { handleKeyDown } = useKeyboardShortcuts({
     onSave,
-    toggleAppFocus,
-    toggleBrowserFullscreen,
-    exitFocusMode,
-    focusMode,
   });
 
   // Keep internal state in sync
