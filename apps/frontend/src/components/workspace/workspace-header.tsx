@@ -1,20 +1,15 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
 import { FolderTree, FilePlus, FileText } from "lucide-react";
 
 interface WorkspaceHeaderProps {
   projectName: string;
   filesCount: number;
   foldersCount: number;
-  onCreateFile: () => void;
 }
 
 export function WorkspaceHeader({
   projectName,
   filesCount,
   foldersCount,
-  onCreateFile,
 }: WorkspaceHeaderProps) {
   return (
     <div className="p-4 border-b bg-card">
@@ -42,15 +37,6 @@ export function WorkspaceHeader({
             </span>
           </div>
         </div>
-
-        <Button
-          size="sm"
-          onClick={onCreateFile}
-          className="gap-2 cursor-pointer"
-        >
-          <FilePlus className="h-4 w-4" />
-          New
-        </Button>
       </div>
     </div>
   );

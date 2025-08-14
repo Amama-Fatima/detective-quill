@@ -2,19 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { useAuth } from "@/context/auth-context";
 import { useFsNodes } from "@/hooks/use-fs-nodes";
-import { useFocusModeStore } from "@/stores/use-focus-mode-store"; // Import the store directly
-import { cn } from "@/lib/utils";
-import { FileTree } from "./file-tree/file-tree";
+import { useFocusModeStore } from "@/stores/use-focus-mode-store";
+import { getProject } from "@/lib/backend-calls/projects";
+import { getFsNode } from "@/lib/backend-calls/fs-nodes";
+import { toast } from "sonner";
+import { WorkspaceLoading } from "@/components/workspace/loading-states";
+import { WorkspaceError } from "@/components/workspace/workspace-error";
+import { WorkspaceSidebar } from "@/components/workspace/workspace-sidebar";
+import { WorkspaceHeaderBar } from "@/components/workspace/workspace-header-bar";
 import {
   FsNodeTreeResponse,
   FsNodeResponse,
 } from "@detective-quill/shared-types";
-import { getProject } from "@/lib/backend-calls/projects";
-import { getFsNode } from "@/lib/backend-calls/fs-nodes";
-import { toast } from "sonner";
+import { countNodes } from "@/lib/utils";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
@@ -22,24 +24,25 @@ interface WorkspaceLayoutProps {
 }
 
 export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
+  // State management
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [projectName, setProjectName] = useState<string>("");
   const [projectLoading, setProjectLoading] = useState(true);
   const [currentNode, setCurrentNode] = useState<FsNodeResponse | null>(null);
   const [nodeLoading, setNodeLoading] = useState(false);
 
+  // Global state and hooks
   const focusMode = useFocusModeStore((state) => state.focusMode);
+  const { session } = useAuth();
+  const params = useParams();
+  const nodeId = params.nodeId as string;
 
   const {
     nodes,
     loading: nodesLoading,
     error,
-    refetch,
     setNodes,
   } = useFsNodes({ projectId });
-  const { session } = useAuth();
-  const params = useParams();
-  const nodeId = params.nodeId as string;
 
   // Fetch project details
   useEffect(() => {
@@ -91,154 +94,64 @@ export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
     fetchCurrentNode();
   }, [nodeId, session?.access_token]);
 
-  const updateNodes = (updatedNodes: FsNodeTreeResponse[]) => {
+  // Event handlers
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleNodesChange = (updatedNodes: FsNodeTreeResponse[]) => {
     setNodes(updatedNodes);
   };
 
-  // Hide sidebar and header in focus modes
+  // Computed values
+  const { files: filesCount, folders: foldersCount } = React.useMemo(() => {
+    return countNodes(nodes);
+  }, [nodes]);
+
   const showSidebar = sidebarOpen && focusMode === "NORMAL";
   const showHeader = focusMode === "NORMAL";
 
-  // Count files and folders
-  const { filesCount, foldersCount } = React.useMemo(() => {
-    const countNodes = (
-      nodeList: FsNodeTreeResponse[]
-    ): { files: number; folders: number } => {
-      let files = 0;
-      let folders = 0;
-
-      nodeList.forEach((node) => {
-        if (node.node_type === "file") {
-          files++;
-        } else {
-          folders++;
-        }
-
-        if (node.children) {
-          const childCounts = countNodes(node.children);
-          files += childCounts.files;
-          folders += childCounts.folders;
-        }
-      });
-
-      return { files, folders };
-    };
-
-    const counts = countNodes(nodes);
-    return { filesCount: counts.files, foldersCount: counts.folders };
-  }, [nodes]);
-
-  // Generate breadcrumb components from file path
-  const generateBreadcrumbs = () => {
-    if (!currentNode?.path) return null;
-
-    // Remove leading slash and split the path
-    const pathParts = currentNode.path.replace(/^\//, "").split("/");
-
-    return (
-      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-        <span className="text-foreground font-medium">{projectName}</span>
-        {pathParts.map((part, index) => (
-          <React.Fragment key={index}>
-            <span>/</span>
-            <span
-              className={cn(
-                index === pathParts.length - 1
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground cursor-pointer"
-              )}
-            >
-              {part}
-            </span>
-          </React.Fragment>
-        ))}
-      </div>
-    );
-  };
-
+  // Loading state
   if (projectLoading || nodesLoading) {
-    return (
-      <div className="flex h-screen w-full bg-background">
-        <div className="w-80 border-r bg-card/50 animate-pulse">
-          <div className="p-4 border-b">
-            <div className="h-4 bg-muted rounded w-32 mb-2" />
-            <div className="h-3 bg-muted rounded w-24" />
-          </div>
-          <div className="p-4 space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-8 bg-muted rounded" />
-            ))}
-          </div>
-        </div>
-        <div className="flex-1 animate-pulse">
-          <div className="h-12 border-b bg-muted/20" />
-          <div className="flex-1 bg-muted/10" />
-        </div>
-      </div>
-    );
+    return <WorkspaceLoading />;
   }
 
+  // Error state
   if (error) {
-    return <div>Error: {error}</div>;
+    return <WorkspaceError error={error} />;
   }
 
   return (
     <div className="flex h-screen w-full bg-background">
+      {/* Sidebar */}
       {showSidebar && (
-        <aside
-          className={cn(
-            "w-80 border-r bg-gradient-to-b from-card/50 to-card/30 flex flex-col shadow-sm transition-all duration-300"
-          )}
-        >
-          <WorkspaceHeader
-            projectName={projectName}
-            filesCount={filesCount}
-            foldersCount={foldersCount}
-            onCreateFile={() => {
-              // This will be handled by FileTree component
-            }}
-          />
-          <FileTree
-            nodes={nodes}
-            onNodesChange={updateNodes}
-            projectId={projectId}
-            projectName={projectName}
-            session={session}
-            loading={nodesLoading}
-          />
-        </aside>
+        <WorkspaceSidebar
+          projectName={projectName}
+          filesCount={filesCount}
+          foldersCount={foldersCount}
+          nodes={nodes}
+          onNodesChange={handleNodesChange}
+          projectId={projectId}
+          session={session}
+          loading={nodesLoading}
+        />
       )}
 
+      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Only show header in normal mode */}
+        {/* Header Bar */}
         {showHeader && (
-          <div className="flex items-center justify-between border-b px-4 py-2 bg-card/30">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-muted rounded-md transition-colors"
-                title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-              >
-                {sidebarOpen ? "←" : "→"}
-              </button>
-
-              {/* Enhanced Breadcrumbs with File Path */}
-              {nodeLoading ? (
-                <div className="h-4 bg-muted rounded w-48 animate-pulse" />
-              ) : nodeId && currentNode ? (
-                generateBreadcrumbs()
-              ) : (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <span className="text-foreground font-medium">
-                    {projectName}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+          <WorkspaceHeaderBar
+            sidebarOpen={sidebarOpen}
+            onSidebarToggle={handleSidebarToggle}
+            projectName={projectName}
+            nodeId={nodeId}
+            currentNodePath={currentNode?.path ?? undefined}
+            nodeLoading={nodeLoading}
+          />
         )}
 
-        {/* Children don't need any special props anymore */}
+        {/* Children */}
         <div className="flex-1">{children}</div>
       </main>
     </div>
