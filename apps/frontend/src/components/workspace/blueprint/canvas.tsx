@@ -15,22 +15,13 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
+import { CardType } from "@detective-quill/shared-types";
 
 interface CanvasProps {
   projectName: string;
   type: string;
 }
 import CanvasCardNode from "./canvas-card-node";
-
-type CardType = {
-  id: string;
-  title: string;
-  description?: string;
-  is_custom: false;
-  user_id?: string;
-  blueprint_type: "character" | "culture";
-  created_at: Date;
-};
 
 // Hardcoded mapping for now
 const CARD_TYPES: Record<string, CardType[]> = {
@@ -41,7 +32,8 @@ const CARD_TYPES: Record<string, CardType[]> = {
       description: "A brief biography of the character.",
       is_custom: false,
       blueprint_type: "character",
-      created_at: new Date(),
+      created_at: "ioee",
+      user_id: null,
     },
     {
       id: "appearance",
@@ -49,7 +41,8 @@ const CARD_TYPES: Record<string, CardType[]> = {
       description: "Details about the character's appearance.",
       is_custom: false,
       blueprint_type: "character",
-      created_at: new Date(),
+      created_at: "1ejds",
+      user_id: null,
     },
   ],
   culture: [
@@ -58,16 +51,18 @@ const CARD_TYPES: Record<string, CardType[]> = {
       title: "Political System",
       description: "The political system of the culture.",
       is_custom: false,
-      blueprint_type: "culture",
-      created_at: new Date(),
+      blueprint_type: "timeline",
+      created_at: "pokds",
+      user_id: null,
     },
     {
       id: "social",
       title: "Social Structure",
       description: "The social hierarchy and structure.",
       is_custom: false,
-      blueprint_type: "culture",
-      created_at: new Date(),
+      blueprint_type: "timeline",
+      created_at: "1ejds",
+      user_id: null,
     },
   ],
 };
@@ -84,7 +79,7 @@ export default function Canvas({ projectName, type }: CanvasProps) {
     []
   );
 
-      const updateNodeContent = useCallback((id: string, newContent: string) => {
+  const updateNodeContent = useCallback((id: string, newContent: string) => {
     setNodes((nds) =>
       nds.map((node) =>
         node.id === id
@@ -101,7 +96,12 @@ export default function Canvas({ projectName, type }: CanvasProps) {
       {
         id,
         type: "card",
-        data: { cardTypeTitle: type.title, cardTypeId: type.id, content: "", onChange: (newContent: string) => updateNodeContent(id, newContent) },
+        data: {
+          cardTypeTitle: type.title,
+          cardTypeId: type.id,
+          content: "",
+          onChange: (newContent: string) => updateNodeContent(id, newContent),
+        },
         position: {
           x: Math.random() * 400,
           y: Math.random() * 400,
@@ -124,8 +124,6 @@ export default function Canvas({ projectName, type }: CanvasProps) {
   const nodeTypes = {
     card: CanvasCardNode,
   };
-
-
 
   return (
     <div className="w-full h-screen flex flex-col">
