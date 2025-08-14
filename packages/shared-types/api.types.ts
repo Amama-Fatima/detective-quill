@@ -3,9 +3,11 @@ import { Database } from "./database.types";
 export type Chapter = Database["public"]["Tables"]["chapters"]["Row"];
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Folder = Database["public"]["Tables"]["folders"]["Row"];
-
+export type Blueprint = Database["public"]["Tables"]["blue_prints"]["Row"];
+export type CardType = Database["public"]["Tables"]["card_types"]["Row"];
+export type BlueprintCard = Database["public"]["Tables"]["blueprint_cards"]["Row"];
 export interface ApiResponse<T> {
-  data: T;
+  data?: T | null;
   message?: string;
   success: boolean;
 }
@@ -90,3 +92,65 @@ export interface WorkspaceData {
 }
 
 export type GetWorkspaceResponse = ApiResponse<WorkspaceData>;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export interface CreateBlueprintDto{
+  title: string;
+  projectId: string;
+  type: Database["public"]["Enums"]["blueprint_type"];
+}
+
+export interface GetUserBlueprintByIdQuery {
+  id: string;
+  userId: string;
+}
+
+export interface UpdateBlueprintDto {
+  title: string;
+}
+
+export interface CreateCardTypeDto {
+  title: string;
+  description: string;
+  blueprint_type: Database["public"]["Enums"]["blueprint_type"];
+  is_custom: boolean;
+}
+
+export interface UpdateCardTypeDto {
+  title?: string;
+  description?: string;
+}
+
+export interface CreateBlueprintCardDto {
+  // title: string;
+  content: string;
+  card_type_id: string;
+  position_x: number;
+  position_y: number;
+}
+
+export type UpdateBlueprintCardDto {
+  content?: string;
+  position_x?: number;
+  position_y?: number;
+}
+
+export type GetBlueprintResponse = ApiResponse<Blueprint>;
+export type GetBlueprintsResponse = ApiResponse<Blueprint[]>;
+export type GetCardTypesResponse = ApiResponse<CardType[]>;
+export type GetCardTypeResponse = ApiResponse<CardType>;
+export type GetBlueprintCardResponse = ApiResponse<BlueprintCard>;
+export type GetBlueprintCardsResponse = ApiResponse<BlueprintCard[]>;

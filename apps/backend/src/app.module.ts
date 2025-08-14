@@ -5,6 +5,9 @@ import { ChaptersModule } from "./chapters/chapters.module";
 import { SupabaseModule } from "./supabase/supabase.module";
 import { ConfigModule } from "@nestjs/config";
 import { FoldersModule } from "./folders/folders.module";
+import { BlueprintsModule } from './blueprints/blueprints.module';
+import { CardTypesModule } from './card_types/card_types.module';
+import { BlueprintCardsModule } from './blueprint_cards/blueprint_cards.module';
 
 @Module({
   controllers: [AppController],
@@ -17,6 +20,9 @@ import { FoldersModule } from "./folders/folders.module";
     SupabaseModule,
     ChaptersModule,
     FoldersModule,
+    BlueprintsModule,
+    CardTypesModule,
+    BlueprintCardsModule,
   ],
 })
 export class AppModule {}
