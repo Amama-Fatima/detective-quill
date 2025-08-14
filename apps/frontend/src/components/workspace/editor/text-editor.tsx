@@ -13,7 +13,7 @@ import {
   Minimize,
   Focus,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getContainerClass, getHeaderClass } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +21,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
+import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
+import { useKeyboardShortcuts } from "@/hooks/text-editor/use-keyboard-shortcuts";
 
 // Dynamically import BlockNote editor with no SSR
 const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
@@ -40,10 +42,7 @@ export type TextEditorProps = {
   onSave?: () => void;
   isDirty?: boolean;
   isSaving?: boolean;
-  onFocusModeChange?: (mode: "normal" | "app" | "browser") => void;
 };
-
-type FocusMode = "normal" | "app" | "browser";
 
 export function TextEditor({
   fileName = "Untitled.md",
@@ -53,11 +52,21 @@ export function TextEditor({
   onSave = () => {},
   isDirty = false,
   isSaving = false,
-  onFocusModeChange = () => {},
 }: TextEditorProps) {
   const [internal, setInternal] = useState(value);
-  const [focusMode, setFocusMode] = useState<FocusMode>("normal");
-  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Custom hooks - now using Zustand for global state
+  const {
+    focusMode,
+    isFullscreen,
+    toggleAppFocus,
+    toggleBrowserFullscreen,
+    exitFocusMode,
+  } = useFocusMode();
+
+  const { handleKeyDown } = useKeyboardShortcuts({
+    onSave,
+  });
 
   // Keep internal state in sync
   useEffect(() => setInternal(value), [value]);
@@ -67,101 +76,11 @@ export function TextEditor({
     onChange(content);
   };
 
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    const mod = e.metaKey || e.ctrlKey;
-
-    // Save shortcut
-    if (mod && e.key.toLowerCase() === "s") {
-      e.preventDefault();
-      onSave();
-    }
-
-    // Focus mode shortcuts
-    if (mod && e.key.toLowerCase() === "k") {
-      e.preventDefault();
-      toggleAppFocus();
-    }
-
-    // Browser fullscreen shortcut
-    if (mod && e.shiftKey && e.key.toLowerCase() === "f") {
-      e.preventDefault();
-      toggleBrowserFullscreen();
-    }
-
-    // Escape to exit focus modes
-    if (e.key === "Escape") {
-      if (focusMode !== "normal") {
-        exitFocusMode();
-      }
-    }
-  };
-
-  const toggleAppFocus = () => {
-    const newMode = focusMode === "app" ? "normal" : "app";
-    setFocusMode(newMode);
-    onFocusModeChange(newMode);
-  };
-
-  const toggleBrowserFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-        setFocusMode("browser");
-        setIsFullscreen(true);
-        onFocusModeChange("browser");
-      } else {
-        await document.exitFullscreen();
-        setFocusMode("normal");
-        setIsFullscreen(false);
-        onFocusModeChange("normal");
-      }
-    } catch (error) {
-      console.error("Fullscreen error:", error);
-    }
-  };
-
-  const exitFocusMode = async () => {
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
-    }
-    setFocusMode("normal");
-    setIsFullscreen(false);
-    onFocusModeChange("normal");
-  };
-
-  // Listen for fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      if (!document.fullscreenElement && focusMode === "browser") {
-        setFocusMode("normal");
-        setIsFullscreen(false);
-        onFocusModeChange("normal");
-      }
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [focusMode, onFocusModeChange]);
-
-  // Focus mode styling
-  const containerClass = cn(
-    "flex flex-col bg-background transition-all duration-300",
-    focusMode === "normal" && "h-screen",
-    focusMode === "app" && "fixed inset-0 z-50 h-screen",
-    focusMode === "browser" && "h-screen"
-  );
-
-  const headerClass = cn(
-    "flex items-center justify-between border-b px-4 py-3 bg-card/50 flex-shrink-0 transition-all duration-300",
-    focusMode === "browser" && "bg-black/80 backdrop-blur-sm"
-  );
-
   return (
     <TooltipProvider delayDuration={200}>
-      <div className={containerClass} onKeyDown={onKeyDown}>
+      <div className={getContainerClass(focusMode)} onKeyDown={handleKeyDown}>
         {/* Header - Always visible but styled differently in focus modes */}
-        <div className={headerClass}>
+        <div className={getHeaderClass(focusMode)}>
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex items-center gap-2">
               <Edit3 className="h-4 w-4 text-muted-foreground" />
@@ -185,14 +104,14 @@ export function TextEditor({
                   onClick={toggleAppFocus}
                   className={cn(
                     "transition-colors",
-                    focusMode === "app" && "bg-primary/10 text-primary"
+                    focusMode === "APP" && "bg-primary/10 text-primary"
                   )}
                 >
                   <Focus className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {focusMode === "app"
+                {focusMode === "APP"
                   ? "Exit App Focus (Cmd/Ctrl + K)"
                   : "App Focus Mode (Cmd/Ctrl + K)"}
               </TooltipContent>
@@ -206,7 +125,7 @@ export function TextEditor({
                   onClick={toggleBrowserFullscreen}
                   className={cn(
                     "transition-colors",
-                    focusMode === "browser" && "bg-primary/10 text-primary"
+                    focusMode === "BROWSER" && "bg-primary/10 text-primary"
                   )}
                 >
                   {isFullscreen ? (
@@ -249,7 +168,7 @@ export function TextEditor({
               </TooltipContent>
             </Tooltip>
 
-            {focusMode === "normal" && (
+            {focusMode === "NORMAL" && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -271,7 +190,7 @@ export function TextEditor({
         </div>
 
         {/* Focus Mode Hint */}
-        {focusMode !== "normal" && (
+        {focusMode !== "NORMAL" && (
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-3 py-1 rounded text-xs backdrop-blur-sm">
             Press ESC to exit focus mode
           </div>

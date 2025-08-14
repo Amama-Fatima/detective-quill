@@ -5,25 +5,7 @@ import "@blocknote/core/fonts/inter.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import "@blocknote/shadcn/style.css";
-
-// Enhanced Notion-like styling with scrollable editor
-const notionStyles = `
-  .bn-container {
-    height: 100% !important;
-    overflow: hidden !important;
-  }
-  .bn-editor {
-    height: 100% !important;
-    min-height: 100% !important;
-    padding: 2rem !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-  }
-  .ProseMirror {
-    min-height: calc(100vh - 160px) !important;
-    padding-bottom: 50vh !important;
-  }
-`;
+import { NOTION_STYLES } from "@/constants/editor";
 
 interface BlockNoteEditorProps {
   initialContent?: string;
@@ -40,21 +22,21 @@ const BlockNoteEditor: React.FC<BlockNoteEditorProps> = ({
 
   // Handle content changes
   useEffect(() => {
-    if (onChange) {
-      const handleChange = async () => {
-        const blocks = editor.document;
-        const jsonContent = JSON.stringify(blocks);
-        onChange(jsonContent);
-      };
+    if (!onChange) return;
 
-      // Listen to document changes
-      editor.onEditorContentChange(handleChange);
-    }
+    const handleChange = async () => {
+      const blocks = editor.document;
+      const jsonContent = JSON.stringify(blocks);
+      onChange(jsonContent);
+    };
+
+    // Listen to document changes
+    editor.onEditorContentChange(handleChange);
   }, [editor, onChange]);
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: notionStyles }} />
+      <style dangerouslySetInnerHTML={{ __html: NOTION_STYLES }} />
       <div
         style={{
           width: "100%",
