@@ -21,8 +21,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
-import { useFocusMode } from "@/hooks/use-focus-mode";
-import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
+import { useKeyboardShortcuts } from "@/hooks/text-editor/use-keyboard-shortcuts";
 
 // Dynamically import BlockNote editor with no SSR
 const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
