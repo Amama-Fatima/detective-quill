@@ -1,11 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import {
-  Blueprint,
-  CreateBlueprintDto,
-  UpdateBlueprintDto,
-} from "@detective-quill/shared-types";
+import { Blueprint } from "@detective-quill/shared-types";
 import { SupabaseService } from "../supabase/supabase.service";
 import { NotFoundException } from "@nestjs/common";
+import { CreateBlueprintDto, UpdateBlueprintDto } from "./dto/blueprints.dto";
 
 @Injectable()
 export class BlueprintsService {
@@ -27,7 +24,7 @@ export class BlueprintsService {
         `Error fetching user blueprints: ${blueprintError.message}`
       );
     }
-    return blueprints as Blueprint[] | null
+    return blueprints as Blueprint[] | null;
   }
 
   async fetchUserBlueprintById(
@@ -109,5 +106,29 @@ export class BlueprintsService {
     }
 
     return blueprint as Blueprint;
+  }
+
+  async deleteBlueprint(
+    userId: string,
+    blueprintId: string,
+    accessToken: string
+  ): Promise<void> {
+    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+
+    const { error: deleteError } = await supabase
+      .from("blue_prints")
+      .delete()
+      .eq("id", blueprintId)
+      .eq("user_id", userId);
+
+    if (deleteError) {
+      if (deleteError.code === "PGRST116") {
+        // No rows updated - blueprint doesn't exist or user doesn't own it
+        throw new NotFoundException(
+          `Blueprint with ID ${blueprintId} not found`
+        );
+      }
+      throw new Error(`Error deleting blueprint: ${deleteError.message}`);
+    }
   }
 }

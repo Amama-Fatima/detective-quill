@@ -6,6 +6,8 @@ export type Folder = Database["public"]["Tables"]["folders"]["Row"];
 export type Blueprint = Database["public"]["Tables"]["blue_prints"]["Row"];
 export type CardType = Database["public"]["Tables"]["card_types"]["Row"];
 export type BlueprintCard = Database["public"]["Tables"]["blueprint_cards"]["Row"];
+export type BlueprintType = Database["public"]["Enums"]["blueprint_type"];
+
 export interface ApiResponse<T> {
   data?: T | null;
   message?: string;

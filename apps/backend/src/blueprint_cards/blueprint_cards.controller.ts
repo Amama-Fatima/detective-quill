@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Post,
@@ -11,11 +12,13 @@ import {
 import { AuthGuard } from "src/auth/auth.guard";
 import { BlueprintCardsService } from "./blueprint_cards.service";
 import {
-  type CreateBlueprintCardDto,
   GetBlueprintCardResponse,
   GetBlueprintCardsResponse,
-  type UpdateBlueprintCardDto,
 } from "@detective-quill/shared-types";
+import {
+  CreateBlueprintCardDto,
+  UpdateBlueprintCardDto,
+} from "./dto/blueprint_cards.dto";
 
 @Controller("blueprint-cards")
 @UseGuards(AuthGuard)
@@ -106,6 +109,33 @@ export class BlueprintCardsController {
       return {
         success: false,
         message: "Error updating blueprint card: " + error.message,
+      };
+    }
+  }
+
+  @Delete(":cardId")
+  async deleteBlueprintCard(
+    @Req() request: any
+  ): Promise<GetBlueprintCardResponse> {
+    const cardId = request.params.cardId;
+    const userId = request.user.id;
+    const accessToken = request.accessToken;
+
+    try {
+      await this.blueprintCardsService.deleteBlueprintCard(
+        cardId,
+        userId,
+        accessToken
+      );
+
+      return {
+        success: true,
+        message: "Blueprint card deleted successfully",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Error deleting blueprint card: " + error.message,
       };
     }
   }

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   Put,
@@ -10,11 +11,10 @@ import {
 import { CardTypesService } from "./card_types.service";
 import { AuthGuard } from "src/auth/auth.guard";
 import {
-  type CreateCardTypeDto,
   GetCardTypeResponse,
   GetCardTypesResponse,
-  type UpdateCardTypeDto,
 } from "@detective-quill/shared-types";
+import { CreateCardTypeDto, UpdateCardTypeDto } from "./dto/card_types.dto";
 
 @Controller("card-types")
 @UseGuards(AuthGuard)
@@ -98,6 +98,30 @@ export class CardTypesController {
         success: false,
         data: null,
         message: "Error updating card type: " + error.message,
+      };
+    }
+  }
+
+  @Delete(":id")
+  async deleteCardType(@Req() request: any): Promise<GetCardTypeResponse> {
+    const userId = request.user.id;
+    const access_token = request.accessToken;
+    const cardTypeId = request.params.id;
+
+    try {
+      await this.cardTypesService.deleteCardType(
+        userId,
+        access_token,
+        cardTypeId
+      );
+      return {
+        success: true,
+        message: "Card type deleted successfully",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Error deleting card type: " + error.message,
       };
     }
   }

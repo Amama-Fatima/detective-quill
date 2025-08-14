@@ -1,10 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
+import { BlueprintCard } from "@detective-quill/shared-types/api";
 import {
-  BlueprintCard,
   CreateBlueprintCardDto,
   UpdateBlueprintCardDto,
-} from "@detective-quill/shared-types/api";
+} from "./dto/blueprint_cards.dto";
 
 @Injectable()
 export class BlueprintCardsService {
@@ -69,9 +69,37 @@ export class BlueprintCardsService {
       .single();
 
     if (error) {
-      throw new Error(`Failed to update card: ${error.message}`);
+      if (error.code === "PGRST116") {
+        throw new NotFoundException(
+          `Blueprint Card with blueprint ID ${cardId} not found`
+        );
+      }
+      throw new Error(`Failed to fetch cards: ${error.message}`);
     }
 
     return updatedCard as BlueprintCard;
+  }
+
+  async deleteBlueprintCard(
+    cardId: string,
+    userId: string,
+    accessToken: string
+  ) {
+    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+
+    const { error } = await supabase
+      .from("blueprint_cards")
+      .delete()
+      .eq("id", cardId)
+      .eq("user_id", userId);
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        throw new NotFoundException(
+          `Blueprint Card with blueprint ID ${cardId} not found`
+        );
+      }
+      throw new Error(`Failed to fetch cards: ${error.message}`);
+    }
   }
 }

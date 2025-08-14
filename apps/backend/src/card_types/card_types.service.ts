@@ -1,10 +1,11 @@
-import { ConflictException, Injectable } from "@nestjs/common";
-import { SupabaseService } from "../supabase/supabase.service";
 import {
-  CardType,
-  CreateCardTypeDto,
-  UpdateCardTypeDto,
-} from "@detective-quill/shared-types";
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { SupabaseService } from "../supabase/supabase.service";
+import { CardType } from "@detective-quill/shared-types";
+import { CreateCardTypeDto, UpdateCardTypeDto } from "./dto/card_types.dto";
 
 @Injectable()
 export class CardTypesService {
@@ -58,7 +59,7 @@ export class CardTypesService {
     userId: string,
     accessToken: string,
     cardTypeId: string,
-    updatedData: UpdateCardTypeDto,
+    updatedData: UpdateCardTypeDto
   ): Promise<CardType> {
     const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
@@ -71,9 +72,37 @@ export class CardTypesService {
       .single();
 
     if (error) {
-      throw new Error(`Error updating card type: ${error.message}`);
+      if (error.code === "PGRST116") {
+        throw new NotFoundException(
+          `Card Type with ID ${cardTypeId} not found`
+        );
+      }
+      throw new Error(`Failed to fetch cards: ${error.message}`);
     }
 
     return cardType as CardType;
+  }
+
+  async deleteCardType(
+    userId: string,
+    accessToken: string,
+    cardTypeId: string
+  ): Promise<void> {
+    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+
+    const { error } = await supabase
+      .from("card_types")
+      .delete()
+      .eq("id", cardTypeId)
+      .eq("user_id", userId);
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        throw new NotFoundException(
+          `Card Type with ID ${cardTypeId} not found`
+        );
+      }
+      throw new Error(`Failed to fetch cards: ${error.message}`);
+    }
   }
 }

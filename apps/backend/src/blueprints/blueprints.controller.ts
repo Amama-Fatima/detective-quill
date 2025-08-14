@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Post,
@@ -12,8 +13,8 @@ import { BlueprintsService } from "./blueprints.service";
 import {
   GetBlueprintResponse,
   GetBlueprintsResponse,
-  type CreateBlueprintDto,
 } from "@detective-quill/shared-types";
+import { CreateBlueprintDto, UpdateBlueprintDto } from "./dto/blueprints.dto";
 import { AuthGuard } from "src/auth/auth.guard";
 
 @Controller("blueprints")
@@ -105,11 +106,13 @@ export class BlueprintsController {
   }
 
   @Put(":id")
-  async updateBlueprint(@Req() request: any): Promise<GetBlueprintResponse> {
+  async updateBlueprint(
+    @Req() request: any,
+    @Body() updateBlueprintDto: UpdateBlueprintDto
+  ): Promise<GetBlueprintResponse> {
     const userId = request.user.id;
     const accessToken = request.accessToken;
     const blueprintId = request.params.id;
-    const updateBlueprintDto = request.body;
 
     try {
       const blueprint = await this.blueprintsService.updatedBlueprint(
@@ -133,6 +136,32 @@ export class BlueprintsController {
         success: false,
         data: null,
         message: "Error updating blueprint: " + error.message,
+      };
+    }
+  }
+
+  @Delete(":id")
+  async deleteBlueprint(
+    @Req() request: any
+  ): Promise<{ success: boolean; message: string }> {
+    const userId = request.user.id;
+    const accessToken = request.accessToken;
+    const blueprintId = request.params.id;
+
+    try {
+      await this.blueprintsService.deleteBlueprint(
+        userId,
+        blueprintId,
+        accessToken
+      );
+      return {
+        success: true,
+        message: "Blueprint deleted successfully",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Error deleting blueprint: " + error.message,
       };
     }
   }

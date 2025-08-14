@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -52,30 +52,33 @@ export type Database = {
       blueprint_cards: {
         Row: {
           blueprint_id: string | null
-          card_type_id: number | null
+          card_type_id: string
           content: string | null
           created_at: string
           id: number
           position_x: number | null
           position_y: number | null
+          userId: string
         }
         Insert: {
           blueprint_id?: string | null
-          card_type_id?: number | null
+          card_type_id: string
           content?: string | null
           created_at?: string
           id?: number
           position_x?: number | null
           position_y?: number | null
+          userId: string
         }
         Update: {
           blueprint_id?: string | null
-          card_type_id?: number | null
+          card_type_id?: string
           content?: string | null
           created_at?: string
           id?: number
           position_x?: number | null
           position_y?: number | null
+          userId?: string
         }
         Relationships: [
           {
@@ -92,6 +95,13 @@ export type Database = {
             referencedRelation: "card_types"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "blueprint_cards_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       card_types: {
@@ -99,32 +109,32 @@ export type Database = {
           blueprint_type: Database["public"]["Enums"]["blueprint_type"] | null
           created_at: string
           description: string | null
-          id: number
-          is_custom: boolean
-          title: string | null
+          id: string
+          is_custom: boolean | null
+          title: string
           user_id: string | null
         }
         Insert: {
           blueprint_type?: Database["public"]["Enums"]["blueprint_type"] | null
           created_at?: string
           description?: string | null
-          id?: number
-          is_custom?: boolean
-          title?: string | null
+          id?: string
+          is_custom?: boolean | null
+          title?: string
           user_id?: string | null
         }
         Update: {
           blueprint_type?: Database["public"]["Enums"]["blueprint_type"] | null
           created_at?: string
           description?: string | null
-          id?: number
-          is_custom?: boolean
-          title?: string | null
+          id?: string
+          is_custom?: boolean | null
+          title?: string
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "card_type_user_id_fkey"
+            foreignKeyName: "card_types_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -383,10 +393,10 @@ export type Database = {
       get_node_children: {
         Args: { node_uuid: string }
         Returns: {
+          depth: number
           id: string
           name: string
           node_type: string
-          depth: number
           path: string
           sort_order: number
         }[]
