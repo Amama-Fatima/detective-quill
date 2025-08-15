@@ -37,7 +37,7 @@ export const useFileOperations = ({
         // Check if it's a file (can't edit folders)
         if (nodeData.node_type !== "file") {
           toast.error("Cannot edit folders");
-          router.push(`/workspace/${projectId}`);
+          router.push(`/workspace/${projectId}/text-editor`);
           return;
         }
 
@@ -45,13 +45,13 @@ export const useFileOperations = ({
         return nodeData;
       } else {
         toast.error("File not found");
-        router.push(`/workspace/${projectId}`);
+        router.push(`/workspace/${projectId}/text-editor`);
         return null;
       }
     } catch (error) {
       console.error("Error fetching node:", error);
       toast.error("Failed to load file");
-      router.push(`/workspace/${projectId}`);
+      router.push(`/workspace/${projectId}/text-editor`);
       return null;
     } finally {
       setLoading(false);
@@ -103,7 +103,7 @@ export const useFileOperations = ({
 
       if (response.success) {
         toast.success("File deleted successfully");
-        router.push(`/workspace/${projectId}`);
+        router.push(`/workspace/${projectId}/text-editor`);
       } else {
         toast.error(response.error || "Failed to delete file");
       }

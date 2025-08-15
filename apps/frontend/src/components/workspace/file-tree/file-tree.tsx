@@ -96,14 +96,14 @@ export function FileTree({
   }, [nodes]);
 
   const handleNodeSelect = (nodeId: string) => {
-    router.push(`/workspace/${projectId}/${nodeId}`);
+    router.push(`/workspace/${projectId}/text-editor/${nodeId}`);
   };
 
   const handleSearchSelect = (nodeId: string) => {
     const node = findNodeById(nodes, nodeId);
     if (node) {
       if (node.node_type === "file") {
-        router.push(`/workspace/${projectId}/${nodeId}`);
+        router.push(`/workspace/${projectId}/text-editor/${nodeId}`);
       } else {
         toast.info(`Folder: ${node.name}`);
       }
@@ -143,7 +143,9 @@ export function FileTree({
         setSelectedFolder(null);
 
         if (nodeType === "file") {
-          router.push(`/workspace/${projectId}/${response.data.id}`);
+          router.push(
+            `/workspace/${projectId}/text-editor/${response.data.id}`
+          );
         }
       } else {
         toast.error(response.error || `Failed to create ${nodeType}`);
@@ -289,7 +291,7 @@ export function FileTree({
         toast.success(response.data?.message || "Item deleted successfully");
 
         if (selectedNodeId === nodeId) {
-          router.push(`/workspace/${projectId}`);
+          router.push(`/workspace/${projectId}/text-editor`);
         } else {
           window.location.reload();
         }
@@ -453,7 +455,6 @@ export function FileTree({
   );
 }
 
-// ✅ SOLUTION: Custom TreeItem that works with MagicUI's limitations
 function TreeItem({
   element,
   selectedNodeId,
@@ -484,7 +485,7 @@ function TreeItem({
   const isHovered = hoveredFolder === element.id;
 
   if (element.isSelectable === false) {
-    // This is a folder - SOLUTION: Custom wrapper around TreeFolder
+    // This is a folder
     return (
       <div
         className="relative group"

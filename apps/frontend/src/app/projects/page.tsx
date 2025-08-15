@@ -89,7 +89,7 @@ export default function ProjectsPage() {
   };
 
   const handleOpenProject = (projectId: string) => {
-    router.push(`/workspace/${projectId}`);
+    router.push(`/workspace/${projectId}/text-editor`);
   };
 
   const toggleSortOrder = () => {
