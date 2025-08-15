@@ -1,5 +1,4 @@
 import React from "react";
-import { WorkspaceLoading } from "./loading-states";
 import { WorkspaceError } from "./workspace-error";
 import { getEditorWorkspaceData } from "@/lib/server/editor-workspace";
 import { WorkspaceLayoutClientWrapper } from "./workspace-layout-client-wrapper";
