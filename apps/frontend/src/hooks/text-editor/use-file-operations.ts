@@ -11,56 +11,23 @@ import { toast } from "sonner";
 
 interface UseFileOperationsProps {
   projectId: string;
-  nodeId: string;
+  initialNode: FsNodeResponse;
 }
 
 export const useFileOperations = ({
   projectId,
-  nodeId,
+  initialNode,
 }: UseFileOperationsProps) => {
-  const [node, setNode] = useState<FsNodeResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [node, setNode] = useState<FsNodeResponse | null>(initialNode);
   const [saving, setSaving] = useState(false);
   const { session } = useAuth();
   const router = useRouter();
 
-  const loadFile = useCallback(async () => {
-    if (!session?.access_token || !nodeId) return;
-
-    setLoading(true);
-    try {
-      const response = await getFsNode(nodeId, session.access_token);
-
-      if (response.success && response.data) {
-        const nodeData = response.data;
-
-        // Check if it's a file (can't edit folders)
-        if (nodeData.node_type !== "file") {
-          toast.error("Cannot edit folders");
-          router.push(`/workspace/${projectId}`);
-          return;
-        }
-
-        setNode(nodeData);
-        return nodeData;
-      } else {
-        toast.error("File not found");
-        router.push(`/workspace/${projectId}`);
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching node:", error);
-      toast.error("Failed to load file");
-      router.push(`/workspace/${projectId}`);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [nodeId, session?.access_token, projectId, router]);
-
   const saveFile = useCallback(
     async (content: string) => {
       if (!node || !session?.access_token) {
+        console.log("NOT SAVING FILE RIGHT NOW");
+        console.log("access token is ", session?.access_token);
         return false;
       }
 
@@ -69,7 +36,7 @@ export const useFileOperations = ({
         const updateData: UpdateFsNodeDto = { content };
 
         const response = await updateFsNode(
-          nodeId,
+          node.id,
           updateData,
           session.access_token
         );
@@ -90,7 +57,7 @@ export const useFileOperations = ({
         setSaving(false);
       }
     },
-    [node, nodeId, session?.access_token]
+    [node, session?.access_token]
   );
 
   const deleteFile = useCallback(async () => {
@@ -99,11 +66,11 @@ export const useFileOperations = ({
     if (!confirm(`Are you sure you want to delete "${node.name}"?`)) return;
 
     try {
-      const response = await deleteFsNode(nodeId, session.access_token);
+      const response = await deleteFsNode(node.id, session.access_token);
 
       if (response.success) {
         toast.success("File deleted successfully");
-        router.push(`/workspace/${projectId}`);
+        router.push(`/workspace/${projectId}/text-editor`);
       } else {
         toast.error(response.error || "Failed to delete file");
       }
@@ -111,13 +78,11 @@ export const useFileOperations = ({
       console.error("Error deleting file:", error);
       toast.error("Failed to delete file");
     }
-  }, [node, nodeId, session?.access_token, projectId, router]);
+  }, [node, session?.access_token, projectId, router]);
 
   return {
     node,
-    loading,
     saving,
-    loadFile,
     saveFile,
     deleteFile,
   };

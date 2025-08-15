@@ -1,5 +1,6 @@
 import { FocusMode } from "@/stores/use-focus-mode-store";
 import { clsx, type ClassValue } from "clsx";
+
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
 import { twMerge } from "tailwind-merge";
 
@@ -43,3 +44,88 @@ export const countNodes = (
 
   return { files, folders };
 };
+
+export function findNodeById(
+  nodes: FsNodeTreeResponse[],
+  nodeId: string
+): FsNodeTreeResponse | null {
+  for (const node of nodes) {
+    if (node.id === nodeId) return node;
+    if (node.children) {
+      const found = findNodeById(node.children, nodeId);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+export function getFolderNodes(
+  nodes: FsNodeTreeResponse[]
+): Array<{ id: string; name: string; path: string }> {
+  const folders: Array<{ id: string; name: string; path: string }> = [];
+
+  const traverse = (nodeList: FsNodeTreeResponse[], parentPath = "") => {
+    nodeList.forEach((node) => {
+      if (node.node_type === "folder") {
+        const currentPath = parentPath
+          ? `${parentPath}/${node.name}`
+          : node.name;
+        folders.push({
+          id: node.id,
+          name: node.name,
+          path: currentPath,
+        });
+
+        if (node.children) {
+          traverse(node.children, currentPath);
+        }
+      }
+    });
+  };
+
+  traverse(nodes);
+  return folders;
+}
+
+export function flattenNodes(
+  nodes: FsNodeTreeResponse[]
+): FsNodeTreeResponse[] {
+  const flattened: FsNodeTreeResponse[] = [];
+  const traverse = (nodeList: FsNodeTreeResponse[]) => {
+    nodeList.forEach((node) => {
+      flattened.push(node);
+      if (node.children) traverse(node.children);
+    });
+  };
+  traverse(nodes);
+  return flattened;
+}
+
+export function countChildren(node: FsNodeTreeResponse): number {
+  let count = 0;
+  if (node.children) {
+    count += node.children.length;
+    node.children.forEach((child) => {
+      count += countChildren(child);
+    });
+  }
+  return count;
+}
+
+export function convertNodesToTreeElements(nodes: FsNodeTreeResponse[]): Array<{
+  id: string;
+  name: string;
+  isSelectable: boolean;
+  children: any[];
+}> {
+  const convertNode = (
+    node: FsNodeTreeResponse
+  ): { id: string; name: string; isSelectable: boolean; children: any[] } => ({
+    id: node.id,
+    name: node.name,
+    isSelectable: node.node_type === "file",
+    children: node.children?.map(convertNode) || [],
+  });
+
+  return nodes.map(convertNode);
+}

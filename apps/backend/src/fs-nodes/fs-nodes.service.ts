@@ -124,7 +124,6 @@ export class FsNodesService {
       );
     }
 
-    // ✅ SIMPLIFIED: Use the pre-calculated hierarchy from the view
     return this.buildTreeFromView(nodes || []);
   }
 

@@ -1,23 +1,26 @@
 "use client";
 
 import { useEffect } from "react";
-import { TextEditor } from "@/components/workspace/editor/text-editor";
+import { TextEditor } from "@/components/editor-workspace/editor/text-editor";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
-import { FileLoadingState, FileNotFoundState } from "./loading-states";
+import { FileNotFoundState } from "./loading-states";
+import { FsNodeResponse } from "@detective-quill/shared-types";
 
 interface TextEditorContainerProps {
   projectId: string;
-  nodeId: string;
+  node: FsNodeResponse;
 }
 
 export function TextEditorContainer({
   projectId,
-  nodeId,
+  node,
 }: TextEditorContainerProps) {
   // File operations (load, save, delete)
-  const { node, loading, saving, loadFile, saveFile, deleteFile } =
-    useFileOperations({ projectId, nodeId });
+  const { saving, saveFile, deleteFile } = useFileOperations({
+    projectId,
+    initialNode: node,
+  });
 
   // Content management (tracking changes, auto-save)
   const { content, isDirty, updateContent, saveContent } = useContentManager({
@@ -26,11 +29,6 @@ export function TextEditorContainer({
     onSave: saveFile,
   });
 
-  // Load file when component mounts or nodeId changes
-  useEffect(() => {
-    loadFile();
-  }, [loadFile]);
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -38,10 +36,10 @@ export function TextEditorContainer({
     };
   }, []);
 
-  // Loading state
-  if (loading) {
-    return <FileLoadingState />;
-  }
+  // // Loading state
+  // if (loading) {
+  //   return <FileLoadingState />;
+  // }
 
   // File not found state
   if (!node) {
