@@ -7,10 +7,7 @@ import {
 } from "@detective-quill/shared-types";
 import { notFound, redirect } from "next/navigation";
 
-export async function getEditorWorkspaceData(
-  projectId: string,
-  nodeId?: string
-) {
+async function getEditorWorkspaceData(projectId: string, nodeId?: string) {
   const supabase = await createSupabaseServerClient();
 
   // Get current user
@@ -164,3 +161,5 @@ function buildTreeFromView(nodes: any[]): FsNodeTreeResponse[] {
 
   return rootNodes;
 }
+
+export { getEditorWorkspaceData, fetchProject, fetchProjectTree, fetchNode };
