@@ -10,6 +10,7 @@ import {
   FsNodeResponse,
   ProjectResponse,
 } from "@detective-quill/shared-types";
+import { useAuth } from "@/context/auth-context";
 
 interface WorkspaceLayoutClientWrapperProps {
   children: React.ReactNode;
@@ -33,6 +34,7 @@ export function WorkspaceLayoutClientWrapper({
   // Client-side state for interactive features
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [nodes, setNodes] = useState<FsNodeTreeResponse[]>(initialNodes);
+  const { session } = useAuth();
 
   // Global focus mode state
   const focusMode = useFocusModeStore((state) => state.focusMode);
@@ -53,12 +55,6 @@ export function WorkspaceLayoutClientWrapper({
 
   const showSidebar = sidebarOpen && focusMode === "NORMAL";
   const showHeader = focusMode === "NORMAL";
-
-  // Create session object for compatibility with existing components
-  const session = {
-    access_token: user?.access_token || "", // You might need to get this differently
-    user,
-  };
 
   return (
     <div className="flex h-screen w-full bg-background">
