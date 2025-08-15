@@ -1,4 +1,4 @@
-import { WorkspaceLayout } from "@/components/workspace/workspace-layout";
+import { WorkspaceLayout } from "@/components/editor-workspace/workspace-layout";
 import { Suspense } from "react";
 
 export const metadata = {

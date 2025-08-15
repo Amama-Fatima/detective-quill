@@ -1,4 +1,4 @@
-import { ProjectLanding } from "@/components/workspace/project-landing";
+import { ProjectLanding } from "@/components/editor-workspace/project-landing";
 import { Suspense } from "react";
 
 interface ProjectPageProps {

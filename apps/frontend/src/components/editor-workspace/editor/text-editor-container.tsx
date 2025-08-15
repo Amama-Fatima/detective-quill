@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { TextEditor } from "@/components/workspace/editor/text-editor";
+import { TextEditor } from "@/components/editor-workspace/editor/text-editor";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
 import { FileLoadingState, FileNotFoundState } from "./loading-states";

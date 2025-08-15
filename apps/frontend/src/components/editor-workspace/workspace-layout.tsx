@@ -8,10 +8,10 @@ import { useFocusModeStore } from "@/stores/use-focus-mode-store";
 import { getProject } from "@/lib/backend-calls/projects";
 import { getFsNode } from "@/lib/backend-calls/fs-nodes";
 import { toast } from "sonner";
-import { WorkspaceLoading } from "@/components/workspace/loading-states";
-import { WorkspaceError } from "@/components/workspace/workspace-error";
-import { WorkspaceSidebar } from "@/components/workspace/workspace-sidebar";
-import { WorkspaceHeaderBar } from "@/components/workspace/workspace-header-bar";
+import { WorkspaceLoading } from "@/components/editor-workspace/loading-states";
+import { WorkspaceError } from "@/components/editor-workspace/workspace-error";
+import { WorkspaceSidebar } from "@/components/editor-workspace/workspace-sidebar";
+import { WorkspaceHeaderBar } from "@/components/editor-workspace/workspace-header-bar";
 import {
   FsNodeTreeResponse,
   FsNodeResponse,
