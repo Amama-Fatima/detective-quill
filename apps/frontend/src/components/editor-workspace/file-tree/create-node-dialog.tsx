@@ -45,7 +45,6 @@ export function CreateNodeDialog({
   availableFolders = [],
 }: CreateNodeDialogProps) {
   const [name, setName] = useState("");
-  console.log("available folders are ", availableFolders);
   const [selectedFolder, setSelectedFolder] = useState<string>(
     folderName
       ? availableFolders.find((f) => f.name === folderName)?.id || ""
