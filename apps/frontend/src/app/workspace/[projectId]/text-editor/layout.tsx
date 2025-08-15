@@ -8,19 +8,21 @@ export const metadata = {
 
 interface WorkspaceLayoutPageProps {
   children: React.ReactNode;
-  params: Promise<{ projectId: string }>; // params is now a Promise
+  params: Promise<{ projectId: string; nodeId: string | undefined }>; // params is now a Promise
 }
 
 export default async function Layout({
   children,
   params,
 }: WorkspaceLayoutPageProps) {
-  const { projectId } = await params;
+  const { projectId, nodeId } = await params;
 
   return (
-    <Suspense fallback={<WorkspaceLayoutSkeleton />}>
-      <WorkspaceLayout projectId={projectId}>{children}</WorkspaceLayout>
-    </Suspense>
+    // <Suspense fallback={<WorkspaceLayoutSkeleton />}>
+    <WorkspaceLayout projectId={projectId} nodeId={nodeId}>
+      {children}
+    </WorkspaceLayout>
+    // {/* </Suspense> */}
   );
 }
 

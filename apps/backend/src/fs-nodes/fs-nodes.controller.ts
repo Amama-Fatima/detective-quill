@@ -81,7 +81,6 @@ export class FsNodesController {
     }
   }
 
-  // ✅ NEW: Get node children using DB function
   @Get(":id/children")
   async getNodeChildren(
     @Param("id") id: string,
