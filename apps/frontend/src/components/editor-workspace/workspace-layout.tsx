@@ -15,7 +15,6 @@ export async function WorkspaceLayout({
   nodeId,
 }: WorkspaceLayoutProps) {
   try {
-    // Fetch all data server-side
     const { project, nodes, currentNode, user } = await getEditorWorkspaceData(
       projectId,
       nodeId
@@ -28,7 +27,6 @@ export async function WorkspaceLayout({
         currentNode={currentNode}
         projectId={projectId}
         nodeId={nodeId}
-        user={user}
       >
         {children}
       </WorkspaceLayoutClientWrapper>

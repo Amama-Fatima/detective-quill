@@ -19,7 +19,6 @@ interface WorkspaceLayoutClientWrapperProps {
   currentNode: FsNodeResponse | null;
   projectId: string;
   nodeId?: string;
-  user: any;
 }
 
 export function WorkspaceLayoutClientWrapper({
@@ -29,7 +28,6 @@ export function WorkspaceLayoutClientWrapper({
   currentNode,
   projectId,
   nodeId,
-  user,
 }: WorkspaceLayoutClientWrapperProps) {
   // Client-side state for interactive features
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -82,7 +80,6 @@ export function WorkspaceLayoutClientWrapper({
             projectName={project.title}
             nodeId={nodeId}
             currentNodePath={currentNode?.path ?? undefined}
-            nodeLoading={false} // No loading since data is pre-fetched
           />
         )}
 
