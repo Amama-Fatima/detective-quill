@@ -16,10 +16,10 @@ export class CreateBlueprintDto implements ICreateBlueprintDto {
 
   @IsString()
   @IsNotEmpty()
-  projectId: string;
+  project_id: string;
 
   @IsString()
-  @IsIn(["character", "timeline"])
+  @IsIn(["character", "timeline", "other"])
   type: BlueprintType;
 }
 

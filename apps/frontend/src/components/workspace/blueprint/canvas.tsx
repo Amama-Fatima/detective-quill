@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -15,61 +14,25 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
-import { CardType } from "@detective-quill/shared-types";
+import { BlueprintType, CardType } from "@detective-quill/shared-types";
 
 interface CanvasProps {
-  projectName: string;
-  type: string;
+  projectId: string;
+  blueprintId: string;
+  type: BlueprintType;
+  cardTypes: CardType[];
+  userTypes: CardType[] | null;
 }
 import CanvasCardNode from "./canvas-card-node";
 
-// Hardcoded mapping for now
-const CARD_TYPES: Record<string, CardType[]> = {
-  character: [
-    {
-      id: "bio",
-      title: "Bio",
-      description: "A brief biography of the character.",
-      is_custom: false,
-      blueprint_type: "character",
-      created_at: "ioee",
-      user_id: null,
-    },
-    {
-      id: "appearance",
-      title: "Physical Appearance",
-      description: "Details about the character's appearance.",
-      is_custom: false,
-      blueprint_type: "character",
-      created_at: "1ejds",
-      user_id: null,
-    },
-  ],
-  culture: [
-    {
-      id: "politics",
-      title: "Political System",
-      description: "The political system of the culture.",
-      is_custom: false,
-      blueprint_type: "timeline",
-      created_at: "pokds",
-      user_id: null,
-    },
-    {
-      id: "social",
-      title: "Social Structure",
-      description: "The social hierarchy and structure.",
-      is_custom: false,
-      blueprint_type: "timeline",
-      created_at: "1ejds",
-      user_id: null,
-    },
-  ],
-};
-
-export default function Canvas({ projectName, type }: CanvasProps) {
-  const blueprintType = type || "character";
-  projectName = projectName || "Untitled Project";
+export default function Canvas({
+  projectId,
+  blueprintId,
+  type,
+  cardTypes,
+  userTypes,
+}: CanvasProps) {
+  const projectName = "Untitled Project";
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
@@ -130,22 +93,26 @@ export default function Canvas({ projectName, type }: CanvasProps) {
       {/* Top Bar */}
       <div className="flex justify-between items-center px-4 py-2 bg-gray-900 border-b border-gray-300">
         <h1 className="text-lg font-semibold capitalize">
-          {projectName} — {blueprintType} Blueprint
+          {projectName} — {type} Blueprint
         </h1>
         <div>
           <Button
-            onClick={() => {
-              const types = CARD_TYPES[blueprintType] || [];
-              const choice = window.prompt(
-                `Choose card type:\n${types
-                  .map((t, i) => `${i + 1}. ${t.title}`)
-                  .join("\n")}`
-              );
-              const index = Number(choice) - 1;
-              if (!isNaN(index) && types[index]) {
-                addCard(types[index]);
-              }
-            }}
+            // onClick={() => {
+            //   const choice = window.prompt(
+            //     `Choose card type:\n${cardTypes
+            //       .map((t, i) => {
+            //         if (t.blueprint_type == type) {
+            //           return `${i + 1}. ${t.title}`;
+            //         }
+            //       })
+            //       .join("\n")}`
+            //   );
+
+            //   const index = Number(choice) - 1;
+            //   if (!isNaN(index) && cardTypes[index]) {
+            //     addCard(cardTypes[index]);
+            //   }
+            // }}
           >
             + Add Card
           </Button>

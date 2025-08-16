@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { createSupabaseBrowserClient } from "@/supabase/browser-client";
+import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { Chrome } from "lucide-react";
 
 interface SocialAuthProps {
@@ -10,8 +10,6 @@ interface SocialAuthProps {
 }
 
 export function SocialAuth({ mode, props }: SocialAuthProps) {
-  const supabaseBrowserClient = createSupabaseBrowserClient();
-
   const handleGoogleAuth = async () => {
     try {
       await supabaseBrowserClient.auth.signInWithOAuth({
@@ -39,7 +37,7 @@ export function SocialAuth({ mode, props }: SocialAuthProps) {
       <Button
         variant="outline"
         onClick={handleGoogleAuth}
-        className="w-full flex items-center justify-center gap-3 h-12 text-white border-slate-600 hover:border-slate-500 transition-colors"
+        className="w-full flex items-center cursor-pointer justify-center gap-3 h-12 text-white border-slate-600 hover:border-slate-500 transition-colors"
       >
         <Chrome className="h-5 w-5" />
         {actionText} with Google

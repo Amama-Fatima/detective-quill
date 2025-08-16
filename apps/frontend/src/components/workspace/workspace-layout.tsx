@@ -4,41 +4,95 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { useAuth } from "@/context/auth-context";
-import { useChapters } from "@/hooks/use-chapters";
+import { useFsNodes } from "@/hooks/use-fs-nodes";
 import { cn } from "@/lib/utils";
-import { EnhancedFileTree } from "./file-tree/file-tree";
-import { ChapterFile } from "@/lib/types/workspace";
+import { FileTree } from "./file-tree/file-tree";
+import {
+  FsNodeTreeResponse,
+  FsNodeResponse,
+} from "@detective-quill/shared-types";
+import { getProject } from "@/lib/backend-calls/projects";
+import { getFsNode } from "@/lib/backend-calls/fs-nodes";
+import { toast } from "sonner";
 
 interface WorkspaceLayoutProps {
-  children: React.ReactElement;
-  projectName: string;
+  children: React.ReactNode;
+  projectId: string;
 }
 
-export function WorkspaceLayout({
-  children,
-  projectName,
-}: WorkspaceLayoutProps) {
+export function WorkspaceLayout({ children, projectId }: WorkspaceLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [focusMode, setFocusMode] = useState<"normal" | "app" | "browser">(
     "normal"
   );
-  const [chapterFiles, setChapterFiles] = useState<ChapterFile[]>([]);
+  const [projectName, setProjectName] = useState<string>("");
+  const [projectLoading, setProjectLoading] = useState(true);
+  const [currentNode, setCurrentNode] = useState<FsNodeResponse | null>(null);
+  const [nodeLoading, setNodeLoading] = useState(false);
 
   const {
-    chapterFiles: initialFiles,
-    loading,
+    nodes,
+    loading: nodesLoading,
     error,
     refetch,
-  } = useChapters({ projectName });
+    setNodes,
+  } = useFsNodes({ projectId });
   const { session } = useAuth();
   const params = useParams();
+  const nodeId = params.nodeId as string;
 
+  // Fetch project details
   useEffect(() => {
-    setChapterFiles(initialFiles);
-  }, [initialFiles]);
+    const fetchProject = async () => {
+      if (!session?.access_token || !projectId) return;
 
-  const updateChapterFiles = (updatedFiles: ChapterFile[]) => {
-    setChapterFiles(updatedFiles);
+      try {
+        const response = await getProject(projectId, session.access_token);
+        if (response.success && response.data) {
+          setProjectName(response.data.title);
+        } else {
+          toast.error("Failed to load project");
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+        toast.error("Failed to load project");
+      } finally {
+        setProjectLoading(false);
+      }
+    };
+
+    fetchProject();
+  }, [projectId, session?.access_token]);
+
+  // Fetch current node details when nodeId changes
+  useEffect(() => {
+    const fetchCurrentNode = async () => {
+      if (!session?.access_token || !nodeId) {
+        setCurrentNode(null);
+        return;
+      }
+
+      setNodeLoading(true);
+      try {
+        const response = await getFsNode(nodeId, session.access_token);
+        if (response.success && response.data) {
+          setCurrentNode(response.data);
+        } else {
+          setCurrentNode(null);
+        }
+      } catch (error) {
+        console.error("Error fetching current node:", error);
+        setCurrentNode(null);
+      } finally {
+        setNodeLoading(false);
+      }
+    };
+
+    fetchCurrentNode();
+  }, [nodeId, session?.access_token]);
+
+  const updateNodes = (updatedNodes: FsNodeTreeResponse[]) => {
+    setNodes(updatedNodes);
   };
 
   // Handle focus mode changes from editor
@@ -49,8 +103,83 @@ export function WorkspaceLayout({
   // Hide sidebar in focus modes
   const showSidebar = sidebarOpen && focusMode === "normal";
 
-  if (loading) {
-    return <div>Loading...</div>;
+  // Count files and folders
+  const { filesCount, foldersCount } = React.useMemo(() => {
+    const countNodes = (
+      nodeList: FsNodeTreeResponse[]
+    ): { files: number; folders: number } => {
+      let files = 0;
+      let folders = 0;
+
+      nodeList.forEach((node) => {
+        if (node.node_type === "file") {
+          files++;
+        } else {
+          folders++;
+        }
+
+        if (node.children) {
+          const childCounts = countNodes(node.children);
+          files += childCounts.files;
+          folders += childCounts.folders;
+        }
+      });
+
+      return { files, folders };
+    };
+
+    const counts = countNodes(nodes);
+    return { filesCount: counts.files, foldersCount: counts.folders };
+  }, [nodes]);
+
+  // Generate breadcrumb components from file path
+  const generateBreadcrumbs = () => {
+    if (!currentNode?.path) return null;
+
+    // Remove leading slash and split the path
+    const pathParts = currentNode.path.replace(/^\//, "").split("/");
+
+    return (
+      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <span className="text-foreground font-medium">{projectName}</span>
+        {pathParts.map((part, index) => (
+          <React.Fragment key={index}>
+            <span>/</span>
+            <span
+              className={cn(
+                index === pathParts.length - 1
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground cursor-pointer"
+              )}
+            >
+              {part}
+            </span>
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
+  if (projectLoading || nodesLoading) {
+    return (
+      <div className="flex h-screen w-full bg-background">
+        <div className="w-80 border-r bg-card/50 animate-pulse">
+          <div className="p-4 border-b">
+            <div className="h-4 bg-muted rounded w-32 mb-2" />
+            <div className="h-3 bg-muted rounded w-24" />
+          </div>
+          <div className="p-4 space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-8 bg-muted rounded" />
+            ))}
+          </div>
+        </div>
+        <div className="flex-1 animate-pulse">
+          <div className="h-12 border-b bg-muted/20" />
+          <div className="flex-1 bg-muted/10" />
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -67,17 +196,19 @@ export function WorkspaceLayout({
         >
           <WorkspaceHeader
             projectName={projectName}
-            filesCount={chapterFiles.length}
+            filesCount={filesCount}
+            foldersCount={foldersCount}
             onCreateFile={() => {
-              // This will be handled by EnhancedFileTree component
+              // This will be handled by FileTree component
             }}
           />
-          <EnhancedFileTree
-            files={chapterFiles}
-            onFilesChange={updateChapterFiles}
+          <FileTree
+            nodes={nodes}
+            onNodesChange={updateNodes}
+            projectId={projectId}
             projectName={projectName}
             session={session}
-            loading={loading}
+            loading={nodesLoading}
           />
         </aside>
       )}
@@ -93,16 +224,26 @@ export function WorkspaceLayout({
               >
                 {sidebarOpen ? "←" : "→"}
               </button>
-              <span className="text-sm text-muted-foreground">
-                {projectName} / {params.chapterName}
-              </span>
+
+              {/* Enhanced Breadcrumbs with File Path */}
+              {nodeLoading ? (
+                <div className="h-4 bg-muted rounded w-48 animate-pulse" />
+              ) : nodeId && currentNode ? (
+                generateBreadcrumbs()
+              ) : (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <span className="text-foreground font-medium">
+                    {projectName}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Pass focus mode handler to children */}
         <div className="flex-1">
-          {React.cloneElement(children, {
+          {React.cloneElement(children as React.ReactElement, {
             onFocusModeChange: handleFocusModeChange,
           })}
         </div>

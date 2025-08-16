@@ -127,7 +127,7 @@ export function SignInForm() {
 
         <Button
           type="submit"
-          className="w-full h-11 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+          className="w-full h-11 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
           disabled={isLoading}
         >
           {isLoading ? (

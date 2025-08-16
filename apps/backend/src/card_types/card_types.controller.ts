@@ -5,30 +5,36 @@ import {
   Get,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from "@nestjs/common";
 import { CardTypesService } from "./card_types.service";
 import { AuthGuard } from "src/auth/auth.guard";
+import { CardType, ApiResponse } from "@detective-quill/shared-types";
 import {
-  GetCardTypeResponse,
-  GetCardTypesResponse,
-} from "@detective-quill/shared-types";
-import { CreateCardTypeDto, UpdateCardTypeDto } from "./dto/card_types.dto";
+  CreateCardTypeDto,
+  UpdateCardTypeDto,
+  GetCardTypesDto,
+} from "./dto/card_types.dto";
 
 @Controller("card-types")
 @UseGuards(AuthGuard)
 export class CardTypesController {
   constructor(private readonly cardTypesService: CardTypesService) {}
 
-  @Get()
-  async getUserCardTypes(@Req() request: any): Promise<GetCardTypesResponse> {
+  @Get("user")
+  async getUserCardTypes(
+    @Req() request: any,
+    @Query("blueprint_type") blueprint_type: GetCardTypesDto
+  ): Promise<ApiResponse<CardType[]>> {
     const userId = request.user.id;
     const access_token = request.accessToken;
     try {
       const cardTypes = await this.cardTypesService.getUserCardTypes(
         userId,
-        access_token
+        access_token,
+        blueprint_type.blueprint_type
       );
       return {
         success: true,
@@ -44,11 +50,38 @@ export class CardTypesController {
     }
   }
 
+  @Get("default")
+  async getDefaultCardTypes(
+    @Req() request: any,
+    @Query("blueprint_type") blueprint_type: GetCardTypesDto
+  ): Promise<ApiResponse<CardType[]>> {
+    const access_token = request.accessToken;
+
+    try {
+      const cardTypes =
+        await this.cardTypesService.getDefaultCardTypesForBlueprintType(
+          blueprint_type.blueprint_type,
+          access_token
+        );
+      return {
+        success: true,
+        data: cardTypes,
+        message: "Default card types retrieved successfully",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: [],
+        message: "Error retrieving default card types: " + error.message,
+      };
+    }
+  }
+
   @Post()
   async createCardType(
     @Req() request: any,
     @Body() createCardTypeDto: CreateCardTypeDto
-  ): Promise<GetCardTypeResponse> {
+  ): Promise<ApiResponse<CardType>> {
     const userId = request.user.id;
     const access_token = request.accessToken;
 
@@ -66,7 +99,6 @@ export class CardTypesController {
     } catch (error) {
       return {
         success: false,
-        data: null,
         message: "Error creating card type: " + error.message,
       };
     }
@@ -76,7 +108,7 @@ export class CardTypesController {
   async updateCardType(
     @Req() request: any,
     @Body() updateCardTypeDto: UpdateCardTypeDto
-  ): Promise<GetCardTypeResponse> {
+  ): Promise<ApiResponse<CardType>> {
     const userId = request.user.id;
     const access_token = request.accessToken;
     const cardTypeId = request.params.id;
@@ -96,14 +128,13 @@ export class CardTypesController {
     } catch (error) {
       return {
         success: false,
-        data: null,
         message: "Error updating card type: " + error.message,
       };
     }
   }
 
   @Delete(":id")
-  async deleteCardType(@Req() request: any): Promise<GetCardTypeResponse> {
+  async deleteCardType(@Req() request: any): Promise<ApiResponse<void>> {
     const userId = request.user.id;
     const access_token = request.accessToken;
     const cardTypeId = request.params.id;

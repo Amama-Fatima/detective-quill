@@ -10,10 +10,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { BlueprintsService } from "./blueprints.service";
-import {
-  GetBlueprintResponse,
-  GetBlueprintsResponse,
-} from "@detective-quill/shared-types";
+import { ApiResponse, Blueprint } from "@detective-quill/shared-types";
 import { CreateBlueprintDto, UpdateBlueprintDto } from "./dto/blueprints.dto";
 import { AuthGuard } from "src/auth/auth.guard";
 
@@ -22,65 +19,11 @@ import { AuthGuard } from "src/auth/auth.guard";
 export class BlueprintsController {
   constructor(private readonly blueprintsService: BlueprintsService) {}
 
-  @Get()
-  async getUserBlueprints(@Req() request: any): Promise<GetBlueprintsResponse> {
-    const userId = request.user.id;
-    const accessToken = request.accessToken;
-
-    try {
-      const blueprints = await this.blueprintsService.fetchUserBlueprints(
-        userId,
-        accessToken
-      );
-
-      return {
-        success: true,
-        data: blueprints ?? [],
-        message: "Blueprints retrieved successfully",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        data: [],
-        message: "Error retrieving blueprints: " + error.message,
-      };
-    }
-  }
-
-  @Get(":id")
-  async getUserBlueprintById(
-    @Req() request: any
-  ): Promise<GetBlueprintResponse> {
-    const userId = request.user.id;
-    const accessToken = request.accessToken;
-    const blueprintId = request.params.id;
-
-    try {
-      const blueprint = await this.blueprintsService.fetchUserBlueprintById(
-        userId,
-        accessToken,
-        blueprintId
-      );
-
-      return {
-        success: true,
-        data: blueprint,
-        message: "Blueprint retrieved successfully",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        data: null,
-        message: "Error retrieving blueprint by ID: " + error.message,
-      };
-    }
-  }
-
   @Post()
   async createBlueprint(
     @Body() createBlueprintDto: CreateBlueprintDto,
     @Req() request: any
-  ): Promise<GetBlueprintResponse> {
+  ): Promise<ApiResponse<Blueprint>> {
     const userId = request.user.id;
     const accessToken = request.accessToken;
 
@@ -99,17 +42,16 @@ export class BlueprintsController {
     } catch (error) {
       return {
         success: false,
-        data: null,
         message: "Error creating blueprint: " + error.message,
       };
     }
   }
 
   @Put(":id")
-  async updateBlueprint(
+  async updateBlueprintById(
     @Req() request: any,
     @Body() updateBlueprintDto: UpdateBlueprintDto
-  ): Promise<GetBlueprintResponse> {
+  ): Promise<ApiResponse<Blueprint>> {
     const userId = request.user.id;
     const accessToken = request.accessToken;
     const blueprintId = request.params.id;
@@ -134,16 +76,13 @@ export class BlueprintsController {
     } catch (error) {
       return {
         success: false,
-        data: null,
         message: "Error updating blueprint: " + error.message,
       };
     }
   }
 
   @Delete(":id")
-  async deleteBlueprint(
-    @Req() request: any
-  ): Promise<{ success: boolean; message: string }> {
+  async deleteBlueprintById(@Req() request: any): Promise<ApiResponse<void>> {
     const userId = request.user.id;
     const accessToken = request.accessToken;
     const blueprintId = request.params.id;
@@ -166,3 +105,69 @@ export class BlueprintsController {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+  // @Get()
+  // async getUserBlueprints(
+  //   @Req() request: any
+  // ): Promise<ApiResponse<Blueprint[]>> {
+  //   const userId = request.user.id;
+  //   const accessToken = request.accessToken;
+
+  //   try {
+  //     const blueprints = await this.blueprintsService.fetchUserBlueprints(
+  //       userId,
+  //       accessToken
+  //     );
+
+  //     return {
+  //       success: true,
+  //       data: blueprints ?? [],
+  //       message: "Blueprints retrieved successfully",
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       data: [],
+  //       message: "Error retrieving blueprints: " + error.message,
+  //     };
+  //   }
+  // }
+
+  // @Get(":id")
+  // async getUserBlueprintById(
+  //   @Req() request: any
+  // ): Promise<ApiResponse<Blueprint>> {
+  //   const userId = request.user.id;
+  //   const accessToken = request.accessToken;
+  //   const blueprintId = request.params.id;
+
+  //   try {
+  //     const blueprint = await this.blueprintsService.fetchUserBlueprintById(
+  //       userId,
+  //       accessToken,
+  //       blueprintId
+  //     );
+
+  //     return {
+  //       success: true,
+  //       data: blueprint,
+  //       message: "Blueprint retrieved successfully",
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       message: "Error retrieving blueprint by ID: " + error.message,
+  //     };
+  //   }
+  // }

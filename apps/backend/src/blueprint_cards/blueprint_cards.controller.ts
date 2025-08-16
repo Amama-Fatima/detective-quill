@@ -11,10 +11,7 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "src/auth/auth.guard";
 import { BlueprintCardsService } from "./blueprint_cards.service";
-import {
-  GetBlueprintCardResponse,
-  GetBlueprintCardsResponse,
-} from "@detective-quill/shared-types";
+import { BlueprintCard, ApiResponse } from "@detective-quill/shared-types";
 import {
   CreateBlueprintCardDto,
   UpdateBlueprintCardDto,
@@ -25,40 +22,11 @@ import {
 export class BlueprintCardsController {
   constructor(private readonly blueprintCardsService: BlueprintCardsService) {}
 
-  @Get(":blueprintId")
-  async getAllCardsOfBlueprint(
-    @Req() request: any
-  ): Promise<GetBlueprintCardsResponse> {
-    const blueprintId = request.params.blueprintId;
-    const userId = request.user.id;
-    const accessToken = request.accessToken;
-
-    try {
-      const cards = await this.blueprintCardsService.fetchAllCardsOfBlueprint(
-        blueprintId,
-        userId,
-        accessToken
-      );
-
-      return {
-        success: true,
-        data: cards,
-        message: "Blueprint cards retrieved successfully",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        data: [],
-        message: "Error retrieving blueprint cards: " + error.message,
-      };
-    }
-  }
-
   @Post(":blueprintId")
   async createBlueprintCard(
     @Req() request: any,
     @Body() cardData: CreateBlueprintCardDto[]
-  ): Promise<GetBlueprintCardResponse> {
+  ): Promise<ApiResponse<BlueprintCard[]>> {
     const blueprintId = request.params.blueprintId;
     const userId = request.user.id;
     const accessToken = request.accessToken;
@@ -78,24 +46,26 @@ export class BlueprintCardsController {
     } catch (error) {
       return {
         success: false,
-        message: "Error creating blueprint card: " + error.message,
+        error: "Error creating blueprint card: " + error.message,
       };
     }
   }
 
-  @Put(":cardId")
+  @Put("/:blueprintId/:cardId")
   async updateBlueprintCard(
     @Req() request: any,
     @Body() cardData: UpdateBlueprintCardDto
-  ): Promise<GetBlueprintCardResponse> {
+  ): Promise<ApiResponse<BlueprintCard>> {
     const cardId = request.params.cardId;
     const userId = request.user.id;
+    const blueprintId = request.params.blueprintId;
     const accessToken = request.accessToken;
 
     try {
       const updatedCard = await this.blueprintCardsService.updateBlueprintCard(
         cardId,
         userId,
+        blueprintId,
         accessToken,
         cardData
       );
@@ -108,23 +78,23 @@ export class BlueprintCardsController {
     } catch (error) {
       return {
         success: false,
-        message: "Error updating blueprint card: " + error.message,
+        error: "Error updating blueprint card: " + error.message,
       };
     }
   }
 
-  @Delete(":cardId")
-  async deleteBlueprintCard(
-    @Req() request: any
-  ): Promise<GetBlueprintCardResponse> {
+  @Delete("/:blueprintId/:cardId")
+  async deleteBlueprintCard(@Req() request: any): Promise<ApiResponse<void>> {
     const cardId = request.params.cardId;
     const userId = request.user.id;
+    const blueprintId = request.params.blueprintId;
     const accessToken = request.accessToken;
 
     try {
       await this.blueprintCardsService.deleteBlueprintCard(
         cardId,
         userId,
+        blueprintId,
         accessToken
       );
 
@@ -135,8 +105,36 @@ export class BlueprintCardsController {
     } catch (error) {
       return {
         success: false,
-        message: "Error deleting blueprint card: " + error.message,
+        error: "Error deleting blueprint card: " + error.message,
       };
     }
   }
 }
+
+// @Get(":blueprintId")
+// async getAllCardsOfBlueprint(
+//   @Req() request: any
+// ): Promise<ApiResponse<BlueprintCard[]>> {
+//   const blueprintId = request.params.blueprintId;
+//   const userId = request.user.id;
+//   const accessToken = request.accessToken;
+
+//   try {
+//     const cards = await this.blueprintCardsService.fetchAllCardsOfBlueprint(
+//       blueprintId,
+//       userId,
+//       accessToken
+//     );
+
+//     return {
+//       success: true,
+//       data: cards ?? [],
+//       error: "Blueprint cards retrieved successfully",
+//     };
+//   } catch (error) {
+//     return {
+//       success: false,
+//       error: "Error retrieving blueprint cards: " + error.message,
+//     };
+//   }
+// }

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
-import { CardType } from "@detective-quill/shared-types";
+import { CardType, BlueprintType } from "@detective-quill/shared-types";
 import { CreateCardTypeDto, UpdateCardTypeDto } from "./dto/card_types.dto";
 
 @Injectable()
@@ -13,7 +13,8 @@ export class CardTypesService {
 
   async getUserCardTypes(
     userId: string,
-    accessToken: string
+    accessToken: string,
+    blueprint_type: BlueprintType
   ): Promise<CardType[] | null> {
     const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
@@ -21,13 +22,33 @@ export class CardTypesService {
       .from("card_types")
       .select("*")
       .eq("user_id", userId)
-      .eq("is_custom", true);
+      .eq("is_custom", true)
+      .eq("blueprint_type", blueprint_type);
 
     if (error) {
       throw new Error(`Error fetching card types: ${error.message}`);
     }
 
     return cardTypes as CardType[] | null;
+  }
+
+  async getDefaultCardTypesForBlueprintType(
+    blueprint_type: BlueprintType,
+    accessToken: string
+  ): Promise<CardType[]> {
+    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+
+    const { data: cardTypes, error } = await supabase
+      .from("card_types")
+      .select("*")
+      .eq("is_custom", false)
+      .eq("blueprint_type", blueprint_type);
+
+    if (error) {
+      throw new Error(`Error fetching card types: ${error.message}`);
+    }
+
+    return cardTypes as CardType[];
   }
 
   async createCardType(

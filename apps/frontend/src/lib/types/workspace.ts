@@ -1,27 +1,14 @@
-// Update your @/lib/types/workspace.ts file
+import { FsNodeTreeResponse } from "@detective-quill/shared-types";
 
-import { ChapterWithProject, Folder } from "@detective-quill/shared-types";
-
-// TODO: see the differnce between schema and types and if this can be shifted to the schema file
-export interface FolderStructure {
-  id: string;
-  name: string;
-  parentId: string | null;
-  order: number;
-  createdAt?: string;
-  updatedAt?: string;
+export interface WorkspaceFile extends FsNodeTreeResponse {
+  isDirty?: boolean;
+  isNew?: boolean;
+  slug?: string; // For URL routing
 }
 
-// Updated ChapterFile interface
-export interface ChapterFile {
+export interface TreeViewElement {
   id: string;
   name: string;
-  slug: string;
-  content: string; // Always string for frontend usage
-  updatedAt: string;
-  isDirty: boolean;
-  isNew: boolean;
-  chapterOrder: number;
-  originalChapter: ChapterWithProject;
-  folder?: string | null; // folder ID reference
+  isSelectable: boolean;
+  children?: TreeViewElement[];
 }

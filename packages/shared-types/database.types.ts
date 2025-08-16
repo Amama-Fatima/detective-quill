@@ -47,6 +47,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "blue_prints_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       blueprint_cards: {
@@ -55,30 +62,30 @@ export type Database = {
           card_type_id: string
           content: string | null
           created_at: string
-          id: number
+          id: string
           position_x: number | null
           position_y: number | null
-          userId: string
+          user_id: string
         }
         Insert: {
           blueprint_id?: string | null
           card_type_id: string
           content?: string | null
           created_at?: string
-          id?: number
+          id?: string
           position_x?: number | null
           position_y?: number | null
-          userId: string
+          user_id: string
         }
         Update: {
           blueprint_id?: string | null
           card_type_id?: string
           content?: string | null
           created_at?: string
-          id?: number
+          id?: string
           position_x?: number | null
           position_y?: number | null
-          userId?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -96,8 +103,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "blueprint_cards_userId_fkey"
-            columns: ["userId"]
+            foreignKeyName: "blueprint_cards_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
@@ -106,29 +113,29 @@ export type Database = {
       }
       card_types: {
         Row: {
-          blueprint_type: Database["public"]["Enums"]["blueprint_type"] | null
+          blueprint_type: Database["public"]["Enums"]["blueprint_type"]
           created_at: string
           description: string | null
           id: string
-          is_custom: boolean | null
+          is_custom: boolean
           title: string
           user_id: string | null
         }
         Insert: {
-          blueprint_type?: Database["public"]["Enums"]["blueprint_type"] | null
+          blueprint_type: Database["public"]["Enums"]["blueprint_type"]
           created_at?: string
           description?: string | null
           id?: string
-          is_custom?: boolean | null
+          is_custom?: boolean
           title?: string
           user_id?: string | null
         }
         Update: {
-          blueprint_type?: Database["public"]["Enums"]["blueprint_type"] | null
+          blueprint_type?: Database["public"]["Enums"]["blueprint_type"]
           created_at?: string
           description?: string | null
           id?: string
-          is_custom?: boolean | null
+          is_custom?: boolean
           title?: string
           user_id?: string | null
         }
@@ -283,7 +290,15 @@ export type Database = {
           title?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
     }
     Views: {
@@ -403,8 +418,8 @@ export type Database = {
       }
     }
     Enums: {
-      blue_print_type: "character" | "culture" | "other"
       blueprint_type: "character" | "timeline"
+      blueprint_types: "character" | "timeline" | "other"
       user_role: "writer" | "reader"
     }
     CompositeTypes: {
@@ -533,8 +548,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      blue_print_type: ["character", "culture", "other"],
       blueprint_type: ["character", "timeline"],
+      blueprint_types: ["character", "timeline", "other"],
       user_role: ["writer", "reader"],
     },
   },

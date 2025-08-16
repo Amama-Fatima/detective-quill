@@ -39,3 +39,9 @@ export class UpdateCardTypeDto implements IUpdateCardTypeDto {
   @IsOptional()
   blueprint_type: BlueprintType;
 }
+
+export class GetCardTypesDto {
+  @IsString()
+  @IsNotEmpty()
+  blueprint_type: BlueprintType;
+}
