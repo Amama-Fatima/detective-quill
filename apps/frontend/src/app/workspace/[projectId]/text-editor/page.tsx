@@ -65,7 +65,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </p>
 
           <div className="flex justify-center">
-            <Button className="gap-2">
+            <Button className="gap-2 cursor-pointer">
               <Plus className="h-4 w-4" />
               Create your first file
             </Button>

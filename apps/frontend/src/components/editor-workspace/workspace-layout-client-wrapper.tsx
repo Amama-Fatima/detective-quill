@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useFocusModeStore } from "@/stores/use-focus-mode-store";
 import { WorkspaceSidebar } from "@/components/editor-workspace/workspace-sidebar";
 import { WorkspaceHeaderBar } from "@/components/editor-workspace/workspace-header-bar";
-import { countNodes } from "@/lib/utils";
+import { countNodes } from "@/lib/utils/utils";
 import {
   FsNodeTreeResponse,
   FsNodeResponse,

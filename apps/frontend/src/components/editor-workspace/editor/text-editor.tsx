@@ -13,7 +13,7 @@ import {
   Minimize,
   Focus,
 } from "lucide-react";
-import { cn, getContainerClass, getHeaderClass } from "@/lib/utils";
+import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {
   Tooltip,
   TooltipContent,

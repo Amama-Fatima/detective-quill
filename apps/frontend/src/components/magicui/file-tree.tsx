@@ -14,7 +14,7 @@ import React, {
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 type TreeViewElement = {
   id: string;

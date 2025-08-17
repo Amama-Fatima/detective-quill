@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react";
 import { SignUpFormValues, signUpSchema } from "@/lib/schema";
-import { createSupabaseBrowserClient } from "@/supabase/browser-client";
-import { useMemo } from "react";
+import { supabaseBrowserClient } from "@/supabase/browser-client";
 
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,11 +24,6 @@ export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Memoize the Supabase client so it's not recreated on every render
-  const supabaseBrowserClient = useMemo(
-    () => createSupabaseBrowserClient(),
-    []
-  );
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),

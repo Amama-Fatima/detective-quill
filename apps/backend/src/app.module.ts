@@ -6,6 +6,9 @@ import { ConfigModule } from "@nestjs/config";
 import { ProjectsService } from "./projects/projects.service";
 import { ProjectsModule } from "./projects/projects.module";
 import { FsNodesModule } from "./fs-nodes/fs-nodes.module";
+import { BlueprintsModule } from './blueprints/blueprints.module';
+import { CardTypesModule } from './card_types/card_types.module';
+import { BlueprintCardsModule } from './blueprint_cards/blueprint_cards.module';
 
 @Module({
   controllers: [AppController],
@@ -18,6 +21,9 @@ import { FsNodesModule } from "./fs-nodes/fs-nodes.module";
     SupabaseModule,
     ProjectsModule,
     FsNodesModule,
+    BlueprintsModule,
+    CardTypesModule,
+    BlueprintCardsModule,
   ],
 })
 export class AppModule {}

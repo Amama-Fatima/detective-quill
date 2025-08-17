@@ -29,7 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import {
   File,
   Tree,
@@ -208,7 +208,7 @@ export function FileTree({
             <Button
               size="sm"
               onClick={() => openCreateDialog("file")}
-              className="w-full"
+              className="w-full cursor-pointer"
             >
               Create your first file
             </Button>

@@ -1,6 +1,6 @@
 // components/workspace/WorkspaceSidebar.tsx
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { WorkspaceHeader } from "@/components/editor-workspace/workspace-header";
 import { FileTree } from "./file-tree/file-tree";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";

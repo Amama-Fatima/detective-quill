@@ -4,7 +4,7 @@ import { useState, useEffect, JSX } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X, FileText, Folder } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
 
 interface SearchResult {
