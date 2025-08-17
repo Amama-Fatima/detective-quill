@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Button } from "../ui/button";
 import { CardType } from "@detective-quill/shared-types/api";
@@ -10,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { NewCardTypeForm } from "./new-card-type-form";
+import { useUserCardTypesStore } from "@/stores/use-user-card-types-store";
 
 interface AddCardPopoverProps {
   cardTypes: CardType[];
@@ -25,7 +27,15 @@ export const AddCardPopover = ({
   userTypes,
 }: AddCardPopoverProps) => {
   const type = cardTypes[0].blueprint_type;
-  console.log("user types", userTypes);
+  const { userTypes: storeUserTypes, setUserTypes: setStoreUserTypes } =
+    useUserCardTypesStore();
+
+  useEffect(() => {
+    if (userTypes && userTypes.length > 0) {
+      setStoreUserTypes(() => userTypes);
+    }
+  }, [userTypes, setStoreUserTypes]);
+
   return (
     <div>
       <Popover>
@@ -47,8 +57,8 @@ export const AddCardPopover = ({
           </div>
           <div>
             <p>Your Types</p>
-            {userTypes ? (
-              userTypes.map((type) => (
+            {storeUserTypes ? (
+              storeUserTypes.map((type) => (
                 <Button
                   key={type.id}
                   onClick={() => addCard(type)}

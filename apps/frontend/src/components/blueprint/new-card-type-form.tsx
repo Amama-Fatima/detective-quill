@@ -1,5 +1,5 @@
 "use client";
-import { set, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import React from "react";
 import { useState } from "react";
 import { BlueprintType } from "@detective-quill/shared-types";
 import { createCardType } from "@/lib/backend-calls/card-types";
+import { useUserCardTypesStore } from "@/stores/use-user-card-types-store";
 import { toast } from "sonner";
 
 interface NewCardTypeFormProps {
@@ -41,16 +42,21 @@ export const NewCardTypeForm = ({
   });
 
   const [loading, setLoading] = useState(false);
+  const { userTypes, setUserTypes } = useUserCardTypesStore();
 
-  const onSubmit = (data: z.infer<typeof NewCardTypeFormSchema>) => {
+  const onSubmit = async (data: z.infer<typeof NewCardTypeFormSchema>) => {
     const createCardTypeData = {
       ...data,
       blueprint_type: type,
     };
     try {
-    setLoading(true);
-      createCardType(accessToken, createCardTypeData);
+      setLoading(true);
+      const response = await createCardType(accessToken, createCardTypeData);
+      if (!response.data) {
+        throw new Error("No card type returned from API");
+      }
       form.reset();
+      setUserTypes((prev) => [...prev, response.data!]);
       toast.success("Card type created successfully");
     } catch (error) {
       console.error("Error creating card type:", error);
@@ -89,11 +95,14 @@ export const NewCardTypeForm = ({
             </FormItem>
           )}
         />
-        <Button type="submit" className="cursor-pointer">Create</Button>
+        <Button
+          type="submit"
+          disabled={loading}
+          className="cursor-pointer disabled:bg-gray-50"
+        >
+          {loading ? "Creating..." : "Create"}
+        </Button>
       </form>
     </Form>
   );
 };
-
-
-// todo: use zustand so that when a new card type is created it automatically shows up on the add card popover
