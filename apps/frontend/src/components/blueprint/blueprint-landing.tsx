@@ -1,6 +1,6 @@
-import Link from "next/link";
 import CreateBlueprintBtns from "./create-blueprint-btns";
 import { getUserBlueprints } from "@/lib/supabase-calls/blueprint";
+import { UserBlueprintsList } from "./user-bueprints-list";
 
 interface BlueprintLandingProps {
   projectId: string;
@@ -13,23 +13,22 @@ export default async function BlueprintLanding({
 }: BlueprintLandingProps) {
   const blueprints = await getUserBlueprints(userId);
   return (
-    <div>
-      <h1>Blueprint Page With All the blue prints</h1>
-      {blueprints.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {blueprints.map((blueprint) => (
-            <div key={blueprint.id} className="border p-4 rounded">
-              <Link href={`/workspace/${projectId}/blueprint/${blueprint.id}?type=${blueprint.type}`}>
-                <h2 className="text-lg font-bold">{blueprint.title}</h2>
-                <p>{blueprint.type}</p>
-              </Link>
-            </div>
-          ))}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Page Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-100">Blueprints</h1>
+            <p className="text-gray-400 mt-2">
+              Manage and organize your reusable design components and templates
+            </p>
+          </div>
+          <CreateBlueprintBtns projectId={projectId} />
         </div>
-      ) : (
-        <>No blueprints found</>
-      )}
-      <CreateBlueprintBtns projectId={projectId} />
+      </div>
+
+      {/* Blueprints List */}
+      <UserBlueprintsList blueprints={blueprints} projectId={projectId} />
     </div>
   );
 }

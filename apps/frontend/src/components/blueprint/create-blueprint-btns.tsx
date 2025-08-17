@@ -4,6 +4,8 @@ import { createBlueprint } from "@/lib/backend-calls/blueprints";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
+import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
+
 import { Button } from "@/components/ui/button";
 
 export default function CreateBlueprintBtns({
@@ -32,23 +34,28 @@ export default function CreateBlueprintBtns({
   };
 
   return (
-    <div className="flex flex-col gap-4 items-center justify-center-safe">
-      <Button
-        onClick={() => handleCreate("character")}
-        className="cursor-pointer"
-      >
-        <h2 className="text-xl font-bold mb-1">
-          Create New Character Blueprint
-        </h2>
-      </Button>
-      <Button
-        onClick={() => handleCreate("timeline")}
-        className="cursor-pointer"
-      >
-        <h2 className="text-xl font-bold mb-1">
-          Create New Timeline Blueprint
-        </h2>
-      </Button>
+    <div>
+      <Popover>
+        <PopoverTrigger className="bg-gray-300 py-2 px-6 cursor-pointer text-md text-black rounded-md">
+          Create Blueprint
+        </PopoverTrigger>
+        <PopoverContent>
+          <div className="flex flex-col gap-2">
+            <Button
+              className="cursor-pointer"
+              onClick={() => handleCreate("character")}
+            >
+              Character
+            </Button>
+            <Button
+              className="cursor-pointer"
+              onClick={() => handleCreate("timeline")}
+            >
+              Timeline
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

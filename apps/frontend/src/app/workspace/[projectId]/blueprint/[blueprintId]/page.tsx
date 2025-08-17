@@ -48,9 +48,6 @@ export default async function CreateBlueprintPage({
   return (
     <Suspense fallback={<CreateBlueprintPageSkeleton />}>
       <div>
-        <h1>
-          Create Blueprint of type: {type} for project: {projectId}{" "}
-        </h1>
         <Canvas
           blueprintId={blueprintId}
           type={type}

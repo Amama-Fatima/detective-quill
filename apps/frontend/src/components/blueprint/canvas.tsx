@@ -179,7 +179,7 @@ export default function Canvas({
   return (
     <div className="w-full h-screen flex flex-col">
       {/* Top Bar */}
-      <div className="flex justify-between items-center px-4 py-2 bg-gray-900 border-b border-gray-300">
+      <div className="flex justify-between items-center px-4 py-2 bg-gray-950 border-b border-gray-300">
         <EditableProjectName
           initialName={projectName}
           type={type}
@@ -194,6 +194,7 @@ export default function Canvas({
             userTypes={userTypes}
           />
           <Button
+            className="cursor-pointer"
             onClick={() => {
               onSave();
             }}

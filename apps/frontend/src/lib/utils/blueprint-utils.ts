@@ -34,7 +34,6 @@ export const mapNodesToBlueprintCards = (nodes: Node[]) => {
     content: typeof node.data.content === "string" ? node.data.content : null,
     position_x: node.position.x,
     position_y: node.position.y,
-
   }));
   console.log("Mapped nodes to blueprint cards:", result);
   return result;
@@ -56,4 +55,17 @@ export async function onSaveBlueprintName(
   } finally {
     setLoading(false);
   }
+}
+
+export function getBlueprintTypeColor(type: string) {
+  const colors = {
+    character: "text-blue-800 p-1 rounded-md",
+    timeline: "text-green-800 p-2 rounded-md",
+    location: "text-purple-800 p-2 rounded-md",
+    item: "text-orange-800 p-2 rounded-md",
+  };
+  return (
+    colors[type.toLowerCase() as keyof typeof colors] ||
+    "text-gray-800 p-2 rounded-md"
+  );
 }
