@@ -1,45 +1,65 @@
 import { Suspense } from "react";
-import Canvas from "@/components/workspace/blueprint/canvas";
+import Canvas from "@/components/blueprint/canvas";
 import { BlueprintType } from "@detective-quill/shared-types";
-import {getUserCardTypes, getDefaultCardTypesForBlueprintType} from "@/lib/supabase-calls/card-types";
+import {
+  getUserCardTypes,
+  getDefaultCardTypesForBlueprintType,
+} from "@/lib/supabase-calls/card-types";
+import {getUserBlueprintById} from "@/lib/supabase-calls/blueprint";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/dist/client/components/navigation";
+import { getAllCardsOfBlueprint } from "@/lib/supabase-calls/blueprint-cards";
 
 interface CreateBlueprintPageProps {
   params: {
     projectId: string;
     blueprintId: string;
   };
-    searchParams: {
+  searchParams: {
     [key: string]: BlueprintType;
   };
 }
 
 export default async function CreateBlueprintPage({
-  params, searchParams
+  params,
+  searchParams,
 }: CreateBlueprintPageProps) {
   const { projectId, blueprintId } = await params;
   const type = await searchParams?.type;
 
-    const supabase = await createSupabaseServerClient();  
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-  
-    if (!user) {
-      redirect("/login");
-    }
-  
-    const userId = user.id;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    const cardTypes = await getDefaultCardTypesForBlueprintType(supabase, type);
-    const userTypes = await getUserCardTypes(supabase, userId, type);
+  if (!user) {
+    redirect("/login");
+  }
+
+  const userId = user.id;
+
+  const cardTypes = await getDefaultCardTypesForBlueprintType(supabase, type);
+  const userTypes = await getUserCardTypes(supabase, userId, type);
+  const blueprint = await getUserBlueprintById(blueprintId, userId);
+  const blueprintCards = await getAllCardsOfBlueprint(supabase, blueprintId, userId);
+
+  console.log("These are use types from the page", userTypes)
 
   return (
     <Suspense fallback={<CreateBlueprintPageSkeleton />}>
       <div>
-        <h1>Create Blueprint of type: {type} for project: {projectId} </h1>
-        <Canvas projectId={projectId} blueprintId={blueprintId} type={type} cardTypes={cardTypes} userTypes={userTypes} />
+        <h1>
+          Create Blueprint of type: {type} for project: {projectId}{" "}
+        </h1>
+        <Canvas
+          blueprintId={blueprintId}
+          type={type}
+          cardTypes={cardTypes}
+          userTypes={userTypes}
+          userId={userId}
+          projectName={blueprint?.title || "Untitled Blueprint"}
+          prevBlueprintCards={blueprintCards}
+        />
       </div>
     </Suspense>
   );

@@ -20,6 +20,8 @@ export async function getUserCardTypes(
       throw new Error(`Failed to retrieve card types: ${error.message}`);
     }
 
+    console.log("Retrieved user card types:", data);
+
     return data || [];
   } catch (err) {
     console.error("Error in getUserCardTypes:", err);

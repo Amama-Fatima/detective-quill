@@ -32,44 +32,12 @@ async function makeAuthenticatedRequest<T>(
   return response.json();
 }
 
-export async function getUserCardTypes(
-  accessToken: string,
-  type: BlueprintType
-): Promise<ApiResponse<CardType[]>> {
-  const response = await makeAuthenticatedRequest<CardType[]>(
-    `/card_types/user?blueprint_type=${type}`,
-    accessToken
-  );
-
-  if (!response.success) {
-    throw new Error(`Failed to retrieve user card types: ${response.error}`);
-  }
-
-  return response;
-}
-
-export async function getDefaultCardTypes(
-  accessToken: string,
-  type: BlueprintType
-): Promise<ApiResponse<CardType[]>> {
-  const response = await makeAuthenticatedRequest<CardType[]>(
-    `/card_types/default?blueprint_type=${type}`,
-    accessToken
-  );
-
-  if (!response.success) {
-    throw new Error(`Failed to retrieve default card types: ${response.error}`);
-  }
-
-  return response;
-}
-
 export async function createCardType(
   accessToken: string,
   createCardTypeDto: CreateCardTypeDto
 ): Promise<ApiResponse<CardType>> {
   const response = await makeAuthenticatedRequest<CardType>(
-    "/card_types",
+    "/card-types",
     accessToken,
     {
       method: "POST",
@@ -110,7 +78,7 @@ export async function deleteCardType(
   cardTypeId: string
 ): Promise<ApiResponse<void>> {
   const response = await makeAuthenticatedRequest<void>(
-    `/card_types/${cardTypeId}`,
+    `/card-types/${cardTypeId}`,
     accessToken,
     {
       method: "DELETE",

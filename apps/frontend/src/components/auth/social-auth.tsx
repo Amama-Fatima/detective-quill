@@ -27,7 +27,6 @@ export function SocialAuth({ mode, props }: SocialAuthProps) {
     } catch (error) {
       console.error("Error during Google auth:", error);
     }
-    console.log("Google auth clicked");
   };
 
   const actionText = mode === "signin" ? "Sign in" : "Sign up";

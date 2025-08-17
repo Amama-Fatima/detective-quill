@@ -2,10 +2,8 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   Post,
   Put,
-  Query,
   Req,
   UseGuards,
 } from "@nestjs/common";
@@ -15,67 +13,12 @@ import { CardType, ApiResponse } from "@detective-quill/shared-types";
 import {
   CreateCardTypeDto,
   UpdateCardTypeDto,
-  GetCardTypesDto,
 } from "./dto/card_types.dto";
 
 @Controller("card-types")
 @UseGuards(AuthGuard)
 export class CardTypesController {
   constructor(private readonly cardTypesService: CardTypesService) {}
-
-  @Get("user")
-  async getUserCardTypes(
-    @Req() request: any,
-    @Query("blueprint_type") blueprint_type: GetCardTypesDto
-  ): Promise<ApiResponse<CardType[]>> {
-    const userId = request.user.id;
-    const access_token = request.accessToken;
-    try {
-      const cardTypes = await this.cardTypesService.getUserCardTypes(
-        userId,
-        access_token,
-        blueprint_type.blueprint_type
-      );
-      return {
-        success: true,
-        data: cardTypes ?? [],
-        message: "Card types retrieved successfully",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        data: [],
-        message: "Error retrieving card types: " + error.message,
-      };
-    }
-  }
-
-  @Get("default")
-  async getDefaultCardTypes(
-    @Req() request: any,
-    @Query("blueprint_type") blueprint_type: GetCardTypesDto
-  ): Promise<ApiResponse<CardType[]>> {
-    const access_token = request.accessToken;
-
-    try {
-      const cardTypes =
-        await this.cardTypesService.getDefaultCardTypesForBlueprintType(
-          blueprint_type.blueprint_type,
-          access_token
-        );
-      return {
-        success: true,
-        data: cardTypes,
-        message: "Default card types retrieved successfully",
-      };
-    } catch (error) {
-      return {
-        success: false,
-        data: [],
-        message: "Error retrieving default card types: " + error.message,
-      };
-    }
-  }
 
   @Post()
   async createCardType(
@@ -157,3 +100,59 @@ export class CardTypesController {
     }
   }
 }
+
+
+
+  // @Get("user")
+  // async getUserCardTypes(
+  //   @Req() request: any,
+  //   @Query("blueprint_type") blueprint_type: GetCardTypesDto
+  // ): Promise<ApiResponse<CardType[]>> {
+  //   const userId = request.user.id;
+  //   const access_token = request.accessToken;
+  //   try {
+  //     const cardTypes = await this.cardTypesService.getUserCardTypes(
+  //       userId,
+  //       access_token,
+  //       blueprint_type.blueprint_type
+  //     );
+  //     return {
+  //       success: true,
+  //       data: cardTypes ?? [],
+  //       message: "Card types retrieved successfully",
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       data: [],
+  //       message: "Error retrieving card types: " + error.message,
+  //     };
+  //   }
+  // }
+
+  // @Get("default")
+  // async getDefaultCardTypes(
+  //   @Req() request: any,
+  //   @Query("blueprint_type") blueprint_type: GetCardTypesDto
+  // ): Promise<ApiResponse<CardType[]>> {
+  //   const access_token = request.accessToken;
+
+  //   try {
+  //     const cardTypes =
+  //       await this.cardTypesService.getDefaultCardTypesForBlueprintType(
+  //         blueprint_type.blueprint_type,
+  //         access_token
+  //       );
+  //     return {
+  //       success: true,
+  //       data: cardTypes,
+  //       message: "Default card types retrieved successfully",
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       data: [],
+  //       message: "Error retrieving default card types: " + error.message,
+  //     };
+  //   }
+  // }

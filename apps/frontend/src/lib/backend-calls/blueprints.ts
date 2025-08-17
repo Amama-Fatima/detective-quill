@@ -2,7 +2,7 @@ import {
   CreateBlueprintDto,
   ApiResponse,
   Blueprint,
-  UpdateBlueprintCardDto,
+  UpdateBlueprintDto,
 } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -35,17 +35,16 @@ export async function createBlueprint(
   accessToken: string,
   blueprintData: CreateBlueprintDto
 ): Promise<ApiResponse<Blueprint>> {
-  console.log("Creating blueprint with data:", blueprintData);
   return await makeAuthenticatedRequest<Blueprint>("/blueprints", accessToken, {
     method: "POST",
     body: JSON.stringify(blueprintData),
   });
 }
 
-export async function UpdateBlueprintById(
+export async function updateBlueprintById(
   accessToken: string,
   blueprintId: string,
-  updateData: UpdateBlueprintCardDto
+  updateData: UpdateBlueprintDto
 ): Promise<ApiResponse<Blueprint>> {
   const response = await makeAuthenticatedRequest<Blueprint>(
     `/blueprints/${blueprintId}`,

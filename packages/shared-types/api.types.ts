@@ -157,8 +157,7 @@ export interface UpdateBlueprintDto {
 export interface CreateCardTypeDto {
   title: string;
   description: string;
-  blueprint_type: Database["public"]["Enums"]["blueprint_type"];
-  is_custom: boolean;
+  blueprint_type: BlueprintType
 }
 
 export interface UpdateCardTypeDto {
@@ -167,15 +166,15 @@ export interface UpdateCardTypeDto {
 }
 
 export interface CreateBlueprintCardDto {
-  // title: string;
-  content: string;
+  content: string | null;
+  card_type_title: string;
   card_type_id: string;
   position_x: number;
   position_y: number;
 }
 
 export interface UpdateBlueprintCardDto {
-  content?: string;
+  content?: string | null;
   position_x?: number;
   position_y?: number;
 }

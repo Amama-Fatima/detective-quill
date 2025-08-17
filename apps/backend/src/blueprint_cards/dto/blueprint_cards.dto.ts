@@ -6,7 +6,8 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
-  IsNumber
+  IsNumber,
+  IsEmpty
 } from 'class-validator';
 
 
@@ -26,6 +27,10 @@ export class CreateBlueprintCardDto implements ICreateBlueprintCardDto {
     @IsNumber()
     @IsNotEmpty()
     position_y: number;
+
+    @IsString()
+    @IsNotEmpty()
+    card_type_title: string;
 }
 
 export class UpdateBlueprintCardDto implements IUpdateBlueprintCardDto {

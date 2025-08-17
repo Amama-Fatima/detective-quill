@@ -31,14 +31,13 @@ async function makeAuthenticatedRequest<T>(
   return response.json();
 }
 
-
 export async function createBlueprintCard(
   accessToken: string,
   blueprintId: string,
   cardData: CreateBlueprintCardDto[]
 ): Promise<ApiResponse<BlueprintCard[]>> {
   const response = await makeAuthenticatedRequest<BlueprintCard[]>(
-    `/blueprint_cards/${blueprintId}`,
+    `/blueprint-cards/${blueprintId}`,
     accessToken,
     {
       method: "POST",
@@ -60,7 +59,7 @@ export async function updateBlueprintCard(
   cardData: UpdateBlueprintCardDto
 ): Promise<ApiResponse<BlueprintCard>> {
   const response = await makeAuthenticatedRequest<BlueprintCard>(
-    `/blueprint_cards/${blueprintId}/${cardId}`,
+    `/blueprint-cards/${blueprintId}/${cardId}`,
     accessToken,
     {
       method: "PUT",
@@ -81,7 +80,7 @@ export async function deleteBlueprintCard(
   cardId: string
 ): Promise<ApiResponse<void>> {
   const response = await makeAuthenticatedRequest<void>(
-    `/blueprint_cards/${blueprintId}/${cardId}`,
+    `/blueprint-cards/${blueprintId}/${cardId}`,
     accessToken,
     {
       method: "DELETE",

@@ -1,14 +1,13 @@
-import { createSupabaseServerClient } from "@/supabase/server-client";
 import { BlueprintCard } from "@detective-quill/shared-types";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 // todo: add RLS policies on supabase side to security
 export async function getAllCardsOfBlueprint(
+  supabase: SupabaseClient,
   blueprintId: string,
   userId: string
-): Promise<BlueprintCard[]> {
+): Promise<BlueprintCard[] | null> {
   try {
-    const supabase = await createSupabaseServerClient();
-
     const { data, error } = await supabase
       .from("blueprint_cards")
       .select("*")
@@ -19,7 +18,7 @@ export async function getAllCardsOfBlueprint(
       throw new Error(`Failed to fetch blueprint cards: ${error.message}`);
     }
 
-    return data as BlueprintCard[];
+    return data as BlueprintCard[] | null;
   } catch (err) {
     console.error("Error in getAllCardsOfBlueprint:", err);
     throw err instanceof Error

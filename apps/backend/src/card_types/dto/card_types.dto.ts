@@ -24,10 +24,6 @@ export class CreateCardTypeDto implements ICreateCardTypeDto {
   @IsString()
   @IsIn(["text", "image", "video"])
   blueprint_type: BlueprintType;
-
-  @IsNotEmpty()
-  @IsBoolean()
-  is_custom: boolean;
 }
 
 export class UpdateCardTypeDto implements IUpdateCardTypeDto {
@@ -40,8 +36,8 @@ export class UpdateCardTypeDto implements IUpdateCardTypeDto {
   blueprint_type: BlueprintType;
 }
 
-export class GetCardTypesDto {
-  @IsString()
-  @IsNotEmpty()
-  blueprint_type: BlueprintType;
-}
+// export class GetCardTypesDto {
+//   @IsString()
+//   @IsNotEmpty()
+//   blueprint_type: BlueprintType;
+// }

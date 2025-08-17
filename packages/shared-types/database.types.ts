@@ -58,33 +58,36 @@ export type Database = {
       }
       blueprint_cards: {
         Row: {
-          blueprint_id: string | null
+          blueprint_id: string
           card_type_id: string
+          card_type_title: string | null
           content: string | null
           created_at: string
           id: string
-          position_x: number | null
-          position_y: number | null
+          position_x: number
+          position_y: number
           user_id: string
         }
         Insert: {
-          blueprint_id?: string | null
+          blueprint_id?: string
           card_type_id: string
+          card_type_title?: string | null
           content?: string | null
           created_at?: string
           id?: string
-          position_x?: number | null
-          position_y?: number | null
+          position_x: number
+          position_y: number
           user_id: string
         }
         Update: {
-          blueprint_id?: string | null
+          blueprint_id?: string
           card_type_id?: string
+          card_type_title?: string | null
           content?: string | null
           created_at?: string
           id?: string
-          position_x?: number | null
-          position_y?: number | null
+          position_x?: number
+          position_y?: number
           user_id?: string
         }
         Relationships: [

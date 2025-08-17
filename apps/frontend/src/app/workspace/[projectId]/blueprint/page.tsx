@@ -1,4 +1,4 @@
-import BlueprintLanding from "@/components/workspace/blueprint/blueprint-landing";
+import BlueprintLanding from "@/components/blueprint/blueprint-landing";
 import { Suspense } from "react";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
@@ -12,7 +12,6 @@ interface BlueprintPageProps {
 export default async function BlueprintPage({ params }: BlueprintPageProps) {
   const { projectId } = await params;
   const supabase = await createSupabaseServerClient();
-  console.log("this is my oennn project id:", projectId);
 
   const {
     data: { user },
