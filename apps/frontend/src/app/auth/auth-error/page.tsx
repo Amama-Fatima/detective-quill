@@ -20,7 +20,7 @@ export default function AuthError() {
 
         <div className="space-y-4">
           <Button asChild className="w-full">
-            <Link href="/login">
+            <Link href="/auth/sign-in">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Link>

@@ -108,7 +108,7 @@ export function ForgotPasswordForm() {
           </Button>
 
           <Button variant="ghost" asChild className="w-full">
-            <Link href="/login">
+            <Link href="/auth/sign-in">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to sign in
             </Link>
@@ -179,7 +179,7 @@ export function ForgotPasswordForm() {
             </Button>
 
             <Button variant="ghost" asChild className="w-full">
-              <Link href="/login">
+              <Link href="/auth/sign-in">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to sign in
               </Link>

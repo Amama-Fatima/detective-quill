@@ -33,7 +33,7 @@ export async function middleware(req: NextRequest) {
     if (req.nextUrl.pathname.startsWith("/workspace/api")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/auth/sign-in", req.url));
   }
 
   return res;

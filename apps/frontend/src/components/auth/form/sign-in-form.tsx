@@ -26,6 +26,7 @@ import {
 import { SignInFormValues, signInSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import ConfirmationMessages from "../confirmation-messages";
+import Link from "next/link";
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -135,14 +136,13 @@ export function SignInForm() {
           />
 
           <div className="flex items-center justify-between">
-            <Button
-              type="button"
-              variant="link"
+            <Link
+              href="/auth/forgot-password"
               className="px-0 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-              onClick={() => console.log("Forgot password clicked")}
+              // onClick={() => console.log("Forgot password clicked")}
             >
               Forgot password?
-            </Button>
+            </Link>
           </div>
 
           <Button

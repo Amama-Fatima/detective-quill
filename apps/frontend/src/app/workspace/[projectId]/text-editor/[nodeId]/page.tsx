@@ -19,7 +19,7 @@ export default async function NodePage({ params }: NodePageProps) {
   } = await supabase.auth.getUser();
 
   if (!user?.id || authError) {
-    redirect("/auth/login");
+    redirect("/auth/sign-in");
   }
 
   const node = await fetchNode(supabase, nodeId, user.id);

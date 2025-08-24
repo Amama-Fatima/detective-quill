@@ -5,7 +5,7 @@ import {
   getUserCardTypes,
   getDefaultCardTypesForBlueprintType,
 } from "@/lib/supabase-calls/card-types";
-import {getUserBlueprintById} from "@/lib/supabase-calls/blueprint";
+import { getUserBlueprintById } from "@/lib/supabase-calls/blueprint";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/dist/client/components/navigation";
 import { getAllCardsOfBlueprint } from "@/lib/supabase-calls/blueprint-cards";
@@ -33,7 +33,7 @@ export default async function CreateBlueprintPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/auth/sign-in");
   }
 
   const userId = user.id;
@@ -41,9 +41,13 @@ export default async function CreateBlueprintPage({
   const cardTypes = await getDefaultCardTypesForBlueprintType(supabase, type);
   const userTypes = await getUserCardTypes(supabase, userId, type);
   const blueprint = await getUserBlueprintById(blueprintId, userId);
-  const blueprintCards = await getAllCardsOfBlueprint(supabase, blueprintId, userId);
+  const blueprintCards = await getAllCardsOfBlueprint(
+    supabase,
+    blueprintId,
+    userId
+  );
 
-  console.log("These are use types from the page", userTypes)
+  console.log("These are use types from the page", userTypes);
 
   return (
     <Suspense fallback={<CreateBlueprintPageSkeleton />}>

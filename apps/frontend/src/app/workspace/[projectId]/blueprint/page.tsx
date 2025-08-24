@@ -18,7 +18,7 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/auth/sign-in");
   }
 
   const userId = user.id;

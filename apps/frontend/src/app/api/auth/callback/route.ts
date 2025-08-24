@@ -17,7 +17,9 @@ export async function GET(request: Request) {
     } else {
       console.error("Error exchanging code for session:", error);
       // Redirect to login with error for email confirmations
-      return NextResponse.redirect(`${origin}/login?error=confirmation_failed`);
+      return NextResponse.redirect(
+        `${origin}/auth/sign-in?error=confirmation_failed`
+      );
     }
   }
 

@@ -105,7 +105,7 @@ export function ResetPasswordForm() {
 
       // Redirect to login after a short delay
       setTimeout(() => {
-        router.push("/login?message=password_updated");
+        router.push("/auth/sign-in?message=password_updated");
       }, 2000);
     } catch (error: any) {
       console.error("Error updating password:", error);
@@ -147,11 +147,11 @@ export function ResetPasswordForm() {
 
         <div className="space-y-3">
           <Button asChild className="w-full">
-            <Link href="/forgot-password">Request new reset link</Link>
+            <Link href="/auth/forgot-password">Request new reset link</Link>
           </Button>
 
           <Button variant="outline" asChild className="w-full">
-            <Link href="/login">Back to sign in</Link>
+            <Link href="/auth/sign-in">Back to sign in</Link>
           </Button>
         </div>
       </div>
@@ -177,7 +177,7 @@ export function ResetPasswordForm() {
         </div>
 
         <Button asChild className="w-full">
-          <Link href="/login">Continue to sign in</Link>
+          <Link href="/auth/sign-in">Continue to sign in</Link>
         </Button>
       </div>
     );

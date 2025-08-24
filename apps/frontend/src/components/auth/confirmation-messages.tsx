@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 const ConfirmationMessages = () => {
   const searchParams = useSearchParams();
   const [confirmationStatus, setConfirmationStatus] = useState<
-    "success" | "error" | "server_error" | null
+    "success" | "error" | "server_error" | "password_updated" | null
   >(null);
 
   useEffect(() => {
@@ -59,6 +59,16 @@ const ConfirmationMessages = () => {
           <XCircle className="h-4 w-4" />
           <AlertDescription>
             A server error occurred during confirmation. Please try again later.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {confirmationStatus === "password_updated" && (
+        <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/50">
+          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <AlertDescription className="text-green-800 dark:text-green-200">
+            Password updated successfully! You can now sign in with your new
+            password.
           </AlertDescription>
         </Alert>
       )}

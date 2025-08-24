@@ -20,7 +20,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   } = await supabase.auth.getUser();
 
   if (!user?.id) {
-    redirect("/auth/login");
+    redirect("/auth/sign-in");
   }
 
   const project = await fetchProject(supabase, projectId, user.id);
