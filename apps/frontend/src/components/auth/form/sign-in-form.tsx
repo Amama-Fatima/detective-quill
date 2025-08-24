@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { SignInFormValues, signInSchema } from "@/lib/schema";
+import { supabaseBrowserClient } from "@/supabase/browser-client";
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,10 +36,18 @@ export function SignInForm() {
     setError("");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-      console.log("Sign in:", values);
-    } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      const { data, error } =
+        await supabaseBrowserClient.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
+
+      if (error) {
+        throw error;
+      }
+      console.log("data sign in is ", data);
+    } catch (error) {
+      setError("Invalid email or password");
     } finally {
       setIsLoading(false);
     }
