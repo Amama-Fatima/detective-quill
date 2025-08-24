@@ -17,12 +17,16 @@ import {
 import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react";
 import { SignUpFormValues, signUpSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
+import { getPasswordStrength } from "@/lib/utils/utils";
+import ConfirmEmailInstruction from "../confirm-email-instruction";
 
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -35,23 +39,6 @@ export function SignUpForm() {
   });
 
   const password = form.watch("password");
-
-  const getPasswordStrength = (password: string) => {
-    if (password.length === 0) return { strength: 0, label: "" };
-
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score < 2) return { strength: 1, label: "Weak", color: "bg-red-500" };
-    if (score < 4)
-      return { strength: 2, label: "Fair", color: "bg-yellow-500" };
-    return { strength: 3, label: "Strong", color: "bg-green-500" };
-  };
-
   const passwordStrength = getPasswordStrength(password);
 
   const onSubmit = async (formData: SignUpFormValues) => {
@@ -68,17 +55,48 @@ export function SignUpForm() {
             full_name: formData.name,
             avatar_url: "",
           },
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
         },
       });
-      console.log("Sign up:", formData);
-      console.log("Supabase response:", data, error);
+
+      if (error) {
+        console.error("Supabase auth error:", error);
+        setError(error.message || "Failed to create account");
+        return;
+      }
+
+      if (data.user) {
+        console.log("Sign up successful:", data);
+
+        // Check if email confirmation is required
+        if (data.user && !data.session) {
+          setUserEmail(formData.email);
+          setSignupSuccess(true);
+          setError(""); // Clear any errors
+        } else {
+          // User is immediately authenticated (email confirmation disabled)
+          console.log("User authenticated immediately");
+        }
+      }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
       console.error("Error during sign up:", err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Show success message after signup
+  if (signupSuccess) {
+    return (
+      <ConfirmEmailInstruction
+        userEmail={userEmail}
+        setSignupSuccess={setSignupSuccess}
+        setError={setError}
+        form={form}
+      />
+    );
+  }
 
   return (
     <Form {...form}>
