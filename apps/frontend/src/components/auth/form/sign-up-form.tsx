@@ -24,7 +24,6 @@ export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -64,6 +63,12 @@ export function SignUpForm() {
       const { data, error } = await supabaseBrowserClient.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            avatar_url: "",
+          },
+        },
       });
       console.log("Sign up:", formData);
       console.log("Supabase response:", data, error);

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LogOut, LogIn, UserPlus } from "lucide-react";
@@ -8,6 +8,9 @@ import { useAuth } from "@/context/auth-context";
 
 export default function AuthButtons() {
   const { user, loading, signOut } = useAuth();
+  useEffect(() => {
+    console.log("user", user);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -49,13 +52,13 @@ export default function AuthButtons() {
         asChild
         className="flex items-center space-x-1 px-3"
       >
-        <Link href="/login">
+        <Link href="/auth/sign-in">
           <LogIn className="h-4 w-4" />
-          <span>Log In</span>
+          <span>Sign In</span>
         </Link>
       </Button>
       <Button size="sm" asChild className="flex items-center space-x-1 px-3">
-        <Link href="/signup">
+        <Link href="/auth/sign-up">
           <UserPlus className="h-4 w-4" />
           <span>Sign Up</span>
         </Link>
