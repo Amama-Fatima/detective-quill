@@ -17,7 +17,7 @@ async function getEditorWorkspaceData(projectId: string, nodeId?: string) {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    redirect("/auth/login");
+    redirect("/auth/sign-in");
   }
 
   try {

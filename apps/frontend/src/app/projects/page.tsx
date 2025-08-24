@@ -99,7 +99,7 @@ export default function ProjectsPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !session) {
-      router.push("/auth/login");
+      router.push("/auth/sign-in");
     }
   }, [session, authLoading, router]);
 

@@ -6,11 +6,11 @@ import { twMerge } from "tailwind-merge";
 import { updateBlueprintById } from "../backend-calls/blueprints";
 import { toast } from "sonner";
 
-export function cn(...inputs: ClassValue[]) {
+function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const getContainerClass = (focusMode: FocusMode) =>
+const getContainerClass = (focusMode: FocusMode) =>
   cn(
     "flex flex-col bg-background transition-all duration-300",
     focusMode === "NORMAL" && "h-screen",
@@ -18,13 +18,13 @@ export const getContainerClass = (focusMode: FocusMode) =>
     focusMode === "BROWSER" && "h-screen"
   );
 
-export const getHeaderClass = (focusMode: FocusMode) =>
+const getHeaderClass = (focusMode: FocusMode) =>
   cn(
     "flex items-center justify-between border-b px-4 py-3 bg-card/50 flex-shrink-0 transition-all duration-300",
     focusMode === "BROWSER" && "bg-black/80 backdrop-blur-sm"
   );
 
-export const countNodes = (
+const countNodes = (
   nodeList: FsNodeTreeResponse[]
 ): { files: number; folders: number } => {
   let files = 0;
@@ -47,7 +47,7 @@ export const countNodes = (
   return { files, folders };
 };
 
-export function findNodeById(
+function findNodeById(
   nodes: FsNodeTreeResponse[],
   nodeId: string
 ): FsNodeTreeResponse | null {
@@ -61,7 +61,7 @@ export function findNodeById(
   return null;
 }
 
-export function getFolderNodes(
+function getFolderNodes(
   nodes: FsNodeTreeResponse[]
 ): Array<{ id: string; name: string; path: string }> {
   const folders: Array<{ id: string; name: string; path: string }> = [];
@@ -89,9 +89,7 @@ export function getFolderNodes(
   return folders;
 }
 
-export function flattenNodes(
-  nodes: FsNodeTreeResponse[]
-): FsNodeTreeResponse[] {
+function flattenNodes(nodes: FsNodeTreeResponse[]): FsNodeTreeResponse[] {
   const flattened: FsNodeTreeResponse[] = [];
   const traverse = (nodeList: FsNodeTreeResponse[]) => {
     nodeList.forEach((node) => {
@@ -103,7 +101,7 @@ export function flattenNodes(
   return flattened;
 }
 
-export function countChildren(node: FsNodeTreeResponse): number {
+function countChildren(node: FsNodeTreeResponse): number {
   let count = 0;
   if (node.children) {
     count += node.children.length;
@@ -114,7 +112,7 @@ export function countChildren(node: FsNodeTreeResponse): number {
   return count;
 }
 
-export function convertNodesToTreeElements(nodes: FsNodeTreeResponse[]): Array<{
+function convertNodesToTreeElements(nodes: FsNodeTreeResponse[]): Array<{
   id: string;
   name: string;
   isSelectable: boolean;
@@ -131,3 +129,31 @@ export function convertNodesToTreeElements(nodes: FsNodeTreeResponse[]): Array<{
 
   return nodes.map(convertNode);
 }
+
+const getPasswordStrength = (password: string) => {
+  if (password.length === 0) return { strength: 0, label: "" };
+
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score < 2) return { strength: 1, label: "Weak", color: "bg-red-500" };
+  if (score < 4) return { strength: 2, label: "Fair", color: "bg-yellow-500" };
+  return { strength: 3, label: "Strong", color: "bg-green-500" };
+};
+
+export {
+  cn,
+  getContainerClass,
+  getHeaderClass,
+  countNodes,
+  findNodeById,
+  getFolderNodes,
+  flattenNodes,
+  countChildren,
+  convertNodesToTreeElements,
+  getPasswordStrength,
+};
