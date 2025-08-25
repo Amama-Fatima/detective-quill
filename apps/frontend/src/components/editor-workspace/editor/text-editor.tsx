@@ -151,7 +151,7 @@ export function TextEditor({
                   size="sm"
                   onClick={onSave}
                   disabled={isSaving || !isDirty}
-                  className={cn("gap-2", isSaving && "animate-pulse")}
+                  className={cn("gap-2 cursor-pointer", isSaving && "animate-pulse cursor-disabled")}
                 >
                   {isSaving ? (
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />

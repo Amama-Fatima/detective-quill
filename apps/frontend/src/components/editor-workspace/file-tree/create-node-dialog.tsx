@@ -186,13 +186,13 @@ export function CreateNodeDialog({
           )}
         </div>
         <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={creating}>
+          <Button variant="outline" onClick={handleClose} disabled={creating} className="cursor-pointer">
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={!name.trim() || creating}
-            className="gap-2"
+            className="gap-2 cursor-pointer"
           >
             {creating ? (
               <>

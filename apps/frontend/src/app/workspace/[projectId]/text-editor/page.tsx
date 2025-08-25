@@ -1,3 +1,4 @@
+// todo: you get error cz of using button and redirect on server side i think, so fix this
 import { Button } from "@/components/ui/button";
 import { fetchProject } from "@/lib/server/editor-workspace";
 import { createSupabaseServerClient } from "@/supabase/server-client";

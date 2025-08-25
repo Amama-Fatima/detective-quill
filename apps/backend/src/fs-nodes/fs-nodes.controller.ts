@@ -8,9 +8,6 @@ import {
   Delete,
   UseGuards,
   Request,
-  Query,
-  ParseBoolPipe,
-  DefaultValuePipe,
 } from "@nestjs/common";
 import { FsNodesService } from "./fs-nodes.service";
 import {
@@ -137,19 +134,13 @@ export class FsNodesController {
   @Delete(":id")
   async remove(
     @Param("id") id: string,
-    @Request() req,
-    @Query("hard", new DefaultValuePipe(false), ParseBoolPipe)
-    hardDelete: boolean,
-    @Query("cascade", new DefaultValuePipe(false), ParseBoolPipe)
-    cascadeDelete: boolean
+    @Request() req
   ): Promise<ApiResponse<DeleteResponse>> {
     try {
       const data = await this.fsNodesService.deleteNode(
         id,
         req.user.id,
-        req.accessToken,
-        hardDelete,
-        cascadeDelete
+        req.accessToken
       );
       return { success: true, data };
     } catch (error) {

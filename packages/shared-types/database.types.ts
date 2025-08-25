@@ -41,13 +41,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "blue_print_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "blue_prints_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -105,13 +98,6 @@ export type Database = {
             referencedRelation: "card_types"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "blueprint_cards_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       card_types: {
@@ -142,67 +128,59 @@ export type Database = {
           title?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "card_types_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       fs_nodes: {
         Row: {
           content: string | null
-          created_at: string | null
+          created_at: string
           depth: number | null
           description: string | null
-          file_extension: string | null
+          file_extension: string
+          global_sequence: number | null
           id: string
-          is_deleted: boolean | null
           name: string
-          node_type: string
+          node_type: Database["public"]["Enums"]["node_type"]
           parent_id: string | null
-          path: string | null
+          path: string
           project_id: string
           sort_order: number | null
-          updated_at: string | null
-          word_count: number | null
+          updated_at: string
+          word_count: number
         }
         Insert: {
           content?: string | null
-          created_at?: string | null
+          created_at?: string
           depth?: number | null
           description?: string | null
-          file_extension?: string | null
+          file_extension?: string
+          global_sequence?: number | null
           id?: string
-          is_deleted?: boolean | null
           name: string
-          node_type: string
+          node_type?: Database["public"]["Enums"]["node_type"]
           parent_id?: string | null
-          path?: string | null
+          path: string
           project_id: string
           sort_order?: number | null
-          updated_at?: string | null
-          word_count?: number | null
+          updated_at?: string
+          word_count?: number
         }
         Update: {
           content?: string | null
-          created_at?: string | null
+          created_at?: string
           depth?: number | null
           description?: string | null
-          file_extension?: string | null
+          file_extension?: string
+          global_sequence?: number | null
           id?: string
-          is_deleted?: boolean | null
           name?: string
-          node_type?: string
+          node_type?: Database["public"]["Enums"]["node_type"]
           parent_id?: string | null
-          path?: string | null
+          path?: string
           project_id?: string
           sort_order?: number | null
-          updated_at?: string | null
-          word_count?: number | null
+          updated_at?: string
+          word_count?: number
         }
         Relationships: [
           {
@@ -210,20 +188,6 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "fs_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fs_nodes_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "project_file_tree"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fs_nodes_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "project_root_nodes"
             referencedColumns: ["id"]
           },
           {
@@ -293,119 +257,11 @@ export type Database = {
           title?: string
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "projects_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
-      project_file_tree: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          depth: number | null
-          description: string | null
-          file_extension: string | null
-          id: string | null
-          is_deleted: boolean | null
-          name: string | null
-          node_type: string | null
-          parent_id: string | null
-          path: string | null
-          project_id: string | null
-          project_title: string | null
-          sort_order: number | null
-          total_word_count: number | null
-          updated_at: string | null
-          word_count: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fs_nodes_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "fs_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fs_nodes_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "project_file_tree"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fs_nodes_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "project_root_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fs_nodes_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      project_root_nodes: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          depth: number | null
-          description: string | null
-          file_extension: string | null
-          id: string | null
-          is_deleted: boolean | null
-          name: string | null
-          node_type: string | null
-          parent_id: string | null
-          path: string | null
-          project_id: string | null
-          project_title: string | null
-          sort_order: number | null
-          updated_at: string | null
-          word_count: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fs_nodes_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "fs_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fs_nodes_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "project_file_tree"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fs_nodes_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "project_root_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fs_nodes_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       get_node_children: {
@@ -423,6 +279,7 @@ export type Database = {
     Enums: {
       blueprint_type: "character" | "timeline"
       blueprint_types: "character" | "timeline" | "other"
+      node_type: "folder" | "file"
       user_role: "writer" | "reader"
     }
     CompositeTypes: {
@@ -553,6 +410,7 @@ export const Constants = {
     Enums: {
       blueprint_type: ["character", "timeline"],
       blueprint_types: ["character", "timeline", "other"],
+      node_type: ["folder", "file"],
       user_role: ["writer", "reader"],
     },
   },
