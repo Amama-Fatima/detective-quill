@@ -36,7 +36,8 @@ export const useFileTreeOperations = ({
     async (
       name: string,
       nodeType: "file" | "folder",
-      parentId?: string
+      parentId?: string,
+      description?: string
     ): Promise<boolean> => {
       if (!session?.access_token) {
         toast.error("No session available");
@@ -52,6 +53,7 @@ export const useFileTreeOperations = ({
           node_type: nodeType,
           content: nodeType === "file" ? "" : undefined,
           file_extension: nodeType === "file" ? "md" : undefined,
+          description: description,
         };
 
         const response = await createFsNode(

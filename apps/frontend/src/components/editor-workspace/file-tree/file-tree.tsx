@@ -110,12 +110,14 @@ export function FileTree({
   const handleCreateNode = async (
     name: string,
     nodeType: "file" | "folder",
-    parentId?: string
+    parentId?: string,
+    description?: string
   ) => {
     const success = await createNode(
       name,
       nodeType,
-      parentId || selectedFolder || undefined
+      parentId || selectedFolder || undefined,
+      description
     );
     if (success) {
       closeDialogs();
@@ -166,11 +168,17 @@ export function FileTree({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => openCreateDialog("file")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => openCreateDialog("file")}
+                className="cursor-pointer"
+              >
                 <FileText className="h-4 w-4 mr-2" />
                 New File
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openCreateDialog("folder")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => openCreateDialog("folder")}
+                className="cursor-pointer"
+              >
                 <FolderPlus className="h-4 w-4 mr-2" />
                 New Folder
               </DropdownMenuItem>
@@ -390,13 +398,15 @@ function TreeItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
-                onClick={() => node && onRenameNode(node as FsNodeResponse)} className="cursor-pointer"
+                onClick={() => node && onRenameNode(node as FsNodeResponse)}
+                className="cursor-pointer"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => node && onMoveNode(node as FsNodeResponse)} className="cursor-pointer"
+                onClick={() => node && onMoveNode(node as FsNodeResponse)}
+                className="cursor-pointer"
               >
                 <FolderX className="h-4 w-4 mr-2" />
                 Move to...
@@ -404,7 +414,7 @@ function TreeItem({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive cursor-pointer"
-                onClick={() => onDeleteNode(element.id)} 
+                onClick={() => onDeleteNode(element.id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
@@ -458,13 +468,15 @@ function TreeItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
-                onClick={() => node && onRenameNode(node as FsNodeResponse)} className="cursor-pointer"
+                onClick={() => node && onRenameNode(node as FsNodeResponse)}
+                className="cursor-pointer"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => node && onMoveNode(node as FsNodeResponse)} className="cursor-pointer"
+                onClick={() => node && onMoveNode(node as FsNodeResponse)}
+                className="cursor-pointer"
               >
                 <FolderX className="h-4 w-4 mr-2" />
                 Move to...
