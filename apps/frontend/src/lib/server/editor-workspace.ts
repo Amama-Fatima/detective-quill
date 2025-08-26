@@ -66,7 +66,6 @@ async function fetchProject(
     .select("*")
     .eq("id", projectId)
     .eq("author_id", userId)
-    .eq("is_deleted", false)
     .single();
 
   if (error || !data) {
@@ -113,7 +112,6 @@ async function fetchNode(
     `
     )
     .eq("id", nodeId)
-    .eq("is_deleted", false)
     .eq("projects.author_id", userId)
     .single();
 

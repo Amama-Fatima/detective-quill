@@ -69,7 +69,9 @@ export const useFileTreeOperations = ({
 
           // Navigate to file if it's a file
           if (nodeType === "file") {
-            router.push(`/workspace/${projectId}/${response.data.id}`);
+            router.push(
+              `/workspace/${projectId}/text-editor/${response.data.id}`
+            );
           }
 
           return true;
