@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, FileText, Folder, FolderPlus } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateNodeDialogProps {
   open: boolean;
@@ -27,7 +28,8 @@ interface CreateNodeDialogProps {
   onSubmit: (
     name: string,
     nodeType: "file" | "folder",
-    parentId?: string
+    parentId?: string,
+    description?: string
   ) => Promise<void>;
   creating?: boolean;
   nodeType: "file" | "folder";
@@ -45,6 +47,7 @@ export function CreateNodeDialog({
   availableFolders = [],
 }: CreateNodeDialogProps) {
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<string>(
     folderName
       ? availableFolders.find((f) => f.name === folderName)?.id || ""
@@ -54,7 +57,12 @@ export function CreateNodeDialog({
   const handleSubmit = async () => {
     if (name.trim()) {
       console.log("selected folder sending as parent id is ", selectedFolder);
-      await onSubmit(name.trim(), nodeType, selectedFolder || undefined);
+      await onSubmit(
+        name.trim(),
+        nodeType,
+        selectedFolder || undefined,
+        description.trim()
+      );
       setName("");
       setSelectedFolder("");
     }
@@ -106,6 +114,31 @@ export function CreateNodeDialog({
                 isFile
                   ? "e.g., Chapter 1, Introduction..."
                   : "e.g., Part I, Character Notes..."
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSubmit();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  handleClose();
+                }
+              }}
+              autoFocus
+              disabled={creating}
+              className="w-full"
+            />
+            <Label htmlFor="description">
+              {isFile ? "File" : "Folder"} Description
+            </Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={
+                isFile
+                  ? "e.g., A brief description of the file..."
+                  : "e.g., A brief description of the folder..."
               }
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -186,13 +219,18 @@ export function CreateNodeDialog({
           )}
         </div>
         <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={creating}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={creating}
+            className="cursor-pointer"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={!name.trim() || creating}
-            className="gap-2"
+            className="gap-2 cursor-pointer"
           >
             {creating ? (
               <>

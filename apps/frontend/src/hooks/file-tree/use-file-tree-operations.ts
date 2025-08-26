@@ -36,7 +36,8 @@ export const useFileTreeOperations = ({
     async (
       name: string,
       nodeType: "file" | "folder",
-      parentId?: string
+      parentId?: string,
+      description?: string
     ): Promise<boolean> => {
       if (!session?.access_token) {
         toast.error("No session available");
@@ -52,6 +53,7 @@ export const useFileTreeOperations = ({
           node_type: nodeType,
           content: nodeType === "file" ? "" : undefined,
           file_extension: nodeType === "file" ? "md" : undefined,
+          description: description,
         };
 
         const response = await createFsNode(
@@ -69,7 +71,9 @@ export const useFileTreeOperations = ({
 
           // Navigate to file if it's a file
           if (nodeType === "file") {
-            router.push(`/workspace/${projectId}/${response.data.id}`);
+            router.push(
+              `/workspace/${projectId}/text-editor/${response.data.id}`
+            );
           }
 
           return true;

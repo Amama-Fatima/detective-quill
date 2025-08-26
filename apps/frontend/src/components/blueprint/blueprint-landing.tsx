@@ -4,7 +4,7 @@ import { UserBlueprintsList } from "./user-bueprints-list";
 
 interface BlueprintLandingProps {
   projectId: string;
-  userId: string; //todo: create a protected route so there is no need to do sth like this
+  userId: string; 
 }
 
 export default async function BlueprintLanding({

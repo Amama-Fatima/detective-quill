@@ -113,7 +113,7 @@ export function RenameDialog({
             <Button
               type="submit"
               disabled={!name.trim() || name.trim() === node.name || loading}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
             >
               {loading ? (
                 <>

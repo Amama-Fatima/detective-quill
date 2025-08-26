@@ -6,6 +6,7 @@ export type CardType = Database["public"]["Tables"]["card_types"]["Row"];
 export type BlueprintCard =
   Database["public"]["Tables"]["blueprint_cards"]["Row"];
 export type BlueprintType = Database["public"]["Enums"]["blueprint_type"];
+export type FsNode = Database["public"]["Tables"]["fs_nodes"]["Row"];
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -62,23 +63,7 @@ export interface DeleteResponse {
 }
 
 // File system node types
-export interface FsNode {
-  id: string;
-  project_id: string;
-  parent_id: string | null;
-  name: string;
-  node_type: "folder" | "file";
-  description: string | null;
-  sort_order: number;
-  depth: number;
-  path: string | null;
-  content: string | null;
-  file_extension: string | null;
-  word_count: number;
-  created_at: string;
-  updated_at: string;
-  is_deleted: boolean;
-}
+
 
 export interface CreateFsNodeDto {
   project_id: string;

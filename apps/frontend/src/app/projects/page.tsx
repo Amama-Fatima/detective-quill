@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { useProjects } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -127,23 +125,15 @@ export default function ProjectsPage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
-        <Tabs defaultValue="projects" className="w-full">
-          <div className="border-b">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="projects" className="flex items-center gap-2">
-                Projects
-                <Badge variant="secondary" className="ml-1">
-                  {projects.length}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="archived" disabled className="opacity-50">
-                Archived
-              </TabsTrigger>
-            </TabsList>
+        <div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-100">My Projects</h1>
+            <p className="text-gray-400 mt-2">
+              Manage the stories and books you have written
+            </p>
           </div>
 
-          <TabsContent value="projects" className="space-y-6">
+          <div className="space-y-6">
             {/* Filters and Search */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <div className="flex flex-1 items-center gap-4 max-w-md">
@@ -211,8 +201,8 @@ export default function ProjectsPage() {
               onUpdateProject={updateProject}
               onDeleteProject={deleteProject}
             />
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
 
       {/* Create Project Dialog */}

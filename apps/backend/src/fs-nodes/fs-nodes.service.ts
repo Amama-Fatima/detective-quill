@@ -1,3 +1,4 @@
+// todo: try to make util functions (like setting the timeout etc and move them to a utils file maybe, i dunno)
 import {
   Injectable,
   NotFoundException,
@@ -5,19 +6,25 @@ import {
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "../projects/projects.service";
+import { QueueService } from "src/queue/queue.service";
 import {
-  CreateFsNodeDto,
-  UpdateFsNodeDto,
   FsNodeResponse,
   FsNodeTreeResponse,
   DeleteResponse,
+  type FsNode,
 } from "@detective-quill/shared-types";
+import {
+  CreateFsNodeDto,
+  UpdateFsNodeDto,
+} from "./validation/fs-nodes.validation";
 
 @Injectable()
 export class FsNodesService {
+  private sceneTimeouts = new Map<string, NodeJS.Timeout>();
   constructor(
     private supabaseService: SupabaseService,
-    private projectsService: ProjectsService
+    private projectsService: ProjectsService,
+    private queueService: QueueService
   ) {}
 
   async createNode(
@@ -40,7 +47,6 @@ export class FsNodesService {
         .from("fs_nodes")
         .select("project_id, node_type")
         .eq("id", createNodeDto.parent_id)
-        .eq("is_deleted", false)
         .single();
 
       if (parentError || !parent) {
@@ -65,7 +71,6 @@ export class FsNodesService {
         .select("sort_order")
         .eq("project_id", createNodeDto.project_id)
         .eq("parent_id", createNodeDto.parent_id || null)
-        .eq("is_deleted", false)
         .order("sort_order", { ascending: false })
         .limit(1);
 
@@ -94,6 +99,14 @@ export class FsNodesService {
     if (error) {
       // ✅ SIMPLIFIED: Circular reference check is handled by the prevent_circular_reference() trigger
       throw new BadRequestException(`Failed to create node: ${error.message}`);
+    }
+
+    // 🎯 NEW: Update global sequences after creating a file (scene)
+    if (data.node_type === "file") {
+      // Run this in background (don't await to avoid slowing down the response)
+      this.updateGlobalSequences(data.project_id, supabase).catch((err) =>
+        console.error("Background global sequence update failed:", err)
+      );
     }
 
     return data;
@@ -168,7 +181,6 @@ export class FsNodesService {
       `
       )
       .eq("id", nodeId)
-      .eq("is_deleted", false)
       .eq("projects.author_id", userId)
       .single();
 
@@ -178,7 +190,7 @@ export class FsNodesService {
 
     return node;
   }
-
+  // todo: try to separate move and update logic
   async updateNode(
     nodeId: string,
     updateNodeDto: UpdateFsNodeDto,
@@ -200,7 +212,6 @@ export class FsNodesService {
           .from("fs_nodes")
           .select("project_id, node_type")
           .eq("id", updateNodeDto.parent_id)
-          .eq("is_deleted", false)
           .single();
 
         if (parentError || !parent) {
@@ -234,21 +245,31 @@ export class FsNodesService {
       .select()
       .single();
 
+    const node = data as FsNode;
+
     if (error) {
       // ✅ SIMPLIFIED: Circular reference prevention is handled by the trigger
       throw new BadRequestException(`Failed to update node: ${error.message}`);
     }
 
-    return data;
+    if (node.node_type === "file" && updateNodeDto.content !== undefined) {
+      await this.handleSceneUpdate(
+        nodeId,
+        node,
+        updateNodeDto.content,
+        userId,
+        supabase
+      );
+    }
+    return node;
   }
 
   async deleteNode(
     nodeId: string,
     userId: string,
-    accessToken: string,
-    hardDelete: boolean = false,
-    cascadeDelete: boolean = false
+    accessToken: string
   ): Promise<DeleteResponse> {
+    // todo: try to remove the use of delete response, shift to general api response
     const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
     // Verify node exists and user owns it
@@ -270,70 +291,32 @@ export class FsNodesService {
 
       const children = allChildren || [];
 
-      if (children.length > 0 && !cascadeDelete) {
-        throw new BadRequestException(
-          `Folder "${node.name}" contains ${children.length} items. Use cascadeDelete=true to delete all contents.`
-        );
-      }
-
-      // If cascade delete, delete all children first (in reverse order to handle nested folders)
-      if (cascadeDelete && children.length > 0) {
+      // If children exist, delete all children first (in reverse order to handle nested folders)
+      if (children.length > 0) {
         // Sort by depth descending to delete deepest items first
         const sortedChildren = children.sort(
           (a, b) => (b.depth || 0) - (a.depth || 0)
         );
 
         for (const child of sortedChildren) {
-          if (hardDelete) {
-            await supabase.from("fs_nodes").delete().eq("id", child.id);
-          } else {
-            await supabase
-              .from("fs_nodes")
-              .update({ is_deleted: true })
-              .eq("id", child.id);
-          }
+          await supabase.from("fs_nodes").delete().eq("id", child.id);
         }
       }
     }
 
-    // Delete/soft-delete the main node
-    if (hardDelete) {
-      const { error } = await supabase
-        .from("fs_nodes")
-        .delete()
-        .eq("id", nodeId);
+    // Delete the main node
+    const { error } = await supabase.from("fs_nodes").delete().eq("id", nodeId);
 
-      if (error) {
-        throw new BadRequestException(
-          `Failed to delete node: ${error.message}`
-        );
-      }
-
-      return {
-        message:
-          node.node_type === "folder"
-            ? "Folder and all contents permanently deleted"
-            : "File permanently deleted",
-      };
-    } else {
-      const { error } = await supabase
-        .from("fs_nodes")
-        .update({ is_deleted: true })
-        .eq("id", nodeId);
-
-      if (error) {
-        throw new BadRequestException(
-          `Failed to delete node: ${error.message}`
-        );
-      }
-
-      return {
-        message:
-          node.node_type === "folder"
-            ? "Folder and all contents moved to trash"
-            : "File moved to trash",
-      };
+    if (error) {
+      throw new BadRequestException(`Failed to delete node: ${error.message}`);
     }
+
+    return {
+      message:
+        node.node_type === "folder"
+          ? "Folder and all contents permanently deleted"
+          : "File permanently deleted",
+    };
   }
 
   async moveNode(
@@ -450,5 +433,140 @@ export class FsNodesService {
       .trim()
       .split(/\s+/)
       .filter((word) => word.length > 0).length;
+  }
+
+  private async handleSceneUpdate(
+    nodeId: string,
+    nodeData: FsNode,
+    content: string,
+    userId: string,
+    supabase: any
+  ): Promise<void> {
+    // Clear existing timeout if any
+    const existingTimeout = this.sceneTimeouts.get(nodeId);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+
+    // Set new timeout for 10 minutes
+    const timeout = setTimeout(
+      async () => {
+        try {
+          const parentInfo = await this.getParentInfo(nodeData, supabase);
+
+          // Queue the embedding job with timeline info
+          this.queueService.sendEmbeddingJob({
+            fs_node_id: nodeId,
+            content: content,
+            project_id: nodeData.project_id,
+            user_id: userId,
+            scene_name: nodeData.name,
+            chapter_name: parentInfo.chapter_name,
+            chapter_sort_order: parentInfo.chapter_sort_order || 0,
+            scene_sort_order: nodeData.sort_order || 1,
+            global_sequence: nodeData.global_sequence || 1,
+            timeline_path: nodeData.path,
+          });
+
+          // Remove from tracking
+          this.sceneTimeouts.delete(nodeId);
+
+          console.log(
+            `Queued embedding job for ${nodeData.path}: ${nodeData.name}`
+          );
+        } catch (error) {
+          console.error(`Failed to queue embedding job for ${nodeId}:`, error);
+        }
+      },
+      10 * 60 * 1000
+    ); // 10 minutes = 600,000 ms
+
+    // Store the timeout
+    this.sceneTimeouts.set(nodeId, timeout);
+
+    console.log(
+      `⏰ Scene update tracked: ${nodeData.name} (embedding job in 10 min if no more updates)`
+    );
+  }
+
+  private async getParentInfo(
+    nodeData: FsNode,
+    supabase: any
+  ): Promise<{
+    chapter_name?: string;
+    chapter_sort_order?: number;
+  }> {
+    try {
+      let chapterName: string | undefined;
+      let chapterSortOrder: number | undefined;
+
+      // Get chapter info if this scene has a parent folder
+      if (nodeData.parent_id) {
+        const { data: chapter } = await supabase
+          .from("fs_nodes")
+          .select("name, sort_order, node_type")
+          .eq("id", nodeData.parent_id)
+          .single();
+
+        if (chapter?.node_type === "folder") {
+          chapterName = chapter.name;
+          chapterSortOrder = chapter.sort_order;
+        }
+      }
+
+      return {
+        chapter_name: chapterName,
+        chapter_sort_order: chapterSortOrder,
+      };
+    } catch (error) {
+      console.error("Error getting description path:", error);
+      return {
+        chapter_name: undefined,
+        chapter_sort_order: undefined,
+      };
+    }
+  }
+
+  // todo: shift this to a cloud function that is run when ever a new node is created, deleted or moved
+  private async updateGlobalSequences(
+    projectId: string,
+    supabase: any
+  ): Promise<void> {
+    try {
+      // Get all chapters in order
+      const { data: chapters } = await supabase
+        .from("fs_nodes")
+        .select("id, sort_order")
+        .eq("project_id", projectId)
+        .eq("node_type", "folder")
+        .order("sort_order", { ascending: true });
+
+      let globalSequence = 1;
+
+      // Go through each chapter in order
+      for (const chapter of chapters || []) {
+        // Get scenes in this chapter, ordered by sort_order
+        const { data: scenes } = await supabase
+          .from("fs_nodes")
+          .select("id, sort_order")
+          .eq("parent_id", chapter.id)
+          .eq("node_type", "file")
+          .order("sort_order", { ascending: true });
+
+        // Update global_sequence for each scene in this chapter
+        for (const scene of scenes || []) {
+          await supabase
+            .from("fs_nodes")
+            .update({ global_sequence: globalSequence })
+            .eq("id", scene.id);
+
+          globalSequence++;
+        }
+      }
+
+      console.log(`✅ Updated global sequences for project ${projectId}`);
+    } catch (error) {
+      console.error("Error updating global sequences:", error);
+    }
   }
 }

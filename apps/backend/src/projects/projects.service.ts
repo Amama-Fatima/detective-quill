@@ -53,7 +53,6 @@ export class ProjectsService {
       .from("projects")
       .select("*")
       .eq("author_id", userId)
-      .eq("is_deleted", false)
       .order("updated_at", { ascending: false });
 
     if (!includeInactive) {
@@ -83,11 +82,10 @@ export class ProjectsService {
       .select("*")
       .eq("id", projectId)
       .eq("author_id", userId)
-      .eq("is_deleted", false)
       .single();
 
     if (error || !data) {
-      throw new NotFoundException("Project not found");
+      throw new NotFoundException("Project not found. Dont know why");
     }
 
     return data;
@@ -250,8 +248,7 @@ export class ProjectsService {
     const { data: stats, error } = await supabase
       .from("fs_nodes")
       .select("node_type, word_count, updated_at")
-      .eq("project_id", projectId)
-      .eq("is_deleted", false);
+      .eq("project_id", projectId);
 
     if (error) {
       throw new BadRequestException(

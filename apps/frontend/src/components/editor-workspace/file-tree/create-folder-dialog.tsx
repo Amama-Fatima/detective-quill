@@ -73,6 +73,7 @@ export function CreateFolderDialog({
               type="button"
               variant="outline"
               onClick={() => handleOpenChange(false)}
+              className="cursor-pointer"
               disabled={creating}
             >
               Cancel
@@ -80,7 +81,7 @@ export function CreateFolderDialog({
             <Button
               type="submit"
               disabled={!name.trim() || creating}
-              className="gap-2"
+              className="gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
               {creating ? (
                 <>

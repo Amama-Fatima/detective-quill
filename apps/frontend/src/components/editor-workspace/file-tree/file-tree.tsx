@@ -110,12 +110,14 @@ export function FileTree({
   const handleCreateNode = async (
     name: string,
     nodeType: "file" | "folder",
-    parentId?: string
+    parentId?: string,
+    description?: string
   ) => {
     const success = await createNode(
       name,
       nodeType,
-      parentId || selectedFolder || undefined
+      parentId || selectedFolder || undefined,
+      description
     );
     if (success) {
       closeDialogs();
@@ -160,17 +162,23 @@ export function FileTree({
         <div className="flex gap-2 mb-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" className="flex-1 gap-2">
+              <Button size="sm" className="flex-1 gap-2 cursor-pointer">
                 <Plus className="h-4 w-4" />
                 New
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => openCreateDialog("file")}>
+              <DropdownMenuItem
+                onClick={() => openCreateDialog("file")}
+                className="cursor-pointer"
+              >
                 <FileText className="h-4 w-4 mr-2" />
                 New File
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openCreateDialog("folder")}>
+              <DropdownMenuItem
+                onClick={() => openCreateDialog("folder")}
+                className="cursor-pointer"
+              >
                 <FolderPlus className="h-4 w-4 mr-2" />
                 New Folder
               </DropdownMenuItem>
@@ -183,7 +191,7 @@ export function FileTree({
             onClick={() => setSearchExpanded(!searchExpanded)}
             className={cn(
               "transition-colors",
-              searchExpanded && "bg-primary/10 text-primary"
+              searchExpanded && "bg-primary/10 text-primary cursor-pointer"
             )}
           >
             <Search className="h-4 w-4" />
@@ -348,7 +356,7 @@ function TreeItem({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-6 text-xs"
+                className="h-6 text-xs cursor-pointer"
                 onClick={() => onCreateFile(element.id)}
               >
                 <FileText className="h-3 w-3 mr-1" />
@@ -357,7 +365,7 @@ function TreeItem({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-6 text-xs"
+                className="h-6 text-xs cursor-pointer"
                 onClick={() => onCreateFolder(element.id)}
               >
                 <FolderPlus className="h-3 w-3 mr-1" />
@@ -379,7 +387,7 @@ function TreeItem({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-5 w-5 shrink-0"
+                className="h-5 w-5 shrink-0 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -391,19 +399,21 @@ function TreeItem({
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
                 onClick={() => node && onRenameNode(node as FsNodeResponse)}
+                className="cursor-pointer"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => node && onMoveNode(node as FsNodeResponse)}
+                className="cursor-pointer"
               >
                 <FolderX className="h-4 w-4 mr-2" />
                 Move to...
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive"
+                className="text-destructive cursor-pointer"
                 onClick={() => onDeleteNode(element.id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -447,7 +457,7 @@ function TreeItem({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-5 w-5 opacity-0 group-hover:opacity-100 shrink-0"
+                className="h-5 w-5 opacity-0 group-hover:opacity-100 shrink-0 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -459,19 +469,21 @@ function TreeItem({
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
                 onClick={() => node && onRenameNode(node as FsNodeResponse)}
+                className="cursor-pointer"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => node && onMoveNode(node as FsNodeResponse)}
+                className="cursor-pointer"
               >
                 <FolderX className="h-4 w-4 mr-2" />
                 Move to...
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive"
+                className="text-destructive cursor-pointer"
                 onClick={() => onDeleteNode(element.id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />

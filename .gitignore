@@ -15,3 +15,5 @@ apps/frontend/next-env.d.ts
 .env
 apps/frontend/.env
 apps/backend/.env
+
+.venv/
