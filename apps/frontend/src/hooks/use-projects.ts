@@ -13,10 +13,12 @@ import {
 } from "@/lib/backend-calls/projects";
 import { toast } from "sonner";
 
-export function useProjects() {
+export function useProjects(initialProjects?: ProjectResponse[]) {
   const { session } = useAuth();
-  const [projects, setProjects] = useState<ProjectResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<ProjectResponse[]>(
+    initialProjects || []
+  );
+  const [loading, setLoading] = useState(!initialProjects);
   const [creating, setCreating] = useState(false);
 
   const fetchProjects = async () => {
@@ -114,11 +116,12 @@ export function useProjects() {
     }
   };
 
+  // Only fetch if we don't have initial projects and session exists
   useEffect(() => {
-    if (session) {
+    if (!initialProjects && session) {
       fetchProjects();
     }
-  }, [session]);
+  }, [session, initialProjects]);
 
   return {
     projects,
