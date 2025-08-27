@@ -1,4 +1,3 @@
-// components/projects-grid.tsx
 import { ProjectResponse } from "@detective-quill/shared-types";
 import { ProjectCard } from "./project-card";
 import { Card, CardContent } from "@/components/ui/card";
