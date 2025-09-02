@@ -5,54 +5,80 @@ import AuthButtons from "./auth-buttons";
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
-        {/* Logo/Brand */}
-        <div className="mr-4 hidden md:flex">
-          <Link href="/" className="flex items-center space-x-2">
-            <Search className="h-6 w-6 text-primary" />
-            <span className="ml-2 text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Detective's Quill
-            </span>
-          </Link>
-        </div>
+    <div className="sticky top-0 z-50 w-full p-4">
+      <header className="mx-auto max-w-7xl rounded-2xl border border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+        <div className="flex h-16 items-center justify-between px-6">
+          {/* Logo/Brand */}
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center space-x-3">
+              <Search className="h-7 w-7 text-primary" />
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Detective's Quill
+              </span>
+            </Link>
+          </div>
 
-        {/* Mobile Logo */}
-        <div className="mr-6 flex md:hidden">
-          <Link href="/" className="flex items-center space-x-2">
-            <Search className="h-6 w-6 text-primary" />
-            <span className="ml-2 text-lg font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              Detective's Quill
-            </span>
-          </Link>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <nav className="flex items-center space-x-6">
+          {/* Navigation - Desktop */}
+          <nav className="hidden md:flex items-center space-x-8">
             <Link
               href="/"
-              className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60"
+              className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
               Home
             </Link>
             <Link
               href="/dashboard"
-              className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60"
+              className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
               Dashboard
             </Link>
             <Link
               href="/cases"
-              className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60"
+              className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
               Cases
             </Link>
           </nav>
 
-          <AuthButtons />
+          {/* Auth Buttons */}
+          <div className="flex items-center">
+            <AuthButtons />
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <MobileNav />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
+  );
+}
+
+// Mobile Navigation Component
+function MobileNav() {
+  return (
+    <div className="flex items-center space-x-4">
+      <nav className="flex items-center space-x-4">
+        <Link
+          href="/"
+          className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+        >
+          Home
+        </Link>
+        <Link
+          href="/dashboard"
+          className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+        >
+          Dashboard
+        </Link>
+        <Link
+          href="/cases"
+          className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+        >
+          Cases
+        </Link>
+      </nav>
+    </div>
   );
 }

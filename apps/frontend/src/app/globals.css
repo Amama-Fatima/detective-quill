@@ -6,8 +6,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter); /* UI elements */
+  --font-serif: var(--font-crimson); /* Main content */
+  --font-mono: var(--font-geist-mono); /* Code */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -79,37 +80,37 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.12 0.03 260); /* Deep navy-blue almost black */
+  --foreground: oklch(0.95 0.01 260); /* Soft off-white */
+  --card: oklch(0.16 0.03 260); /* Slightly lighter navy for cards */
+  --card-foreground: oklch(0.95 0.01 260);
+  --popover: oklch(0.16 0.03 260);
+  --popover-foreground: oklch(0.95 0.01 260);
+  --primary: oklch(0.75 0.17 25); /* Deep crimson red - like blood */
+  --primary-foreground: oklch(0.95 0.01 260);
+  --secondary: oklch(0.22 0.03 260); /* Medium navy */
+  --secondary-foreground: oklch(0.95 0.01 260);
+  --muted: oklch(0.18 0.02 260); /* Muted navy */
+  --muted-foreground: oklch(0.7 0.02 260); /* Light gray-blue */
+  --accent: oklch(0.65 0.12 50); /* Amber/Yellow - like a street lamp */
+  --accent-foreground: oklch(0.95 0.01 260);
+  --destructive: oklch(0.65 0.22 25); /* Bright red for alerts */
+  --border: oklch(0.25 0.03 260); /* Border color */
+  --input: oklch(0.2 0.02 260); /* Input backgrounds */
+  --ring: oklch(0.75 0.17 25); /* Focus ring using primary color */
+  --chart-1: oklch(0.75 0.17 25); /* Crimson */
+  --chart-2: oklch(0.65 0.12 50); /* Amber */
+  --chart-3: oklch(0.55 0.08 260); /* Steel blue */
+  --chart-4: oklch(0.7 0.05 150); /* Sage green */
+  --chart-5: oklch(0.8 0.1 300); /* Soft purple */
+  --sidebar: oklch(0.16 0.03 260);
+  --sidebar-foreground: oklch(0.95 0.01 260);
+  --sidebar-primary: oklch(0.75 0.17 25);
+  --sidebar-primary-foreground: oklch(0.95 0.01 260);
+  --sidebar-accent: oklch(0.22 0.03 260);
+  --sidebar-accent-foreground: oklch(0.95 0.01 260);
+  --sidebar-border: oklch(0.25 0.03 260);
+  --sidebar-ring: oklch(0.75 0.17 25);
 }
 
 @layer base {
@@ -118,5 +119,54 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Better reading experience */
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Use serif for content, sans for UI */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif;
+  }
+
+  /* UI elements use sans-serif */
+  button,
+  input,
+  select,
+  textarea,
+  .ui-text {
+    @apply font-sans;
+  }
+
+  /* Improve readability for longer text */
+  p,
+  article,
+  .content {
+    @apply font-serif;
+  }
+}
+
+/* Custom typography classes for crime fiction theme */
+@layer components {
+  .mystery-title {
+    @apply font-serif text-4xl font-bold tracking-tight;
+    font-variant: small-caps;
+  }
+
+  .noir-text {
+    @apply font-serif leading-relaxed;
+    font-feature-settings: "liga", "kern";
+  }
+
+  .case-file {
+    @apply font-mono text-sm tracking-wide;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
   }
 }
