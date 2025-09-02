@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
 import AuthButtons from "./auth-buttons";
+import Image from "next/image";
 
 export default function Header() {
   return (
@@ -11,10 +11,16 @@ export default function Header() {
           {/* Logo/Brand */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3">
-              <Search className="h-7 w-7 text-primary" />
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <Image
+                src="/quill.svg"
+                alt="Detective's Quill Logo"
+                width={60}
+                height={60}
+                className="text-primary"
+              />
+              {/* <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 Detective's Quill
-              </span>
+              </span> */}
             </Link>
           </div>
 
