@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -34,9 +35,18 @@ import {
   Calendar,
   Save,
   X,
+  BookOpen,
+  FileText,
+  Eye,
+  MoreVertical,
+  Target,
+  Star,
+  Archive,
+  Clock,
 } from "lucide-react";
 import { ProjectResponse } from "@detective-quill/shared-types";
 import { formatDistanceToNow } from "date-fns";
+import { Badge } from "../ui/badge";
 
 interface ProjectCardProps {
   project: ProjectResponse;
@@ -48,182 +58,137 @@ interface ProjectCardProps {
   onDelete: (projectId: string) => Promise<boolean>;
 }
 
-export function ProjectCard({
+const ProjectCard = ({
   project,
   onOpen,
   onUpdate,
   onDelete,
-}: ProjectCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [editForm, setEditForm] = useState({
-    title: project.title,
-    description: project.description || "",
-  });
-
-  const handleSave = async () => {
-    if (!editForm.title.trim()) return;
-
-    const success = await onUpdate(project.id, editForm);
-    if (success) {
-      setIsEditing(false);
+}: {
+  project: any;
+  onOpen: (id: string) => void;
+  onUpdate: (id: string, data: any) => Promise<boolean>;
+  onDelete: (id: string) => Promise<boolean>;
+}) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-accent text-accent-foreground";
+      case "completed":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "archived":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      default:
+        return "bg-secondary text-secondary-foreground";
     }
   };
 
-  const handleCancel = () => {
-    setEditForm({
-      title: project.title,
-      description: project.description || "",
-    });
-    setIsEditing(false);
-  };
-
-  const handleDelete = async () => {
-    const success = await onDelete(project.id);
-    if (success) {
-      setIsDeleting(false);
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "active":
+        return <Target className="h-3 w-3" />;
+      case "completed":
+        return <Star className="h-3 w-3" />;
+      case "archived":
+        return <Archive className="h-3 w-3" />;
+      default:
+        return <Clock className="h-3 w-3" />;
     }
   };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
-    } catch {
-      return "Unknown";
-    }
-  };
-
-  if (isEditing) {
-    return (
-      <Card className="border-blue-200 bg-blue-50/30">
-        <CardHeader>
-          <Input
-            value={editForm.title}
-            onChange={(e) =>
-              setEditForm((prev) => ({ ...prev, title: e.target.value }))
-            }
-            className="text-lg font-semibold"
-            placeholder="Project title"
-          />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Textarea
-            value={editForm.description}
-            onChange={(e) =>
-              setEditForm((prev) => ({ ...prev, description: e.target.value }))
-            }
-            placeholder="Project description (optional)"
-            rows={3}
-          />
-          <div className="flex gap-2">
-            <Button onClick={handleSave} size="sm">
-              <Save className="h-4 w-4 mr-2" />
-              Save
-            </Button>
-            <Button onClick={handleCancel} variant="outline" size="sm">
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
-    <>
-      <Card className="group hover:shadow-lg transition-all duration-200 hover:border-gray-300">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg text-blue-600 hover:text-blue-700 cursor-pointer truncate">
-                <button
-                  onClick={() => onOpen(project.id)}
-                  className="text-left hover:underline"
-                >
-                  {project.title}
-                </button>
-              </CardTitle>
-              {project.description && (
-                <CardDescription className="mt-2 line-clamp-2">
-                  {project.description}
-                </CardDescription>
-              )}
+    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border/50 bg-gradient-to-br from-card via-card to-card/50 hover:border-primary/30">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
+              <BookOpen className="h-5 w-5 text-primary" />
             </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onOpen(project.id)}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open Project
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setIsDeleting(true)}
-                  className="text-red-600 focus:text-red-600"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex-1">
+              <CardTitle className="font-serif text-lg group-hover:text-primary transition-colors line-clamp-1">
+                {project.title}
+              </CardTitle>
+              <Badge
+                className={`text-xs case-file mt-1 ${getStatusColor(
+                  project.status
+                )}`}
+              >
+                {getStatusIcon(project.status)}
+                <span className="ml-1">{project.status.toUpperCase()}</span>
+              </Badge>
+            </div>
           </div>
-        </CardHeader>
 
-        <CardContent>
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onOpen(project.id)}>
+                <Eye className="h-4 w-4 mr-2" />
+                Open Case
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Details
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => onDelete(project.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Close Case
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pt-0" onClick={() => onOpen(project.id)}>
+        <p className="text-sm text-muted-foreground noir-text mb-4 line-clamp-2">
+          {project.description || "No case summary available..."}
+        </p>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">
+              Investigation Progress
+            </span>
+            <span className="font-mono text-xs">{project.progress}%</span>
+          </div>
+          <div className="w-full bg-muted rounded-full h-2">
+            <div
+              className="bg-gradient-to-r from-primary to-accent h-2 rounded-full transition-all duration-500"
+              style={{ width: `${project.progress}%` }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center space-x-3">
               <div className="flex items-center">
-                <Calendar className="h-3 w-3 mr-1" />
-                Updated{" "}
-                {formatDate(project.updated_at || project.created_at || "")}
+                <FileText className="h-3 w-3 mr-1" />
+                {project.wordCount.toLocaleString()} words
+              </div>
+              <div className="flex items-center">
+                <BookOpen className="h-3 w-3 mr-1" />
+                {project.chapters} chapters
               </div>
             </div>
-
-            <Button
-              onClick={() => onOpen(project.id)}
-              variant="ghost"
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center">
+              <Clock className="h-3 w-3 mr-1" />
+              {project.lastActivity.toLocaleDateString()}
+            </div>
           </div>
-        </CardContent>
-      </Card>
-
-      <AlertDialog open={isDeleting} onOpenChange={setIsDeleting}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Project</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{project.title}"? This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+        </div>
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default ProjectCard;
