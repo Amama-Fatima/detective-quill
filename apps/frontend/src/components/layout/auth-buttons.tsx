@@ -8,9 +8,6 @@ import { useAuth } from "@/context/auth-context";
 
 export default function AuthButtons() {
   const { user, loading, signOut } = useAuth();
-  useEffect(() => {
-    console.log("user", user);
-  }, []);
 
   const handleSignOut = async () => {
     await signOut();

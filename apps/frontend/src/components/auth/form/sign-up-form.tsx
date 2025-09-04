@@ -54,6 +54,7 @@ export function SignUpForm() {
           data: {
             full_name: formData.name,
             avatar_url: "",
+            username: formData.email.split("@")[0],
           },
           emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
         },

@@ -9,9 +9,31 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
+    if (!error && data.user) {
+      // Check if this is a new user or if username doesn't exist in user metadata
+      if (!data.user.user_metadata?.username && data.user.email) {
+        try {
+          // Extract username from email (before @)
+          const emailUsername = data.user.email.split("@")[0];
+
+          // Update user metadata with pen name
+          await supabase.auth.updateUser({
+            data: {
+              username: emailUsername,
+            },
+          });
+
+          console.log(
+            `Set pen name "${emailUsername}" for user ${data.user.id}`
+          );
+        } catch (updateError) {
+          console.error("Error setting pen name:", updateError);
+          // Don't fail the auth flow if pen name update fails
+        }
+      }
+
       // Success - redirect to the next URL or dashboard
       return NextResponse.redirect(`${origin}${next}`);
     } else {
