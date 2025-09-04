@@ -1,4 +1,3 @@
-// components/profile/detective-profile-client.tsx - Client Component
 "use client";
 
 import React, { useState } from "react";
@@ -27,12 +26,8 @@ export function DetectiveProfileClient({
       const { error } = await supabaseBrowserClient.from("profiles").upsert({
         id: profile.id,
         full_name: profile.full_name,
-        pen_name: profile.pen_name,
+        username: profile.pen_name,
         bio: profile.bio,
-        detective_rank: profile.detective_rank,
-        writing_stats: profile.writing_stats,
-        achievements: profile.achievements,
-        case_files: profile.case_files,
         updated_at: new Date().toISOString(),
       });
 
