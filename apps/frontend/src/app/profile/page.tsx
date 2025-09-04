@@ -38,14 +38,12 @@ export default async function ProfilePage() {
       "Crafting intricate mysteries where every clue matters and every character has secrets to hide.",
     avatar_url: user.user_metadata?.avatar_url || "",
     detective_rank: profileData?.detective_rank || "Senior Detective",
-    specialization: profileData?.specialization || "Locked Room Mysteries",
     joined_date: user.created_at || new Date().toISOString(),
     writing_stats: profileData?.writing_stats || {
       total_words: 245670,
       completed_stories: 8,
       active_cases: 3,
       writing_streak: 15,
-      favorite_genre: "Cozy Mystery",
       daily_target: 1500,
     },
     achievements: profileData?.achievements || [

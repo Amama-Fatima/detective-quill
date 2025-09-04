@@ -4,9 +4,9 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { ProfileHeader } from "./profile-header";
-import { ProfileTabs } from "./profile-tabs";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { DetectiveProfile } from "@/lib/types/profile";
+import ProfileTabs from "./profile/profile-tabs";
 
 interface DetectiveProfileClientProps {
   initialProfile: DetectiveProfile;
