@@ -33,40 +33,7 @@ import {
   Lock,
   ChevronRight,
 } from "lucide-react";
-
-interface DetectiveProfile {
-  id: string;
-  email: string;
-  full_name: string;
-  pen_name: string;
-  bio: string;
-  location: string;
-  website: string;
-  avatar_url: string;
-  detective_rank: string;
-  specialization: string;
-  joined_date: string;
-  writing_stats: {
-    total_words: number;
-    completed_stories: number;
-    active_cases: number;
-    writing_streak: number;
-    favorite_genre: string;
-    daily_target: number;
-  };
-  achievements: string[];
-  case_files: {
-    solved: number;
-    cold_cases: number;
-    active_investigations: number;
-  };
-  preferences: {
-    theme: string;
-    notifications: boolean;
-    public_profile: boolean;
-    show_stats: boolean;
-  };
-}
+import { DetectiveProfile } from "@/lib/types/profile";
 
 interface ProfileTabsProps {
   profile: DetectiveProfile;
@@ -219,22 +186,7 @@ export function ProfileTabs({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-center p-4 bg-accent/5 rounded-lg border border-accent/20">
-                <div className="text-2xl font-serif font-bold text-accent mb-2">
-                  {profile.specialization}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Primary Investigation Focus
-                </div>
-              </div>
-
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Favorite Genre</span>
-                  <span className="font-medium">
-                    {profile.writing_stats.favorite_genre}
-                  </span>
-                </div>
                 <div className="flex justify-between">
                   <span>Detective Rank</span>
                   <span className="font-medium text-primary">
@@ -482,68 +434,6 @@ export function ProfileTabs({
                   placeholder="Describe your detective writing style and interests..."
                   rows={4}
                 />
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    value={profile.location}
-                    onChange={(e) =>
-                      setProfile({ ...profile, location: e.target.value })
-                    }
-                    placeholder="City, Country"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input
-                    id="website"
-                    type="url"
-                    value={profile.website}
-                    onChange={(e) =>
-                      setProfile({ ...profile, website: e.target.value })
-                    }
-                    placeholder="https://yourwebsite.com"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="specialization">
-                    Detective Specialization
-                  </Label>
-                  <Input
-                    id="specialization"
-                    value={profile.specialization}
-                    onChange={(e) =>
-                      setProfile({ ...profile, specialization: e.target.value })
-                    }
-                    placeholder="e.g., Locked Room Mysteries"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="daily_target">Daily Writing Target</Label>
-                  <Input
-                    id="daily_target"
-                    type="number"
-                    value={profile.writing_stats.daily_target}
-                    onChange={(e) =>
-                      setProfile({
-                        ...profile,
-                        writing_stats: {
-                          ...profile.writing_stats,
-                          daily_target: parseInt(e.target.value) || 0,
-                        },
-                      })
-                    }
-                    placeholder="e.g., 1500"
-                  />
-                </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-4">

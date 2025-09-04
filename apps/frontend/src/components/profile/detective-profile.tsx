@@ -6,40 +6,7 @@ import { toast } from "sonner";
 import { ProfileHeader } from "./profile-header";
 import { ProfileTabs } from "./profile-tabs";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
-
-interface DetectiveProfile {
-  id: string;
-  email: string;
-  full_name: string;
-  pen_name: string;
-  bio: string;
-  location: string;
-  website: string;
-  avatar_url: string;
-  detective_rank: string;
-  specialization: string;
-  joined_date: string;
-  writing_stats: {
-    total_words: number;
-    completed_stories: number;
-    active_cases: number;
-    writing_streak: number;
-    favorite_genre: string;
-    daily_target: number;
-  };
-  achievements: string[];
-  case_files: {
-    solved: number;
-    cold_cases: number;
-    active_investigations: number;
-  };
-  preferences: {
-    theme: string;
-    notifications: boolean;
-    public_profile: boolean;
-    show_stats: boolean;
-  };
-}
+import { DetectiveProfile } from "@/lib/types/profile";
 
 interface DetectiveProfileClientProps {
   initialProfile: DetectiveProfile;
@@ -62,14 +29,10 @@ export function DetectiveProfileClient({
         full_name: profile.full_name,
         pen_name: profile.pen_name,
         bio: profile.bio,
-        location: profile.location,
-        website: profile.website,
         detective_rank: profile.detective_rank,
-        specialization: profile.specialization,
         writing_stats: profile.writing_stats,
         achievements: profile.achievements,
         case_files: profile.case_files,
-        preferences: profile.preferences,
         updated_at: new Date().toISOString(),
       });
 

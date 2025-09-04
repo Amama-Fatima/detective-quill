@@ -7,40 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Edit, Calendar, MapPin, Globe, Mail } from "lucide-react";
-
-interface DetectiveProfile {
-  id: string;
-  email: string;
-  full_name: string;
-  pen_name: string;
-  bio: string;
-  location: string;
-  website: string;
-  avatar_url: string;
-  detective_rank: string;
-  specialization: string;
-  joined_date: string;
-  writing_stats: {
-    total_words: number;
-    completed_stories: number;
-    active_cases: number;
-    writing_streak: number;
-    favorite_genre: string;
-    daily_target: number;
-  };
-  achievements: string[];
-  case_files: {
-    solved: number;
-    cold_cases: number;
-    active_investigations: number;
-  };
-  preferences: {
-    theme: string;
-    notifications: boolean;
-    public_profile: boolean;
-    show_stats: boolean;
-  };
-}
+import { DetectiveProfile } from "@/lib/types/profile";
 
 interface ProfileHeaderProps {
   profile: DetectiveProfile;
@@ -112,12 +79,6 @@ export function ProfileHeader({
                   <Calendar className="h-4 w-4" />
                   <span>Joined {memberSince}</span>
                 </div>
-                {profile.location && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{profile.location}</span>
-                  </div>
-                )}
               </div>
 
               <p className="noir-text text-muted-foreground max-w-2xl">
@@ -172,18 +133,6 @@ export function ProfileHeader({
               <Edit className="h-4 w-4 mr-2" />
               {isEditing ? "Cancel" : "Edit Profile"}
             </Button>
-            {profile.website && (
-              <Button variant="ghost" size="sm" asChild>
-                <a
-                  href={profile.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Globe className="h-4 w-4 mr-2" />
-                  Website
-                </a>
-              </Button>
-            )}
           </div>
         </div>
       </CardContent>

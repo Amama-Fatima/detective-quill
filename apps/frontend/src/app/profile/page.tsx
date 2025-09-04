@@ -2,40 +2,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { DetectiveProfileClient } from "@/components/profile/detective-profile";
-
-interface DetectiveProfile {
-  id: string;
-  email: string;
-  full_name: string;
-  pen_name: string;
-  bio: string;
-  location: string;
-  website: string;
-  avatar_url: string;
-  detective_rank: string;
-  specialization: string;
-  joined_date: string;
-  writing_stats: {
-    total_words: number;
-    completed_stories: number;
-    active_cases: number;
-    writing_streak: number;
-    favorite_genre: string;
-    daily_target: number;
-  };
-  achievements: string[];
-  case_files: {
-    solved: number;
-    cold_cases: number;
-    active_investigations: number;
-  };
-  preferences: {
-    theme: string;
-    notifications: boolean;
-    public_profile: boolean;
-    show_stats: boolean;
-  };
-}
+import { DetectiveProfile } from "@/lib/types/profile";
 
 export default async function ProfilePage() {
   const supabase = await createSupabaseServerClient();
@@ -69,8 +36,6 @@ export default async function ProfilePage() {
     bio:
       profileData?.bio ||
       "Crafting intricate mysteries where every clue matters and every character has secrets to hide.",
-    location: profileData?.location || "London, England",
-    website: profileData?.website || "https://mysterysolver.com",
     avatar_url: user.user_metadata?.avatar_url || "",
     detective_rank: profileData?.detective_rank || "Senior Detective",
     specialization: profileData?.specialization || "Locked Room Mysteries",
@@ -95,12 +60,6 @@ export default async function ProfilePage() {
       solved: 8,
       cold_cases: 2,
       active_investigations: 3,
-    },
-    preferences: profileData?.preferences || {
-      theme: "dark",
-      notifications: true,
-      public_profile: true,
-      show_stats: true,
     },
   };
 
