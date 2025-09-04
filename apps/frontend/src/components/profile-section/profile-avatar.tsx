@@ -24,9 +24,8 @@ export function ProfileAvatar({ user, size = "xl" }: ProfileAvatarProps) {
   };
 
   const displayName = user.user_metadata?.full_name || user.email || "User";
-  const avatarUrl =
-    user.user_metadata?.avatar_url || user.user_metadata?.picture;
-
+  const avatarUrl = user.user_metadata?.avatar_url;
+  console.log("user in profile avataar", user);
   return (
     <Avatar className={sizeClasses[size]}>
       <AvatarImage src={avatarUrl} alt={displayName} />

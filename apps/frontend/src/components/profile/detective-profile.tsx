@@ -1,3 +1,4 @@
+// components/profile/detective-profile-client.tsx - Client Component
 "use client";
 
 import React, { useState } from "react";
@@ -5,7 +6,7 @@ import { toast } from "sonner";
 import { ProfileHeader } from "./profile-header";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { DetectiveProfile } from "@/lib/types/profile";
-import ProfileTabs from "./profile/profile-tabs";
+import ProfileTabs from "./profile-tabs/profile-tabs";
 
 interface DetectiveProfileClientProps {
   initialProfile: DetectiveProfile;
@@ -26,8 +27,12 @@ export function DetectiveProfileClient({
       const { error } = await supabaseBrowserClient.from("profiles").upsert({
         id: profile.id,
         full_name: profile.full_name,
-        username: profile.pen_name,
+        pen_name: profile.pen_name,
         bio: profile.bio,
+        detective_rank: profile.detective_rank,
+        writing_stats: profile.writing_stats,
+        achievements: profile.achievements,
+        case_files: profile.case_files,
         updated_at: new Date().toISOString(),
       });
 
@@ -45,9 +50,14 @@ export function DetectiveProfileClient({
     }
   };
 
-  const handleAvatarUpload = async () => {
-    toast.info("Avatar upload coming soon!");
-    // TODO: Implement avatar upload functionality
+  const handleAvatarUpload = (newAvatarUrl: string) => {
+    // Avatar upload is handled in ProfileHeader component
+    // This callback is triggered after successful upload
+    console.log("Avatar updated:", newAvatarUrl);
+  };
+
+  const handleProfileUpdate = (updatedProfile: DetectiveProfile) => {
+    setProfile(updatedProfile);
   };
 
   return (
@@ -58,6 +68,7 @@ export function DetectiveProfileClient({
           isEditing={isEditing}
           onEdit={() => setIsEditing(!isEditing)}
           onAvatarUpload={handleAvatarUpload}
+          onProfileUpdate={handleProfileUpdate}
         />
 
         <ProfileTabs

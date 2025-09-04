@@ -31,11 +31,9 @@ export default async function ProfilePage() {
   const profile: DetectiveProfile = {
     id: user.id,
     email: user.email || "",
-    full_name: user.user_metadata?.full_name || "Detective Writer",
-    pen_name: profileData?.pen_name || "A. Christie Detective",
-    bio:
-      profileData?.bio ||
-      "Crafting intricate mysteries where every clue matters and every character has secrets to hide.",
+    full_name: user.user_metadata?.full_name,
+    pen_name: profileData?.username,
+    bio: profileData?.bio || "",
     avatar_url: user.user_metadata?.avatar_url || "",
     detective_rank: profileData?.detective_rank || "Senior Detective",
     joined_date: user.created_at || new Date().toISOString(),
