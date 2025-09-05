@@ -28,7 +28,7 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     .from("projects")
     .select("*")
     .eq("id", projectId)
-    .eq("author_id", user.id)
+    // .eq("author_id", user.id)
     .single();
 
   return (

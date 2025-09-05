@@ -5,6 +5,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function middleware(req: NextRequest) {
+  console.log("Middleware running for:", req.nextUrl.pathname);
   const res = NextResponse.next();
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
