@@ -17,7 +17,7 @@ async function isProjectMember(
   try {
     const { data, error } = await supabase
       .from("projects_members")
-      .select("id")
+      .select("*")
       .eq("project_id", projectId)
       .eq("user_id", userId)
       .single();

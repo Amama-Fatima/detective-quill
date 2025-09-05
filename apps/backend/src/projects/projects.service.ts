@@ -23,23 +23,50 @@ export class ProjectsService {
   ): Promise<ProjectResponse> {
     const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
-    const { data, error } = await supabase
-      .from("projects")
-      .insert({
-        title: createProjectDto.title,
-        description: createProjectDto.description || null,
-        author_id: userId,
-      })
-      .select()
-      .single();
+    try {
+      // Step 1: Create the project
+      const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .insert({
+          title: createProjectDto.title,
+          description: createProjectDto.description || null,
+          author_id: userId,
+        })
+        .select()
+        .single();
 
-    if (error) {
+      if (projectError) {
+        throw new BadRequestException(
+          `Failed to create project: ${projectError.message}`
+        );
+      }
+
+      // Step 2: Add the creator as a project member
+      const { error: memberError } = await supabase
+        .from("projects_members")
+        .insert({
+          project_id: project.id,
+          user_id: userId,
+        });
+
+      if (memberError) {
+        // Cleanup: delete the project if member insertion fails
+        await supabase.from("projects").delete().eq("id", project.id);
+
+        throw new BadRequestException(
+          `Failed to add project member: ${memberError.message}`
+        );
+      }
+
+      return project;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new BadRequestException(
         `Failed to create project: ${error.message}`
       );
     }
-
-    return data;
   }
 
   async findAllUserProjects(
