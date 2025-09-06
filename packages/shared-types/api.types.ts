@@ -211,3 +211,21 @@ export interface CommentStats {
   resolved: number;
   unresolved: number;
 }
+
+export interface ProjectMember {
+  id: string;
+  project_id: string;
+  member_id: string;
+  created_at: string;
+  profile: {
+    id: string;
+    full_name: string;
+    username: string;
+    email: string;
+    avatar_url: string | null;
+  };
+}
+
+export interface AddMemberDto {
+  email: string;
+}
