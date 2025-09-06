@@ -63,11 +63,10 @@ export class SettingsService {
       .from("projects_members")
       .select(
         `
-        id,
         project_id,
-        member_id,
+        user_id,
         created_at,
-        profile:profiles!projects_members_member_id_fkey (
+        profile:profiles!projects_members_user_id_fkey (
           id,
           full_name,
           username,
@@ -84,7 +83,7 @@ export class SettingsService {
         `Failed to fetch project members: ${error.message}`
       );
     }
-
+    console.log("data in here is ", data);
     return (data as unknown as ProjectMember[]) || [];
   }
 
@@ -118,7 +117,7 @@ export class SettingsService {
       .from("projects_members")
       .select("id")
       .eq("project_id", projectId)
-      .eq("member_id", profile.id)
+      .eq("user_id", profile.id)
       .single();
 
     if (existingMember) {
@@ -130,13 +129,13 @@ export class SettingsService {
       .from("projects_members")
       .insert({
         project_id: projectId,
-        member_id: profile.id,
+        user_id: profile.id,
       })
       .select(
         `
         id,
         project_id,
-        member_id,
+        user_id,
         created_at
       `
       )
@@ -149,7 +148,7 @@ export class SettingsService {
     // Return the member with profile info
     return {
       ...data,
-      profile,
+      profiles: profile,
     };
   }
 
@@ -168,7 +167,7 @@ export class SettingsService {
     // Check if the member exists and get their details
     const { data: member, error: memberError } = await supabase
       .from("projects_members")
-      .select("member_id")
+      .select("user_id")
       .eq("id", memberId)
       .eq("project_id", projectId)
       .single();
@@ -178,7 +177,7 @@ export class SettingsService {
     }
 
     // Prevent removing the project owner
-    if (member.member_id === userId) {
+    if (member.user_id === userId) {
       throw new BadRequestException(
         "Project owner cannot be removed from the project"
       );
@@ -282,7 +281,7 @@ export class SettingsService {
       .from("projects_members")
       .select("id")
       .eq("project_id", projectId)
-      .eq("member_id", userId)
+      .eq("user_id", userId)
       .single();
 
     if (!member) {

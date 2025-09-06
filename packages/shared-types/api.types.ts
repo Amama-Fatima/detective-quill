@@ -213,11 +213,10 @@ export interface CommentStats {
 }
 
 export interface ProjectMember {
-  id: string;
   project_id: string;
-  member_id: string;
+  user_id: string;
   created_at: string;
-  profile: {
+  profiles: {
     id: string;
     full_name: string;
     username: string;

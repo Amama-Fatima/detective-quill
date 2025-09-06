@@ -3,8 +3,6 @@ import { clsx, type ClassValue } from "clsx";
 
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
 import { twMerge } from "tailwind-merge";
-import { updateBlueprintById } from "../backend-calls/blueprints";
-import { toast } from "sonner";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -145,6 +143,18 @@ const getPasswordStrength = (password: string) => {
   return { strength: 3, label: "Strong", color: "bg-green-500" };
 };
 
+const formatDate = (dateString: string | null): string => {
+  if (!dateString) return "N/A";
+
+  const date = new Date(dateString);
+  // Use a consistent format that doesn't depend on locale
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
 export {
   cn,
   getContainerClass,
@@ -156,4 +166,5 @@ export {
   countChildren,
   convertNodesToTreeElements,
   getPasswordStrength,
+  formatDate,
 };

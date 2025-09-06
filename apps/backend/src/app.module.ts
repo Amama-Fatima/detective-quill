@@ -11,6 +11,7 @@ import { CardTypesModule } from "./card_types/card_types.module";
 import { BlueprintCardsModule } from "./blueprint_cards/blueprint_cards.module";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { CommentsModule } from "./comments/comments.module";
+import { SettingsModule } from "./settings/settings.module";
 
 @Module({
   controllers: [AppController],
@@ -40,6 +41,7 @@ import { CommentsModule } from "./comments/comments.module";
     CardTypesModule,
     BlueprintCardsModule,
     CommentsModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}

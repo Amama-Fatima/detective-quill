@@ -35,28 +35,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Settings,
   Users,
   UserPlus,
   Trash2,
   Crown,
   Edit3,
-  Eye,
   AlertTriangle,
   Shield,
   Mail,
   Calendar,
   Save,
   X,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
+import { useSettings } from "@/hooks/use-settings";
+import { ProjectMember } from "@detective-quill/shared-types";
+import { formatDate } from "@/lib/utils/utils";
 
 interface Project {
   id: string;
@@ -70,20 +66,25 @@ interface Project {
 
 interface ProjectSettingsBodyProps {
   project: Project;
+  initialMembers: ProjectMember[];
+  currentUserId: string;
 }
 
-interface ProjectMember {
-  id: string;
-  user_id: string;
-  email: string;
-  full_name: string;
-  role: "creator" | "writer" | "reviewer";
-  joined_date: string;
-  status: "active" | "pending" | "inactive";
-  avatar_url?: string;
-}
+const ProjectSettingsBody = ({
+  project,
+  initialMembers,
+  currentUserId,
+}: ProjectSettingsBodyProps) => {
+  const {
+    members,
+    updating,
+    addingMember,
+    updateProject,
+    addMember,
+    removeMember,
+    deleteProject,
+  } = useSettings(project.id, initialMembers);
 
-const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [projectTitle, setProjectTitle] = useState(project.title);
   const [projectDescription, setProjectDescription] = useState(
@@ -91,120 +92,64 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
   );
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState("");
-  const [newMemberRole, setNewMemberRole] = useState<"writer" | "reviewer">(
-    "writer"
-  );
 
-  // Hardcoded members data for now
-  const projectMembers: ProjectMember[] = [
-    {
-      id: "1",
-      user_id: "user-1",
-      email: "detective.holmes@mystery.com",
-      full_name: "Sherlock Holmes",
-      role: "creator",
-      joined_date: "2024-01-15",
-      status: "active",
-      avatar_url: "/avatars/holmes.jpg",
-    },
-    {
-      id: "2",
-      user_id: "user-2",
-      email: "dr.watson@mystery.com",
-      full_name: "Dr. John Watson",
-      role: "writer",
-      joined_date: "2024-01-20",
-      status: "active",
-      avatar_url: "/avatars/watson.jpg",
-    },
-    {
-      id: "3",
-      user_id: "user-3",
-      email: "inspector.lestrade@mystery.com",
-      full_name: "Inspector Lestrade",
-      role: "reviewer",
-      joined_date: "2024-02-01",
-      status: "pending",
-      avatar_url: "/avatars/lestrade.jpg",
-    },
-    {
-      id: "4",
-      user_id: "user-4",
-      email: "mrs.hudson@mystery.com",
-      full_name: "Mrs. Hudson",
-      role: "reviewer",
-      joined_date: "2024-02-10",
-      status: "active",
-    },
-  ];
+  // Check if current user is the project owner
+  const isOwner = project.author_id === currentUserId;
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case "creator":
-        return <Crown className="h-4 w-4" />;
-      case "writer":
-        return <Edit3 className="h-4 w-4" />;
-      case "reviewer":
-        return <Eye className="h-4 w-4" />;
-      default:
-        return <Users className="h-4 w-4" />;
+  const getRoleIcon = (member: ProjectMember) => {
+    if (member.user_id === project.author_id) {
+      return <Crown className="h-4 w-4" />;
     }
+    return <Edit3 className="h-4 w-4" />;
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case "creator":
-        return "default";
-      case "writer":
-        return "secondary";
-      case "reviewer":
-        return "outline";
-      default:
-        return "outline";
+  const getRoleBadgeVariant = (member: ProjectMember) => {
+    if (member.user_id === project.author_id) {
+      return "default"; // Creator
     }
+    return "secondary"; // Member
   };
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "active":
-        return "default";
-      case "pending":
-        return "secondary";
-      case "inactive":
-        return "outline";
-      default:
-        return "outline";
+  const getRoleText = (member: ProjectMember) => {
+    if (member.user_id === project.author_id) {
+      return "Creator";
     }
+    return "Member";
   };
 
-  const handleSaveProject = () => {
-    // TODO: Implement save functionality
-    console.log("Saving project:", {
+  const handleSaveProject = async () => {
+    const success = await updateProject({
       title: projectTitle,
       description: projectDescription,
     });
-    setIsEditingProject(false);
+
+    if (success) {
+      setIsEditingProject(false);
+      // Update local state to reflect the changes immediately
+      project.title = projectTitle;
+      project.description = projectDescription;
+    }
   };
 
-  const handleAddMember = () => {
-    // TODO: Implement add member functionality
-    console.log("Adding member:", {
-      email: newMemberEmail,
-      role: newMemberRole,
-    });
-    setIsAddMemberOpen(false);
-    setNewMemberEmail("");
-    setNewMemberRole("writer");
+  const handleAddMember = async () => {
+    if (!newMemberEmail.trim()) {
+      return;
+    }
+
+    const success = await addMember({ email: newMemberEmail });
+
+    if (success) {
+      setIsAddMemberOpen(false);
+      setNewMemberEmail("");
+    }
   };
 
-  const handleRemoveMember = (memberId: string) => {
-    // TODO: Implement remove member functionality
-    console.log("Removing member:", memberId);
+  const handleRemoveMember = async (memberId: string) => {
+    await removeMember(memberId);
   };
 
-  const handleDeleteProject = () => {
-    // TODO: Implement delete project functionality
-    console.log("Deleting project:", project.id);
+  const handleDeleteProject = async () => {
+    await deleteProject();
   };
 
   return (
@@ -241,27 +186,30 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                       </p>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditingProject(!isEditingProject)}
-                  >
-                    {isEditingProject ? (
-                      <>
-                        <X className="h-4 w-4 mr-2" />
-                        Cancel
-                      </>
-                    ) : (
-                      <>
-                        <Edit3 className="h-4 w-4 mr-2" />
-                        Edit
-                      </>
-                    )}
-                  </Button>
+                  {isOwner && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditingProject(!isEditingProject)}
+                      disabled={updating}
+                    >
+                      {isEditingProject ? (
+                        <>
+                          <X className="h-4 w-4 mr-2" />
+                          Cancel
+                        </>
+                      ) : (
+                        <>
+                          <Edit3 className="h-4 w-4 mr-2" />
+                          Edit
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                {isEditingProject ? (
+                {isEditingProject && isOwner ? (
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="title">Case Title</Label>
@@ -270,6 +218,7 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                         value={projectTitle}
                         onChange={(e) => setProjectTitle(e.target.value)}
                         className="mt-1"
+                        disabled={updating}
                       />
                     </div>
                     <div>
@@ -281,18 +230,29 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                         className="mt-1"
                         rows={4}
                         placeholder="Brief summary of your mystery..."
+                        disabled={updating}
                       />
                     </div>
                     <div className="flex justify-end space-x-2">
                       <Button
                         variant="outline"
                         onClick={() => setIsEditingProject(false)}
+                        disabled={updating}
                       >
                         Cancel
                       </Button>
-                      <Button onClick={handleSaveProject}>
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Changes
+                      <Button onClick={handleSaveProject} disabled={updating}>
+                        {updating ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4 mr-2" />
+                            Save Changes
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -317,21 +277,13 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                         <Label className="text-sm font-medium text-muted-foreground">
                           Created
                         </Label>
-                        <p className="mt-1">
-                          {new Date(
-                            project.created_at || ""
-                          ).toLocaleDateString()}
-                        </p>
+                        <p className="mt-1">{formatDate(project.created_at)}</p>
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-muted-foreground">
                           Last Updated
                         </Label>
-                        <p className="mt-1">
-                          {new Date(
-                            project.updated_at || ""
-                          ).toLocaleDateString()}
-                        </p>
+                        <p className="mt-1">{formatDate(project.updated_at)}</p>
                       </div>
                     </div>
                   </div>
@@ -352,69 +304,70 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                       </p>
                     </div>
                   </div>
-                  <Dialog
-                    open={isAddMemberOpen}
-                    onOpenChange={setIsAddMemberOpen}
-                  >
-                    <DialogTrigger asChild>
-                      <Button size="sm">
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Add Detective
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle className="font-serif">
-                          Add New Detective
-                        </DialogTitle>
-                        <DialogDescription>
-                          Invite a new team member to join your investigation.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div>
-                          <Label htmlFor="email">Email Address</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={newMemberEmail}
-                            onChange={(e) => setNewMemberEmail(e.target.value)}
-                            placeholder="detective@mystery.com"
-                            className="mt-1"
-                          />
+                  {isOwner && (
+                    <Dialog
+                      open={isAddMemberOpen}
+                      onOpenChange={setIsAddMemberOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button size="sm" disabled={addingMember}>
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Add Detective
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle className="font-serif">
+                            Add New Detective
+                          </DialogTitle>
+                          <DialogDescription>
+                            Invite a new team member to join your investigation.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div>
+                            <Label htmlFor="email">Email Address</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={newMemberEmail}
+                              onChange={(e) =>
+                                setNewMemberEmail(e.target.value)
+                              }
+                              placeholder="detective@mystery.com"
+                              className="mt-1"
+                              disabled={addingMember}
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <Label htmlFor="role">Role</Label>
-                          <Select
-                            value={newMemberRole}
-                            onValueChange={(value: "writer" | "reviewer") =>
-                              setNewMemberRole(value)
-                            }
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsAddMemberOpen(false)}
+                            disabled={addingMember}
                           >
-                            <SelectTrigger className="mt-1">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="writer">Writer</SelectItem>
-                              <SelectItem value="reviewer">Reviewer</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsAddMemberOpen(false)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAddMember}>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Send Invitation
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleAddMember}
+                            disabled={addingMember}
+                          >
+                            {addingMember ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Adding...
+                              </>
+                            ) : (
+                              <>
+                                <Mail className="h-4 w-4 mr-2" />
+                                Send Invitation
+                              </>
+                            )}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
@@ -423,26 +376,25 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                     <TableRow>
                       <TableHead>Detective</TableHead>
                       <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {projectMembers.map((member) => (
-                      <TableRow key={member.id}>
+                    {members.map((member) => (
+                      <TableRow key={member.user_id}>
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                              {member.avatar_url ? (
+                              {member.profiles.avatar_url ? (
                                 <img
-                                  src={member.avatar_url}
-                                  alt={member.full_name}
+                                  src={member.profiles.avatar_url}
+                                  alt={member.profiles.full_name}
                                   className="w-8 h-8 rounded-full object-cover"
                                 />
                               ) : (
                                 <span className="text-sm font-medium">
-                                  {member.full_name
+                                  {member.profiles.full_name
                                     .split(" ")
                                     .map((n) => n[0])
                                     .join("")}
@@ -450,37 +402,32 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                               )}
                             </div>
                             <div>
-                              <p className="font-medium">{member.full_name}</p>
+                              <p className="font-medium">
+                                {member.profiles.full_name}
+                              </p>
                               <p className="text-sm text-muted-foreground">
-                                {member.email}
+                                {member.profiles.email}
                               </p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={getRoleBadgeVariant(member.role)}
+                            variant={getRoleBadgeVariant(member)}
                             className="case-file"
                           >
-                            {getRoleIcon(member.role)}
-                            <span className="ml-2 capitalize">
-                              {member.role}
-                            </span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getStatusBadgeVariant(member.status)}>
-                            {member.status}
+                            {getRoleIcon(member)}
+                            <span className="ml-2">{getRoleText(member)}</span>
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4 mr-1" />
-                            {new Date(member.joined_date).toLocaleDateString()}
+                            {formatDate(member.created_at)}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          {member.role !== "creator" && (
+                          {isOwner && member.user_id !== project.author_id && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="sm">
@@ -494,9 +441,9 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                                   </AlertDialogTitle>
                                   <AlertDialogDescription>
                                     Are you sure you want to remove{" "}
-                                    {member.full_name} from this investigation?
-                                    They will lose access to all case files
-                                    immediately.
+                                    {member.profiles.full_name} from this
+                                    investigation? They will lose access to all
+                                    case files immediately.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -504,7 +451,7 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                                   <AlertDialogAction
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     onClick={() =>
-                                      handleRemoveMember(member.id)
+                                      handleRemoveMember(member.user_id)
                                     }
                                   >
                                     Remove Detective
@@ -524,73 +471,75 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
 
           {/* Sidebar - Danger Zone */}
           <div className="space-y-6">
-            <Card className="shadow-lg border-destructive/20">
-              <CardHeader className="border-b border-destructive/10 bg-gradient-to-r from-destructive/5 to-transparent">
-                <CardTitle className="flex items-center">
-                  <AlertTriangle className="h-6 w-6 mr-3 text-destructive" />
-                  <div>
-                    <h3 className="text-xl font-serif text-destructive">
-                      Danger Zone
-                    </h3>
-                    <p className="text-sm text-muted-foreground font-sans">
-                      Irreversible actions
-                    </p>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium text-destructive mb-2">
-                      Close Investigation
-                    </h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Permanently delete this case and all associated evidence.
-                      This action cannot be undone.
-                    </p>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="w-full"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete Case
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Delete Investigation
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete "{project.title}" and
-                            remove all associated data including:
-                            <br />• All case files and evidence
-                            <br />• Team member access
-                            <br />• Version history
-                            <br />• Investigation notes
-                            <br />
-                            <br />
-                            <strong>This action cannot be undone.</strong>
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={handleDeleteProject}
+            {isOwner && (
+              <Card className="shadow-lg border-destructive/20">
+                <CardHeader className="border-b border-destructive/10 bg-gradient-to-r from-destructive/5 to-transparent">
+                  <CardTitle className="flex items-center">
+                    <AlertTriangle className="h-6 w-6 mr-3 text-destructive" />
+                    <div>
+                      <h3 className="text-xl font-serif text-destructive">
+                        Danger Zone
+                      </h3>
+                      <p className="text-sm text-muted-foreground font-sans">
+                        Irreversible actions
+                      </p>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-destructive mb-2">
+                        Close Investigation
+                      </h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Permanently delete this case and all associated
+                        evidence. This action cannot be undone.
+                      </p>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="w-full"
                           >
-                            Delete Investigation
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Case
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Delete Investigation
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete "{project.title}" and
+                              remove all associated data including:
+                              <br />• All case files and evidence
+                              <br />• Team member access
+                              <br />• Version history
+                              <br />• Investigation notes
+                              <br />
+                              <br />
+                              <strong>This action cannot be undone.</strong>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={handleDeleteProject}
+                            >
+                              Delete Investigation
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Project Info */}
             <Card className="shadow-lg">
@@ -608,7 +557,7 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Team Size</span>
-                    <span>{projectMembers.length} detectives</span>
+                    <span>{members.length} detectives</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Status</span>
@@ -620,9 +569,7 @@ const ProjectSettingsBody = ({ project }: ProjectSettingsBodyProps) => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Created</span>
-                    <span>
-                      {new Date(project.created_at || "").toLocaleDateString()}
-                    </span>
+                    <span>{formatDate(project.created_at)}</span>
                   </div>
                 </div>
               </CardContent>
