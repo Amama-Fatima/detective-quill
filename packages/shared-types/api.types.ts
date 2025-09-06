@@ -217,7 +217,7 @@ export interface ProjectMember {
   user_id: string;
   created_at: string;
   profiles: {
-    id: string;
+    user_id: string;
     full_name: string;
     username: string;
     email: string;

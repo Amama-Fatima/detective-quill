@@ -102,7 +102,7 @@ export class SettingsService {
     // First, find the user by email
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("id, full_name, username, email, avatar_url")
+      .select("user_id, full_name, username, email, avatar_url")
       .eq("email", addMemberDto.email)
       .single();
 
@@ -115,9 +115,9 @@ export class SettingsService {
     // Check if user is already a member
     const { data: existingMember, error: checkError } = await supabase
       .from("projects_members")
-      .select("id")
+      .select("*")
       .eq("project_id", projectId)
-      .eq("user_id", profile.id)
+      .eq("user_id", profile.user_id)
       .single();
 
     if (existingMember) {
@@ -129,11 +129,10 @@ export class SettingsService {
       .from("projects_members")
       .insert({
         project_id: projectId,
-        user_id: profile.id,
+        user_id: profile.user_id,
       })
       .select(
         `
-        id,
         project_id,
         user_id,
         created_at
@@ -168,7 +167,7 @@ export class SettingsService {
     const { data: member, error: memberError } = await supabase
       .from("projects_members")
       .select("user_id")
-      .eq("id", memberId)
+      .eq("user_id", memberId)
       .eq("project_id", projectId)
       .single();
 
@@ -187,7 +186,7 @@ export class SettingsService {
     const { error } = await supabase
       .from("projects_members")
       .delete()
-      .eq("id", memberId)
+      .eq("user_id", memberId)
       .eq("project_id", projectId);
 
     if (error) {
