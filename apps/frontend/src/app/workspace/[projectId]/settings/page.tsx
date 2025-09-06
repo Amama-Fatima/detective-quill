@@ -1,15 +1,16 @@
 import ProjectWorkspaceHeader from "@/components/project-workspace/project-workspace-header";
-import WorkspaceMainBody from "@/components/project-workspace/project-workspace-main";
+import ProjectSettingsBody from "@/components/project-workspace/settings/settings-body";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import React from "react";
-interface ProjectWorkspacePageProps {
+
+interface ProjectSettingsPageProps {
   params: Promise<{
     projectId: string;
   }>;
 }
 
-const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
+const ProjectSettingsPage = async ({ params }: ProjectSettingsPageProps) => {
   const supabase = await createSupabaseServerClient();
 
   const { projectId } = await params;
@@ -28,15 +29,13 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     .from("projects")
     .select("*")
     .eq("id", projectId)
-    // .eq("author_id", user.id)
     .single();
 
   return (
     <div>
-      {/* <ProjectWorkspaceHeader project={data} /> */}
-      <WorkspaceMainBody project={data} />
+      <ProjectSettingsBody project={data} />
     </div>
   );
 };
 
-export default ProjectWorkspace;
+export default ProjectSettingsPage;
