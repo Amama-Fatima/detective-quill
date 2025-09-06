@@ -142,8 +142,13 @@ const ProjectWorkspaceHeader = ({ project }: WorkspaceHeaderProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Project Settings
+                    <Link
+                      href={`/workspace/${project.id}/settings`}
+                      className="flex items-center w-full"
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      Project Settings
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <FileText className="h-4 w-4 mr-2" />

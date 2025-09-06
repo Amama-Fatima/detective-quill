@@ -1,12 +1,11 @@
-// components/profile/detective-profile-client.tsx - Client Component
 "use client";
 
-import React, { useState } from "react";
-import { toast } from "sonner";
+import React from "react";
 import { ProfileHeader } from "./profile-header";
-import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { DetectiveProfile } from "@/lib/types/profile";
 import ProfileTabs from "./profile-tabs/profile-tabs";
+import { useProfileState } from "@/hooks/profile/use-profile-state";
+import { useProfileSave } from "@/hooks/profile/use-profile-save";
 
 interface DetectiveProfileClientProps {
   initialProfile: DetectiveProfile;
@@ -15,38 +14,23 @@ interface DetectiveProfileClientProps {
 export function DetectiveProfileClient({
   initialProfile,
 }: DetectiveProfileClientProps) {
-  const [profile, setProfile] = useState<DetectiveProfile>(initialProfile);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
+  const {
+    profile,
+    setProfile,
+    isEditing,
+    setIsEditing,
+    activeTab,
+    setActiveTab,
+    handleProfileUpdate,
+    toggleEdit,
+  } = useProfileState(initialProfile);
+
+  const { saveProfile, isSaving } = useProfileSave();
 
   const handleSaveProfile = async () => {
-    setIsSaving(true);
-    try {
-      // Save to Supabase
-      const { error } = await supabaseBrowserClient.from("profiles").upsert({
-        id: profile.id,
-        full_name: profile.full_name,
-        pen_name: profile.pen_name,
-        bio: profile.bio,
-        detective_rank: profile.detective_rank,
-        writing_stats: profile.writing_stats,
-        achievements: profile.achievements,
-        case_files: profile.case_files,
-        updated_at: new Date().toISOString(),
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      toast.success("Profile updated successfully!");
+    const result = await saveProfile(profile);
+    if (result.success) {
       setIsEditing(false);
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      toast.error("Failed to save profile");
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -56,17 +40,13 @@ export function DetectiveProfileClient({
     console.log("Avatar updated:", newAvatarUrl);
   };
 
-  const handleProfileUpdate = (updatedProfile: DetectiveProfile) => {
-    setProfile(updatedProfile);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-card">
       <div className="container max-w-6xl mx-auto py-8 space-y-8">
         <ProfileHeader
           profile={profile}
           isEditing={isEditing}
-          onEdit={() => setIsEditing(!isEditing)}
+          onEdit={toggleEdit}
           onAvatarUpload={handleAvatarUpload}
           onProfileUpdate={handleProfileUpdate}
         />

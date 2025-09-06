@@ -64,7 +64,6 @@ export interface DeleteResponse {
 
 // File system node types
 
-
 export interface CreateFsNodeDto {
   project_id: string;
   parent_id?: string;
@@ -142,7 +141,7 @@ export interface UpdateBlueprintDto {
 export interface CreateCardTypeDto {
   title: string;
   description: string;
-  blueprint_type: BlueprintType
+  blueprint_type: BlueprintType;
 }
 
 export interface UpdateCardTypeDto {
@@ -162,4 +161,70 @@ export interface UpdateBlueprintCardDto {
   content?: string | null;
   position_x?: number;
   position_y?: number;
+}
+
+export interface CommentResponse {
+  id: string;
+  fs_node_id: string;
+  block_id: string;
+  start_offset: number;
+  end_offset: number;
+  content: string;
+  author_id: string;
+  is_resolved: boolean;
+  created_at: string;
+  updated_at: string;
+  // Author info (from join)
+  author?: {
+    user_id: string;
+    username: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  };
+}
+
+// Extended version for internal service use with nested data
+export interface CommentWithRelations extends CommentResponse {
+  fs_node?: {
+    project_id: string;
+    project?: {
+      author_id: string;
+    };
+  };
+}
+
+export interface CreateCommentDto {
+  fs_node_id: string;
+  block_id: string;
+  start_offset: number;
+  end_offset: number;
+  content: string;
+}
+
+export interface UpdateCommentDto {
+  content?: string;
+  is_resolved?: boolean;
+}
+
+export interface CommentStats {
+  total: number;
+  resolved: number;
+  unresolved: number;
+}
+
+export interface ProjectMember {
+  project_id: string;
+  user_id: string;
+  created_at: string;
+  profiles: {
+    user_id: string;
+    full_name: string;
+    username: string;
+    email: string;
+    avatar_url: string | null;
+  };
+}
+
+export interface AddMemberDto {
+  email: string;
 }

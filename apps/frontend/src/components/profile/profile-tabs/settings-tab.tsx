@@ -1,4 +1,3 @@
-// components/profile/tabs/settings-tab.tsx
 "use client";
 
 import React from "react";
@@ -61,6 +60,10 @@ const SettingsTab = ({
     },
   ];
 
+  const handleFieldChange = (field: keyof DetectiveProfile, value: string) => {
+    setProfile({ ...profile, [field]: value });
+  };
+
   if (isEditing) {
     return (
       <div className="space-y-6">
@@ -76,7 +79,7 @@ const SettingsTab = ({
                   id="full_name"
                   value={profile.full_name}
                   onChange={(e) =>
-                    setProfile({ ...profile, full_name: e.target.value })
+                    handleFieldChange("full_name", e.target.value)
                   }
                 />
               </div>
@@ -87,7 +90,7 @@ const SettingsTab = ({
                   id="pen_name"
                   value={profile.pen_name}
                   onChange={(e) =>
-                    setProfile({ ...profile, pen_name: e.target.value })
+                    handleFieldChange("pen_name", e.target.value)
                   }
                   placeholder="Your detective persona"
                 />
@@ -99,9 +102,7 @@ const SettingsTab = ({
               <Textarea
                 id="bio"
                 value={profile.bio}
-                onChange={(e) =>
-                  setProfile({ ...profile, bio: e.target.value })
-                }
+                onChange={(e) => handleFieldChange("bio", e.target.value)}
                 placeholder="Describe your detective writing style and interests..."
                 rows={4}
               />

@@ -1,8 +1,7 @@
-import Test from "@/components/test";
 import React from "react";
 
 const TestPage = () => {
-  return <Test />;
+  return <div>TestPage</div>;
 };
 
 export default TestPage;
