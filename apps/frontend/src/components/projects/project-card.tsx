@@ -96,7 +96,10 @@ const ProjectCard = ({
   };
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border/50 bg-gradient-to-br from-card via-card to-card/50 hover:border-primary/30">
+    <Card
+      onClick={() => onOpen(project.id)}
+      className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border/50 bg-gradient-to-br from-card via-card to-card/50 hover:border-primary/30"
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
@@ -128,7 +131,7 @@ const ProjectCard = ({
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            {/* <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onOpen(project.id)}>
                 <Eye className="h-4 w-4 mr-2" />
                 Open Case
@@ -145,7 +148,7 @@ const ProjectCard = ({
                 <Trash2 className="h-4 w-4 mr-2" />
                 Close Case
               </DropdownMenuItem>
-            </DropdownMenuContent>
+            </DropdownMenuContent> */}
           </DropdownMenu>
         </div>
       </CardHeader>
