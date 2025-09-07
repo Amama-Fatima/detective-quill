@@ -191,6 +191,7 @@ export class FsNodesService {
     return node;
   }
   // todo: try to separate move and update logic
+  
   async updateNode(
     nodeId: string,
     updateNodeDto: UpdateFsNodeDto,

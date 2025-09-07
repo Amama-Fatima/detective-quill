@@ -109,7 +109,7 @@ export function CreateProjectDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={creating || !formData.title.trim()}>
+            <Button type="submit" disabled={creating || !formData.title.trim()} className="cursor-pointer">
               {creating ? "Creating..." : "Create Project"}
             </Button>
           </DialogFooter>
