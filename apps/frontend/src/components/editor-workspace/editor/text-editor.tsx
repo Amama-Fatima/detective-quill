@@ -12,6 +12,7 @@ import {
   Maximize,
   Minimize,
   Focus,
+  MessageCircle,
 } from "lucide-react";
 import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {
@@ -23,6 +24,7 @@ import {
 import dynamic from "next/dynamic";
 import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
 import { useKeyboardShortcuts } from "@/hooks/text-editor/use-keyboard-shortcuts";
+import type { Comment } from "./block-note-editor";
 
 // Dynamically import BlockNote editor with no SSR
 const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
@@ -42,6 +44,10 @@ export type TextEditorProps = {
   onSave?: () => void;
   isDirty?: boolean;
   isSaving?: boolean;
+  // Comment-related props
+  comments?: Comment[];
+  onCommentsChange?: (comments: Comment[]) => void;
+  currentUser?: string;
 };
 
 export function TextEditor({
@@ -52,8 +58,12 @@ export function TextEditor({
   onSave = () => {},
   isDirty = false,
   isSaving = false,
+  comments = [],
+  onCommentsChange = () => {},
+  currentUser = "Anonymous",
 }: TextEditorProps) {
   const [internal, setInternal] = useState(value);
+  const [localComments, setLocalComments] = useState<Comment[]>(comments);
 
   // Custom hooks - now using Zustand for global state
   const {
@@ -70,11 +80,19 @@ export function TextEditor({
 
   // Keep internal state in sync
   useEffect(() => setInternal(value), [value]);
+  useEffect(() => setLocalComments(comments), [comments]);
 
   const handleContentChange = (content: string) => {
     setInternal(content);
     onChange(content);
   };
+
+  const handleCommentsChange = (newComments: Comment[]) => {
+    setLocalComments(newComments);
+    onCommentsChange(newComments);
+  };
+
+  const activeCommentsCount = localComments.filter((c) => !c.resolved).length;
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -91,10 +109,37 @@ export function TextEditor({
                   <span className="text-xs text-muted-foreground">Unsaved</span>
                 </div>
               )}
+              {activeCommentsCount > 0 && (
+                <div className="flex items-center gap-1">
+                  <MessageCircle className="h-3 w-3 text-blue-500" />
+                  <span className="text-xs text-blue-500">
+                    {activeCommentsCount} comment
+                    {activeCommentsCount !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Comments indicator */}
+            {activeCommentsCount > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-blue-500/10 text-blue-600">
+                    <MessageCircle className="h-3 w-3" />
+                    <span className="text-xs font-medium">
+                      {activeCommentsCount}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {activeCommentsCount} active comment
+                  {activeCommentsCount !== 1 ? "s" : ""}
+                </TooltipContent>
+              </Tooltip>
+            )}
+
             {/* Focus Mode Controls */}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -151,7 +196,10 @@ export function TextEditor({
                   size="sm"
                   onClick={onSave}
                   disabled={isSaving || !isDirty}
-                  className={cn("gap-2 cursor-pointer", isSaving && "animate-pulse cursor-disabled")}
+                  className={cn(
+                    "gap-2 cursor-pointer",
+                    isSaving && "animate-pulse cursor-disabled"
+                  )}
                 >
                   {isSaving ? (
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -186,6 +234,9 @@ export function TextEditor({
           <BlockNoteEditor
             initialContent={internal}
             onChange={handleContentChange}
+            comments={localComments}
+            onCommentsChange={handleCommentsChange}
+            currentUser={currentUser}
           />
         </div>
 
