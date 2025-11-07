@@ -2,7 +2,6 @@ import { Database } from "./database.types";
 
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Blueprint = Database["public"]["Tables"]["blue_prints"]["Row"];
-export type CardType = Database["public"]["Tables"]["card_types"]["Row"];
 export type BlueprintCard =
   Database["public"]["Tables"]["blueprint_cards"]["Row"];
 export type BlueprintType = Database["public"]["Enums"]["blueprint_type"];
@@ -151,8 +150,6 @@ export interface UpdateCardTypeDto {
 
 export interface CreateBlueprintCardDto {
   content: string | null;
-  card_type_title: string;
-  card_type_id: string;
   position_x: number;
   position_y: number;
 }

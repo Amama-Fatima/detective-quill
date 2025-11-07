@@ -14,18 +14,13 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
-import {
-  BlueprintType,
-  CardType,
-  BlueprintCard,
-} from "@detective-quill/shared-types";
+import { BlueprintType, BlueprintCard } from "@detective-quill/shared-types";
 import {
   createBlueprintCard,
   deleteBlueprintCard,
   updateBlueprintCard,
 } from "@/lib/backend-calls/blueprint-cards";
 import CanvasCardNode from "./canvas-card-node";
-import { AddCardPopover } from "./add-card-popover";
 import { useAuth } from "@/context/auth-context";
 import EditableProjectName from "./editable-blueprint-name";
 import {
@@ -38,8 +33,6 @@ interface CanvasProps {
   projectName: string;
   blueprintId: string;
   type: BlueprintType;
-  cardTypes: CardType[];
-  userTypes: CardType[] | null;
   userId: string;
   prevBlueprintCards: BlueprintCard[] | null;
 }
@@ -47,8 +40,6 @@ interface CanvasProps {
 export default function Canvas({
   blueprintId,
   type,
-  cardTypes,
-  userTypes,
   userId,
   projectName,
   prevBlueprintCards,
@@ -68,6 +59,7 @@ export default function Canvas({
       ? blueprintCardsToNodes(
           prevBlueprintCards,
           (id, newContent) => updateNodeContent(id, newContent),
+          (id, newTitle) => updateNodeTitle(id, newTitle),
           (id) => deleteCard(id)
         )
       : []
@@ -93,7 +85,17 @@ export default function Canvas({
     );
   }, []);
 
-  const addCard = (type: CardType) => {
+  const updateNodeTitle = useCallback((id: string, newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === id
+          ? { ...node, data: { ...node.data, title: newTitle } }
+          : node
+      )
+    );
+  }, []);
+
+  const addCard = () => {
     const reactFlowId = `temp-${Date.now()}`;
     setNodes((nds) => [
       ...nds,
@@ -102,11 +104,12 @@ export default function Canvas({
         type: "card",
         data: {
           id: null,
-          cardTypeTitle: type.title,
-          cardTypeId: type.id,
           content: "",
-          onChange: (newContent: string) =>
+          title: "New Card",
+          onContentChange: (newContent: string) =>
             updateNodeContent(reactFlowId, newContent),
+          onTitleChange: (newTitle: string) =>
+            updateNodeTitle(reactFlowId, newTitle),
           onDelete: () => deleteCard(reactFlowId),
         },
         position: {
@@ -186,13 +189,7 @@ export default function Canvas({
           blueprintId={blueprintId}
           accessToken={accessToken!}
         />
-        <div className="flex gap-3">
-          <AddCardPopover
-            cardTypes={cardTypes}
-            addCard={addCard}
-            accessToken={accessToken!}
-            userTypes={userTypes}
-          />
+        <div className="flex gap-1">
           <Button
             className="cursor-pointer"
             onClick={() => {
@@ -200,6 +197,12 @@ export default function Canvas({
             }}
           >
             Save
+          </Button>
+          <Button
+            onClick={() => addCard()}
+            className="text-left cursor-pointer"
+          >
+            + Add Card{" "}
           </Button>
         </div>
       </div>

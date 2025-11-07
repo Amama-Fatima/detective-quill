@@ -6,7 +6,8 @@ import { updateBlueprintById } from "../backend-calls/blueprints";
 export const blueprintCardsToNodes = (
   cards: BlueprintCard[],
   updateNodeContent: (id: string, newContent: string) => void,
-  deleteCard: (id: string) => void
+  updateNodeTitle: (id: string, newTitle: string) => void,
+  deleteCard: (id: string) => void,
 ): Node[] => {
   return cards.map((card) => ({
     id: card.id,
@@ -17,10 +18,10 @@ export const blueprintCardsToNodes = (
     },
     data: {
       id: card.id,
-      cardTypeId: card.card_type_id,
-      cardTypeTitle: card.card_type_title,
       content: card.content ?? "",
-      onChange: (newContent: string) => updateNodeContent(card.id, newContent),
+      title: card.title || "Untitled Card",
+      onContentChange: (newContent: string) => updateNodeContent(card.id, newContent),
+      onTitleChange: (newTitle: string) => updateNodeTitle(card.id, newTitle),
       onDelete: () => deleteCard(card.id),
     },
   }));
@@ -29,11 +30,10 @@ export const blueprintCardsToNodes = (
 export const mapNodesToBlueprintCards = (nodes: Node[]) => {
   const result = nodes.map((node) => ({
     id: node.data.id || null,
-    card_type_id: String(node.data.cardTypeId),
-    card_type_title: String(node.data.cardTypeTitle),
     content: typeof node.data.content === "string" ? node.data.content : null,
     position_x: node.position.x,
     position_y: node.position.y,
+    title: node.data.title,
   }));
   console.log("Mapped nodes to blueprint cards:", result);
   return result;
