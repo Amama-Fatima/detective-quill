@@ -13,11 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface CanvasCardNodeProps {
-  id?: string; // DB id
+  id?: string; // DB id or no id for new cards
   content: string;
-  onChange: (newContent: string) => void;
-  cardTypeTitle: string;
-  cardTypeId: string;
+  title: string;
+  onContentChange: (newContent: string) => void;
+  onTitleChange: (newTitle: string) => void;
   onDelete?: () => void;
 }
 
@@ -29,6 +29,7 @@ export default function CanvasCardNode({
   const [isEditing, setIsEditing] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function CanvasCardNode({
   return (
     <div
       className={`
-      group relative bg-white rounded-xl shadow-sm border-2 w-84 min-h-72 
+      group relative bg-white rounded-xl shadow-sm border-2 w-84 min-h-68
       transition-all duration-200 hover:shadow-lg hover:border-blue-300
       ${
         isFocused
@@ -58,9 +59,19 @@ export default function CanvasCardNode({
           <span className="text-black text-lg">
             <NotepadTextDashed />
           </span>
-          <Badge className={`text-lg font-medium border`}>
-            {data.cardTypeTitle}
-          </Badge>
+          {/* title area */}
+          {isEditing ? (
+            <input
+              ref={titleRef}
+              value={data.title}
+              onChange={(e) => data.onTitleChange(e.target.value)}
+              className="nodrag w-3/4 min-h-12 p-3 border border-gray-200 rounded-lg resize-none bg-gray-100
+                     focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300
+                     text-gray-800 text-md leading-relaxed transition-all"
+            />
+          ) : (
+            <Badge className={`text-lg font-medium border`}>{data.title}</Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
@@ -94,7 +105,7 @@ export default function CanvasCardNode({
           <textarea
             ref={textareaRef}
             value={data.content}
-            onChange={(e) => data.onChange(e.target.value)}
+            onChange={(e) => data.onContentChange(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder="Start typing your content here..."

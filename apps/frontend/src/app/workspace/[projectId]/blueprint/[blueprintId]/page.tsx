@@ -1,10 +1,6 @@
 import { Suspense } from "react";
 import Canvas from "@/components/blueprint/canvas";
 import { BlueprintType } from "@detective-quill/shared-types";
-import {
-  getUserCardTypes,
-  getDefaultCardTypesForBlueprintType,
-} from "@/lib/supabase-calls/card-types";
 import { getUserBlueprintById } from "@/lib/supabase-calls/blueprint";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/dist/client/components/navigation";
@@ -24,7 +20,7 @@ export default async function CreateBlueprintPage({
   params,
   searchParams,
 }: CreateBlueprintPageProps) {
-  const { projectId, blueprintId } = await params;
+  const { blueprintId } = await params;
   const type = await searchParams?.type;
 
   const supabase = await createSupabaseServerClient();
@@ -38,8 +34,6 @@ export default async function CreateBlueprintPage({
 
   const userId = user.id;
 
-  const cardTypes = await getDefaultCardTypesForBlueprintType(supabase, type);
-  const userTypes = await getUserCardTypes(supabase, userId, type);
   const blueprint = await getUserBlueprintById(blueprintId, userId);
   const blueprintCards = await getAllCardsOfBlueprint(
     supabase,
@@ -47,17 +41,12 @@ export default async function CreateBlueprintPage({
     userId
   );
 
-  console.log("These are use types from the page", userTypes);
-
   return (
     <Suspense fallback={<CreateBlueprintPageSkeleton />}>
       <div>
         <Canvas
           blueprintId={blueprintId}
           type={type}
-          cardTypes={cardTypes}
-          userTypes={userTypes}
-          userId={userId}
           projectName={blueprint?.title || "Untitled Blueprint"}
           prevBlueprintCards={blueprintCards}
         />

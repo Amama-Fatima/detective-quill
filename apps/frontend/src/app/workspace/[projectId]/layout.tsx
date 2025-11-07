@@ -36,7 +36,7 @@ const WorkspaceLayout = async ({
     .single();
   return (
     <div>
-      <ProjectWorkspaceHeader project={data} />
+      {/* <ProjectWorkspaceHeader project={data} /> */}
       {children}
     </div>
   );

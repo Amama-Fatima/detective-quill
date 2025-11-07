@@ -1,31 +1,23 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   MiniMap,
   Controls,
   Background,
   Node,
-  Edge,
-  addEdge,
   applyNodeChanges,
-  applyEdgeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
-import {
-  BlueprintType,
-  CardType,
-  BlueprintCard,
-} from "@detective-quill/shared-types";
+import { BlueprintType, BlueprintCard } from "@detective-quill/shared-types";
 import {
   createBlueprintCard,
   deleteBlueprintCard,
   updateBlueprintCard,
 } from "@/lib/backend-calls/blueprint-cards";
 import CanvasCardNode from "./canvas-card-node";
-import { AddCardPopover } from "./add-card-popover";
 import { useAuth } from "@/context/auth-context";
 import EditableProjectName from "./editable-blueprint-name";
 import {
@@ -38,18 +30,12 @@ interface CanvasProps {
   projectName: string;
   blueprintId: string;
   type: BlueprintType;
-  cardTypes: CardType[];
-  userTypes: CardType[] | null;
-  userId: string;
   prevBlueprintCards: BlueprintCard[] | null;
 }
 
 export default function Canvas({
   blueprintId,
   type,
-  cardTypes,
-  userTypes,
-  userId,
   projectName,
   prevBlueprintCards,
 }: CanvasProps) {
@@ -68,20 +54,29 @@ export default function Canvas({
       ? blueprintCardsToNodes(
           prevBlueprintCards,
           (id, newContent) => updateNodeContent(id, newContent),
+          (id, newTitle) => updateNodeTitle(id, newTitle),
           (id) => deleteCard(id)
         )
       : []
   );
   const [deletedCards, setDeletedCards] = useState<string[]>([]);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [edges, setEdges] = useState<Edge[]>([]);
   const { session } = useAuth();
   const accessToken = session?.access_token;
 
-  const onConnect = useCallback(
-    (connection: any) => setEdges((eds) => addEdge(connection, eds)),
-    []
-  );
+  // Warn user if they try to refresh/close the tab when there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      e.preventDefault();
+      return "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   const updateNodeContent = useCallback((id: string, newContent: string) => {
     setNodes((nds) =>
@@ -93,7 +88,17 @@ export default function Canvas({
     );
   }, []);
 
-  const addCard = (type: CardType) => {
+  const updateNodeTitle = useCallback((id: string, newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === id
+          ? { ...node, data: { ...node.data, title: newTitle } }
+          : node
+      )
+    );
+  }, []);
+
+  const addCard = () => {
     const reactFlowId = `temp-${Date.now()}`;
     setNodes((nds) => [
       ...nds,
@@ -102,11 +107,12 @@ export default function Canvas({
         type: "card",
         data: {
           id: null,
-          cardTypeTitle: type.title,
-          cardTypeId: type.id,
           content: "",
-          onChange: (newContent: string) =>
+          title: "New Card",
+          onContentChange: (newContent: string) =>
             updateNodeContent(reactFlowId, newContent),
+          onTitleChange: (newTitle: string) =>
+            updateNodeTitle(reactFlowId, newTitle),
           onDelete: () => deleteCard(reactFlowId),
         },
         position: {
@@ -122,34 +128,30 @@ export default function Canvas({
       const updated = applyNodeChanges(changes, nds);
       return updated;
     });
-  };
-
-  const onEdgeChanges = (changes: any) => {
-    setEdges((eds) => applyEdgeChanges(changes, eds));
+    setIsDirty(true);
   };
 
   const onSave = async () => {
+    setIsSaving(true);
     const cardsToSave = mapNodesToBlueprintCards(nodes);
 
     const createList = cardsToSave.filter((c) => !c.id); // new cards
-    console.log("This is the create list", createList);
     const createListWoId = createList.map(({ id, ...rest }) => rest); // remove id field
     const updateList = cardsToSave.filter((c) => c.id); // existing cards
 
     try {
       // create new cards
       if (createList.length > 0) {
-        console.log("Creating new cards:", createListWoId);
         await createBlueprintCard(accessToken!, blueprintId, createListWoId);
       }
 
       // update existing cards
       if (updateList.length > 0) {
-        console.log("Updating existing cards:", updateList);
         await Promise.all(
           updateList.map((card) =>
             updateBlueprintCard(accessToken!, blueprintId, String(card.id), {
               content: card.content,
+              title: card.title,
               position_x: card.position_x,
               position_y: card.position_y,
             })
@@ -169,6 +171,9 @@ export default function Canvas({
     } catch (error) {
       console.error("Error saving cards:", error);
       toast.error("Failed to save cards");
+    } finally {
+      setIsSaving(false);
+      setIsDirty(false);
     }
   };
 
@@ -186,32 +191,31 @@ export default function Canvas({
           blueprintId={blueprintId}
           accessToken={accessToken!}
         />
-        <div className="flex gap-3">
-          <AddCardPopover
-            cardTypes={cardTypes}
-            addCard={addCard}
-            accessToken={accessToken!}
-            userTypes={userTypes}
-          />
+        <div className="flex gap-1">
           <Button
             className="cursor-pointer"
             onClick={() => {
               onSave();
             }}
+            disabled={isSaving}
           >
             Save
+          </Button>
+          <Button
+            onClick={() => addCard()}
+            className="text-left cursor-pointer"
+          >
+            + Add Card{" "}
           </Button>
         </div>
       </div>
 
       <ReactFlow
         nodes={nodes}
-        edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodeChanges}
-        onEdgesChange={onEdgeChanges}
-        onConnect={onConnect}
-        fitView
+        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+        fitView={false}
       >
         <MiniMap />
         <Controls />
