@@ -158,6 +158,7 @@ export interface UpdateBlueprintCardDto {
   content?: string | null;
   position_x?: number;
   position_y?: number;
+  title?: string | null;
 }
 
 export interface CommentResponse {

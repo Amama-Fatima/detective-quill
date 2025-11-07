@@ -33,7 +33,7 @@ export const mapNodesToBlueprintCards = (nodes: Node[]) => {
     content: typeof node.data.content === "string" ? node.data.content : null,
     position_x: node.position.x,
     position_y: node.position.y,
-    title: node.data.title,
+    title: typeof node.data.title === "string" ? node.data.title : null,
   }));
   console.log("Mapped nodes to blueprint cards:", result);
   return result;

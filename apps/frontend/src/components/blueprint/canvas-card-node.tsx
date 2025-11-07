@@ -43,7 +43,7 @@ export default function CanvasCardNode({
   return (
     <div
       className={`
-      group relative bg-white rounded-xl shadow-sm border-2 w-84 min-h-72 
+      group relative bg-white rounded-xl shadow-sm border-2 w-84 min-h-68
       transition-all duration-200 hover:shadow-lg hover:border-blue-300
       ${
         isFocused
@@ -70,9 +70,7 @@ export default function CanvasCardNode({
                      text-gray-800 text-md leading-relaxed transition-all"
             />
           ) : (
-            <Badge className={`text-lg font-medium border`}>
-              {data.title}
-            </Badge>
+            <Badge className={`text-lg font-medium border`}>{data.title}</Badge>
           )}
         </div>
 

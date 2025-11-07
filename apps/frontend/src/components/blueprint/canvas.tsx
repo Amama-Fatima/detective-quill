@@ -1,16 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   MiniMap,
   Controls,
   Background,
   Node,
-  Edge,
-  addEdge,
   applyNodeChanges,
-  applyEdgeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
@@ -33,14 +30,12 @@ interface CanvasProps {
   projectName: string;
   blueprintId: string;
   type: BlueprintType;
-  userId: string;
   prevBlueprintCards: BlueprintCard[] | null;
 }
 
 export default function Canvas({
   blueprintId,
   type,
-  userId,
   projectName,
   prevBlueprintCards,
 }: CanvasProps) {
@@ -65,15 +60,23 @@ export default function Canvas({
       : []
   );
   const [deletedCards, setDeletedCards] = useState<string[]>([]);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [edges, setEdges] = useState<Edge[]>([]);
   const { session } = useAuth();
   const accessToken = session?.access_token;
 
-  const onConnect = useCallback(
-    (connection: any) => setEdges((eds) => addEdge(connection, eds)),
-    []
-  );
+  // Warn user if they try to refresh/close the tab when there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      e.preventDefault();
+      return "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   const updateNodeContent = useCallback((id: string, newContent: string) => {
     setNodes((nds) =>
@@ -125,34 +128,30 @@ export default function Canvas({
       const updated = applyNodeChanges(changes, nds);
       return updated;
     });
-  };
-
-  const onEdgeChanges = (changes: any) => {
-    setEdges((eds) => applyEdgeChanges(changes, eds));
+    setIsDirty(true);
   };
 
   const onSave = async () => {
+    setIsSaving(true);
     const cardsToSave = mapNodesToBlueprintCards(nodes);
 
     const createList = cardsToSave.filter((c) => !c.id); // new cards
-    console.log("This is the create list", createList);
     const createListWoId = createList.map(({ id, ...rest }) => rest); // remove id field
     const updateList = cardsToSave.filter((c) => c.id); // existing cards
 
     try {
       // create new cards
       if (createList.length > 0) {
-        console.log("Creating new cards:", createListWoId);
         await createBlueprintCard(accessToken!, blueprintId, createListWoId);
       }
 
       // update existing cards
       if (updateList.length > 0) {
-        console.log("Updating existing cards:", updateList);
         await Promise.all(
           updateList.map((card) =>
             updateBlueprintCard(accessToken!, blueprintId, String(card.id), {
               content: card.content,
+              title: card.title,
               position_x: card.position_x,
               position_y: card.position_y,
             })
@@ -172,6 +171,9 @@ export default function Canvas({
     } catch (error) {
       console.error("Error saving cards:", error);
       toast.error("Failed to save cards");
+    } finally {
+      setIsSaving(false);
+      setIsDirty(false);
     }
   };
 
@@ -195,6 +197,7 @@ export default function Canvas({
             onClick={() => {
               onSave();
             }}
+            disabled={isSaving}
           >
             Save
           </Button>
@@ -209,12 +212,10 @@ export default function Canvas({
 
       <ReactFlow
         nodes={nodes}
-        edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodeChanges}
-        onEdgesChange={onEdgeChanges}
-        onConnect={onConnect}
-        fitView
+        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+        fitView={false}
       >
         <MiniMap />
         <Controls />
