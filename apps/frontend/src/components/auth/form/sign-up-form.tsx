@@ -42,7 +42,6 @@ export function SignUpForm() {
   const passwordStrength = getPasswordStrength(password);
 
   const onSubmit = async (formData: SignUpFormValues) => {
-    console.log("Form data:", formData);
     setIsLoading(true);
     setError("");
 
@@ -67,8 +66,6 @@ export function SignUpForm() {
       }
 
       if (data.user) {
-        console.log("Sign up successful:", data);
-
         // Check if email confirmation is required
         if (data.user && !data.session) {
           setUserEmail(formData.email);
@@ -76,7 +73,6 @@ export function SignUpForm() {
           setError(""); // Clear any errors
         } else {
           // User is immediately authenticated (email confirmation disabled)
-          console.log("User authenticated immediately");
         }
       }
     } catch (err) {
@@ -113,18 +109,16 @@ export function SignUpForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Full Name
-              </FormLabel>
+              <FormLabel className="text-md font-medium">Full Name</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input
                     type="text"
                     placeholder="Enter your full name"
-                    className="pl-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                    className="pl-10 h-11 border-slate-200 dark:border-slate-700"
                     {...field}
                   />
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />
                 </div>
               </FormControl>
               <FormMessage />
@@ -145,10 +139,10 @@ export function SignUpForm() {
                   <Input
                     type="email"
                     placeholder="Enter your email"
-                    className="pl-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                    className="pl-10 h-11 border-slate-200 dark:border-slate-700"
                     {...field}
                   />
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />
                 </div>
               </FormControl>
               <FormMessage />
@@ -169,10 +163,10 @@ export function SignUpForm() {
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a password"
-                    className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                    className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700"
                     {...field}
                   />
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />
                   <Button
                     type="button"
                     variant="ghost"
@@ -181,9 +175,9 @@ export function SignUpForm() {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-slate-400" />
+                      <EyeOff className="h-4 w-4 text-secondary-foreground" />
                     ) : (
-                      <Eye className="h-4 w-4 text-slate-400" />
+                      <Eye className="h-4 w-4 text-secondary-foreground" />
                     )}
                   </Button>
                 </div>
@@ -223,10 +217,10 @@ export function SignUpForm() {
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
-                    className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                    className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700"
                     {...field}
                   />
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />
                   <Button
                     type="button"
                     variant="ghost"
@@ -235,9 +229,9 @@ export function SignUpForm() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4 text-slate-400" />
+                      <EyeOff className="h-4 w-4 text-secondary-foreground" />
                     ) : (
-                      <Eye className="h-4 w-4 text-slate-400" />
+                      <Eye className="h-4 w-4 text-secondary-foreground" />
                     )}
                   </Button>
                 </div>

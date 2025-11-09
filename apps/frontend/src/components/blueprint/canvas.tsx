@@ -182,9 +182,9 @@ export default function Canvas({
   };
 
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full h-[85vh] flex flex-col">
       {/* Top Bar */}
-      <div className="flex justify-between items-center px-4 py-2 bg-gray-950 border-b border-gray-300">
+      <div className="flex bg-secondary justify-between m-2 rounded-lg items-center px-4 py-2 border border-secondary-foreground">
         <EditableProjectName
           initialName={projectName}
           type={type}
@@ -193,7 +193,7 @@ export default function Canvas({
         />
         <div className="flex gap-1">
           <Button
-            className="cursor-pointer"
+            className="cursor-pointer bg-primary hover:bg-primary/90 shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
               onSave();
             }}
@@ -203,7 +203,7 @@ export default function Canvas({
           </Button>
           <Button
             onClick={() => addCard()}
-            className="text-left cursor-pointer"
+            className="text-left cursor-pointer bg-primary hover:bg-primary/90 shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           >
             + Add Card{" "}
           </Button>

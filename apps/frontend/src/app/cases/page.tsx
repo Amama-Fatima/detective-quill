@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { ProjectsPageClient } from "@/components/projects/project-page-client";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 
-export default async function ProjectsPage() {
+export default async function CasesPage() {
   const supabase = await createSupabaseServerClient();
 
   // Get the current user
@@ -16,7 +16,7 @@ export default async function ProjectsPage() {
     redirect("/auth/sign-in");
   }
 
-  // Fetch projects server-side
+  // Fetch cases server-side
   const { data: projects, error: projectsError } = await supabase
     .from("projects")
     .select("*")

@@ -36,9 +36,9 @@ export function SocialAuth({ mode, props }: SocialAuthProps) {
       <Button
         variant="outline"
         onClick={handleGoogleAuth}
-        className="w-full flex items-center cursor-pointer justify-center gap-3 h-12 text-white border-slate-600 hover:border-slate-500 transition-colors"
+        className="w-full flex items-center cursor-pointer justify-center gap-3 h-12 border-slate-800 hover:border-slate-500 transition-colors"
       >
-        <Chrome className="h-5 w-5" />
+        <Chrome className="h-5 w-5 text-muted-foreground" />
         {actionText} with Google
       </Button>
     </div>

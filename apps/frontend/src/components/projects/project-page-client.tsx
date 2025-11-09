@@ -358,7 +358,7 @@ export function ProjectsPageClient({
                 Active
               </TabsTrigger>
               <TabsTrigger value="completed" className="font-serif">
-                Solved
+                Completed
               </TabsTrigger>
               <TabsTrigger value="archived" className="font-serif">
                 Archived

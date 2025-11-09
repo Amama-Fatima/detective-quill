@@ -47,7 +47,7 @@ export default function EditableProjectName({
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             autoFocus
-            className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white text-lg font-semibold"
+            className="bg-secondary-foreground border border-gray-600 rounded px-2 py-1 text-white text-lg font-semibold"
           />
         </div>
       ) : (

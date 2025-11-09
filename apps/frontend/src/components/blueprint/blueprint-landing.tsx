@@ -18,8 +18,8 @@ export default async function BlueprintLanding({
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-100">Blueprints</h1>
-            <p className="text-gray-400 mt-2">
+            <h1 className="text-3xl font-bold">Blueprints</h1>
+            <p className="mt-2">
               Manage and organize your reusable design components and templates
             </p>
           </div>
