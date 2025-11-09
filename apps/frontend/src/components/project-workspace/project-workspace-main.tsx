@@ -231,7 +231,7 @@ const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
                             {member.name}
                           </span>
                           <span className="text-xs text-gray-500">
-                            {member.email || `member${index + 1}@project.com`}
+                            { `member${index + 1}@project.com`}
                           </span>
                         </div>
                       </div>
