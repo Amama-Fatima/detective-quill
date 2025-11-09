@@ -160,4 +160,25 @@ function buildTreeFromView(nodes: any[]): FsNodeTreeResponse[] {
   return rootNodes;
 }
 
-export { getEditorWorkspaceData, fetchProject, fetchProjectTree, fetchNode };
+async function fetchProjectTitle(
+  projectId: string
+): Promise<{ title: string; error: string | null }> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select("title")
+    .eq("id", projectId)
+    .single();
+  if (error || !data) {
+    return { title: "", error: "Project not found" };
+  }
+  return { title: data.title, error: null };
+}
+
+export {
+  getEditorWorkspaceData,
+  fetchProject,
+  fetchProjectTree,
+  fetchNode,
+  fetchProjectTitle,
+};

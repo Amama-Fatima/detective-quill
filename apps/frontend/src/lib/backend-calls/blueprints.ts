@@ -6,7 +6,7 @@ import {
 } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
+// todo: catch all these errors in the UI and show toasts
 // Helper function to make authenticated requests
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
@@ -35,10 +35,19 @@ export async function createBlueprint(
   accessToken: string,
   blueprintData: CreateBlueprintDto
 ): Promise<ApiResponse<Blueprint>> {
-  return await makeAuthenticatedRequest<Blueprint>("/blueprints", accessToken, {
-    method: "POST",
-    body: JSON.stringify(blueprintData),
-  });
+  const response = await makeAuthenticatedRequest<Blueprint>(
+    "/blueprints",
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(blueprintData),
+    }
+  );
+
+  if (!response.success) {
+    throw new Error(`Failed to create user blueprint: ${response.error}`);
+  }
+  return response;
 }
 
 export async function updateBlueprintById(

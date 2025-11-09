@@ -36,7 +36,7 @@ export default function CanvasCardNode({
   return (
     <div
       className={`
-      group relative bg-card rounded-xl shadow-sm border-2 w-84 min-h-72
+      group relative bg-drag-card rounded-xl shadow-sm border-2 w-84 min-h-72
       transition-all duration-200 hover:shadow-lg
       ${isFocused ? "shadow-lg ring-2" : "border-muted-foreground"}
       cursor-grab active:cursor-grabbing

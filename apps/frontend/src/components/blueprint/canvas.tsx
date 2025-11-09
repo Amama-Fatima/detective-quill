@@ -219,7 +219,7 @@ export default function Canvas({
       >
         <MiniMap />
         <Controls />
-        <Background />
+        <Background variant={"dots" as any} gap={12} size={2} color="#593e04" />
       </ReactFlow>
     </div>
   );

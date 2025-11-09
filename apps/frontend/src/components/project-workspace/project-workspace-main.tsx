@@ -1,40 +1,33 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  GitBranch,
-  Users,
-  MapPin,
-  Calendar,
-  BookOpen,
-  Target,
-  Zap,
-  TrendingUp,
-  FileText,
-  Search,
-  Shield,
-  Eye,
-  Skull,
-  Coffee,
-  Fingerprint,
-  Timer,
-  Star,
-  Activity,
-  ChevronRight,
-  Play,
-  Edit,
-  Plus,
-  Archive,
-  AlertCircle,
-  Lightbulb,
-} from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Clock, Trash2, Plus } from "lucide-react";
+import { NAV_ITEMS } from "@/constants/project-constants";
+import { cn } from "@/lib/utils/utils";
+import RemoveMemberDialog from "./remove-member-dialog";
 
 interface Project {
   id: string;
@@ -46,538 +39,242 @@ interface Project {
   is_active: boolean | null;
 }
 
+interface Member {
+  id: string;
+  name: string;
+  role: "Author" | "Beta Reader";
+  avatar?: string;
+}
+
 interface WorkspaceMainBodyProps {
   project: Project;
 }
 
+const initialMembers: Member[] = [
+  { id: "1", name: "Elara Vance", role: "Author" },
+  { id: "2", name: "Jaxson Reid", role: "Beta Reader" },
+  { id: "3", name: "Lena Petrova", role: "Beta Reader" },
+  { id: "4", name: "Marcus Thorne", role: "Beta Reader" },
+];
+
 const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
-  // Enhanced mock data for demonstration
-  const caseFiles = [
-    {
-      id: 1,
-      type: "Character",
-      severity: "critical",
-      title: "Detective Sarah's Eye Color Inconsistency",
-      description: "Brown eyes in Chapter 2, blue eyes in Chapter 7",
-      chapter: "Chapter 7",
-      status: "active",
-      priority: "high",
-      timeFound: "2 hours ago",
-    },
-    {
-      id: 2,
-      type: "Timeline",
-      severity: "urgent",
-      title: "Murder Timeline Contradiction",
-      description: "Murder occurred Tuesday vs. witness says Wednesday",
-      chapter: "Chapter 4",
-      status: "investigating",
-      priority: "critical",
-      timeFound: "4 hours ago",
-    },
-    {
-      id: 3,
-      type: "Location",
-      severity: "minor",
-      title: "Coffee Shop Location Error",
-      description: "Described as 'downtown' then 'uptown'",
-      chapter: "Chapter 6",
-      status: "solved",
-      priority: "low",
-      timeFound: "1 day ago",
-    },
-  ];
+  const navItems = NAV_ITEMS.map((item) => ({
+    ...item,
+    href: item.href.replace("123", project.id),
+  }));
 
-  const recentVersions = [
-    {
-      id: "v2.1.4",
-      codename: "The Butler's Alibi",
-      message: "Major breakthrough: Revealed killer's true identity and motive",
-      timestamp: "2 hours ago",
-      changes: 156,
-      type: "major",
-      author: "You",
-      status: "current",
-    },
-    {
-      id: "v2.1.3",
-      codename: "Red Herring Revision",
-      message: "Added misleading clues about the gardener's involvement",
-      timestamp: "6 hours ago",
-      changes: 43,
-      type: "minor",
-      author: "You",
-      status: "archived",
-    },
-    {
-      id: "v2.1.2",
-      codename: "Timeline Overhaul",
-      message: "Restructured murder sequence and witness testimonies",
-      timestamp: "1 day ago",
-      changes: 89,
-      type: "major",
-      author: "You",
-      status: "archived",
-    },
-  ];
+  const [members, setMembers] = useState<Member[]>(initialMembers);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [emails, setEmails] = useState<string[]>([""]);
+  const [memberToRemove, setMemberToRemove] = useState<Member | null>(null);
 
-  const mysteryMetrics = {
-    totalWords: 67420,
-    chapters: 15,
-    characters: 12,
-    locations: 18,
-    clues: 34,
-    redHerrings: 9,
-    suspects: 6,
-    plotHoles: 2,
-    completionRate: 78,
-    consistencyScore: 85,
+  const handleAddEmailField = () => setEmails([...emails, ""]);
+
+  const handleEmailChange = (index: number, value: string) => {
+    const updated = [...emails];
+    updated[index] = value;
+    setEmails(updated);
   };
 
-  const writingProgress = {
-    dailyTarget: 1500,
-    todayWritten: 1247,
-    weeklyGoal: 10500,
-    weekWritten: 8340,
+  const handleSendInvitations = () => {
+    console.log("Inviting:", emails);
+    setInviteDialogOpen(false);
+    setEmails([""]);
+  };
+
+  const handleRemoveMember = (member: Member) => {
+    setMemberToRemove(member);
+    setRemoveDialogOpen(true);
+  };
+
+  const confirmRemoveMember = () => {
+    if (memberToRemove) {
+      setMembers(members.filter((m) => m.id !== memberToRemove.id));
+      setRemoveDialogOpen(false);
+      setMemberToRemove(null);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-card">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero Section - Case Overview */}
-        <div className="mb-8 relative overflow-hidden">
-          <Card className="border-primary/20 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/10"></div>
-            <CardContent className="relative p-8">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 rounded-full bg-primary/10 border border-primary/20">
-                    <Fingerprint className="h-8 w-8 text-primary" />
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-serif font-bold mb-2">
-                      Case Status: Active Investigation
-                    </h2>
-                    <p className="text-muted-foreground">
-                      Last evidence logged 2 hours ago
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-primary">
-                    {mysteryMetrics.consistencyScore}%
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Story Consistency
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="text-center p-4 rounded-lg bg-card/50 border border-primary/10">
-                  <div className="text-2xl font-bold text-primary mb-1">
-                    {mysteryMetrics.suspects}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Active Suspects
-                  </div>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-card/50 border border-accent/20">
-                  <div className="text-2xl font-bold text-accent mb-1">
-                    {mysteryMetrics.clues}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Clues Planted
-                  </div>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-card/50 border border-primary/10">
-                  <div className="text-2xl font-bold text-primary mb-1">
-                    {mysteryMetrics.redHerrings}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Red Herrings
-                  </div>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-card/50 border border-destructive/20">
-                  <div className="text-2xl font-bold text-destructive mb-1">
-                    {mysteryMetrics.plotHoles}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Plot Holes
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen px-10 py-6">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h4 className="font-bold text-xl">Description</h4>
+          <p className="text-[1.1rem] w-[70%] noir-text mb-2">
+            {project.description ??
+              "This section provides an overview and notes for the ongoing project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."}
+          </p>
+          <p className="text-xs mt-1">
+            <span className="flex items-center text-secondary-foreground">
+              <Clock className="mr-1 h-4 w-4" />
+              <span className="font-semibold mr-2">Last updated:</span>
+              {project.updated_at ?? "N/A"}
+            </span>
+          </p>
         </div>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Active Cases - Inconsistency Detection */}
-            <Card className="border-destructive/20 shadow-lg">
-              <CardHeader className="border-b border-destructive/10 bg-gradient-to-r from-destructive/5 to-transparent">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <AlertCircle className="h-6 w-6 mr-3 text-destructive" />
-                    <div>
-                      <h3 className="text-xl font-serif">Active Case Files</h3>
-                      <p className="text-sm text-muted-foreground font-sans">
-                        Story inconsistencies requiring investigation
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant="destructive" className="case-file">
-                    {caseFiles.filter((f) => f.status !== "solved").length} Open
-                    Cases
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y divide-border">
-                  {caseFiles.map((caseFile) => (
-                    <div
-                      key={caseFile.id}
-                      className={`p-6 transition-all duration-200 hover:bg-accent/5 cursor-pointer border-l-4 ${
-                        caseFile.severity === "critical"
-                          ? "border-destructive bg-destructive/5"
-                          : caseFile.severity === "urgent"
-                          ? "border-orange-500 bg-orange-500/5"
-                          : "border-green-500 bg-green-500/5"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center mb-3">
-                            <Badge
-                              variant={
-                                caseFile.status === "solved"
-                                  ? "secondary"
-                                  : "destructive"
-                              }
-                              className="mr-3 case-file"
-                            >
-                              {caseFile.type}
-                            </Badge>
-                            <Badge variant="outline" className="mr-2 text-xs">
-                              {caseFile.chapter}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {caseFile.timeFound}
-                            </span>
-                          </div>
+        <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary shadow-lg mt-6 cursor-pointer hover:bg-primary/90">
+              Invite Beta Readers
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Invite Beta Readers</DialogTitle>
+              <DialogDescription>
+                Enter the email addresses of the readers you’d like to invite.
+              </DialogDescription>
+            </DialogHeader>
 
-                          <h4 className="font-serif font-semibold mb-2 text-lg">
-                            {caseFile.title}
-                          </h4>
-                          <p className="text-muted-foreground mb-3 noir-text">
-                            {caseFile.description}
-                          </p>
+            <div className="space-y-3 mt-4">
+              {emails.map((email, index) => (
+                <Input
+                  key={index}
+                  type="email"
+                  placeholder="Enter email"
+                  value={email}
+                  onChange={(e) => handleEmailChange(index, e.target.value)}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddEmailField}
+                className="cursor-pointer"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add another
+              </Button>
+            </div>
 
-                          <div className="flex items-center">
-                            {caseFile.status === "solved" ? (
-                              <>
-                                <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                                <span className="text-sm text-green-600 font-medium">
-                                  Case Closed
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <Skull className="h-4 w-4 text-destructive mr-2" />
-                                <span className="text-sm text-destructive font-medium">
-                                  {caseFile.status === "investigating"
-                                    ? "Under Investigation"
-                                    : "Awaiting Detective"}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col items-end space-y-2">
-                          {caseFile.status !== "solved" && (
-                            <Button
-                              size="sm"
-                              className="bg-primary hover:bg-primary/90"
-                            >
-                              <Search className="h-4 w-4 mr-2" />
-                              Investigate
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="p-6 border-t border-border bg-muted/20">
-                  <Button variant="outline" className="w-full">
-                    <Shield className="h-4 w-4 mr-2" />
-                    Run Complete Story Analysis
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Evidence Locker - Version Control */}
-            <Card className="shadow-lg border-accent/20">
-              <CardHeader className="border-b border-accent/10 bg-gradient-to-r from-accent/5 to-transparent">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Archive className="h-6 w-6 mr-3 text-accent" />
-                    <div>
-                      <h3 className="text-xl font-serif">Evidence Locker</h3>
-                      <p className="text-sm text-muted-foreground font-sans">
-                        Story version history and major revisions
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant="secondary" className="case-file">
-                    {recentVersions.length} Versions
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="divide-y divide-border">
-                  {recentVersions.map((version, index) => (
-                    <div
-                      key={version.id}
-                      className="p-6 hover:bg-accent/5 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center mb-2">
-                            <Badge
-                              variant={index === 0 ? "default" : "outline"}
-                              className="mr-3 case-file bg-accent text-accent-foreground"
-                            >
-                              {version.id}
-                            </Badge>
-                            <Badge
-                              variant="secondary"
-                              className="mr-2 text-xs font-serif"
-                            >
-                              {version.codename}
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {version.timestamp}
-                            </span>
-                          </div>
-
-                          <h4 className="font-serif font-semibold mb-2">
-                            {version.message}
-                          </h4>
-
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <TrendingUp className="h-4 w-4 mr-1" />
-                            <span className="mr-4">
-                              {version.changes} changes
-                            </span>
-                            <Users className="h-4 w-4 mr-1" />
-                            <span>by {version.author}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          {index === 0 && (
-                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                              Current
-                            </Badge>
-                          )}
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4 mr-2" />
-                            Examine
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="p-6 border-t border-border bg-muted/20">
-                  <Button variant="outline" className="w-full">
-                    <GitBranch className="h-4 w-4 mr-2" />
-                    Create New Case Version
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Writing Progress */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Timer className="h-5 w-5 mr-2 text-primary" />
-                  <span className="font-serif">Today's Investigation</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Daily Word Target</span>
-                    <span className="font-mono">
-                      {writingProgress.todayWritten}/
-                      {writingProgress.dailyTarget}
-                    </span>
-                  </div>
-                  <Progress
-                    value={
-                      (writingProgress.todayWritten /
-                        writingProgress.dailyTarget) *
-                      100
-                    }
-                    className="h-2"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Weekly Progress</span>
-                    <span className="font-mono">
-                      {writingProgress.weekWritten}/{writingProgress.weeklyGoal}
-                    </span>
-                  </div>
-                  <Progress
-                    value={
-                      (writingProgress.weekWritten /
-                        writingProgress.weeklyGoal) *
-                      100
-                    }
-                    className="h-2"
-                  />
-                </div>
-
-                <Button size="sm" className="w-full">
-                  <Play className="h-4 w-4 mr-2" />
-                  Continue Writing
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Investigation Tools */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Lightbulb className="h-5 w-5 mr-2 text-accent" />
-                  <span className="font-serif">Investigation Tools</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New Suspect
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Target className="h-4 w-4 mr-2" />
-                  Plant Evidence
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Create Crime Scene
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Timeline Builder
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Coffee className="h-4 w-4 mr-2" />
-                  Interrogation Notes
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Case Elements Summary */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BookOpen className="h-5 w-5 mr-2 text-primary" />
-                  <span className="font-serif">Case Elements</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center text-sm">
-                    <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-                    Characters
-                  </span>
-                  <Badge variant="secondary">{mysteryMetrics.characters}</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center text-sm">
-                    <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    Crime Scenes
-                  </span>
-                  <Badge variant="secondary">{mysteryMetrics.locations}</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center text-sm">
-                    <Search className="h-4 w-4 mr-2 text-muted-foreground" />
-                    Evidence Pieces
-                  </span>
-                  <Badge variant="secondary">{mysteryMetrics.clues}</Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="flex items-center text-sm">
-                    <Eye className="h-4 w-4 mr-2 text-muted-foreground" />
-                    False Leads
-                  </span>
-                  <Badge variant="secondary">
-                    {mysteryMetrics.redHerrings}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Activity className="h-5 w-5 mr-2 text-accent" />
-                  <span className="font-serif">Recent Activity</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">
-                      New suspect profile added
-                    </p>
-                    <p className="text-xs text-muted-foreground">2 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 rounded-full bg-accent mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">
-                      Timeline evidence updated
-                    </p>
-                    <p className="text-xs text-muted-foreground">5 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">
-                      Chapter 8 investigation notes
-                    </p>
-                    <p className="text-xs text-muted-foreground">1 day ago</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+            <DialogFooter>
+              <Button
+                onClick={handleSendInvitations}
+                className="bg-primary cursor-pointer hover:bg-primary/90"
+              >
+                Send Invitations
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+
+      {/* Navigation */}
+      <nav className="flex flex-wrap gap-4 mb-8 justify-center">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={
+                "flex items-center gap-3 px-6 py-2 rounded-md border transition-colors bg-card hover:bg-secondary-foreground hover:text-secondary"
+              }
+            >
+              <Icon className="h-5 w-5" />
+              <div className="flex flex-col">
+                <span className="font-medium text-sm">{item.label}</span>
+                <span className="text-xs">{item.description}</span>
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Members Table */}
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-start gap-4 mb-8">
+          <h2 className="font-bold text-2xl">Project Members</h2>
+          <span className="text-[1rem] text-muted-foreground">
+            {members.length} members
+          </span>
+        </div>
+
+        <div className="w-[85%] mx-auto">
+          <div className="rounded-lg border overflow-hidden shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow className="">
+                  <TableHead className="font-semibold text-lg">
+                    Member
+                  </TableHead>
+                  <TableHead className="font-semibold text-lg">Role</TableHead>
+                  <TableHead className="text-right font-semibold text-lg">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((member, index) => (
+                  <TableRow
+                    key={member.id}
+                    className="hover:bg-card transition-colors"
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 border-2 border-gray-100">
+                          <AvatarImage src={member.avatar} alt={member.name} />
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+                            {member.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">
+                            {member.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {member.email || `member${index + 1}@project.com`}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="secondary"
+                        className="bg-secondary-foreground text-secondary text-[0.9rem] hover:bg-blue-100 font-medium"
+                      >
+                        {member.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveMember(member)}
+                        className="hover:bg-red-50 hover:text-red-600 cursor-pointer transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {members.length === 0 && (
+          <div className="text-center py-12 text-gray-500">
+            <p>No members yet. Add someone to get started!</p>
+          </div>
+        )}
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <RemoveMemberDialog
+        open={removeDialogOpen}
+        onOpenChange={(v) => setRemoveDialogOpen(v)}
+        member={memberToRemove}
+        onConfirm={confirmRemoveMember}
+      />
     </div>
   );
 };

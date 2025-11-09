@@ -1,7 +1,7 @@
 import { TextEditorContainer } from "@/components/editor-workspace/editor/text-editor-container";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
-import { fetchNode } from "@/lib/server/editor-workspace";
+import { fetchNode } from "@/lib/supabase-calls/editor-workspace";
 
 interface NodePageProps {
   params: Promise<{

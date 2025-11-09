@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { ProjectsPageClient } from "@/components/projects/project-page-client";
 import { createSupabaseServerClient } from "@/supabase/server-client";
+import { getUserProjects } from "@/lib/supabase-calls/user-projects";
+import ErrorMsg from "@/components/error-msg";
 
 export default async function CasesPage() {
   const supabase = await createSupabaseServerClient();
@@ -17,23 +19,10 @@ export default async function CasesPage() {
   }
 
   // Fetch cases server-side
-  const { data: projects, error: projectsError } = await supabase
-    .from("projects")
-    .select("*")
-    .eq("author_id", user.id)
-    .order("updated_at", { ascending: false });
+  const { projects, error } = await getUserProjects(user.id);
 
-  if (projectsError) {
-    console.error("Error fetching projects:", projectsError);
-    // You might want to handle this error differently
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-xl font-semibold text-red-600">Error</h1>
-          <p className="text-gray-600 mt-2">Failed to load projects</p>
-        </div>
-      </div>
-    );
+  if (error) {
+    return <ErrorMsg message="Failed to load projects" />;
   }
 
   return <ProjectsPageClient user={user} initialProjects={projects || []} />;

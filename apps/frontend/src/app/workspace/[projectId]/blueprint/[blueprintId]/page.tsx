@@ -5,6 +5,7 @@ import { getUserBlueprintById } from "@/lib/supabase-calls/blueprint";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/dist/client/components/navigation";
 import { getAllCardsOfBlueprint } from "@/lib/supabase-calls/blueprint-cards";
+import ErrorMsg from "@/components/error-msg";
 
 interface CreateBlueprintPageProps {
   params: {
@@ -34,12 +35,21 @@ export default async function CreateBlueprintPage({
 
   const userId = user.id;
 
-  const blueprint = await getUserBlueprintById(blueprintId, userId);
-  const blueprintCards = await getAllCardsOfBlueprint(
-    supabase,
+  const { blueprint, error: blueprintError } = await getUserBlueprintById(
     blueprintId,
     userId
   );
+  if (blueprintError || !blueprint) {
+    return <ErrorMsg message="Failed to load blueprint data" />;
+  }
+  const { blueprint_cards, error: cardsError } = await getAllCardsOfBlueprint(
+    blueprintId,
+    userId
+  );
+
+  if (cardsError) {
+    return <ErrorMsg message="Failed to load blueprint cards" />;
+  }
 
   return (
     <Suspense fallback={<CreateBlueprintPageSkeleton />}>
@@ -48,7 +58,7 @@ export default async function CreateBlueprintPage({
           blueprintId={blueprintId}
           type={type}
           projectName={blueprint?.title || "Untitled Blueprint"}
-          prevBlueprintCards={blueprintCards}
+          prevBlueprintCards={blueprint_cards}
         />
       </div>
     </Suspense>

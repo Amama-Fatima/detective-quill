@@ -1,4 +1,3 @@
-import ProjectWorkspaceHeader from "@/components/project-workspace/project-workspace-header";
 import WorkspaceMainBody from "@/components/project-workspace/project-workspace-main";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
@@ -33,7 +32,6 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
 
   return (
     <div>
-      {/* <ProjectWorkspaceHeader project={data} /> */}
       <WorkspaceMainBody project={data} />
     </div>
   );
