@@ -6,7 +6,7 @@ import Image from "next/image";
 export default function Header() {
   return (
     <div className="sticky top-0 z-50 w-full p-4">
-      <header className="mx-auto max-w-7xl rounded-2xl border border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <header className="mx-auto max-w-7xl rounded-2xl border border-border/40 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm">
         <div className="flex h-16 items-center justify-between px-6">
           {/* Logo/Brand */}
           <div className="flex items-center">
@@ -32,6 +32,13 @@ export default function Header() {
             >
               Dashboard
             </Link>
+            <Link
+              href="/profile"
+              className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+            >
+              Profile
+            </Link>
+
             <Link
               href="/cases"
               className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"

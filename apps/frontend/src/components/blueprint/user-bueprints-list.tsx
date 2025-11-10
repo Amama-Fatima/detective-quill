@@ -20,10 +20,10 @@ export const UserBlueprintsList = ({
       <div className="text-center py-16">
         <div className="mx-auto max-w-md">
           <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h2 className="mystery-title text-lg font-semibold mb-2">
             No blueprints yet
-          </h3>
-          <p className="text-gray-500 mb-6">
+          </h2>
+          <p className="text-muted-foreground noir-text mb-6">
             Get started by creating your first blueprint to organize and reuse
             your designs.
           </p>
@@ -66,7 +66,7 @@ export const UserBlueprintsList = ({
               >
                 <>
                   <Tag />
-                  <p className="text-lg font-medium">{blueprint.type}</p>
+                  <p className="case-file text-lg font-medium">{blueprint.type}</p>
                 </>
               </div>
             </CardContent>

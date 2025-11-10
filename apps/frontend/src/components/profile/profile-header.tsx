@@ -99,7 +99,7 @@ export function ProfileHeader({
           <div className="flex-1 space-y-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="mystery-title text-4xl">
+                <h1 className="noir-text text-4xl">
                   {profile.pen_name || profile.full_name}
                 </h1>
                 <Badge className="bg-primary/10 text-primary border-primary/30 case-file">
@@ -124,7 +124,7 @@ export function ProfileHeader({
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="noir-text grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 bg-card/50 rounded-lg border border-primary/10">
                 <div className="text-2xl font-bold text-primary">
                   {profile.case_files.solved}
@@ -165,7 +165,7 @@ export function ProfileHeader({
             <Button
               onClick={onEdit}
               variant={isEditing ? "secondary" : "outline"}
-              className="border-primary/30 hover:bg-primary/10"
+              className="border-primary/30 hover:bg-primary/10 cursor-pointer shadow-lg"
             >
               <Edit className="h-4 w-4 mr-2" />
               {isEditing ? "Cancel" : "Edit Profile"}

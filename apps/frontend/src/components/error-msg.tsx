@@ -6,7 +6,7 @@ const ErrorMsg = ({ message }: { message: string }) => {
       <div className="text-center">
         <h1 className="text-xl font-semibold text-destructive">Error</h1>
 
-        <p className="text-destructive mt-2">{message}</p>
+        <p className="noir-text text-destructive mt-2">{message}</p>
       </div>
     </div>
   );

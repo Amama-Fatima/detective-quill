@@ -57,7 +57,7 @@ export function MemberTableRow({
   return (
     <TableRow key={member.user_id}>
       <TableCell>
-        <div className="flex items-center space-x-3">
+        <div className="noir-text flex items-center space-x-3">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             {member.profiles.avatar_url ? (
               <img

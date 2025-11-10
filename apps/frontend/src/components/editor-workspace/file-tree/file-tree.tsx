@@ -212,7 +212,7 @@ export function FileTree({
         {treeElements.length === 0 ? (
           <div className="text-center text-muted-foreground py-8 px-4">
             <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm mb-4">No files or folders yet</p>
+            <p className="text-[1rem] noir-text mb-4">No files or folders yet</p>
             <Button
               size="sm"
               onClick={() => openCreateDialog("file")}

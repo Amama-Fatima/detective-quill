@@ -39,8 +39,8 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Blueprints</h1>
-              <p className="mt-2">
+              <h2 className="mystery-title text-3xl font-bold">Blueprints</h2>
+              <p className="noir-text mt-2">
                 Manage and organize your reusable design components and
                 templates
               </p>

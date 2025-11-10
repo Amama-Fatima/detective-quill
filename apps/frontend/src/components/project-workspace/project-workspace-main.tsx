@@ -40,7 +40,7 @@ const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
             {project.description ??
               "This section provides an overview and notes for the ongoing project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."}
           </p>
-          <p className="text-xs mt-1">
+          <p className="noir-text text-xs mt-1">
             <span className="flex items-center text-secondary-foreground">
               <Clock className="mr-1 h-4 w-4" />
               <span className="font-semibold mr-2">Last updated:</span>
@@ -68,7 +68,7 @@ const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
               key={item.id}
               href={item.href}
               className={
-                "flex items-center gap-3 px-6 py-2 rounded-md border transition-colors bg-card hover:bg-secondary-foreground hover:text-secondary"
+                "flex noir-text items-center gap-3 px-6 py-2 rounded-md border transition-colors bg-card hover:bg-secondary-foreground hover:text-secondary"
               }
             >
               <Icon className="h-5 w-5" />

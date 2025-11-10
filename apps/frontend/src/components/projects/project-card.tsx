@@ -69,7 +69,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
           {project.description || "No case summary available..."}
         </p>
 
-        <div className="space-y-3">
+        <div className="noir-text space-y-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center space-x-3">
               <div className="flex items-center">
@@ -78,7 +78,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
               </div>
               <div className="flex items-center">
                 <BookOpen className="h-3 w-3 mr-1" />
-                Chapter umber chapters
+                Chapter number chapters
               </div>
             </div>
             <div className="flex items-center">

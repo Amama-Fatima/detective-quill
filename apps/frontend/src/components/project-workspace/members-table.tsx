@@ -24,7 +24,7 @@ interface Member {
 }
 
 const initialMembers: Member[] = [
-  { id: "1", name: "Elara Vance", role: "Author" },
+  { id: "1", name: "Wlara Vance", role: "Author" },
   { id: "2", name: "Jaxson Reid", role: "Beta Reader" },
   { id: "3", name: "Lena Petrova", role: "Beta Reader" },
   { id: "4", name: "Marcus Thorne", role: "Beta Reader" },
@@ -52,13 +52,13 @@ const MembersTable = () => {
     <div className="">
       <div className="space-y-4">
         <div className="flex items-center justify-start gap-4 mb-8">
-          <h2 className="font-bold text-2xl">Project Members</h2>
-          <span className="text-[1rem] text-muted-foreground">
+          <h2 className="mystery-title font-bold text-2xl">Project Members</h2>
+          <span className="noir-text text-[1rem] text-muted-foreground">
             {members.length} members
           </span>
         </div>
         <div className="w-[85%] mx-auto">
-          <div className="rounded-lg border overflow-hidden shadow-sm">
+          <div className="noir-text rounded-lg border overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow className="">

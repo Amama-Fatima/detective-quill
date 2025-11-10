@@ -86,7 +86,7 @@ export function ProjectsPageClient({
           onValueChange={(value) => setFilter(value as FilterOption)}
         >
           {/* Controls Section */}
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
+          <div className="noir-text flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
             <TabsList className="bg-card/50 border border-border">
               <TabsTrigger value="all" className="font-serif cursor-pointer">
                 All Cases
