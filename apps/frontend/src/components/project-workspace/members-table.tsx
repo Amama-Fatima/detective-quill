@@ -13,38 +13,56 @@ import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import RemoveMemberDialog from "./remove-member-dialog";
 import { Badge } from "../ui/badge";
+import { ProjectMember } from "@detective-quill/shared-types";
+import { removeProjectMember } from "@/lib/backend-calls/projects-members";
+import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
 
 //todo: fetch the members on server side from supabase, then for removal, make api call to backend
 
-interface Member {
-  id: string;
-  name: string;
-  role: "Author" | "Beta Reader";
-  avatar?: string;
-}
-
-const initialMembers: Member[] = [
-  { id: "1", name: "Wlara Vance", role: "Author" },
-  { id: "2", name: "Jaxson Reid", role: "Beta Reader" },
-  { id: "3", name: "Lena Petrova", role: "Beta Reader" },
-  { id: "4", name: "Marcus Thorne", role: "Beta Reader" },
-];
-
-const MembersTable = () => {
-  const [members, setMembers] = useState<Member[]>(initialMembers);
-  const [memberToRemove, setMemberToRemove] = useState<Member | null>(null);
+const MembersTable = ({
+  isOwner,
+  initialMembers,
+  projectId,
+}: {
+  isOwner: boolean;
+  initialMembers: ProjectMember[] | [];
+  projectId: string;
+}) => {
+  const [members, setMembers] = useState<ProjectMember[]>(initialMembers);
+  const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(
+    null
+  );
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const handleRemoveMember = (member: Member) => {
+  const { session } = useAuth();
+  const accessToken = session?.access_token;
+
+  const handleRemoveMember = (member: ProjectMember) => {
     setMemberToRemove(member);
     setRemoveDialogOpen(true);
   };
 
-  const confirmRemoveMember = () => {
+  const confirmRemoveMember = async () => {
     if (memberToRemove) {
-      setMembers(members.filter((m) => m.id !== memberToRemove.id));
-      setRemoveDialogOpen(false);
-      setMemberToRemove(null);
+      try {
+        setDeleting(true);
+        await removeProjectMember(
+          accessToken!,
+          projectId,
+          memberToRemove.user_id
+        );
+        setMembers(members.filter((m) => m.user_id !== memberToRemove.user_id));
+        setRemoveDialogOpen(false);
+        setMemberToRemove(null);
+        toast.success("Member removed successfully");
+      } catch (error) {
+        console.error("Error removing member:", error);
+        toast.error("Failed to remove member. Please try again.");
+      } finally {
+        setDeleting(false);
+      }
     }
   };
 
@@ -66,30 +84,37 @@ const MembersTable = () => {
                     Member
                   </TableHead>
                   <TableHead className="font-semibold text-lg">Role</TableHead>
-                  <TableHead className="text-right font-semibold text-lg">
-                    Actions
-                  </TableHead>
+                  {isOwner && (
+                    <TableHead className="text-right font-semibold text-lg">
+                      Actions
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {members.map((member, index) => (
                   <TableRow
-                    key={member.id}
+                    key={member.user_id}
                     className="hover:bg-card transition-colors"
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border-2 border-gray-100">
-                          <AvatarImage src={member.avatar} alt={member.name} />
+                          <AvatarImage
+                            src={member.avatar_url ?? undefined}
+                            alt={member.full_name}
+                          />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
-                            {member.name
+                            {member.full_name
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                          <span className="font-medium">{member.name}</span>
+                          <span className="font-medium">
+                            {member.full_name}
+                          </span>
                           <span className="text-xs text-muted-foreground">
                             {`member${index + 1}@project.com`}
                           </span>
@@ -101,19 +126,21 @@ const MembersTable = () => {
                         variant="secondary"
                         className="bg-secondary-foreground text-secondary text-[0.9rem] hover:bg-muted-foreground font-medium"
                       >
-                        {member.role}
+                        {!isOwner ? "Beta Reader" : "Author"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveMember(member)}
-                        className="hover:bg-red-50 hover:text-red-600 cursor-pointer transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+                    {isOwner && (
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveMember(member)}
+                          className="hover:bg-red-50 hover:text-red-600 cursor-pointer transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -132,6 +159,7 @@ const MembersTable = () => {
         onOpenChange={(v) => setRemoveDialogOpen(v)}
         member={memberToRemove}
         onConfirm={confirmRemoveMember}
+        isLoading={deleting}
       />
     </div>
   );

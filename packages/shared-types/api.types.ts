@@ -211,16 +211,12 @@ export interface CommentStats {
 }
 
 export interface ProjectMember {
-  project_id: string;
-  user_id: string;
   created_at: string;
-  profiles: {
-    user_id: string;
-    full_name: string;
-    username: string;
-    email: string;
-    avatar_url: string | null;
-  };
+  user_id: string;
+  username: string | null;
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
 }
 
 export interface AddMemberDto {

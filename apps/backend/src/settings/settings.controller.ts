@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Patch,
@@ -8,16 +7,12 @@ import {
   Delete,
   UseGuards,
   Request,
-  Query,
-  ParseBoolPipe,
-  DefaultValuePipe,
 } from "@nestjs/common";
 import { SettingsService } from "./settings.service";
 import { AuthGuard } from "../auth/auth.guard";
 import type {
   UpdateProjectDto,
   ProjectResponse,
-  DeleteResponse,
   ApiResponse,
   ProjectMember,
   AddMemberDto,
@@ -39,24 +34,6 @@ export class SettingsController {
       const data = await this.settingsService.updateProjectInfo(
         projectId,
         updateProjectDto,
-        req.user.id,
-        req.accessToken
-      );
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Get all project members
-  @Get("members")
-  async getProjectMembers(
-    @Param("projectId") projectId: string,
-    @Request() req
-  ): Promise<ApiResponse<ProjectMember[]>> {
-    try {
-      const data = await this.settingsService.getProjectMembers(
-        projectId,
         req.user.id,
         req.accessToken
       );
@@ -92,15 +69,15 @@ export class SettingsController {
     @Param("projectId") projectId: string,
     @Param("memberId") memberId: string,
     @Request() req
-  ): Promise<ApiResponse<DeleteResponse>> {
+  ): Promise<ApiResponse<void>> {
     try {
-      const data = await this.settingsService.removeProjectMember(
+      await this.settingsService.removeProjectMember(
         projectId,
         memberId,
         req.user.id,
         req.accessToken
       );
-      return { success: true, data };
+      return { success: true, message: "Member removed successfully" };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -111,14 +88,14 @@ export class SettingsController {
   async deleteProject(
     @Param("projectId") projectId: string,
     @Request() req
-  ): Promise<ApiResponse<DeleteResponse>> {
+  ): Promise<ApiResponse<void>> {
     try {
-      const data = await this.settingsService.deleteProject(
+      await this.settingsService.deleteProject(
         projectId,
         req.user.id,
         req.accessToken
       );
-      return { success: true, data };
+      return { success: true, message: "Project deleted successfully" };
     } catch (error) {
       return { success: false, error: error.message };
     }

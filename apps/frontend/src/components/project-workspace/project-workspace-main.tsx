@@ -6,27 +6,26 @@ import { Clock } from "lucide-react";
 import { NAV_ITEMS } from "@/constants/project-constants";
 import ChangeStateDropDown from "./change-state-dropdown";
 import InviteMembersDialog from "./invite-memebers-dialog";
+import { Project, ProjectMember } from "@detective-quill/shared-types";
 import MembersTable from "./members-table";
-
-interface Project {
-  id: string;
-  title: string;
-  description: string | null;
-  author_id: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-  is_active: boolean | null;
-}
 
 interface WorkspaceMainBodyProps {
   project: Project;
+  userId: string;
+  members: ProjectMember[] | [];
 }
 
-const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
+const WorkspaceMainBody = ({
+  project,
+  userId,
+  members,
+}: WorkspaceMainBodyProps) => {
   const navItems = NAV_ITEMS.map((item) => ({
     ...item,
     href: item.href.replace("123", project.id),
   }));
+
+  const isOwner = userId === project.author_id;
 
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 
@@ -50,13 +49,15 @@ const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-4">
-          <ChangeStateDropDown />
-          <InviteMembersDialog
-            inviteDialogOpen={inviteDialogOpen}
-            setInviteDialogOpen={setInviteDialogOpen}
-          />
-        </div>
+        {isOwner && (
+          <div className="flex items-center gap-4">
+            <ChangeStateDropDown />
+            <InviteMembersDialog
+              inviteDialogOpen={inviteDialogOpen}
+              setInviteDialogOpen={setInviteDialogOpen}
+            />
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
@@ -82,7 +83,7 @@ const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
       </nav>
 
       {/* Members Table */}
-      <MembersTable />
+      <MembersTable isOwner={isOwner} initialMembers={members} projectId={project.id} />
     </div>
   );
 };

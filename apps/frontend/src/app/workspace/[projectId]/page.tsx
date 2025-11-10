@@ -2,6 +2,8 @@ import WorkspaceMainBody from "@/components/project-workspace/project-workspace-
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import React from "react";
+import { getProjectMembers } from "@/lib/supabase-calls/projects-members";
+import ErrorMsg from "@/components/error-msg";
 interface ProjectWorkspacePageProps {
   params: Promise<{
     projectId: string;
@@ -30,9 +32,22 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     // .eq("author_id", user.id)
     .single();
 
+  if (error || !data) {
+    return <ErrorMsg message="Project not found" />;
+  }
+
+  const { members, error: membersError } = await getProjectMembers(
+    projectId,
+    user.id
+  );
+
+  if (membersError) {
+    console.error("Error fetching project members:", membersError);
+  }
+
   return (
     <div>
-      <WorkspaceMainBody project={data} />
+      <WorkspaceMainBody project={data} userId={user.id} members={members || [] } />
     </div>
   );
 };

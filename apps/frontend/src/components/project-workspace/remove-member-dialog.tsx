@@ -8,20 +8,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-interface Member {
-  id: string;
-  name: string;
-  role: "Author" | "Beta Reader";
-  avatar?: string;
-  email?: string;
-}
+import { ProjectMember } from "@detective-quill/shared-types";
 
 interface RemoveMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: Member | null;
+  member: ProjectMember | null;
   onConfirm: () => void;
+  isLoading: boolean;
 }
 
 const RemoveMemberDialog: React.FC<RemoveMemberDialogProps> = ({
@@ -29,6 +23,7 @@ const RemoveMemberDialog: React.FC<RemoveMemberDialogProps> = ({
   onOpenChange,
   member,
   onConfirm,
+  isLoading,
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -37,7 +32,7 @@ const RemoveMemberDialog: React.FC<RemoveMemberDialogProps> = ({
           <DialogTitle>Remove Member</DialogTitle>
           <DialogDescription>
             Are you sure you want to remove{" "}
-            <span className="font-semibold">{member?.name}</span> from the
+            <span className="font-semibold">{member?.full_name}</span> from the
             project? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
@@ -51,8 +46,9 @@ const RemoveMemberDialog: React.FC<RemoveMemberDialogProps> = ({
           </Button>
           <Button
             variant="destructive"
-            className="cursor-pointer"
+            className="cursor-pointer disabled:cursor-not-allowed"
             onClick={onConfirm}
+            disabled={isLoading}
           >
             Remove
           </Button>

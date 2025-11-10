@@ -48,45 +48,6 @@ export class SettingsService {
     return data;
   }
 
-  // Get all project members with their profile information
-  async getProjectMembers(
-    projectId: string,
-    userId: string,
-    accessToken: string
-  ): Promise<ProjectMember[]> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
-
-    // Verify user has access to this project (either owner or member)
-    await this.verifyProjectAccess(projectId, userId, accessToken);
-
-    const { data, error } = await supabase
-      .from("projects_members")
-      .select(
-        `
-        project_id,
-        user_id,
-        created_at,
-        profile:profiles!projects_members_user_id_fkey (
-          id,
-          full_name,
-          username,
-          email,
-          avatar_url
-        )
-      `
-      )
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      throw new BadRequestException(
-        `Failed to fetch project members: ${error.message}`
-      );
-    }
-    console.log("data in here is ", data);
-    return (data as unknown as ProjectMember[]) || [];
-  }
-
   // Add a new member to the project
   async addProjectMember(
     projectId: string,
@@ -147,7 +108,10 @@ export class SettingsService {
     // Return the member with profile info
     return {
       ...data,
-      profiles: profile,
+      full_name: profile.full_name ?? profile.username ?? null,
+      username: profile.username ?? null,
+      email: profile.email,
+      avatar_url: profile.avatar_url ?? null,
     };
   }
 
