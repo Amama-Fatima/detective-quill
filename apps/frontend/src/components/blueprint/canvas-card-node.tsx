@@ -1,14 +1,7 @@
 // todo: use useCallbacks where needed
 
 import { useState, useRef, useEffect } from "react";
-import {
-  NotepadTextDashed,
-  X,
-  GripVertical,
-  MoreVertical,
-  Edit3,
-  Trash,
-} from "lucide-react";
+import { NotepadTextDashed, Edit3, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -43,30 +36,27 @@ export default function CanvasCardNode({
   return (
     <div
       className={`
-      group relative bg-white rounded-xl shadow-sm border-2 w-84 min-h-68
-      transition-all duration-200 hover:shadow-lg hover:border-blue-300
-      ${
-        isFocused
-          ? "shadow-lg border-blue-400 ring-2 ring-blue-100"
-          : "border-gray-200"
-      }
+      group relative bg-drag-card rounded-xl shadow-sm border-2 w-84 min-h-72
+      transition-all duration-200 hover:shadow-lg
+      ${isFocused ? "shadow-lg ring-2" : "border-muted-foreground"}
       cursor-grab active:cursor-grabbing
     `}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         <div className="flex items-center gap-2">
-          <span className="text-black text-lg">
+          <span className="text-lg">
             <NotepadTextDashed />
           </span>
           {/* title area */}
           {isEditing ? (
             <input
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               ref={titleRef}
               value={data.title}
               onChange={(e) => data.onTitleChange(e.target.value)}
               className="nodrag w-3/4 min-h-12 p-3 border border-gray-200 rounded-lg resize-none bg-gray-100
-                     focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300
                      text-gray-800 text-md leading-relaxed transition-all"
             />
           ) : (
@@ -80,9 +70,7 @@ export default function CanvasCardNode({
             size="sm"
             onClick={() => setIsEditing(!isEditing)}
             className={`h-7 w-7 p-0 opacity-0 cursor-pointer text-gray-900 group-hover:opacity-100 transition-opacity ${
-              isEditing
-                ? "opacity-100 bg-blue-50 text-blue-600"
-                : "hover:bg-gray-100"
+              isEditing ? "opacity-100 bg-muted" : "hover:bg-gray-100"
             }`}
           >
             <Edit3 className="w-3 h-3" />
@@ -110,7 +98,6 @@ export default function CanvasCardNode({
             onBlur={() => setIsFocused(false)}
             placeholder="Start typing your content here..."
             className="nodrag w-full min-h-64 p-3 border border-gray-200 rounded-lg resize-none bg-gray-100
-                     focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300
                      text-gray-800 text-md leading-relaxed transition-all"
             style={{
               minHeight: "128px",

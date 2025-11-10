@@ -70,7 +70,7 @@ export async function updateProject(
   data: UpdateProjectDto,
   accessToken: string
 ): Promise<ApiResponse<ProjectResponse>> {
-  return makeAuthenticatedRequest<ProjectResponse>(
+  const response = await makeAuthenticatedRequest<ProjectResponse>(
     `/projects/${projectId}`,
     accessToken,
     {
@@ -78,6 +78,12 @@ export async function updateProject(
       body: JSON.stringify(data),
     }
   );
+
+  if (!response.success) {
+    throw new Error(`Failed to update user project: ${response.error}`);
+  }
+
+  return response;
 }
 
 export async function deleteProject(
@@ -86,43 +92,64 @@ export async function deleteProject(
   hardDelete: boolean = false
 ): Promise<ApiResponse<DeleteResponse>> {
   const query = hardDelete ? "?hard=true" : "";
-  return makeAuthenticatedRequest<DeleteResponse>(
+  const response = await makeAuthenticatedRequest<DeleteResponse>(
     `/projects/${projectId}${query}`,
     accessToken,
     {
       method: "DELETE",
     }
   );
+
+  if (!response.success) {
+    throw new Error(`Failed to delete user project: ${response.error}`);
+  }
+  return response;
 }
 
 export async function restoreProject(
   projectId: string,
   accessToken: string
 ): Promise<ApiResponse<ProjectResponse>> {
-  return makeAuthenticatedRequest<ProjectResponse>(
+  const response = await makeAuthenticatedRequest<ProjectResponse>(
     `/projects/${projectId}/restore`,
     accessToken,
     {
       method: "POST",
     }
   );
+  if (!response.success) {
+    throw new Error(`Failed to restore user project: ${response.error}`);
+  }
+  return response;
 }
 
 export async function getProjectStats(
   projectId: string,
   accessToken: string
 ): Promise<ApiResponse<ProjectStats>> {
-  return makeAuthenticatedRequest<ProjectStats>(
+  const response = await makeAuthenticatedRequest<ProjectStats>(
     `/projects/${projectId}/stats`,
     accessToken
   );
+
+  if (!response.success) {
+    throw new Error(`Failed to get project stats: ${response.error}`);
+  }
+
+  return response;
 }
 
 export async function getDeletedProjects(
   accessToken: string
 ): Promise<ApiResponse<ProjectResponse[]>> {
-  return makeAuthenticatedRequest<ProjectResponse[]>(
+  const response = await makeAuthenticatedRequest<ProjectResponse[]>(
     "/projects/deleted",
     accessToken
   );
+
+  if (!response.success) {
+    throw new Error(`Failed to get deleted projects: ${response.error}`);
+  }
+
+  return response;
 }

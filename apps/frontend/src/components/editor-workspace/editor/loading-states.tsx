@@ -16,8 +16,8 @@ export const FileNotFoundState = () => (
         <FileText className="h-12 w-12 text-muted-foreground" />
       </div>
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">File not found</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="noir-text text-xl font-semibold">File not found</h2>
+        <p className="noir-text text-[1rem] text-muted-foreground">
           The file you're looking for doesn't exist or has been deleted.
         </p>
       </div>

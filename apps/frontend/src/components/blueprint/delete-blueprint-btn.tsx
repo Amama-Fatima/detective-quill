@@ -61,13 +61,16 @@ export const DeleteBlueprintButton = ({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setOpenDialogId(null)} className="cursor-pointer">
+            <Button
+              variant="outline"
+              className="cursor-pointer"
+            >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={() => onDelete(blueprintId)}
-              className="bg-red-600 hover:bg-red-700 cursor-pointer"
+              className="cursor-pointer"
             >
               Delete Blueprint
             </Button>

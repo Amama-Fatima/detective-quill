@@ -1,6 +1,6 @@
 // todo: you get error cz of using button and redirect on server side i think, so fix this
 import { Button } from "@/components/ui/button";
-import { fetchProject } from "@/lib/server/editor-workspace";
+import { fetchProject } from "@/lib/supabase-calls/editor-workspace";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { FileText, FolderOpen, Plus } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -34,8 +34,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <FileText className="h-12 w-12 text-muted-foreground" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Project not found</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="noir-text text-xl font-semibold">Project not found</h2>
+            <p className="noir-text text-sm text-muted-foreground">
               The project you're looking for doesn't exist or you don't have
               access to it.
             </p>
@@ -53,14 +53,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">{project.title}</h1>
+          <h2 className="noir-text text-2xl font-bold">{project.title}</h2>
           {project.description && (
-            <p className="text-muted-foreground">{project.description}</p>
+            <p className="noir-text-muted-foreground">{project.description}</p>
           )}
         </div>
 
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="noir-text text-sm text-muted-foreground">
             Select a file from the sidebar to start editing, or create a new
             file to begin writing.
           </p>

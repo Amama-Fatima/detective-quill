@@ -79,10 +79,10 @@ export function ForgotPasswordForm() {
   return (
     <div className="space-y-6 max-w-md mx-auto">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="mystery-title text-2xl font-bold">
           Reset your password
-        </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        </h1>
+        <p className="text-[1rem] noir-text">
           Enter your email address and we'll send you a link to reset your
           password.
         </p>
@@ -101,7 +101,7 @@ export function ForgotPasswordForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <FormLabel className="text-[1rem] font-medium">
                   Email address
                 </FormLabel>
                 <FormControl>
@@ -109,10 +109,10 @@ export function ForgotPasswordForm() {
                     <Input
                       type="email"
                       placeholder="Enter your email"
-                      className="pl-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                      className="pl-10 h-11 border-slate-200 dark:border-slate-700"
                       {...field}
                     />
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -123,7 +123,7 @@ export function ForgotPasswordForm() {
           <div className="space-y-4">
             <Button
               type="submit"
-              className="w-full h-11 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+              className="w-full h-11 bg-primary shadow-lg hover:bg-primary/90 cursor-pointer transition-colors"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -136,7 +136,7 @@ export function ForgotPasswordForm() {
               )}
             </Button>
 
-            <Button variant="ghost" asChild className="w-full">
+            <Button variant="ghost" asChild className="w-full cursor-pointer">
               <Link href="/auth/sign-in">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to sign in

@@ -64,7 +64,7 @@ export function SignInForm() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="">
       <ConfirmationMessages />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -87,10 +87,10 @@ export function SignInForm() {
                     <Input
                       type="email"
                       placeholder="Enter your email"
-                      className="pl-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                      className="pl-10 h-11 border-slate-200 dark:border-slate-700"
                       {...field}
                     />
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Mail className="absolute text-secondary-foreground left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" />
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -103,7 +103,7 @@ export function SignInForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <FormLabel className="text-sm font-medium text-muted-foreground dark:text-slate-300">
                   Password
                 </FormLabel>
                 <FormControl>
@@ -111,10 +111,10 @@ export function SignInForm() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                      className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700"
                       {...field}
                     />
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />
                     <Button
                       type="button"
                       variant="ghost"
@@ -123,9 +123,9 @@ export function SignInForm() {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-slate-400" />
+                        <EyeOff className="h-4 w-4 text-secondary-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-slate-400" />
+                        <Eye className="h-4 w-4 text-secondary-foreground" />
                       )}
                     </Button>
                   </div>
@@ -138,8 +138,7 @@ export function SignInForm() {
           <div className="flex items-center justify-between">
             <Link
               href="/auth/forgot-password"
-              className="px-0 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-              // onClick={() => console.log("Forgot password clicked")}
+              className="px-0 text-sm hover:text-muted-foreground"
             >
               Forgot password?
             </Link>
@@ -147,7 +146,7 @@ export function SignInForm() {
 
           <Button
             type="submit"
-            className="w-full h-11 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors cursor-pointer disabled:cursor-not-allowed"
+            className="w-full h-11  bg-primary hover:bg-primary/90 cursor-pointer disabled:cursor-not-allowed"
             disabled={isLoading}
           >
             {isLoading ? (

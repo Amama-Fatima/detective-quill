@@ -63,7 +63,7 @@ function ResetPasswordLoading() {
   return (
     <div className="text-center space-y-4 max-w-md mx-auto">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-      <p className="text-sm text-gray-600 dark:text-gray-400">
+      <p className="noir-text text-sm text-gray-600 dark:text-gray-400">
         Verifying reset link...
       </p>
     </div>
@@ -78,10 +78,10 @@ export function ResetPasswordInvalid() {
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="noir-text text-xl font-semibold">
           Invalid or expired link
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="noir-text text-[1rem]">
           This password reset link is invalid or has expired. Please request a
           new one.
         </p>
@@ -108,10 +108,10 @@ export function ResetPasswordSuccess() {
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="noir-text text-xl font-semibold">
           Password updated successfully!
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="noir-text text-[1rem]">
           Your password has been updated. You'll be redirected to sign in
           shortly.
         </p>

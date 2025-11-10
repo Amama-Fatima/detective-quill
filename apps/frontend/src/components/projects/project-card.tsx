@@ -7,68 +7,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  MoreHorizontal,
-  ExternalLink,
-  Edit,
-  Trash2,
-  Calendar,
-  Save,
-  X,
-  BookOpen,
-  FileText,
-  Eye,
-  MoreVertical,
-  Target,
-  Star,
-  Archive,
-  Clock,
-} from "lucide-react";
+import { BookOpen, FileText, Target, Star, Archive, Clock } from "lucide-react";
 import { ProjectResponse } from "@detective-quill/shared-types";
-import { formatDistanceToNow } from "date-fns";
 import { Badge } from "../ui/badge";
+import Link from "next/link";
 
 interface ProjectCardProps {
   project: ProjectResponse;
-  onOpen: (projectTitle: string) => void;
-  onUpdate: (
-    projectId: string,
-    data: { title: string; description: string }
-  ) => Promise<boolean>;
-  onDelete: (projectId: string) => Promise<boolean>;
 }
 
-const ProjectCard = ({
-  project,
-  onOpen,
-  onUpdate,
-  onDelete,
-}: {
-  project: any;
-  onOpen: (id: string) => void;
-  onUpdate: (id: string, data: any) => Promise<boolean>;
-  onDelete: (id: string) => Promise<boolean>;
-}) => {
+const ProjectCard = ({ project }: ProjectCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -96,7 +44,7 @@ const ProjectCard = ({
   };
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border/50 bg-gradient-to-br from-card via-card to-card/50 hover:border-primary/30">
+    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border/50  bg-gradient-to-tl from-background via-background to-card">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
@@ -104,85 +52,38 @@ const ProjectCard = ({
               <BookOpen className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1">
-              <CardTitle className="font-serif text-lg group-hover:text-primary transition-colors line-clamp-1">
-                {project.title}
+              <CardTitle className="font-serif text-xl group-hover:text-primary transition-colors line-clamp-1">
+                <Link href={`/workspace/${project.id}`}>{project.title}</Link>
               </CardTitle>
-              <Badge
-                className={`text-xs case-file mt-1 ${getStatusColor(
-                  project.status
-                )}`}
-              >
-                {getStatusIcon(project.status)}
-                <span className="ml-1">{project.status.toUpperCase()}</span>
+              <Badge className="text-xs case-file mt-1">
+                <Archive className="h-2 w-2" />
+                <span className="ml-1">Archived</span>
               </Badge>
             </div>
           </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onOpen(project.id)}>
-                <Eye className="h-4 w-4 mr-2" />
-                Open Case
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Details
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => onDelete(project.id)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Close Case
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0" onClick={() => onOpen(project.id)}>
+      <CardContent className="pt-0">
         <p className="text-sm text-muted-foreground noir-text mb-4 line-clamp-2">
           {project.description || "No case summary available..."}
         </p>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              Investigation Progress
-            </span>
-            <span className="font-mono text-xs">{project.progress}%</span>
-          </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-primary to-accent h-2 rounded-full transition-all duration-500"
-              style={{ width: `${project.progress}%` }}
-            />
-          </div>
-
+        <div className="noir-text space-y-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center space-x-3">
               <div className="flex items-center">
                 <FileText className="h-3 w-3 mr-1" />
-                {project.wordCount.toLocaleString()} words
+                Word Count words
               </div>
               <div className="flex items-center">
                 <BookOpen className="h-3 w-3 mr-1" />
-                {project.chapters} chapters
+                Chapter number chapters
               </div>
             </div>
             <div className="flex items-center">
               <Clock className="h-3 w-3 mr-1" />
-              {project.lastActivity.toLocaleDateString()}
+              {project.updated_at}
             </div>
           </div>
         </div>

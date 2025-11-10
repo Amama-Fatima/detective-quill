@@ -74,10 +74,10 @@ export function ResetPasswordForm() {
       <ResetFormStates />
       <div className="space-y-6 max-w-md mx-auto">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="mystery-title text-2xl font-bold">
             Create new password
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          </h1>
+          <p className="text-[1rem] noir-text">
             Enter your new password below.
           </p>
         </div>
@@ -95,7 +95,7 @@ export function ResetPasswordForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <FormLabel className="text-[1rem] font-medium">
                     New Password
                   </FormLabel>
                   <FormControl>
@@ -103,21 +103,21 @@ export function ResetPasswordForm() {
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="Create a new password"
-                        className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                        className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700"
                         {...field}
                       />
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                        className="absolute cursor-pointer right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-slate-400" />
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
                         ) : (
-                          <Eye className="h-4 w-4 text-slate-400" />
+                          <Eye className="h-4 w-4 text-muted-foreground" />
                         )}
                       </Button>
                     </div>
@@ -135,7 +135,7 @@ export function ResetPasswordForm() {
                             }}
                           />
                         </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 min-w-[3rem]">
+                        <span className="text-xs text-muted-foreground min-w-[3rem]">
                           {passwordStrength.label}
                         </span>
                       </div>
@@ -151,7 +151,7 @@ export function ResetPasswordForm() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <FormLabel className="text-[1rem] font-medium">
                     Confirm New Password
                   </FormLabel>
                   <FormControl>
@@ -159,23 +159,23 @@ export function ResetPasswordForm() {
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your new password"
-                        className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400"
+                        className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700"
                         {...field}
                       />
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent cursor-pointer"
                         onClick={() =>
                           setShowConfirmPassword(!showConfirmPassword)
                         }
                       >
                         {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4 text-slate-400" />
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
                         ) : (
-                          <Eye className="h-4 w-4 text-slate-400" />
+                          <Eye className="h-4 w-4 text-muted-foreground" />
                         )}
                       </Button>
                     </div>
@@ -187,7 +187,7 @@ export function ResetPasswordForm() {
 
             <Button
               type="submit"
-              className="w-full h-11 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+              className="w-full h-11 bg-primary shadow-lg hover:bg-primary/90 cursor-pointer transition-colors"
               disabled={isLoading}
             >
               {isLoading ? (

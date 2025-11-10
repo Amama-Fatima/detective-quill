@@ -1,7 +1,10 @@
-import BlueprintLanding from "@/components/blueprint/blueprint-landing";
 import { Suspense } from "react";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
+import CreateBlueprintBtns from "@/components/blueprint/create-blueprint-btns";
+import { getUserBlueprints } from "@/lib/supabase-calls/blueprint";
+import { UserBlueprintsList } from "@/components/blueprint/user-bueprints-list";
+import ErrorMsg from "@/components/error-msg";
 
 interface BlueprintPageProps {
   params: {
@@ -23,9 +26,32 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
 
   const userId = user.id;
 
+  const { blueprints, error } = await getUserBlueprints(userId);
+
+  if (error) {
+    return <ErrorMsg message="Failed to load blueprints" />;
+  }
+
   return (
     <Suspense fallback={<BlueprintLandingSkeleton />}>
-      <BlueprintLanding projectId={projectId} userId={userId} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="mystery-title text-3xl font-bold">Blueprints</h2>
+              <p className="noir-text mt-2">
+                Manage and organize your reusable design components and
+                templates
+              </p>
+            </div>
+            <CreateBlueprintBtns projectId={projectId} />
+          </div>
+        </div>
+
+        {/* Blueprints List */}
+        <UserBlueprintsList blueprints={blueprints} projectId={projectId} />
+      </div>
     </Suspense>
   );
 }

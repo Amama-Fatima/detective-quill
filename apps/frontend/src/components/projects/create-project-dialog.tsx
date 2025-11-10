@@ -106,10 +106,15 @@ export function CreateProjectDialog({
               variant="outline"
               onClick={() => handleOpenChange(false)}
               disabled={creating}
+              className="shadow-lg cursor-pointer"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={creating || !formData.title.trim()}>
+            <Button
+              type="submit"
+              className="shadow-lg bg-primary hover:bg-primary/90 cursor-pointer"
+              disabled={creating || !formData.title.trim()}
+            >
               {creating ? "Creating..." : "Create Project"}
             </Button>
           </DialogFooter>

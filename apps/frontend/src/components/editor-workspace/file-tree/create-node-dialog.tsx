@@ -185,7 +185,7 @@ export function CreateNodeDialog({
             </Select>
 
             {folderName && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[1rem] noir-text text-muted-foreground">
                 This {nodeType} will be created in the "{folderName}" folder.
               </p>
             )}

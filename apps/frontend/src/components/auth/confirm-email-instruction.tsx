@@ -24,10 +24,10 @@ const ConfirmEmailInstruction = ({
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="noir-text text-xl font-semibold text-gray-900 dark:text-gray-100">
           Check your email
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="noir-text text-sm text-gray-600 dark:text-gray-400">
           We've sent a confirmation link to{" "}
           <span className="font-medium text-gray-900 dark:text-gray-100">
             {userEmail}
@@ -35,11 +35,11 @@ const ConfirmEmailInstruction = ({
         </p>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left">
-        <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+      <div className="noir-text bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left">
+        <h4 className="noir-text text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
           Next steps:
         </h4>
-        <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
+        <ol className="noir-text text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
           <li>Check your email inbox (and spam folder)</li>
           <li>Click the confirmation link in the email</li>
           <li>You'll be redirected back to sign in</li>
@@ -59,7 +59,7 @@ const ConfirmEmailInstruction = ({
           Sign up with different email
         </Button>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="noir-text text-xs text-gray-500 dark:text-gray-400">
           Already have an account?{" "}
           <Link
             href="/auth/sign-in"

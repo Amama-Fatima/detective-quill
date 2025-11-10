@@ -1,6 +1,6 @@
 import React from "react";
 import { WorkspaceError } from "./workspace-error";
-import { getEditorWorkspaceData } from "@/lib/server/editor-workspace";
+import { getEditorWorkspaceData } from "@/lib/supabase-calls/editor-workspace";
 import { WorkspaceLayoutClientWrapper } from "./workspace-layout-client-wrapper";
 
 interface WorkspaceLayoutProps {

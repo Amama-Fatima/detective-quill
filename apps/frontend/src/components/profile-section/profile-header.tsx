@@ -28,27 +28,27 @@ export function ProfileHeader({
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 truncate">
+                  <h1 className="mystery-title text-2xl font-bold truncate">
                     {displayName}
                   </h1>
-                  <p className="text-xl text-gray-600">@{username}</p>
+                  <p className="noir-text text-xl">@{username}</p>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <Button onClick={onCreateProject} size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2 cursor-pointer" />
                     New Project
                   </Button>
                   <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4 mr-2" />
+                    <Settings className="h-4 w-4 mr-2 cursor-pointer" />
                     Settings
                   </Button>
                 </div>
               </div>
 
               <div className="mt-4 flex items-center gap-4">
-                <div className="flex items-center text-sm text-gray-600">
-                  <span className="font-medium text-gray-900">
+                <div className="noir-text flex items-center text-[1rem">
+                  <span className="font-medium">
                     {projectCount}
                   </span>
                   <span className="ml-1">projects</span>

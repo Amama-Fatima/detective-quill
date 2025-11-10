@@ -16,7 +16,7 @@ export function WorkspaceHeader({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <FolderTree className="h-5 w-5 text-primary" />
-          <h1 className="text-lg font-semibold">{projectName}</h1>
+          <h1 className="mystery-title text-lg font-semibold">{projectName}</h1>
         </div>
       </div>
 

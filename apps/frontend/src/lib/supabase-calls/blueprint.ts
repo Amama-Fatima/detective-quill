@@ -1,7 +1,9 @@
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import type { Blueprint } from "@detective-quill/shared-types";
 
-export async function getUserBlueprints(userId: string): Promise<Blueprint[]> {
+export async function getUserBlueprints(
+  userId: string
+): Promise<{ blueprints: Blueprint[]; error: string | null }> {
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -14,19 +16,21 @@ export async function getUserBlueprints(userId: string): Promise<Blueprint[]> {
       throw new Error(`Failed to get user blueprints: ${error.message}`);
     }
 
-    return data || [];
+    return { blueprints: data || [], error: null };
   } catch (err) {
     console.error("Error in getUserBlueprints:", err);
-    throw err instanceof Error
-      ? err
-      : new Error("Unknown error fetching user blueprints");
+    const msg =
+      err instanceof Error
+        ? err.message
+        : "Unknown error fetching user blueprints";
+    return { blueprints: [], error: msg };
   }
 }
 
 export async function getUserBlueprintById(
   blueprintId: string,
   userId: string
-): Promise<Blueprint> {
+): Promise<{ blueprint: Blueprint | null; error: string | null }> {
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -41,11 +45,15 @@ export async function getUserBlueprintById(
       throw new Error(`Failed to get user blueprint: ${error.message}`);
     }
 
-    return data as Blueprint;
+    return { blueprint: data as Blueprint, error: null };
   } catch (err) {
     console.error("Error in getUserBlueprintById:", err);
-    throw err instanceof Error
-      ? err
-      : new Error("Unknown error fetching user blueprint");
+    return {
+      blueprint: null,
+      error:
+        err instanceof Error
+          ? err.message
+          : "Unknown error fetching user blueprint",
+    };
   }
 }

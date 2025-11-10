@@ -1,11 +1,9 @@
 import { Coffee } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
-import ProjectListItem from "./project-list-item";
 import ProjectCard from "./project-card";
 
 interface ProjectsDisplayProps {
   projects: any[];
-  viewMode: "grid" | "list";
   onOpenProject: (projectId: string) => void;
   onUpdateProject: (
     projectId: string,
@@ -16,7 +14,6 @@ interface ProjectsDisplayProps {
 
 const ProjectsDisplay = ({
   projects,
-  viewMode,
   onOpenProject,
   onUpdateProject,
   onDeleteProject,
@@ -42,27 +39,12 @@ const ProjectsDisplay = ({
     );
   }
 
-  return viewMode === "grid" ? (
+  return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
         <ProjectCard
           key={project.id}
           project={project}
-          onOpen={onOpenProject}
-          onUpdate={onUpdateProject}
-          onDelete={onDeleteProject}
-        />
-      ))}
-    </div>
-  ) : (
-    <div className="space-y-4">
-      {projects.map((project) => (
-        <ProjectListItem
-          key={project.id}
-          project={project}
-          onOpen={onOpenProject}
-          onUpdate={onUpdateProject}
-          onDelete={onDeleteProject}
         />
       ))}
     </div>

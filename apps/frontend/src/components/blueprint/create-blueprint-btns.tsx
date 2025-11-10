@@ -36,8 +36,8 @@ export default function CreateBlueprintBtns({
   return (
     <div>
       <Popover>
-        <PopoverTrigger className="bg-gray-300 py-2 px-6 cursor-pointer text-md text-black rounded-md">
-          Create Blueprint
+        <PopoverTrigger className="bg-primary px-4 py-2 cursor-pointer rounded-md text-white hover:bg-primary/90 shadow-lg">
+          Create New Blueprint
         </PopoverTrigger>
         <PopoverContent>
           <div className="flex flex-col gap-2">

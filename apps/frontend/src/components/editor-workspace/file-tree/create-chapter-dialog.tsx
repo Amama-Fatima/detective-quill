@@ -139,7 +139,7 @@ export function CreateChapterDialog({
             </Select>
 
             {folderName && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[1rem] noir-text text-muted-foreground">
                 This chapter will be created in the "{folderName}" folder.
               </p>
             )}
@@ -169,13 +169,18 @@ export function CreateChapterDialog({
           )}
         </div>
         <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={creating}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            className="cursor-pointer disabled:cursor-not-allowed"
+            disabled={creating}
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={!title.trim() || creating}
-            className="gap-2"
+            className="gap-2 cursor-pointer disabled:cursor-not-allowed"
           >
             {creating ? (
               <>
