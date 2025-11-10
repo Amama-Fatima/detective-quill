@@ -57,8 +57,8 @@ const MembersTable = () => {
             {members.length} members
           </span>
         </div>
-        <div className="w-[85%] mx-auto">
-          <div className="noir-text rounded-lg border overflow-hidden shadow-sm">
+        <div className="w-[65%] mx-auto">
+          <div className="noir-text bg-card-foreground/20 rounded-lg border overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow className="">

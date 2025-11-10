@@ -25,14 +25,14 @@ export default function AuthButtons() {
   if (user) {
     return (
       <div className="flex items-center space-x-3">
-        <span className="text-sm text-muted-foreground hidden sm:inline">
+        <span className="text-[0.9rem] text-muted-foreground hidden sm:inline">
           {user.email?.split("@")[0]}
         </span>
         <Button
           variant="ghost"
           size="sm"
           onClick={handleSignOut}
-          className="flex items-center space-x-1 px-3"
+          className="flex items-center space-x-1 px-3 cursor-pointer"
         >
           <LogOut className="h-4 w-4" />
           <span>Sign Out</span>
@@ -47,14 +47,14 @@ export default function AuthButtons() {
         variant="ghost"
         size="sm"
         asChild
-        className="flex items-center space-x-1 px-3"
+        className="flex items-center space-x-1 px-3 cursor-pointer"
       >
         <Link href="/auth/sign-in">
           <LogIn className="h-4 w-4" />
           <span>Sign In</span>
         </Link>
       </Button>
-      <Button size="sm" asChild className="flex items-center space-x-1 px-3">
+      <Button size="sm" asChild className="flex items-center space-x-1 px-3 cursor-pointer">
         <Link href="/auth/sign-up">
           <UserPlus className="h-4 w-4" />
           <span>Sign Up</span>
