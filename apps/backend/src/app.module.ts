@@ -10,7 +10,7 @@ import { BlueprintsModule } from "./blueprints/blueprints.module";
 import { BlueprintCardsModule } from "./blueprint_cards/blueprint_cards.module";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { CommentsModule } from "./comments/comments.module";
-import { SettingsModule } from "./settings/settings.module";
+import { MembersModule } from "./members/members.module";
 
 @Module({
   controllers: [AppController],
@@ -39,7 +39,7 @@ import { SettingsModule } from "./settings/settings.module";
     BlueprintsModule,
     BlueprintCardsModule,
     CommentsModule,
-    SettingsModule,
+    MembersModule,
   ],
 })
 export class AppModule {}

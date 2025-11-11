@@ -49,14 +49,6 @@ export interface ProjectListResponse {
   total: number;
 }
 
-// API Response wrappers
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
 export interface DeleteResponse {
   message: string;
 }
@@ -221,4 +213,19 @@ export interface ProjectMember {
 
 export interface AddMemberDto {
   email: string;
+}
+
+export interface EmailSendingApiRequestDto{
+  projectId: string;
+  emails: string[];
+  inviterName: string;
+  inviterEmail: string;
+}
+
+export interface EmailSendingJobData {
+  projectId: string;
+  emails: string[];
+  inviterName: string;
+  inviterEmail: string;
+  projectTitle: string;
 }

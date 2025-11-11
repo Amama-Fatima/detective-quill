@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import {
@@ -118,25 +119,25 @@ export class ProjectsService {
     return data;
   }
 
-  async updateProject(
+  // Update project information (title, description)
+  async updateProjectInfo(
     projectId: string,
-    updateProjectDto: UpdateProjectDto,
+    updateData: UpdateProjectDto,
     userId: string,
     accessToken: string
   ): Promise<ProjectResponse> {
     const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
-    // First check if project exists and belongs to user
-    await this.findProjectById(projectId, userId, accessToken);
+    // First verify the user is the project owner
+    await this.verifyProjectOwnership(projectId, userId, accessToken);
 
     const { data, error } = await supabase
       .from("projects")
       .update({
-        ...updateProjectDto,
+        ...updateData,
         updated_at: new Date().toISOString(),
       })
       .eq("id", projectId)
-      .eq("author_id", userId)
       .select()
       .single();
 
@@ -152,48 +153,33 @@ export class ProjectsService {
   async deleteProject(
     projectId: string,
     userId: string,
-    accessToken: string,
-    hardDelete: boolean = false
+    accessToken: string
   ): Promise<DeleteResponse> {
     const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
-    // First check if project exists and belongs to user
-    await this.findProjectById(projectId, userId, accessToken);
+    // Verify the user is the project owner
+    await this.verifyProjectOwnership(projectId, userId, accessToken);
 
-    if (hardDelete) {
-      // Hard delete - completely remove from database
-      const { error } = await supabase
-        .from("projects")
-        .delete()
-        .eq("id", projectId)
-        .eq("author_id", userId);
+    // First delete all project members
+    await supabase
+      .from("projects_members")
+      .delete()
+      .eq("project_id", projectId);
 
-      if (error) {
-        throw new BadRequestException(
-          `Failed to delete project: ${error.message}`
-        );
-      }
+    // Then delete the project
+    const { error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", projectId)
+      .eq("author_id", userId);
 
-      return { message: "Project permanently deleted" };
-    } else {
-      // Soft delete - mark as deleted
-      const { error } = await supabase
-        .from("projects")
-        .update({
-          is_deleted: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", projectId)
-        .eq("author_id", userId);
-
-      if (error) {
-        throw new BadRequestException(
-          `Failed to delete project: ${error.message}`
-        );
-      }
-
-      return { message: "Project moved to trash" };
+    if (error) {
+      throw new BadRequestException(
+        `Failed to delete project: ${error.message}`
+      );
     }
+
+    return { message: "Project permanently deleted" };
   }
 
   async restoreProject(
@@ -303,5 +289,30 @@ export class ProjectsService {
       totalWordCount,
       lastModified,
     };
+  }
+
+  // Helper method to verify project ownership
+  private async verifyProjectOwnership(
+    projectId: string,
+    userId: string,
+    accessToken: string
+  ): Promise<void> {
+    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+
+    const { data, error } = await supabase
+      .from("projects")
+      .select("author_id")
+      .eq("id", projectId)
+      .single();
+
+    if (error || !data) {
+      throw new NotFoundException("Project not found");
+    }
+
+    if (data.author_id !== userId) {
+      throw new ForbiddenException(
+        "Only the project owner can perform this action"
+      );
+    }
   }
 }

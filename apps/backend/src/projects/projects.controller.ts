@@ -119,7 +119,7 @@ export class ProjectsController {
     @Request() req
   ): Promise<ApiResponse<ProjectResponse>> {
     try {
-      const data = await this.projectsService.updateProject(
+      const data = await this.projectsService.updateProjectInfo(
         id,
         updateProjectDto,
         req.user.id,
@@ -143,7 +143,6 @@ export class ProjectsController {
         id,
         req.user.id,
         req.accessToken,
-        hardDelete
       );
       return { success: true, data };
     } catch (error) {

@@ -94,7 +94,7 @@ export function useSettings(
 
       if (response.success) {
         toast.success("Detective removed successfully");
-        setMembers((prev) => prev.filter((m) => m.id !== memberId));
+        setMembers((prev) => prev.filter((m) => m.user_id !== memberId));
         return true;
       } else {
         toast.error(response.error || "Failed to remove team member");

@@ -36,18 +36,23 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     return <ErrorMsg message="Project not found" />;
   }
 
-  const { members, error: membersError } = await getProjectMembers(
+  let { members, error: membersError } = await getProjectMembers(
     projectId,
     user.id
   );
 
   if (membersError) {
     console.error("Error fetching project members:", membersError);
+    members = [];
   }
 
   return (
     <div>
-      <WorkspaceMainBody project={data} userId={user.id} members={members || [] } />
+      <WorkspaceMainBody
+        project={data}
+        userId={user.id}
+        members={members || []}
+      />
     </div>
   );
 };

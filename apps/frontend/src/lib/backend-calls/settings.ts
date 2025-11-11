@@ -49,17 +49,6 @@ export async function updateProjectInfo(
   );
 }
 
-// Get project members
-export async function getProjectMembers(
-  projectId: string,
-  accessToken: string
-): Promise<ApiResponse<ProjectMember[]>> {
-  return makeAuthenticatedRequest<ProjectMember[]>(
-    `/projects/${projectId}/settings/members`,
-    accessToken
-  );
-}
-
 // Add project member
 export async function addProjectMember(
   projectId: string,

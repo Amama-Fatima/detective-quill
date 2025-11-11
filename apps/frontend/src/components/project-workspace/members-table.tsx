@@ -18,8 +18,6 @@ import { removeProjectMember } from "@/lib/backend-calls/projects-members";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 
-//todo: fetch the members on server side from supabase, then for removal, make api call to backend
-
 const MembersTable = ({
   isOwner,
   initialMembers,

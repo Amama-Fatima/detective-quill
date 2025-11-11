@@ -5,53 +5,18 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
-import {
-  UpdateProjectDto,
-  ProjectResponse,
-  DeleteResponse,
-  ProjectMember,
-  AddMemberDto,
-} from "@detective-quill/shared-types";
+import { ProjectMember, AddMemberDto } from "@detective-quill/shared-types";
 
 @Injectable()
-export class SettingsService {
-  constructor(private supabaseService: SupabaseService) {}
-
-  // Update project information (title, description)
-  async updateProjectInfo(
-    projectId: string,
-    updateData: UpdateProjectDto,
-    userId: string,
-    accessToken: string
-  ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
-
-    // First verify the user is the project owner
-    await this.verifyProjectOwnership(projectId, userId, accessToken);
-
-    const { data, error } = await supabase
-      .from("projects")
-      .update({
-        ...updateData,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", projectId)
-      .select()
-      .single();
-
-    if (error) {
-      throw new BadRequestException(
-        `Failed to update project: ${error.message}`
-      );
-    }
-
-    return data;
-  }
+export class MembersService {
+  constructor(
+    private supabaseService: SupabaseService,
+  ) {}
 
   // Add a new member to the project
   async addProjectMember(
     projectId: string,
-    addMemberDto: AddMemberDto,
+    member: AddMemberDto,
     userId: string,
     accessToken: string
   ): Promise<ProjectMember> {
@@ -64,12 +29,12 @@ export class SettingsService {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("user_id, full_name, username, email, avatar_url")
-      .eq("email", addMemberDto.email)
+      .eq("email", member.email)
       .single();
 
     if (profileError || !profile) {
       throw new NotFoundException(
-        `User with email ${addMemberDto.email} not found`
+        `User with email ${member.email} not found`
       );
     }
 
@@ -121,7 +86,7 @@ export class SettingsService {
     memberId: string,
     userId: string,
     accessToken: string
-  ): Promise<DeleteResponse> {
+  ): Promise<void> {
     const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
     // Verify the user is the project owner
@@ -159,40 +124,7 @@ export class SettingsService {
       );
     }
 
-    return { message: "Member removed successfully" };
-  }
-
-  // Delete the entire project
-  async deleteProject(
-    projectId: string,
-    userId: string,
-    accessToken: string
-  ): Promise<DeleteResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
-
-    // Verify the user is the project owner
-    await this.verifyProjectOwnership(projectId, userId, accessToken);
-
-    // First delete all project members
-    await supabase
-      .from("projects_members")
-      .delete()
-      .eq("project_id", projectId);
-
-    // Then delete the project
-    const { error } = await supabase
-      .from("projects")
-      .delete()
-      .eq("id", projectId)
-      .eq("author_id", userId);
-
-    if (error) {
-      throw new BadRequestException(
-        `Failed to delete project: ${error.message}`
-      );
-    }
-
-    return { message: "Project permanently deleted" };
+    return;
   }
 
   // Helper method to verify project ownership
@@ -221,34 +153,34 @@ export class SettingsService {
   }
 
   // Helper method to verify project access (owner or member)
-  private async verifyProjectAccess(
-    projectId: string,
-    userId: string,
-    accessToken: string
-  ): Promise<void> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+  // private async verifyProjectAccess(
+  //   projectId: string,
+  //   userId: string,
+  //   accessToken: string
+  // ): Promise<void> {
+  //   const supabase = this.supabaseService.getClientWithAuth(accessToken);
 
-    // Check if user is the owner
-    const { data: project } = await supabase
-      .from("projects")
-      .select("author_id")
-      .eq("id", projectId)
-      .single();
+  //   // Check if user is the owner
+  //   const { data: project } = await supabase
+  //     .from("projects")
+  //     .select("author_id")
+  //     .eq("id", projectId)
+  //     .single();
 
-    if (project?.author_id === userId) {
-      return; // User is the owner
-    }
+  //   if (project?.author_id === userId) {
+  //     return; // User is the owner
+  //   }
 
-    // Check if user is a member
-    const { data: member } = await supabase
-      .from("projects_members")
-      .select("id")
-      .eq("project_id", projectId)
-      .eq("user_id", userId)
-      .single();
+  //   // Check if user is a member
+  //   const { data: member } = await supabase
+  //     .from("projects_members")
+  //     .select("id")
+  //     .eq("project_id", projectId)
+  //     .eq("user_id", userId)
+  //     .single();
 
-    if (!member) {
-      throw new ForbiddenException("Access denied to this project");
-    }
-  }
+  //   if (!member) {
+  //     throw new ForbiddenException("Access denied to this project");
+  //   }
+  // }
 }
