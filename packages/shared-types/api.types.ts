@@ -219,13 +219,11 @@ export interface EmailSendingApiRequestDto{
   projectId: string;
   emails: string[];
   inviterName: string;
-  inviterEmail: string;
 }
 
 export interface EmailSendingJobData {
   projectId: string;
   emails: string[];
   inviterName: string;
-  inviterEmail: string;
   projectTitle: string;
 }

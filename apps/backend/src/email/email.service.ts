@@ -37,7 +37,6 @@ export class EmailService implements OnModuleInit {
     emails: string[],
     userId: string,
     inviterName: string,
-    inviterEmail: string
   ): Promise<void> {
     await this.verifyProjectOwnership(projectId, userId);
     const projectTitle = await this.fetchProjectTitle(projectId);
@@ -45,7 +44,6 @@ export class EmailService implements OnModuleInit {
       projectId,
       emails,
       inviterName,
-      inviterEmail,
       projectTitle,
     });
     return;

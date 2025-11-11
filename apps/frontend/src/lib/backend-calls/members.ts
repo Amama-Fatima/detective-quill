@@ -1,11 +1,10 @@
 import {
-  ProjectResponse,
-  UpdateProjectDto,
   DeleteResponse,
   ApiResponse,
   ProjectMember,
   AddMemberDto,
 } from "@detective-quill/shared-types";
+import { EmailSendingApiRequestDto } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -33,20 +32,19 @@ async function makeAuthenticatedRequest<T>(
   return response.json();
 }
 
-// Update project information
-export async function updateProjectInfo(
-  projectId: string,
-  data: UpdateProjectDto,
-  accessToken: string
-): Promise<ApiResponse<ProjectResponse>> {
-  return makeAuthenticatedRequest<ProjectResponse>(
-    `/projects/${projectId}/settings/info`,
-    accessToken,
-    {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    }
-  );
+export async function inviteProjectMembers({
+  data,
+  accessToken,
+}: {
+  data: EmailSendingApiRequestDto;
+  accessToken: string;
+}): Promise<ApiResponse<void>> {
+  const response = await makeAuthenticatedRequest<void>(`/email/send-invite`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ data }),
+  });
+
+  return response;
 }
 
 // Add project member
@@ -73,20 +71,6 @@ export async function removeProjectMember(
 ): Promise<ApiResponse<DeleteResponse>> {
   return makeAuthenticatedRequest<DeleteResponse>(
     `/projects/${projectId}/settings/members/${memberId}`,
-    accessToken,
-    {
-      method: "DELETE",
-    }
-  );
-}
-
-// Delete project
-export async function deleteProject(
-  projectId: string,
-  accessToken: string
-): Promise<ApiResponse<DeleteResponse>> {
-  return makeAuthenticatedRequest<DeleteResponse>(
-    `/projects/${projectId}/settings`,
     accessToken,
     {
       method: "DELETE",

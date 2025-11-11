@@ -16,13 +16,12 @@ export class EmailController {
   ): Promise<ApiResponse<void>> {
     try {
       // get all the values from body
-      const { projectId, emails, inviterName, inviterEmail } = body;
+      const { projectId, emails, inviterName } = body;
       await this.emailService.inviteProjectMember(
         projectId,
         emails,
         req.user.id,
         inviterName,
-        inviterEmail
       );
       return { success: true, message: "Invitations sent successfully" };
     } catch (error) {

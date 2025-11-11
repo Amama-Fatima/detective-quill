@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import {
   Dialog,
@@ -12,17 +13,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { inviteProjectMembers } from "@/lib/backend-calls/members";
+import { EmailSendingApiRequestDto } from "@detective-quill/shared-types";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
 
 interface InviteMembersDialogProps {
   inviteDialogOpen: boolean;
   setInviteDialogOpen: (open: boolean) => void;
+  projectId: string;
 }
 
 const InviteMembersDialog = ({
   inviteDialogOpen,
   setInviteDialogOpen,
+  projectId,
 }: InviteMembersDialogProps) => {
   const [emails, setEmails] = useState<string[]>([""]);
+  const [loading, setLoading] = useState(false);
+
+  const { user, session } = useAuth();
+  const username = user?.user_metadata.full_name || "Someone";
+  const accessToken = session?.access_token || "";
+  console.log("user", user);
+
   const handleAddEmailField = () => setEmails([...emails, ""]);
 
   const handleEmailChange = (index: number, value: string) => {
@@ -31,10 +45,25 @@ const InviteMembersDialog = ({
     setEmails(updated);
   };
 
-  const handleSendInvitations = () => {
-    console.log("Inviting:", emails);
-    setInviteDialogOpen(false);
-    setEmails([""]);
+  const handleSendInvitations = async () => {
+    try {
+      setLoading(true);
+      const requestData: EmailSendingApiRequestDto = {
+        projectId,
+        emails,
+        inviterName: username,
+      };
+      console.log("Inviting:", emails);
+      await inviteProjectMembers({ data: requestData, accessToken });
+      toast.success("Invitation emails sent successfully");
+      setInviteDialogOpen(false);
+      setEmails([""]);
+    } catch (error) {
+      console.error("Error sending invitations:", error);
+      toast.error("Failed to send invitation emails");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,9 +106,10 @@ const InviteMembersDialog = ({
         <DialogFooter>
           <Button
             onClick={handleSendInvitations}
-            className="bg-primary cursor-pointer hover:bg-primary/90"
+            className="bg-primary cursor-pointer hover:bg-primary/90 disabled:cursor-not-allowed"
+            disabled={loading}
           >
-            Send Invitations
+            {loading ? "Sending..." : "Send Invitations"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -2,7 +2,7 @@ import WorkspaceMainBody from "@/components/project-workspace/project-workspace-
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import React from "react";
-import { getProjectMembers } from "@/lib/supabase-calls/projects-members";
+import { getProjectMembers } from "@/lib/supabase-calls/members";
 import ErrorMsg from "@/components/error-msg";
 interface ProjectWorkspacePageProps {
   params: Promise<{

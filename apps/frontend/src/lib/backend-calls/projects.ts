@@ -89,11 +89,9 @@ export async function updateProject(
 export async function deleteProject(
   projectId: string,
   accessToken: string,
-  hardDelete: boolean = false
 ): Promise<ApiResponse<DeleteResponse>> {
-  const query = hardDelete ? "?hard=true" : "";
   const response = await makeAuthenticatedRequest<DeleteResponse>(
-    `/projects/${projectId}${query}`,
+    `/projects/${projectId}`,
     accessToken,
     {
       method: "DELETE",

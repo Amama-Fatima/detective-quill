@@ -13,10 +13,6 @@ export class EmailSendingApiRequestDto implements IEmailSendingApiRequestDto {
   @IsString()
   @IsNotEmpty()
   inviterName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  inviterEmail: string;
   
   @IsString()
   @IsNotEmpty()
