@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
-  NotFoundException,
   Post,
   Put,
   Req,
@@ -29,13 +27,11 @@ export class BlueprintCardsController {
   ): Promise<ApiResponse<BlueprintCard[]>> {
     const blueprintId = request.params.blueprintId;
     const userId = request.user.id;
-    const accessToken = request.accessToken;
 
     try {
       await this.blueprintCardsService.createBlueprintCard(
         blueprintId,
         userId,
-        accessToken,
         cardData
       );
 
@@ -59,14 +55,12 @@ export class BlueprintCardsController {
     const cardId = request.params.cardId;
     const userId = request.user.id;
     const blueprintId = request.params.blueprintId;
-    const accessToken = request.accessToken;
 
     try {
       const updatedCard = await this.blueprintCardsService.updateBlueprintCard(
         cardId,
         userId,
         blueprintId,
-        accessToken,
         cardData
       );
 
@@ -88,14 +82,12 @@ export class BlueprintCardsController {
     const cardId = request.params.cardId;
     const userId = request.user.id;
     const blueprintId = request.params.blueprintId;
-    const accessToken = request.accessToken;
 
     try {
       await this.blueprintCardsService.deleteBlueprintCard(
         cardId,
         userId,
         blueprintId,
-        accessToken
       );
 
       return {

@@ -2,6 +2,7 @@ import { Controller, Post, UseGuards, Request, Body } from "@nestjs/common";
 import { AuthGuard } from "src/auth/auth.guard";
 import { EmailService } from "./email.service";
 import { type EmailSendingApiRequestDto } from "./dto/email.dto";
+import { ApiResponse } from "@detective-quill/shared-types";
 
 @Controller("email")
 @UseGuards(AuthGuard)
@@ -12,7 +13,7 @@ export class EmailController {
   async sendInviteEmails(
     @Body() body: EmailSendingApiRequestDto,
     @Request() req
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<ApiResponse<void>> {
     try {
       // get all the values from body
       const { projectId, emails, inviterName, inviterEmail } = body;
@@ -20,7 +21,6 @@ export class EmailController {
         projectId,
         emails,
         req.user.id,
-        req.accessToken,
         inviterName,
         inviterEmail
       );

@@ -19,10 +19,9 @@ export class ProjectsService {
 
   async createProject(
     createProjectDto: CreateProjectDto,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     try {
       // Step 1: Create the project
@@ -72,10 +71,9 @@ export class ProjectsService {
 
   async findAllUserProjects(
     userId: string,
-    accessToken: string,
     includeInactive: boolean = false
   ): Promise<ProjectResponse[]> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     let query = supabase
       .from("projects")
@@ -100,10 +98,9 @@ export class ProjectsService {
 
   async findProjectById(
     projectId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("projects")
@@ -123,13 +120,12 @@ export class ProjectsService {
   async updateProjectInfo(
     projectId: string,
     updateData: UpdateProjectDto,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // First verify the user is the project owner
-    await this.verifyProjectOwnership(projectId, userId, accessToken);
+    await this.verifyProjectOwnership(projectId, userId);
 
     const { data, error } = await supabase
       .from("projects")
@@ -152,13 +148,12 @@ export class ProjectsService {
 
   async deleteProject(
     projectId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<DeleteResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify the user is the project owner
-    await this.verifyProjectOwnership(projectId, userId, accessToken);
+    await this.verifyProjectOwnership(projectId, userId);
 
     // First delete all project members
     await supabase
@@ -184,10 +179,9 @@ export class ProjectsService {
 
   async restoreProject(
     projectId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Check if project exists (including deleted ones)
     const { data: existingProject, error: findError } = await supabase
@@ -225,11 +219,8 @@ export class ProjectsService {
     return data;
   }
 
-  async getDeletedProjects(
-    userId: string,
-    accessToken: string
-  ): Promise<ProjectResponse[]> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+  async getDeletedProjects(userId: string): Promise<ProjectResponse[]> {
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("projects")
@@ -249,13 +240,12 @@ export class ProjectsService {
 
   async getProjectStats(
     projectId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<ProjectStats> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // First verify project exists and belongs to user
-    await this.findProjectById(projectId, userId, accessToken);
+    await this.findProjectById(projectId, userId);
 
     // Get file and folder counts
     const { data: stats, error } = await supabase
@@ -294,10 +284,9 @@ export class ProjectsService {
   // Helper method to verify project ownership
   private async verifyProjectOwnership(
     projectId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<void> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("projects")

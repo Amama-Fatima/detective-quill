@@ -30,15 +30,13 @@ export class FsNodesService {
   async createNode(
     createNodeDto: CreateFsNodeDto,
     userId: string,
-    accessToken: string
   ): Promise<FsNodeResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify project ownership
     await this.projectsService.findProjectById(
       createNodeDto.project_id,
       userId,
-      accessToken
     );
 
     // If parent_id is provided, verify it exists and belongs to the same project
@@ -116,12 +114,11 @@ export class FsNodesService {
   async getProjectTree(
     projectId: string,
     userId: string,
-    accessToken: string
   ): Promise<FsNodeTreeResponse[]> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify project ownership
-    await this.projectsService.findProjectById(projectId, userId, accessToken);
+    await this.projectsService.findProjectById(projectId, userId);
 
     // ✅ Using the project_file_tree view
     const { data: nodes, error } = await supabase
@@ -144,12 +141,11 @@ export class FsNodesService {
   async getNodeChildren(
     nodeId: string,
     userId: string,
-    accessToken: string
   ): Promise<FsNodeResponse[]> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify node exists and user owns it
-    await this.getNode(nodeId, userId, accessToken);
+    await this.getNode(nodeId, userId);
 
     // ✅ Use the get_node_children stored function
     const { data: children, error } = await supabase.rpc("get_node_children", {
@@ -168,9 +164,8 @@ export class FsNodesService {
   async getNode(
     nodeId: string,
     userId: string,
-    accessToken: string
   ): Promise<FsNodeResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data: node, error } = await supabase
       .from("fs_nodes")
@@ -195,12 +190,11 @@ export class FsNodesService {
     nodeId: string,
     updateNodeDto: UpdateFsNodeDto,
     userId: string,
-    accessToken: string
   ): Promise<FsNodeResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify node exists and user owns it
-    const existingNode = await this.getNode(nodeId, userId, accessToken);
+    const existingNode = await this.getNode(nodeId, userId);
 
     // If moving to a different parent, verify the new parent
     if (
@@ -267,13 +261,12 @@ export class FsNodesService {
   async deleteNode(
     nodeId: string,
     userId: string,
-    accessToken: string
   ): Promise<DeleteResponse> {
     // todo: try to remove the use of delete response, shift to general api response
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify node exists and user owns it
-    const node = await this.getNode(nodeId, userId, accessToken);
+    const node = await this.getNode(nodeId, userId);
 
     // If it's a folder, check for children and handle cascade
     if (node.node_type === "folder") {
@@ -324,7 +317,6 @@ export class FsNodesService {
     newParentId: string | null,
     newSortOrder: number,
     userId: string,
-    accessToken: string
   ): Promise<FsNodeResponse> {
     // ✅ updateNode will handle path/depth recalculation via triggers
     return this.updateNode(
@@ -334,7 +326,6 @@ export class FsNodesService {
         sort_order: newSortOrder,
       },
       userId,
-      accessToken
     );
   }
 
@@ -342,17 +333,16 @@ export class FsNodesService {
   async getProjectStats(
     projectId: string,
     userId: string,
-    accessToken: string
   ): Promise<{
     totalFiles: number;
     totalFolders: number;
     totalWordCount: number;
     rootNodes: number;
   }> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify project ownership
-    await this.projectsService.findProjectById(projectId, userId, accessToken);
+    await this.projectsService.findProjectById(projectId, userId);
 
     // ✅ Using the project_file_tree view for efficient stats
     const { data: stats, error } = await supabase

@@ -38,8 +38,7 @@ export class ProjectsController {
     try {
       const data = await this.projectsService.createProject(
         createProjectDto,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -56,7 +55,6 @@ export class ProjectsController {
     try {
       const data = await this.projectsService.findAllUserProjects(
         req.user.id,
-        req.accessToken,
         includeInactive
       );
       return { success: true, data };
@@ -68,10 +66,7 @@ export class ProjectsController {
   @Get("deleted")
   async findDeleted(@Request() req): Promise<ApiResponse<ProjectResponse[]>> {
     try {
-      const data = await this.projectsService.getDeletedProjects(
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.projectsService.getDeletedProjects(req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -84,11 +79,7 @@ export class ProjectsController {
     @Request() req
   ): Promise<ApiResponse<ProjectResponse>> {
     try {
-      const data = await this.projectsService.findProjectById(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.projectsService.findProjectById(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -101,11 +92,7 @@ export class ProjectsController {
     @Request() req
   ): Promise<ApiResponse<ProjectStats>> {
     try {
-      const data = await this.projectsService.getProjectStats(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.projectsService.getProjectStats(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -122,8 +109,7 @@ export class ProjectsController {
       const data = await this.projectsService.updateProjectInfo(
         id,
         updateProjectDto,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -139,11 +125,7 @@ export class ProjectsController {
     hardDelete: boolean
   ): Promise<ApiResponse<DeleteResponse>> {
     try {
-      const data = await this.projectsService.deleteProject(
-        id,
-        req.user.id,
-        req.accessToken,
-      );
+      const data = await this.projectsService.deleteProject(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -156,11 +138,7 @@ export class ProjectsController {
     @Request() req
   ): Promise<ApiResponse<ProjectResponse>> {
     try {
-      const data = await this.projectsService.restoreProject(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.projectsService.restoreProject(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };

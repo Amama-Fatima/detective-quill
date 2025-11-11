@@ -13,10 +13,9 @@ export class BlueprintCardsService {
   async createBlueprintCard(
     blueprintId: string,
     userId: string,
-    accessToken: string,
     cardData: CreateBlueprintCardDto[]
   ) {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const cards = cardData.map((data) => ({
       ...data,
@@ -37,10 +36,9 @@ export class BlueprintCardsService {
     cardId: string,
     userId: string,
     blueprintId: string,
-    accessToken: string,
     cardData: UpdateBlueprintCardDto
   ) {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data: updatedCard, error } = await supabase
       .from("blueprint_cards")
@@ -66,9 +64,8 @@ export class BlueprintCardsService {
     cardId: string,
     userId: string,
     blueprintId: string,
-    accessToken: string
   ) {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { error } = await supabase
       .from("blueprint_cards")

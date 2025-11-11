@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   NotFoundException,
   Post,
   Put,
@@ -25,12 +24,10 @@ export class BlueprintsController {
     @Req() request: any
   ): Promise<ApiResponse<Blueprint>> {
     const userId = request.user.id;
-    const accessToken = request.accessToken;
 
     try {
       const blueprint = await this.blueprintsService.createBlueprint(
         userId,
-        accessToken,
         createBlueprintDto
       );
 
@@ -53,14 +50,12 @@ export class BlueprintsController {
     @Body() updateBlueprintDto: UpdateBlueprintDto
   ): Promise<ApiResponse<Blueprint>> {
     const userId = request.user.id;
-    const accessToken = request.accessToken;
     const blueprintId = request.params.id;
 
     try {
       const blueprint = await this.blueprintsService.updatedBlueprint(
         userId,
         blueprintId,
-        accessToken,
         updateBlueprintDto
       );
       if (!blueprint) {
@@ -84,14 +79,12 @@ export class BlueprintsController {
   @Delete(":id")
   async deleteBlueprintById(@Req() request: any): Promise<ApiResponse<void>> {
     const userId = request.user.id;
-    const accessToken = request.accessToken;
     const blueprintId = request.params.id;
 
     try {
       await this.blueprintsService.deleteBlueprint(
         userId,
         blueprintId,
-        accessToken
       );
       return {
         success: true,
@@ -105,16 +98,6 @@ export class BlueprintsController {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
 
 
   // @Get()

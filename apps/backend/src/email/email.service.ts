@@ -36,12 +36,11 @@ export class EmailService implements OnModuleInit {
     projectId: string,
     emails: string[],
     userId: string,
-    accessToken: string,
     inviterName: string,
     inviterEmail: string
   ): Promise<void> {
-    await this.verifyProjectOwnership(projectId, userId, accessToken);
-    const projectTitle = await this.fetchProjectTitle(projectId, accessToken);
+    await this.verifyProjectOwnership(projectId, userId);
+    const projectTitle = await this.fetchProjectTitle(projectId);
     this.queueService.sendInviteEmailsJob({
       projectId,
       emails,
@@ -57,10 +56,10 @@ export class EmailService implements OnModuleInit {
     toEmail: string,
     inviterName: string,
     projectTitle: string
-  ) {
+  ): Promise<boolean> {
     if (!this.enabled) {
       console.log("Email service is disabled. Skipping email to", toEmail);
-      return;
+      return false;
     }
 
     try {
@@ -72,8 +71,10 @@ export class EmailService implements OnModuleInit {
       });
       await transporter.sendMail(mailOptions);
       console.log("Invitation email sent to", toEmail);
+      return true;
     } catch (err) {
       console.error("Error sending email:", err);
+      return false;
     }
   }
 
@@ -81,9 +82,8 @@ export class EmailService implements OnModuleInit {
   private async verifyProjectOwnership(
     projectId: string,
     userId: string,
-    accessToken: string
   ): Promise<void> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("projects")
@@ -104,9 +104,8 @@ export class EmailService implements OnModuleInit {
 
   private async fetchProjectTitle(
     projectId: string,
-    accessToken: string
   ): Promise<string> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("projects")
       .select("title")
@@ -116,5 +115,20 @@ export class EmailService implements OnModuleInit {
       throw new NotFoundException("Project not found");
     }
     return data.title;
+  }
+
+  private async verifyEmailsRegistered(
+    emails: string[],
+  ): Promise<string[]> {
+    const supabase = this.supabaseService.client;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("email")
+      .in("email", emails);
+    if (error) {
+      console.error("Error verifying emails:", error);
+      return [];
+    }
+    return data.map((user) => user.email);
   }
 }

@@ -15,7 +15,7 @@ export interface EmbeddingJobData {
   global_sequence?: number;
   timeline_path?: string;
 }
-
+// todo: where will errors that are thrown here be catched?
 @Injectable()
 export class QueueService {
   constructor(

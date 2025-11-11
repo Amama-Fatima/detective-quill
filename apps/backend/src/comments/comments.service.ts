@@ -16,23 +16,20 @@ import {
   DeleteResponse,
 } from "@detective-quill/shared-types";
 
+// todo: add verfication checks in proper middlewares
+
 @Injectable()
 export class CommentsService {
   constructor(private supabaseService: SupabaseService) {}
 
   async createComment(
     createCommentDto: CreateCommentDto,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<CommentResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // First verify the fs_node exists and user has access
-    await this.verifyNodeAccess(
-      createCommentDto.fs_node_id,
-      userId,
-      accessToken
-    );
+    await this.verifyNodeAccess(createCommentDto.fs_node_id, userId);
 
     // Validate selection range
     if (createCommentDto.start_offset > createCommentDto.end_offset) {
@@ -76,13 +73,12 @@ export class CommentsService {
   async findCommentsByNode(
     fsNodeId: string,
     userId: string,
-    accessToken: string,
     includeResolved: boolean = true
   ): Promise<CommentResponse[]> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify user has access to the node
-    await this.verifyNodeAccess(fsNodeId, userId, accessToken);
+    await this.verifyNodeAccess(fsNodeId, userId);
 
     let query = supabase
       .from("comments")
@@ -118,9 +114,8 @@ export class CommentsService {
   async findCommentById(
     commentId: string,
     userId: string,
-    accessToken: string
   ): Promise<CommentWithRelations> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("comments")
@@ -163,15 +158,13 @@ export class CommentsService {
     commentId: string,
     updateCommentDto: UpdateCommentDto,
     userId: string,
-    accessToken: string
   ): Promise<CommentResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // First verify the comment exists and user has permission
     const existingComment = await this.findCommentById(
       commentId,
       userId,
-      accessToken
     );
 
     // Only allow author to update content, but project owner can resolve
@@ -228,12 +221,12 @@ export class CommentsService {
   async deleteComment(
     commentId: string,
     userId: string,
-    accessToken: string
+
   ): Promise<DeleteResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify comment exists and user has permission
-    const comment = await this.findCommentById(commentId, userId, accessToken);
+    const comment = await this.findCommentById(commentId, userId);
 
     // Only comment author or project owner can delete
     const project = Array.isArray(comment.fs_node?.project)
@@ -261,13 +254,12 @@ export class CommentsService {
 
   async getCommentStats(
     fsNodeId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<CommentStats> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify user has access to the node
-    await this.verifyNodeAccess(fsNodeId, userId, accessToken);
+    await this.verifyNodeAccess(fsNodeId, userId);
 
     const { data, error } = await supabase
       .from("comments")
@@ -293,10 +285,9 @@ export class CommentsService {
 
   private async verifyNodeAccess(
     fsNodeId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<void> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("fs_nodes")

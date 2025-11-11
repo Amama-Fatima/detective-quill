@@ -40,8 +40,7 @@ export class CommentsController {
     try {
       const data = await this.commentsService.createComment(
         createCommentDto,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -60,7 +59,6 @@ export class CommentsController {
       const data = await this.commentsService.findCommentsByNode(
         fsNodeId,
         req.user.id,
-        req.accessToken,
         includeResolved
       );
       return { success: true, data };
@@ -77,8 +75,7 @@ export class CommentsController {
     try {
       const data = await this.commentsService.getCommentStats(
         fsNodeId,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -92,11 +89,7 @@ export class CommentsController {
     @Request() req
   ): Promise<ApiResponse<CommentResponse>> {
     try {
-      const data = await this.commentsService.findCommentById(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.commentsService.findCommentById(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -113,8 +106,7 @@ export class CommentsController {
       const data = await this.commentsService.updateComment(
         id,
         updateCommentDto,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -128,11 +120,7 @@ export class CommentsController {
     @Request() req
   ): Promise<ApiResponse<DeleteResponse>> {
     try {
-      const data = await this.commentsService.deleteComment(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.commentsService.deleteComment(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -148,8 +136,7 @@ export class CommentsController {
       const data = await this.commentsService.updateComment(
         id,
         { is_resolved: true },
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -166,8 +153,7 @@ export class CommentsController {
       const data = await this.commentsService.updateComment(
         id,
         { is_resolved: false },
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {

@@ -18,12 +18,11 @@ export class MembersService {
     projectId: string,
     member: AddMemberDto,
     userId: string,
-    accessToken: string
   ): Promise<ProjectMember> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify the user is the project owner
-    await this.verifyProjectOwnership(projectId, userId, accessToken);
+    await this.verifyProjectOwnership(projectId, userId);
 
     // First, find the user by email
     const { data: profile, error: profileError } = await supabase
@@ -85,12 +84,11 @@ export class MembersService {
     projectId: string,
     memberId: string,
     userId: string,
-    accessToken: string
   ): Promise<void> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // Verify the user is the project owner
-    await this.verifyProjectOwnership(projectId, userId, accessToken);
+    await this.verifyProjectOwnership(projectId, userId);
 
     // Check if the member exists and get their details
     const { data: member, error: memberError } = await supabase
@@ -130,10 +128,9 @@ export class MembersService {
   // Helper method to verify project ownership
   private async verifyProjectOwnership(
     projectId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<void> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("projects")
@@ -158,7 +155,7 @@ export class MembersService {
   //   userId: string,
   //   accessToken: string
   // ): Promise<void> {
-  //   const supabase = this.supabaseService.getClientWithAuth(accessToken);
+  //   const supabase = this.supabaseService.client;
 
   //   // Check if user is the owner
   //   const { data: project } = await supabase

@@ -29,7 +29,6 @@ export class MembersController {
         projectId,
         member,
         req.user.id,
-        req.accessToken
       );
       return { success: true, data };
     } catch (error) {
@@ -49,7 +48,6 @@ export class MembersController {
         projectId,
         memberId,
         req.user.id,
-        req.accessToken
       );
       return { success: true, message: "Member removed successfully" };
     } catch (error) {
