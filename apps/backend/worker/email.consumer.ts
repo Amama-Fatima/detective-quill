@@ -14,13 +14,16 @@ export class EmailConsumer {
     const { projectId, emails, inviterName, projectTitle } = data;
     const failed: string[] = [];
     for (const email of emails) {
-      const inviteLink = `${process.env.FRONTEND_URL}/projects/${projectId}/accept-invite?email=${encodeURIComponent(email)}`;
+      // generate a random string
+      const inviteCode = Math.random().toString(36).substring(2);
+      const inviteLink = `${process.env.FRONTEND_URL}/workspace/${projectId}/accept-invite?email=${encodeURIComponent(email)}&projectTitle=${projectTitle}&code=${inviteCode}`;
       try {
         const ok = await this.emailService.sendEmail(
           inviteLink,
           email,
           inviterName,
-          projectTitle
+          projectTitle,
+          inviteCode
         );
 
         if (!ok) {

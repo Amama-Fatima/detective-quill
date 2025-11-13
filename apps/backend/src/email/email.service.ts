@@ -8,12 +8,13 @@ import { SupabaseService } from "../supabase/supabase.service";
 import { QueueService } from "src/queue/queue.service";
 import { transporter, verifyTransporter } from "src/utils/email-transporter";
 import { buildInviteEmail } from "src/utils/invite-email";
-
+import { InvitationsService } from "src/invitations/invitations.service";
 @Injectable()
 export class EmailService implements OnModuleInit {
   constructor(
     private supabaseService: SupabaseService,
-    private queueService: QueueService
+    private queueService: QueueService,
+    private invitationsService: InvitationsService
   ) {}
 
   private enabled = true;
@@ -36,13 +37,20 @@ export class EmailService implements OnModuleInit {
     projectId: string,
     emails: string[],
     userId: string,
-    inviterName: string,
+    inviterName: string
   ): Promise<void> {
     await this.verifyProjectOwnership(projectId, userId);
     const projectTitle = await this.fetchProjectTitle(projectId);
+    const registeredEmails = await this.verifyEmailsRegistered(emails);
+
+    if (registeredEmails.length === 0) {
+      console.log("No registered emails to send invitations to.");
+      return;
+    }
+
     this.queueService.sendInviteEmailsJob({
       projectId,
-      emails,
+      emails: registeredEmails,
       inviterName,
       projectTitle,
     });
@@ -53,7 +61,8 @@ export class EmailService implements OnModuleInit {
     inviteLink,
     toEmail: string,
     inviterName: string,
-    projectTitle: string
+    projectTitle: string,
+    inviteCode: string
   ): Promise<boolean> {
     if (!this.enabled) {
       console.log("Email service is disabled. Skipping email to", toEmail);
@@ -69,6 +78,8 @@ export class EmailService implements OnModuleInit {
       });
       await transporter.sendMail(mailOptions);
       console.log("Invitation email sent to", toEmail);
+      await this.invitationsService.addInvitation(projectTitle, inviteCode, toEmail);
+      console.log("Invitation code stored for", toEmail);
       return true;
     } catch (err) {
       console.error("Error sending email:", err);
@@ -79,7 +90,7 @@ export class EmailService implements OnModuleInit {
   // Helper method to verify project ownership
   private async verifyProjectOwnership(
     projectId: string,
-    userId: string,
+    userId: string
   ): Promise<void> {
     const supabase = this.supabaseService.client;
 
@@ -100,9 +111,7 @@ export class EmailService implements OnModuleInit {
     }
   }
 
-  private async fetchProjectTitle(
-    projectId: string,
-  ): Promise<string> {
+  private async fetchProjectTitle(projectId: string): Promise<string> {
     const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("projects")
@@ -115,9 +124,8 @@ export class EmailService implements OnModuleInit {
     return data.title;
   }
 
-  private async verifyEmailsRegistered(
-    emails: string[],
-  ): Promise<string[]> {
+  // only return emails that are already registered users
+  private async verifyEmailsRegistered(emails: string[]): Promise<string[]> {
     const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("profiles")

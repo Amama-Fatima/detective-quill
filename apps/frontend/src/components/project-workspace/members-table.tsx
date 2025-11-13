@@ -14,7 +14,7 @@ import { useState } from "react";
 import RemoveMemberDialog from "./remove-member-dialog";
 import { Badge } from "../ui/badge";
 import { ProjectMember } from "@detective-quill/shared-types";
-import { removeProjectMember } from "@/lib/backend-calls/projects-members";
+import { removeProjectMember } from "@/lib/backend-calls/members";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 

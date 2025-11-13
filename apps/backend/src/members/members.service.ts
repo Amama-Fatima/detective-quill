@@ -5,36 +5,26 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
-import { ProjectMember, AddMemberDto } from "@detective-quill/shared-types";
 
 @Injectable()
 export class MembersService {
-  constructor(
-    private supabaseService: SupabaseService,
-  ) {}
+  constructor(private supabaseService: SupabaseService) {}
 
   // Add a new member to the project
   async addProjectMember(
     projectId: string,
-    member: AddMemberDto,
-    userId: string,
-  ): Promise<ProjectMember> {
+    email: string
+  ): Promise<void> {
     const supabase = this.supabaseService.client;
-
-    // Verify the user is the project owner
-    await this.verifyProjectOwnership(projectId, userId);
-
     // First, find the user by email
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("user_id, full_name, username, email, avatar_url")
-      .eq("email", member.email)
+      .eq("email", email)
       .single();
 
     if (profileError || !profile) {
-      throw new NotFoundException(
-        `User with email ${member.email} not found`
-      );
+      throw new NotFoundException(`User with email ${email} not found`);
     }
 
     // Check if user is already a member
@@ -56,13 +46,6 @@ export class MembersService {
         project_id: projectId,
         user_id: profile.user_id,
       })
-      .select(
-        `
-        project_id,
-        user_id,
-        created_at
-      `
-      )
       .single();
 
     if (error) {
@@ -70,20 +53,14 @@ export class MembersService {
     }
 
     // Return the member with profile info
-    return {
-      ...data,
-      full_name: profile.full_name ?? profile.username ?? null,
-      username: profile.username ?? null,
-      email: profile.email,
-      avatar_url: profile.avatar_url ?? null,
-    };
+    return;
   }
 
   // Remove a member from the project
   async removeProjectMember(
     projectId: string,
     memberId: string,
-    userId: string,
+    userId: string
   ): Promise<void> {
     const supabase = this.supabaseService.client;
 

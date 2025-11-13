@@ -11,6 +11,7 @@ import { BlueprintCardsModule } from "./blueprint_cards/blueprint_cards.module";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { CommentsModule } from "./comments/comments.module";
 import { MembersModule } from "./members/members.module";
+import { InvitationsModule } from './invitations/invitations.module';
 
 @Module({
   controllers: [AppController],
@@ -40,6 +41,7 @@ import { MembersModule } from "./members/members.module";
     BlueprintCardsModule,
     CommentsModule,
     MembersModule,
+    InvitationsModule,
   ],
 })
 export class AppModule {}

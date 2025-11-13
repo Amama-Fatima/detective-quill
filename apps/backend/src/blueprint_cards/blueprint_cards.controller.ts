@@ -47,7 +47,7 @@ export class BlueprintCardsController {
     }
   }
 
-  @Put("/:blueprintId/:cardId")
+  @Put(":blueprintId/:cardId")
   async updateBlueprintCard(
     @Req() request: any,
     @Body() cardData: UpdateBlueprintCardDto
@@ -77,7 +77,7 @@ export class BlueprintCardsController {
     }
   }
 
-  @Delete("/:blueprintId/:cardId")
+  @Delete(":blueprintId/:cardId")
   async deleteBlueprintCard(@Req() request: any): Promise<ApiResponse<void>> {
     const cardId = request.params.cardId;
     const userId = request.user.id;

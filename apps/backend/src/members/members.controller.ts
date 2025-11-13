@@ -1,7 +1,5 @@
 import {
   Controller,
-  Post,
-  Body,
   Param,
   Delete,
   UseGuards,
@@ -9,35 +7,15 @@ import {
 } from "@nestjs/common";
 import { MembersService } from "./members.service";
 import { AuthGuard } from "../auth/auth.guard";
-import type { ApiResponse, ProjectMember } from "@detective-quill/shared-types";
-import { AddMemberDto } from "./dto/members.dto";
+import type { ApiResponse } from "@detective-quill/shared-types";
 
 @Controller("projects/:projectId/members")
 @UseGuards(AuthGuard)
 export class MembersController {
   constructor(private readonly membersService: MembersService) {}
 
-  // Add a new member
-  @Post("members")
-  async addProjectMember(
-    @Param("projectId") projectId: string,
-    @Body() member: AddMemberDto,
-    @Request() req
-  ): Promise<ApiResponse<ProjectMember>> {
-    try {
-      const data = await this.membersService.addProjectMember(
-        projectId,
-        member,
-        req.user.id,
-      );
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
   // Remove a member
-  @Delete("members/:memberId")
+  @Delete(":memberId")
   async removeProjectMember(
     @Param("projectId") projectId: string,
     @Param("memberId") memberId: string,

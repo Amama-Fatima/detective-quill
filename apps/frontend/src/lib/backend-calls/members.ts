@@ -1,5 +1,4 @@
 import {
-  DeleteResponse,
   ApiResponse,
   ProjectMember,
   AddMemberDto,
@@ -47,30 +46,14 @@ export async function inviteProjectMembers({
   return response;
 }
 
-// Add project member
-export async function addProjectMember(
-  projectId: string,
-  data: AddMemberDto,
-  accessToken: string
-): Promise<ApiResponse<ProjectMember>> {
-  return makeAuthenticatedRequest<ProjectMember>(
-    `/projects/${projectId}/settings/members`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify(data),
-    }
-  );
-}
-
 // Remove project member
 export async function removeProjectMember(
   projectId: string,
   memberId: string,
   accessToken: string
-): Promise<ApiResponse<DeleteResponse>> {
-  return makeAuthenticatedRequest<DeleteResponse>(
-    `/projects/${projectId}/settings/members/${memberId}`,
+): Promise<ApiResponse<void>> {
+  return makeAuthenticatedRequest<void>(
+    `/projects/${projectId}/members/${memberId}`,
     accessToken,
     {
       method: "DELETE",

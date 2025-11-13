@@ -2,10 +2,10 @@ import { Database } from "./database.types";
 
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Blueprint = Database["public"]["Tables"]["blue_prints"]["Row"];
-export type BlueprintCard =
-  Database["public"]["Tables"]["blueprint_cards"]["Row"];
+export type BlueprintCard = Database["public"]["Tables"]["blueprint_cards"]["Row"];
 export type BlueprintType = Database["public"]["Enums"]["blueprint_type"];
 export type FsNode = Database["public"]["Tables"]["fs_nodes"]["Row"];
+export type Invitation = Database["public"]["Tables"]["invitations"]["Row"];
 
 export interface ApiResponse<T = any> {
   success: boolean;

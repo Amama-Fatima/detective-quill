@@ -55,6 +55,7 @@ const WorkspaceMainBody = ({
             <InviteMembersDialog
               inviteDialogOpen={inviteDialogOpen}
               setInviteDialogOpen={setInviteDialogOpen}
+              projectId={project.id}
             />
           </div>
         )}
@@ -83,7 +84,11 @@ const WorkspaceMainBody = ({
       </nav>
 
       {/* Members Table */}
-      <MembersTable isOwner={isOwner} initialMembers={members} projectId={project.id} />
+      <MembersTable
+        isOwner={isOwner}
+        initialMembers={members}
+        projectId={project.id}
+      />
     </div>
   );
 };

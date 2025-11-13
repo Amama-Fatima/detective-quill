@@ -281,8 +281,8 @@ export class ProjectsService {
     };
   }
 
-  // Helper method to verify project ownership
-  private async verifyProjectOwnership(
+  // Helper method to verify project ownership ( cannot make this private, need it in other places)
+  async verifyProjectOwnership(
     projectId: string,
     userId: string
   ): Promise<void> {
