@@ -1,6 +1,11 @@
 import { NestFactory } from "@nestjs/core";
 import { WorkerModule } from "./worker.module";
 import { Transport } from "@nestjs/microservices";
+import * as dotenv from "dotenv";
+import * as path from "path";
+
+// load backend .env before creating the microservice
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice(WorkerModule, {

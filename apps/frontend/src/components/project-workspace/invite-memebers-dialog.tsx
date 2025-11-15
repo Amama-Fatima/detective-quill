@@ -54,7 +54,7 @@ const InviteMembersDialog = ({
         inviterName: username,
       };
       console.log("Inviting:", emails);
-      await inviteProjectMembers({ data: requestData, accessToken });
+      await inviteProjectMembers(requestData, accessToken);
       toast.success("Invitation emails sent successfully");
       setInviteDialogOpen(false);
       setEmails([""]);
@@ -75,8 +75,8 @@ const InviteMembersDialog = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite Beta Readers</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="mystery-title text-xl">Invite Beta Readers</DialogTitle>
+          <DialogDescription className="noir-text text-[1rem]">
             Enter the email addresses of the readers you’d like to invite.
           </DialogDescription>
         </DialogHeader>
@@ -85,10 +85,11 @@ const InviteMembersDialog = ({
           {emails.map((email, index) => (
             <Input
               key={index}
-              type="email"
+              type="email"    
               placeholder="Enter email"
               value={email}
               onChange={(e) => handleEmailChange(index, e.target.value)}
+              className="border-border"
             />
           ))}
           <Button

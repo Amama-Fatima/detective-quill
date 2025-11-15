@@ -31,17 +31,18 @@ async function makeAuthenticatedRequest<T>(
   return response.json();
 }
 
-export async function inviteProjectMembers({
-  data,
-  accessToken,
-}: {
-  data: EmailSendingApiRequestDto;
-  accessToken: string;
-}): Promise<ApiResponse<void>> {
-  const response = await makeAuthenticatedRequest<void>(`/email/send-invite`, accessToken, {
-    method: "POST",
-    body: JSON.stringify({ data }),
-  });
+export async function inviteProjectMembers(
+  data: EmailSendingApiRequestDto,
+  accessToken: string
+): Promise<ApiResponse<void>> {
+  const response = await makeAuthenticatedRequest<void>(
+    `/email/send-invite`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    }
+  );
 
   return response;
 }

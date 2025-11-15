@@ -2,35 +2,16 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
-  OnModuleInit,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
-import { QueueService } from "src/queue/queue.service";
-import { transporter, verifyTransporter } from "src/utils/email-transporter";
-import { buildInviteEmail } from "src/utils/invite-email";
-import { InvitationsService } from "src/invitations/invitations.service";
+import { QueueService } from "../queue/queue.service";
+
 @Injectable()
-export class EmailService implements OnModuleInit {
+export class EmailService {
   constructor(
     private supabaseService: SupabaseService,
-    private queueService: QueueService,
-    private invitationsService: InvitationsService
+    private queueService: QueueService
   ) {}
-
-  private enabled = true;
-
-  async onModuleInit() {
-    try {
-      await verifyTransporter();
-      console.log("Email transporter verified on module init");
-    } catch (err) {
-      this.enabled = false;
-      console.error(
-        "Email transporter verification failed on module init",
-        err
-      );
-    }
-  }
 
   // Invite new members to the project via email
   async inviteProjectMember(
@@ -42,7 +23,7 @@ export class EmailService implements OnModuleInit {
     await this.verifyProjectOwnership(projectId, userId);
     const projectTitle = await this.fetchProjectTitle(projectId);
     const registeredEmails = await this.verifyEmailsRegistered(emails);
-
+    console.log("Registered emails:", registeredEmails);
     if (registeredEmails.length === 0) {
       console.log("No registered emails to send invitations to.");
       return;
@@ -54,37 +35,8 @@ export class EmailService implements OnModuleInit {
       inviterName,
       projectTitle,
     });
+    console.log("From email to queue");
     return;
-  }
-
-  async sendEmail(
-    inviteLink,
-    toEmail: string,
-    inviterName: string,
-    projectTitle: string,
-    inviteCode: string
-  ): Promise<boolean> {
-    if (!this.enabled) {
-      console.log("Email service is disabled. Skipping email to", toEmail);
-      return false;
-    }
-
-    try {
-      const mailOptions = buildInviteEmail({
-        inviteLink,
-        toEmail,
-        inviterName,
-        projectTitle,
-      });
-      await transporter.sendMail(mailOptions);
-      console.log("Invitation email sent to", toEmail);
-      await this.invitationsService.addInvitation(projectTitle, inviteCode, toEmail);
-      console.log("Invitation code stored for", toEmail);
-      return true;
-    } catch (err) {
-      console.error("Error sending email:", err);
-      return false;
-    }
   }
 
   // Helper method to verify project ownership

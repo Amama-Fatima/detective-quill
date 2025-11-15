@@ -13,15 +13,14 @@ export class SupabaseService {
     @Inject(REQUEST) private request: Request
   ) {
     const supabaseUrl = this.configService.get<string>("SUPABASE_URL");
-    const supabaseServiceKey = this.configService.get<string>("SUPABASE_SERVICE_KEY");
     const supabaseAnonKey = this.configService.get<string>("SUPABASE_ANON_KEY");
 
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error("Missing Supabase configuration");
     }
 
     // default admin client (fallback)
-    this.clientInstance = createClient(supabaseUrl, supabaseServiceKey);
+    this.clientInstance = createClient(supabaseUrl, supabaseAnonKey);
 
     // if request includes a Bearer token, create a single per-request user client
     const auth = this.request.headers["authorization"];

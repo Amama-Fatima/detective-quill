@@ -19,7 +19,7 @@ export async function getProjectMembers(
         user_id,
         created_at,
         profile:profiles!projects_members_user_id_fkey (
-          id,
+          user_id,
           full_name,
           username,
           email,
@@ -31,6 +31,7 @@ export async function getProjectMembers(
       .order("created_at", { ascending: true });
 
     if (error) {
+      console.error("Supabase error fetching project members:", error);
       throw new Error(`Failed to fetch project members: ${error.message}`);
     }
 
@@ -54,7 +55,7 @@ export async function getProjectMembers(
     const msg =
       err instanceof Error
         ? err.message
-        : "Unknown error fetching user blueprints";
+        : "Unknown error fetching project members";
     return { members: null, error: msg };
   }
 }

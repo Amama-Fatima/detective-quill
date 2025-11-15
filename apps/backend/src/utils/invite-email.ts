@@ -5,6 +5,7 @@ export interface InviteEmailParams {
   toEmail: string;
   inviterName: string;
   projectTitle: string;
+  from: string;
 }
 
 
@@ -13,8 +14,8 @@ export function buildInviteEmail({
   toEmail,
   inviterName,
   projectTitle,
+  from
 }: InviteEmailParams): SendMailOptions {
-  const from = `${process.env.EMAIL_USER}`;
   return {
     from,
     to: toEmail,

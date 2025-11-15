@@ -44,7 +44,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
   };
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border/50  bg-gradient-to-tl from-background via-background to-card">
+    <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border  bg-card shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
@@ -65,7 +65,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
       </CardHeader>
 
       <CardContent className="pt-0">
-        <p className="text-sm text-muted-foreground noir-text mb-4 line-clamp-2">
+        <p className="text-sm text-muted-foreground noir-text text-[1rem] mb-4 line-clamp-2">
           {project.description || "No case summary available..."}
         </p>
 

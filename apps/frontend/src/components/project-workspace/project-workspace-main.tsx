@@ -88,6 +88,7 @@ const WorkspaceMainBody = ({
         isOwner={isOwner}
         initialMembers={members}
         projectId={project.id}
+        userId={userId}
       />
     </div>
   );

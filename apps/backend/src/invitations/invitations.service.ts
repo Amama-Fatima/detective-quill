@@ -1,33 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { type Invitation } from "@detective-quill/shared-types";
-import { MembersService } from "src/members/members.service";
-import { ProjectsService } from "src/projects/projects.service";
+import { MembersService } from "../members/members.service";
+import { ProjectsService } from "../projects/projects.service";
+import { AdminSupabaseService } from "../supabase/admin-supabase.service";
 
 @Injectable()
 export class InvitationsService {
   constructor(
     private supabaseService: SupabaseService,
     private membersService: MembersService,
-    private projectsService: ProjectsService
+    private projectsService: ProjectsService,
+    private adminSupabaseService: AdminSupabaseService
   ) {}
 
-  async addInvitation(
-    projectId: string,
-    inviteCode: string,
-    toEmail: string
-  ): Promise<void> {
-    const supabase = this.supabaseService.client;
-    const { error } = await supabase.from("invitations").insert({
-      project_id: projectId,
-      invite_code: inviteCode,
-      email: toEmail,
-    });
-    if (error) {
-      throw new Error(`Failed to add invitation: ${error.message}`);
-    }
-    return;
-  }
 
   async respondToInvitation(
     projectId: string,
@@ -35,14 +21,6 @@ export class InvitationsService {
     response: "accept" | "reject"
   ): Promise<void> {
     const supabase = this.supabaseService.client;
-    const { error } = await supabase.from("invitations").delete().match({
-      project_id: projectId,
-      invite_code: inviteCode,
-    });
-    if (error) {
-      throw new Error(`Failed to ${response} invitation: ${error.message}`);
-    }
-
     // insert member if accepted
     if (response === "accept") {
       const { data, error: fetchError } = await supabase
@@ -59,6 +37,13 @@ export class InvitationsService {
         );
       }
       await this.membersService.addProjectMember(projectId, data.email);
+    }
+    const { error } = await supabase.from("invitations").delete().match({
+      project_id: projectId,
+      invite_code: inviteCode,
+    });
+    if (error) {
+      throw new Error(`Failed to ${response} invitation: ${error.message}`);
     }
 
     return;

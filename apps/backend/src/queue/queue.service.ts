@@ -44,6 +44,7 @@ export class QueueService {
         ...jobData,
         timestamp: new Date().toISOString(),
       });
+      console.log("Invite emails job queued");
     } catch (error) {
       console.error("Failed to queue invite emails job:", error);
       throw error;

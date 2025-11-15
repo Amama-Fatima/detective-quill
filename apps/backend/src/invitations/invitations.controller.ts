@@ -7,7 +7,7 @@ import {
   Delete,
   Body,
 } from "@nestjs/common";
-import { AuthGuard } from "src/auth/auth.guard";
+import { AuthGuard } from "../auth/auth.guard";
 import { ApiResponse, type Invitation } from "@detective-quill/shared-types";
 import { InvitationsService } from "./invitations.service";
 

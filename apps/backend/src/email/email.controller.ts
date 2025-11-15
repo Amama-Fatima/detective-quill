@@ -1,5 +1,5 @@
 import { Controller, Post, UseGuards, Request, Body } from "@nestjs/common";
-import { AuthGuard } from "src/auth/auth.guard";
+import { AuthGuard } from "../auth/auth.guard";
 import { EmailService } from "./email.service";
 import { type EmailSendingApiRequestDto } from "./dto/email.dto";
 import { ApiResponse } from "@detective-quill/shared-types";
@@ -17,6 +17,7 @@ export class EmailController {
     try {
       // get all the values from body
       const { projectId, emails, inviterName } = body;
+      console.log("Sending invite emails to:", body);
       await this.emailService.inviteProjectMember(
         projectId,
         emails,

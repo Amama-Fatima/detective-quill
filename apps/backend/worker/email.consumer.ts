@@ -1,12 +1,13 @@
 import { Controller } from "@nestjs/common";
 import { EventPattern, Payload } from "@nestjs/microservices";
 import { type EmailSendingJobData } from "@detective-quill/shared-types";
-import { EmailService } from "src/email/email.service";
+import { WorkerEmailService } from "../src/email/worker-email.service";
+import { ConfigService } from "@nestjs/config";
 
 // todo: add retry mechanism in here
 @Controller()
 export class EmailConsumer {
-  constructor(private emailService: EmailService) {}
+  constructor(private workerEmailService: WorkerEmailService, private configService: ConfigService) {}
 
   @EventPattern("invite_email_job")
   async handleInviteEmail(@Payload() data: EmailSendingJobData) {
@@ -16,14 +17,16 @@ export class EmailConsumer {
     for (const email of emails) {
       // generate a random string
       const inviteCode = Math.random().toString(36).substring(2);
-      const inviteLink = `${process.env.FRONTEND_URL}/workspace/${projectId}/accept-invite?email=${encodeURIComponent(email)}&projectTitle=${projectTitle}&code=${inviteCode}`;
+      const inviteLink = `${this.configService.get("FRONTEND_URL")}/workspace/${projectId}/accept-invite?email=${encodeURIComponent(email)}&projectTitle=${projectTitle}&code=${inviteCode}`;
+      console.log("Generated invite link:", inviteLink);
       try {
-        const ok = await this.emailService.sendEmail(
+        const ok = await this.workerEmailService.sendEmail(
           inviteLink,
           email,
           inviterName,
           projectTitle,
-          inviteCode
+          inviteCode,
+          projectId
         );
 
         if (!ok) {
