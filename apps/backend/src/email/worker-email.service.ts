@@ -55,7 +55,7 @@ export class WorkerEmailService implements OnModuleInit {
         toEmail,
         inviterName,
         projectTitle,
-        from: this.configService.get("EMAIL_USER"),
+        from: this.configService.get("EMAIL_USER")!,
       });
       await this.transporter.sendMail(mailOptions);
       console.log("Invitation email sent to", toEmail);
