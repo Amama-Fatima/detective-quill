@@ -23,7 +23,6 @@ export class EmailService {
     await this.verifyProjectOwnership(projectId, userId);
     const projectTitle = await this.fetchProjectTitle(projectId);
     const registeredEmails = await this.verifyEmailsRegistered(emails);
-    console.log("Registered emails:", registeredEmails);
     if (registeredEmails.length === 0) {
       console.log("No registered emails to send invitations to.");
       return;
@@ -35,7 +34,6 @@ export class EmailService {
       inviterName,
       projectTitle,
     });
-    console.log("From email to queue");
     return;
   }
 

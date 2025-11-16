@@ -1,19 +1,16 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { type Invitation } from "@detective-quill/shared-types";
 import { MembersService } from "../members/members.service";
 import { ProjectsService } from "../projects/projects.service";
-import { AdminSupabaseService } from "../supabase/admin-supabase.service";
 
 @Injectable()
 export class InvitationsService {
   constructor(
     private supabaseService: SupabaseService,
     private membersService: MembersService,
-    private projectsService: ProjectsService,
-    private adminSupabaseService: AdminSupabaseService
+    private projectsService: ProjectsService
   ) {}
-
 
   async respondToInvitation(
     projectId: string,
@@ -26,22 +23,25 @@ export class InvitationsService {
       const { data, error: fetchError } = await supabase
         .from("invitations")
         .select("email")
-        .match({
-          project_id: projectId,
-          invite_code: inviteCode,
-        })
-        .single();
-      if (fetchError || !data) {
+        .eq("invite_code", inviteCode)
+        .eq("project_id", projectId);
+
+      if (fetchError) {
         throw new Error(
           `Failed to fetch invitation details: ${fetchError?.message}`
         );
       }
-      await this.membersService.addProjectMember(projectId, data.email);
+      if (!data || data.length === 0) {
+        // explicit not found
+        throw new NotFoundException("Invitation not found");
+      }
+      await this.membersService.addProjectMember(projectId, data[0].email);
     }
-    const { error } = await supabase.from("invitations").delete().match({
-      project_id: projectId,
-      invite_code: inviteCode,
-    });
+    const { error } = await supabase
+      .from("invitations")
+      .delete()
+      .eq("project_id", projectId)
+      .eq("invite_code", inviteCode);
     if (error) {
       throw new Error(`Failed to ${response} invitation: ${error.message}`);
     }

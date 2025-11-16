@@ -30,6 +30,7 @@ export async function respondToInvitation(
   response: "accept" | "reject",
   accessToken: string
 ): Promise<ApiResponse<void>> {
+
   const apiResponse = await makeAuthenticatedRequest<void>(
     `/invitations/${inviteCode}/respond`,
     accessToken,

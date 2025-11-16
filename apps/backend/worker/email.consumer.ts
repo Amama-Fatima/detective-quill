@@ -11,14 +11,12 @@ export class EmailConsumer {
 
   @EventPattern("invite_email_job")
   async handleInviteEmail(@Payload() data: EmailSendingJobData) {
-    console.log("Email worker received job:", data);
     const { projectId, emails, inviterName, projectTitle } = data;
     const failed: string[] = [];
     for (const email of emails) {
       // generate a random string
       const inviteCode = Math.random().toString(36).substring(2);
       const inviteLink = `${this.configService.get("FRONTEND_URL")}/workspace/${projectId}/accept-invite?email=${encodeURIComponent(email)}&projectTitle=${projectTitle}&code=${inviteCode}`;
-      console.log("Generated invite link:", inviteLink);
       try {
         const ok = await this.workerEmailService.sendEmail(
           inviteLink,

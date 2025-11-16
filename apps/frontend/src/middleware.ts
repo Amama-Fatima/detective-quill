@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// todo: if not project memeber, create a separate page to show no access message
+// todo: check if there is a need to create a new supabase server client here or not
 function extractProjectId(pathname: string): string | null {
   const workspaceMatch = pathname.match(/^\/workspace\/([a-f0-9-]{36})/);
   return workspaceMatch ? workspaceMatch[1] : null;
@@ -54,19 +56,22 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    if (req.nextUrl.pathname.startsWith("/workspace/api")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    return NextResponse.redirect(new URL("/auth/sign-in", req.url));
+    const redirectUrl = new URL("/auth/sign-in", req.url);
+    redirectUrl.searchParams.set(
+      "redirectTo",
+      req.nextUrl.pathname + req.nextUrl.search
+    );
+    return NextResponse.redirect(redirectUrl);
   }
 
   const projectId = extractProjectId(req.nextUrl.pathname);
+  const notInviteRoute = !req.nextUrl.pathname.includes("accept-invite");
 
-  if (projectId) {
+  if (projectId && notInviteRoute) {
     const isMember = await isProjectMember(supabase, user.id, projectId);
 
     if (!isMember) {
-      if (req.nextUrl.pathname.startsWith("/workspace/api")) {
+      if (req.nextUrl.pathname.startsWith("/workspace")) {
         return NextResponse.json(
           {
             error: "Forbidden",

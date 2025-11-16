@@ -48,7 +48,6 @@ export class WorkerEmailService implements OnModuleInit {
       console.log("Email service is disabled. Skipping email to", toEmail);
       return false;
     }
-    console.log("From queue to email");
     try {
       const mailOptions = buildInviteEmail({
         inviteLink,
@@ -58,13 +57,11 @@ export class WorkerEmailService implements OnModuleInit {
         from: this.configService.get("EMAIL_USER")!,
       });
       await this.transporter.sendMail(mailOptions);
-      console.log("Invitation email sent to", toEmail);
       await this.workerInvitationsService.addInvitation(
         projectId,
         inviteCode,
         toEmail,
       );
-      console.log("Invitation code stored for", toEmail);
       return true;
     } catch (err) {
       console.error("Error sending email:", err);

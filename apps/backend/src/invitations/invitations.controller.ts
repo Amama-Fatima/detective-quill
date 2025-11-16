@@ -6,6 +6,9 @@ import {
   Post,
   Delete,
   Body,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { ApiResponse, type Invitation } from "@detective-quill/shared-types";
@@ -30,20 +33,22 @@ export class InvitationsController {
         data: invitations,
       };
     } catch (error) {
-      return {
-        success: false,
-        message: "Error retrieving project invitations: " + error.message,
-      };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
   @Post(":inviteCode/respond")
   async respondToInvitation(
     @Request() req,
+    @Param("inviteCode") inviteCode: string,
     @Body() body: { response: "accept" | "reject"; projectId: string }
   ): Promise<ApiResponse<void>> {
     const projectId = body.projectId;
-    const inviteCode = req.params.inviteCode;
     const response = body.response; // "accept" or "reject"
     try {
       await this.invitationsService.respondToInvitation(
@@ -56,7 +61,12 @@ export class InvitationsController {
         message: `Invitation ${response}ed successfully`,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -79,7 +89,12 @@ export class InvitationsController {
         message: "Invitation deleted successfully",
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 }

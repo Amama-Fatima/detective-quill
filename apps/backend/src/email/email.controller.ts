@@ -17,7 +17,6 @@ export class EmailController {
     try {
       // get all the values from body
       const { projectId, emails, inviterName } = body;
-      console.log("Sending invite emails to:", body);
       await this.emailService.inviteProjectMember(
         projectId,
         emails,
