@@ -11,7 +11,7 @@ export class MembersService {
   constructor(private supabaseService: SupabaseService) {}
 
   // Add a new member to the project
-  async addProjectMember(
+  async addProjectMemberWithEmail(
     projectId: string,
     email: string
   ): Promise<void> {
@@ -45,16 +45,31 @@ export class MembersService {
       .insert({
         project_id: projectId,
         user_id: profile.user_id,
+        is_author: false,
       })
       .single();
 
     if (error) {
       throw new BadRequestException(`Failed to add member: ${error.message}`);
     }
-
-    // Return the member with profile info
     return;
   }
+
+  // async addProjectAuthor(projectId: string, userId: string): Promise<void> {
+  //   const supabase = this.supabaseService.client;
+  //   const { data, error } = await supabase
+  //     .from("projects_members")
+  //     .insert({
+  //       project_id: projectId,
+  //       user_id: userId,
+  //       is_author: true,
+  //     })
+  //     .single();
+  //   if (error) {
+  //     throw new BadRequestException(`Failed to add author: ${error.message}`);
+  //   }
+  //   return;
+  // }
 
   // Remove a member from the project
   async removeProjectMember(

@@ -208,6 +208,7 @@ export interface ProjectMember {
   username: string | null;
   full_name: string;
   email: string;
+  is_author: boolean;
   avatar_url: string | null;
 }
 

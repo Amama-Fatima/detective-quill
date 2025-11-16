@@ -35,7 +35,7 @@ export class InvitationsService {
         // explicit not found
         throw new NotFoundException("Invitation not found");
       }
-      await this.membersService.addProjectMember(projectId, data[0].email);
+      await this.membersService.addProjectMemberWithEmail(projectId, data[0].email);
     }
     const { error } = await supabase
       .from("invitations")

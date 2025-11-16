@@ -121,8 +121,6 @@ export class ProjectsController {
   async remove(
     @Param("id") id: string,
     @Request() req,
-    @Query("hard", new DefaultValuePipe(false), ParseBoolPipe)
-    hardDelete: boolean
   ): Promise<ApiResponse<DeleteResponse>> {
     try {
       const data = await this.projectsService.deleteProject(id, req.user.id);

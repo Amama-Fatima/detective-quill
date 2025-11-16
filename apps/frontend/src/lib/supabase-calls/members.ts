@@ -18,6 +18,7 @@ export async function getProjectMembers(
         `
         user_id,
         created_at,
+        is_author,
         profile:profiles!projects_members_user_id_fkey (
           user_id,
           full_name,
@@ -46,6 +47,7 @@ export async function getProjectMembers(
         email: profile?.email,
         avatar: profile?.avatar_url ?? null,
         created_at: member.created_at,
+        is_author: member.is_author,
       };
     });
 
@@ -66,30 +68,18 @@ async function verifyMembership(
   supabase: any
 ): Promise<boolean> {
   try {
-    const { data: owner, error: ownerError } = await supabase
-      .from("projects")
-      .select("author_id")
-      .eq("id", projectId)
-      .single();
-    if (owner) {
-      return true;
-    }
     const { data: member, error: memberError } = await supabase
-      .from("project_members")
+      .from("projects_members")
       .select("*")
       .eq("project_id", projectId)
       .eq("user_id", userId)
-      .single();
     if (member) {
       return true;
     }
 
-    if (ownerError || memberError) {
-      throw new Error(
-        `Failed to verify membership: ${
-          ownerError?.message || memberError?.message
-        }`
-      );
+    if (memberError) {
+      console.error("Supabase error verifying membership:", memberError);
+      throw new Error(`Failed to verify membership: ${memberError?.message}`);
     }
     return false;
   } catch (error) {

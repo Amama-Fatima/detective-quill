@@ -13,9 +13,13 @@ import {
   DeleteResponse,
 } from "@detective-quill/shared-types";
 
+// todo: add transactions where needed
+
 @Injectable()
 export class ProjectsService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+  ) {}
 
   async createProject(
     createProjectDto: CreateProjectDto,
@@ -23,50 +27,18 @@ export class ProjectsService {
   ): Promise<ProjectResponse> {
     const supabase = this.supabaseService.client;
 
-    try {
-      // Step 1: Create the project
-      const { data: project, error: projectError } = await supabase
-        .from("projects")
-        .insert({
-          title: createProjectDto.title,
-          description: createProjectDto.description || null,
-          author_id: userId,
-        })
-        .select()
-        .single();
+    const { data, error } = await supabase.rpc("create_project_with_author", {
+      p_title: createProjectDto.title,
+      p_description: createProjectDto.description || null,
+      p_user_id: userId,
+    });
 
-      if (projectError) {
-        throw new BadRequestException(
-          `Failed to create project: ${projectError.message}`
-        );
-      }
-
-      // Step 2: Add the creator as a project member
-      const { error: memberError } = await supabase
-        .from("projects_members")
-        .insert({
-          project_id: project.id,
-          user_id: userId,
-        });
-
-      if (memberError) {
-        // Cleanup: delete the project if member insertion fails
-        await supabase.from("projects").delete().eq("id", project.id);
-
-        throw new BadRequestException(
-          `Failed to add project member: ${memberError.message}`
-        );
-      }
-
-      return project;
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
+    if (error) {
       throw new BadRequestException(
         `Failed to create project: ${error.message}`
       );
     }
+    return data;
   }
 
   async findAllUserProjects(

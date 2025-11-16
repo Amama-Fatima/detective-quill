@@ -45,6 +45,8 @@ const MembersTable = ({
     setRemoveDialogOpen(true);
   };
 
+  console.log("members are ", members);
+
   const confirmRemoveMember = async () => {
     if (memberToRemove) {
       try {
@@ -151,7 +153,7 @@ const MembersTable = ({
                           variant="secondary"
                           className="bg-secondary-foreground text-secondary text-[0.9rem] hover:bg-muted-foreground font-medium"
                         >
-                          {!isOwner ? "Beta Reader" : "Author"}
+                          {!member.is_author ? "Beta Reader" : "Author"}
                         </Badge>
                       </TableCell>
                       {isOwner && member.user_id !== userId && (
