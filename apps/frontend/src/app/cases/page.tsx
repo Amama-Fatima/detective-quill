@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 import { ProjectsPageClient } from "@/components/projects/project-page-client";
 import { createSupabaseServerClient } from "@/supabase/server-client";
-import { getUserProjects } from "@/lib/supabase-calls/user-projects";
+import {
+  getUserProjects,
+  getInvitedProjects,
+} from "@/lib/supabase-calls/user-projects";
 import ErrorMsg from "@/components/error-msg";
 
 export default async function CasesPage() {
@@ -18,12 +21,23 @@ export default async function CasesPage() {
     redirect("/auth/sign-in");
   }
 
-  // Fetch cases server-side
   const { projects, error } = await getUserProjects(user.id);
+  const { projects: invitedProjects, error: invitedError } =
+    await getInvitedProjects(user.id);
 
   if (error) {
     return <ErrorMsg message="Failed to load projects" />;
   }
 
-  return <ProjectsPageClient user={user} initialProjects={projects || []} />;
+  if (invitedError) {
+    return <ErrorMsg message="Failed to load invited projects" />;
+  }
+
+  return (
+    <ProjectsPageClient
+      user={user}
+      initialProjects={projects || []}
+      invitedProjects={invitedProjects || []}
+    />
+  );
 }

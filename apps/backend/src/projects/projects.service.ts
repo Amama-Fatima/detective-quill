@@ -8,7 +8,7 @@ import { SupabaseService } from "../supabase/supabase.service";
 import {
   CreateProjectDto,
   UpdateProjectDto,
-  ProjectResponse,
+  Project,
   ProjectStats,
   DeleteResponse,
 } from "@detective-quill/shared-types";
@@ -24,7 +24,7 @@ export class ProjectsService {
   async createProject(
     createProjectDto: CreateProjectDto,
     userId: string
-  ): Promise<ProjectResponse> {
+  ): Promise<Project> {
     const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase.rpc("create_project_with_author", {
@@ -44,7 +44,7 @@ export class ProjectsService {
   async findAllUserProjects(
     userId: string,
     includeInactive: boolean = false
-  ): Promise<ProjectResponse[]> {
+  ): Promise<Project[]> {
     const supabase = this.supabaseService.client;
 
     let query = supabase
@@ -71,7 +71,7 @@ export class ProjectsService {
   async findProjectById(
     projectId: string,
     userId: string
-  ): Promise<ProjectResponse> {
+  ): Promise<Project> {
     const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
@@ -93,7 +93,7 @@ export class ProjectsService {
     projectId: string,
     updateData: UpdateProjectDto,
     userId: string
-  ): Promise<ProjectResponse> {
+  ): Promise<Project> {
     const supabase = this.supabaseService.client;
 
     // First verify the user is the project owner
@@ -152,7 +152,7 @@ export class ProjectsService {
   async restoreProject(
     projectId: string,
     userId: string
-  ): Promise<ProjectResponse> {
+  ): Promise<Project> {
     const supabase = this.supabaseService.client;
 
     // Check if project exists (including deleted ones)
@@ -191,7 +191,7 @@ export class ProjectsService {
     return data;
   }
 
-  async getDeletedProjects(userId: string): Promise<ProjectResponse[]> {
+  async getDeletedProjects(userId: string): Promise<Project[]> {
     const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase

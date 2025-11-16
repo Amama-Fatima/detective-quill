@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import {
-  ProjectResponse,
+  Project,
   CreateProjectDto,
   UpdateProjectDto,
 } from "@detective-quill/shared-types";
@@ -13,33 +13,31 @@ import {
 } from "@/lib/backend-calls/projects";
 import { toast } from "sonner";
 
-export function useProjects(initialProjects?: ProjectResponse[]) {
+export function useProjects(initialProjects?: Project[]) {
   const { session } = useAuth();
-  const [projects, setProjects] = useState<ProjectResponse[]>(
-    initialProjects || []
-  );
+  const [projects, setProjects] = useState<Project[]>(initialProjects || []);
   const [loading, setLoading] = useState(!initialProjects);
   const [creating, setCreating] = useState(false);
 
-  const fetchProjects = async () => {
-    if (!session?.access_token) return;
+  // const fetchProjects = async () => {
+  //   if (!session?.access_token) return;
 
-    try {
-      setLoading(true);
-      const response = await getProjects(session.access_token);
+  //   try {
+  //     setLoading(true);
+  //     const response = await getProjects(session.access_token);
 
-      if (response.success && response.data) {
-        setProjects(response.data);
-      } else {
-        toast.error(response.error || "Failed to fetch projects");
-      }
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      toast.error("Failed to fetch projects");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (response.success && response.data) {
+  //       setProjects(response.data);
+  //     } else {
+  //       toast.error(response.error || "Failed to fetch projects");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching projects:", error);
+  //     toast.error("Failed to fetch projects");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const createNewProject = async (data: CreateProjectDto) => {
     if (!session?.access_token) return false;
@@ -117,17 +115,17 @@ export function useProjects(initialProjects?: ProjectResponse[]) {
   };
 
   // Only fetch if we don't have initial projects and session exists
-  useEffect(() => {
-    if (!initialProjects && session) {
-      fetchProjects();
-    }
-  }, [session, initialProjects]);
+  // useEffect(() => {
+  //   if (!initialProjects && session) {
+  //     fetchProjects();
+  //   }
+  // }, [session, initialProjects]);
 
   return {
     projects,
     loading,
     creating,
-    fetchProjects,
+    // fetchProjects,
     createProject: createNewProject,
     updateProject: updateExistingProject,
     deleteProject: deleteExistingProject,

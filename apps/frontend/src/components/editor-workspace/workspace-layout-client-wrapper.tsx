@@ -8,13 +8,13 @@ import { countNodes } from "@/lib/utils/utils";
 import {
   FsNodeTreeResponse,
   FsNodeResponse,
-  ProjectResponse,
+  Project,
 } from "@detective-quill/shared-types";
 import { useAuth } from "@/context/auth-context";
 
 interface WorkspaceLayoutClientWrapperProps {
   children: React.ReactNode;
-  project: ProjectResponse;
+  project: Project;
   initialNodes: FsNodeTreeResponse[];
   currentNode: FsNodeResponse | null;
   projectId: string;

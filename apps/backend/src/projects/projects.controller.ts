@@ -19,7 +19,7 @@ import {
 } from "./validation/project.validation";
 import { AuthGuard } from "../auth/auth.guard";
 import {
-  ProjectResponse,
+  Project,
   ProjectStats,
   DeleteResponse,
   ApiResponse,
@@ -34,7 +34,7 @@ export class ProjectsController {
   async create(
     @Body() createProjectDto: CreateProjectDto,
     @Request() req
-  ): Promise<ApiResponse<ProjectResponse>> {
+  ): Promise<ApiResponse<Project>> {
     try {
       const data = await this.projectsService.createProject(
         createProjectDto,
@@ -51,7 +51,7 @@ export class ProjectsController {
     @Request() req,
     @Query("includeInactive", new DefaultValuePipe(false), ParseBoolPipe)
     includeInactive: boolean
-  ): Promise<ApiResponse<ProjectResponse[]>> {
+  ): Promise<ApiResponse<Project[]>> {
     try {
       const data = await this.projectsService.findAllUserProjects(
         req.user.id,
@@ -64,7 +64,7 @@ export class ProjectsController {
   }
 
   @Get("deleted")
-  async findDeleted(@Request() req): Promise<ApiResponse<ProjectResponse[]>> {
+  async findDeleted(@Request() req): Promise<ApiResponse<Project[]>> {
     try {
       const data = await this.projectsService.getDeletedProjects(req.user.id);
       return { success: true, data };
@@ -77,7 +77,7 @@ export class ProjectsController {
   async findOne(
     @Param("id") id: string,
     @Request() req
-  ): Promise<ApiResponse<ProjectResponse>> {
+  ): Promise<ApiResponse<Project>> {
     try {
       const data = await this.projectsService.findProjectById(id, req.user.id);
       return { success: true, data };
@@ -104,7 +104,7 @@ export class ProjectsController {
     @Param("id") id: string,
     @Body() updateProjectDto: UpdateProjectDto,
     @Request() req
-  ): Promise<ApiResponse<ProjectResponse>> {
+  ): Promise<ApiResponse<Project>> {
     try {
       const data = await this.projectsService.updateProjectInfo(
         id,
@@ -134,7 +134,7 @@ export class ProjectsController {
   async restore(
     @Param("id") id: string,
     @Request() req
-  ): Promise<ApiResponse<ProjectResponse>> {
+  ): Promise<ApiResponse<Project>> {
     try {
       const data = await this.projectsService.restoreProject(id, req.user.id);
       return { success: true, data };

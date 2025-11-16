@@ -35,7 +35,6 @@ export interface UpdateProjectDto {
 }
 
 // Project response types
-export interface ProjectResponse extends Project {}
 
 export interface ProjectStats {
   totalFiles: number;
@@ -45,7 +44,7 @@ export interface ProjectStats {
 }
 
 export interface ProjectListResponse {
-  projects: ProjectResponse[];
+  projects: Project[];
   total: number;
 }
 

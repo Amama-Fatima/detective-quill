@@ -4,19 +4,10 @@ import ProjectCard from "./project-card";
 
 interface ProjectsDisplayProps {
   projects: any[];
-  onOpenProject: (projectId: string) => void;
-  onUpdateProject: (
-    projectId: string,
-    data: { title: string; description: string }
-  ) => Promise<boolean>;
-  onDeleteProject: (projectId: string) => Promise<boolean>;
 }
 
 const ProjectsDisplay = ({
   projects,
-  onOpenProject,
-  onUpdateProject,
-  onDeleteProject,
 }: ProjectsDisplayProps) => {
   if (projects.length === 0) {
     return (

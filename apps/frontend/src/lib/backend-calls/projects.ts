@@ -1,5 +1,5 @@
 import {
-  ProjectResponse,
+  Project,
   CreateProjectDto,
   UpdateProjectDto,
   ProjectStats,
@@ -37,8 +37,8 @@ async function makeAuthenticatedRequest<T>(
 export async function createProject(
   data: CreateProjectDto,
   accessToken: string
-): Promise<ApiResponse<ProjectResponse>> {
-  return makeAuthenticatedRequest<ProjectResponse>("/projects", accessToken, {
+): Promise<ApiResponse<Project>> {
+  return makeAuthenticatedRequest<Project>("/projects", accessToken, {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -47,19 +47,16 @@ export async function createProject(
 export async function getProjects(
   accessToken: string,
   includeInactive: boolean = false
-): Promise<ApiResponse<ProjectResponse[]>> {
+): Promise<ApiResponse<Project[]>> {
   const query = includeInactive ? "?includeInactive=true" : "";
-  return makeAuthenticatedRequest<ProjectResponse[]>(
-    `/projects${query}`,
-    accessToken
-  );
+  return makeAuthenticatedRequest<Project[]>(`/projects${query}`, accessToken);
 }
 
 export async function getProject(
   projectId: string,
   accessToken: string
-): Promise<ApiResponse<ProjectResponse>> {
-  return makeAuthenticatedRequest<ProjectResponse>(
+): Promise<ApiResponse<Project>> {
+  return makeAuthenticatedRequest<Project>(
     `/projects/${projectId}`,
     accessToken
   );
@@ -69,8 +66,8 @@ export async function updateProject(
   projectId: string,
   data: UpdateProjectDto,
   accessToken: string
-): Promise<ApiResponse<ProjectResponse>> {
-  const response = await makeAuthenticatedRequest<ProjectResponse>(
+): Promise<ApiResponse<Project>> {
+  const response = await makeAuthenticatedRequest<Project>(
     `/projects/${projectId}`,
     accessToken,
     {
@@ -88,7 +85,7 @@ export async function updateProject(
 
 export async function deleteProject(
   projectId: string,
-  accessToken: string,
+  accessToken: string
 ): Promise<ApiResponse<DeleteResponse>> {
   const response = await makeAuthenticatedRequest<DeleteResponse>(
     `/projects/${projectId}`,
@@ -107,8 +104,8 @@ export async function deleteProject(
 export async function restoreProject(
   projectId: string,
   accessToken: string
-): Promise<ApiResponse<ProjectResponse>> {
-  const response = await makeAuthenticatedRequest<ProjectResponse>(
+): Promise<ApiResponse<Project>> {
+  const response = await makeAuthenticatedRequest<Project>(
     `/projects/${projectId}/restore`,
     accessToken,
     {
@@ -139,8 +136,8 @@ export async function getProjectStats(
 
 export async function getDeletedProjects(
   accessToken: string
-): Promise<ApiResponse<ProjectResponse[]>> {
-  const response = await makeAuthenticatedRequest<ProjectResponse[]>(
+): Promise<ApiResponse<Project[]>> {
+  const response = await makeAuthenticatedRequest<Project[]>(
     "/projects/deleted",
     accessToken
   );

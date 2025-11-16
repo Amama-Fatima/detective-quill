@@ -8,12 +8,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BookOpen, FileText, Target, Star, Archive, Clock } from "lucide-react";
-import { ProjectResponse } from "@detective-quill/shared-types";
+import { Project } from "@detective-quill/shared-types";
 import { Badge } from "../ui/badge";
 import Link from "next/link";
 
 interface ProjectCardProps {
-  project: ProjectResponse;
+  project: Project;
 }
 
 const ProjectCard = ({ project }: ProjectCardProps) => {
