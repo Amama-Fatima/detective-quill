@@ -58,8 +58,8 @@ export function CreateProjectDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-primary text-2xl">Create New Project</DialogTitle>
+            <DialogDescription className="text-secondary-foreground text-[0.9rem]">
               Start a new writing project. Give it a name and description to get
               started.
             </DialogDescription>
@@ -67,7 +67,7 @@ export function CreateProjectDialog({
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">
+              <Label htmlFor="title" className="text-[1rem]">
                 Project Title <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -83,7 +83,7 @@ export function CreateProjectDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="description">Description (optional)</Label>
+              <Label htmlFor="description" className="text-[1rem]">Description (optional)</Label>
               <Textarea
                 id="description"
                 value={formData.description}

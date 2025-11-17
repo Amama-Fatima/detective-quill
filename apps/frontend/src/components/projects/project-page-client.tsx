@@ -1,34 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Grid3X3, List, Briefcase } from "lucide-react";
-import {
-  CreateProjectDto,
-  ProjectResponse,
-} from "@detective-quill/shared-types";
+import { Search, Plus, Briefcase } from "lucide-react";
+import { CreateProjectDto, Project } from "@detective-quill/shared-types";
 import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
 import { useProjects } from "@/hooks/use-projects";
 import ProjectsDisplay from "./project-display";
 
-type FilterOption = "all" | "active" | "completed" | "archived";
+type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
 interface ProjectsPageClientProps {
   user: User;
-  initialProjects: ProjectResponse[];
+  initialProjects: Project[];
+  invitedProjects?: Project[];
 }
 
 export function ProjectsPageClient({
-  user,
   initialProjects,
+  invitedProjects = [],
 }: ProjectsPageClientProps) {
   const router = useRouter();
-  const { projects, creating, createProject, updateProject, deleteProject } =
-    useProjects(initialProjects);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { projects, creating, createProject } = useProjects(initialProjects);
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,14 +37,29 @@ export function ProjectsPageClient({
   // Only run client-side to avoid hydration issues
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    const initialFilter = (searchParams.get("tab") as FilterOption) || "all";
+    if (
+      initialFilter &&
+      ["all", "active", "completed", "archived", "invited"].includes(
+        initialFilter
+      )
+    ) {
+      setFilter(initialFilter);
+    }
+  }, [searchParams]);
 
   const handleCreateProject = async (data: CreateProjectDto) => {
     return await createProject(data);
   };
 
-  const handleOpenProject = (projectId: string) => {
-    router.push(`/workspace/${projectId}`);
+  const updateTabUrl = (tab: FilterOption) => {
+    if (tab == "all") {
+      router.replace(pathname);
+      return;
+    }
+    if (tab == searchParams.get("tab")) return;
+    const url = `${pathname}?tab=${tab}`;
+    router.replace(url);
   };
 
   return (
@@ -83,7 +97,10 @@ export function ProjectsPageClient({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs
           value={filter}
-          onValueChange={(value) => setFilter(value as FilterOption)}
+          onValueChange={(value) => {
+            setFilter(value as FilterOption);
+            updateTabUrl(value as FilterOption);
+          }}
         >
           {/* Controls Section */}
           <div className="noir-text flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
@@ -106,6 +123,12 @@ export function ProjectsPageClient({
               >
                 Archived
               </TabsTrigger>
+              <TabsTrigger
+                value="invited"
+                className="font-serif cursor-pointer"
+              >
+                Invited
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -124,36 +147,19 @@ export function ProjectsPageClient({
           {/* todo: add proper filteration for these, just filter on client side based on status, can do this inside the useProjects hook as well */}
           {/* Content Tabs */}
           <TabsContent value="all">
-            <ProjectsDisplay
-              projects={projects}
-              onOpenProject={handleOpenProject}
-              onUpdateProject={updateProject}
-              onDeleteProject={deleteProject}
-            />
+            <ProjectsDisplay projects={projects} />
           </TabsContent>
           <TabsContent value="active">
-            <ProjectsDisplay
-              projects={projects}
-              onOpenProject={handleOpenProject}
-              onUpdateProject={updateProject}
-              onDeleteProject={deleteProject}
-            />
+            <ProjectsDisplay projects={projects} />
           </TabsContent>
           <TabsContent value="completed">
-            <ProjectsDisplay
-              projects={projects}
-              onOpenProject={handleOpenProject}
-              onUpdateProject={updateProject}
-              onDeleteProject={deleteProject}
-            />
+            <ProjectsDisplay projects={projects} />
           </TabsContent>
           <TabsContent value="archived">
-            <ProjectsDisplay
-              projects={projects}
-              onOpenProject={handleOpenProject}
-              onUpdateProject={updateProject}
-              onDeleteProject={deleteProject}
-            />
+            <ProjectsDisplay projects={projects} />
+          </TabsContent>
+          <TabsContent value="invited">
+            <ProjectsDisplay projects={invitedProjects} />
           </TabsContent>
         </Tabs>
       </div>

@@ -2,10 +2,10 @@ import { Database } from "./database.types";
 
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Blueprint = Database["public"]["Tables"]["blue_prints"]["Row"];
-export type BlueprintCard =
-  Database["public"]["Tables"]["blueprint_cards"]["Row"];
+export type BlueprintCard = Database["public"]["Tables"]["blueprint_cards"]["Row"];
 export type BlueprintType = Database["public"]["Enums"]["blueprint_type"];
 export type FsNode = Database["public"]["Tables"]["fs_nodes"]["Row"];
+export type Invitation = Database["public"]["Tables"]["invitations"]["Row"];
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -35,7 +35,6 @@ export interface UpdateProjectDto {
 }
 
 // Project response types
-export interface ProjectResponse extends Project {}
 
 export interface ProjectStats {
   totalFiles: number;
@@ -45,16 +44,8 @@ export interface ProjectStats {
 }
 
 export interface ProjectListResponse {
-  projects: ProjectResponse[];
+  projects: Project[];
   total: number;
-}
-
-// API Response wrappers
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
 }
 
 export interface DeleteResponse {
@@ -211,18 +202,28 @@ export interface CommentStats {
 }
 
 export interface ProjectMember {
-  project_id: string;
-  user_id: string;
   created_at: string;
-  profiles: {
-    user_id: string;
-    full_name: string;
-    username: string;
-    email: string;
-    avatar_url: string | null;
-  };
+  user_id: string;
+  username: string | null;
+  full_name: string;
+  email: string;
+  is_author: boolean;
+  avatar_url: string | null;
 }
 
 export interface AddMemberDto {
   email: string;
+}
+
+export interface EmailSendingApiRequestDto{
+  projectId: string;
+  emails: string[];
+  inviterName: string;
+}
+
+export interface EmailSendingJobData {
+  projectId: string;
+  emails: string[];
+  inviterName: string;
+  projectTitle: string;
 }

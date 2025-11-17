@@ -1,6 +1,3 @@
-Need to install the following packages:
-supabase@2.54.11
-Ok to proceed? (y) 
 export type Json =
   | string
   | number
@@ -244,6 +241,35 @@ export type Database = {
           },
         ]
       }
+      invitations: {
+        Row: {
+          created_at: string
+          email: string
+          invite_code: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          invite_code?: string
+          project_id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          invite_code?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -313,16 +339,19 @@ export type Database = {
       projects_members: {
         Row: {
           created_at: string
+          is_author: boolean | null
           project_id: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
+          is_author?: boolean | null
           project_id?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
+          is_author?: boolean | null
           project_id?: string | null
           user_id?: string | null
         }
@@ -463,6 +492,7 @@ export type Database = {
     Enums: {
       blueprint_type: "character" | "timeline"
       blueprint_types: "character" | "timeline" | "other"
+      invitation_status: "pending" | "rejected"
       node_type: "folder" | "file"
       user_role: "writer" | "reader"
     }
@@ -594,6 +624,7 @@ export const Constants = {
     Enums: {
       blueprint_type: ["character", "timeline"],
       blueprint_types: ["character", "timeline", "other"],
+      invitation_status: ["pending", "rejected"],
       node_type: ["folder", "file"],
       user_role: ["writer", "reader"],
     },

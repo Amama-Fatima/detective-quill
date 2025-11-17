@@ -1,37 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Clock } from "lucide-react";
 import { NAV_ITEMS } from "@/constants/project-constants";
 import ChangeStateDropDown from "./change-state-dropdown";
 import InviteMembersDialog from "./invite-memebers-dialog";
+import {
+  Project,
+  ProjectMember,
+  Invitation,
+} from "@detective-quill/shared-types";
 import MembersTable from "./members-table";
-
-interface Project {
-  id: string;
-  title: string;
-  description: string | null;
-  author_id: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-  is_active: boolean | null;
-}
+import PendingInvitations from "./pending-invitations";
+import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 
 interface WorkspaceMainBodyProps {
   project: Project;
+  userId: string;
+  members: ProjectMember[] | [];
+  invitations: Invitation[] | [];
 }
 
-const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
+const WorkspaceMainBody = ({
+  project,
+  userId,
+  members,
+  invitations,
+}: WorkspaceMainBodyProps) => {
   const navItems = NAV_ITEMS.map((item) => ({
     ...item,
     href: item.href.replace("123", project.id),
   }));
 
+  const isOwner = userId === project.author_id;
+
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const { setInvitations, setNotAllowedEmails } = useBetaReaderEmailsStore();
+  const invitedEmails = invitations.map((inv) => inv.email);
+  const memberEmails = members.map((member) => member.email);
+
+  useEffect(() => {
+    // Read current store state (zustand hook exposes getState)
+    const storeState = useBetaReaderEmailsStore.getState();
+    const prevInvitations = storeState.invitations || [];
+    const prevNotAllowed = storeState.notAllowedEmails || [];
+
+    const nextInvitations = invitations || [];
+    const prevInvKeys = prevInvitations
+      .map((p) => p.invite_code ?? p.email)
+      .sort()
+      .join(",");
+    const nextInvKeys = nextInvitations
+      .map((p) => p.invite_code ?? p.email)
+      .sort()
+      .join(",");
+    if (prevInvKeys !== nextInvKeys) {
+      setInvitations(nextInvitations);
+    }
+
+    const nextNotAllowed = [...invitedEmails, ...memberEmails];
+    const prevNotAllowedJoined = prevNotAllowed.slice().sort().join(",");
+    const nextNotAllowedJoined = nextNotAllowed.slice().sort().join(",");
+    if (prevNotAllowedJoined !== nextNotAllowedJoined) {
+      setNotAllowedEmails(nextNotAllowed);
+    }
+  }, [invitations, members, setInvitations, setNotAllowedEmails]);
 
   return (
-    <div className="min-h-screen px-10 py-6">
+    <div className="min-h-[80vh] px-10 py-6">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
@@ -50,13 +87,16 @@ const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-4">
-          <ChangeStateDropDown />
-          <InviteMembersDialog
-            inviteDialogOpen={inviteDialogOpen}
-            setInviteDialogOpen={setInviteDialogOpen}
-          />
-        </div>
+        {isOwner && (
+          <div className="flex items-center gap-4">
+            <ChangeStateDropDown />
+            <InviteMembersDialog
+              inviteDialogOpen={inviteDialogOpen}
+              setInviteDialogOpen={setInviteDialogOpen}
+              projectId={project.id}
+            />
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
@@ -82,7 +122,14 @@ const WorkspaceMainBody = ({ project }: WorkspaceMainBodyProps) => {
       </nav>
 
       {/* Members Table */}
-      <MembersTable />
+      <MembersTable
+        isOwner={isOwner}
+        initialMembers={members}
+        projectId={project.id}
+        userId={userId}
+      />
+
+      {isOwner && <PendingInvitations projectId={project.id} />}
     </div>
   );
 };

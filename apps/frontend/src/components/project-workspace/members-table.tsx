@@ -9,44 +9,91 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import RemoveMemberDialog from "./remove-member-dialog";
 import { Badge } from "../ui/badge";
+import { ProjectMember } from "@detective-quill/shared-types";
+import { removeProjectMember } from "@/lib/backend-calls/members";
+import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
+import { Card, CardContent } from "../ui/card";
+import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 
-//todo: fetch the members on server side from supabase, then for removal, make api call to backend
-
-interface Member {
-  id: string;
-  name: string;
-  role: "Author" | "Beta Reader";
-  avatar?: string;
-}
-
-const initialMembers: Member[] = [
-  { id: "1", name: "Wlara Vance", role: "Author" },
-  { id: "2", name: "Jaxson Reid", role: "Beta Reader" },
-  { id: "3", name: "Lena Petrova", role: "Beta Reader" },
-  { id: "4", name: "Marcus Thorne", role: "Beta Reader" },
-];
-
-const MembersTable = () => {
-  const [members, setMembers] = useState<Member[]>(initialMembers);
-  const [memberToRemove, setMemberToRemove] = useState<Member | null>(null);
+const MembersTable = ({
+  isOwner,
+  initialMembers,
+  projectId,
+  userId,
+}: {
+  isOwner: boolean;
+  initialMembers: ProjectMember[] | [];
+  projectId: string;
+  userId: string;
+}) => {
+  const [members, setMembers] = useState<ProjectMember[]>(initialMembers);
+  const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(
+    null
+  );
+  const { setNotAllowedEmails, notAllowedEmails } = useBetaReaderEmailsStore();
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const handleRemoveMember = (member: Member) => {
+  const { session } = useAuth();
+  const accessToken = session?.access_token;
+
+  const handleRemoveMember = (member: ProjectMember) => {
     setMemberToRemove(member);
     setRemoveDialogOpen(true);
   };
 
-  const confirmRemoveMember = () => {
+  const confirmRemoveMember = async () => {
     if (memberToRemove) {
-      setMembers(members.filter((m) => m.id !== memberToRemove.id));
-      setRemoveDialogOpen(false);
-      setMemberToRemove(null);
+      try {
+        setDeleting(true);
+        await removeProjectMember(
+          accessToken!,
+          projectId,
+          memberToRemove.user_id
+        );
+        setMembers(members.filter((m) => m.user_id !== memberToRemove.user_id));
+        setRemoveDialogOpen(false);
+        setMemberToRemove(null);
+
+        const updatedNotAllowedEmails = notAllowedEmails.filter(
+          (email) => email !== memberToRemove.email
+        );
+        setNotAllowedEmails(updatedNotAllowedEmails);
+        toast.success("Member removed successfully");
+      } catch (error) {
+        console.error("Error removing member:", error);
+        toast.error("Failed to remove member. Please try again.");
+      } finally {
+        setDeleting(false);
+      }
     }
   };
+
+  if (members.length === 0) {
+    return (
+      <Card className="text-center py-16 border-2 border-muted bg-gradient-to-br from-card/70 to-chart-5/30">
+        <CardContent>
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="rounded-full bg-primary/10 p-8 text-center">
+              <UserPlus className="h-12 w-12 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="mystery-title text-2xl">No Beta Readers Added</h3>
+              <p className="text-muted-foreground noir-text max-w-md">
+                Your project currently has no beta readers. Invite members to
+                collaborate and provide feedback on your writing.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="">
@@ -59,72 +106,80 @@ const MembersTable = () => {
         </div>
         <div className="w-[65%] mx-auto">
           <div className="noir-text bg-card-foreground/20 rounded-lg border overflow-hidden shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow className="">
-                  <TableHead className="font-semibold text-lg">
-                    Member
-                  </TableHead>
-                  <TableHead className="font-semibold text-lg">Role</TableHead>
-                  <TableHead className="text-right font-semibold text-lg">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {members.map((member, index) => (
-                  <TableRow
-                    key={member.id}
-                    className="hover:bg-card transition-colors"
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border-2 border-gray-100">
-                          <AvatarImage src={member.avatar} alt={member.name} />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
-                            {member.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{member.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {`member${index + 1}@project.com`}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className="bg-secondary-foreground text-secondary text-[0.9rem] hover:bg-muted-foreground font-medium"
-                      >
-                        {member.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveMember(member)}
-                        className="hover:bg-red-50 hover:text-red-600 cursor-pointer transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+            {members.length > 0 && (
+              <Table>
+                <TableHeader>
+                  <TableRow className="">
+                    <TableHead className="font-semibold text-lg">
+                      Member
+                    </TableHead>
+                    <TableHead className="font-semibold text-lg">
+                      Role
+                    </TableHead>
+                    {isOwner && (
+                      <TableHead className="text-right font-semibold text-lg">
+                        Actions
+                      </TableHead>
+                    )}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {members.map((member, index) => (
+                    <TableRow
+                      key={member.user_id}
+                      className="hover:bg-card transition-colors"
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10 border-2 border-gray-100">
+                            <AvatarImage
+                              src={member.avatar_url ?? undefined}
+                              alt={member.full_name}
+                            />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+                              {member.full_name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {member.full_name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {`member${index + 1}@project.com`}
+                            </span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className="bg-secondary-foreground text-secondary text-[0.9rem] hover:bg-muted-foreground font-medium"
+                        >
+                          {!member.is_author ? "Beta Reader" : "Author"}
+                        </Badge>
+                      </TableCell>
+                      {isOwner && member.user_id !== userId && (
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveMember(member)}
+                            className="hover:bg-red-50 hover:text-red-600 cursor-pointer transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </div>
-        {members.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            <p>No members yet. Add someone to get started!</p>
-          </div>
-        )}
       </div>
       {/* Delete Confirmation Dialog */}
       <RemoveMemberDialog
@@ -132,6 +187,7 @@ const MembersTable = () => {
         onOpenChange={(v) => setRemoveDialogOpen(v)}
         member={memberToRemove}
         onConfirm={confirmRemoveMember}
+        isLoading={deleting}
       />
     </div>
   );

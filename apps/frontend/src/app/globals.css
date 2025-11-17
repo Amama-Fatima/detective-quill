@@ -52,11 +52,11 @@
   --foreground: oklch(0.22 0.01 30); /* Licorice text */
 
   --background: oklch(0.87 0.03 85); /* deep beige */
-  --card: oklch(85.044% 0.02753 85.656); /* card slightly darker */
+  --card: oklch(74.434% 0.02172 91.647); /* card slightly darker */
   --drag-card: oklch(78.823% 0.02677 84.576); /* card slightly darker */
   --popover: oklch(0.87 0.03 85); /* matching background */
 
-  --card-foreground: oklch(0.22 0.01 30);
+  --card-foreground: oklch(27.68% 0.00557 91.585);
 
   --popover-foreground: oklch(0.22 0.01 30);
 

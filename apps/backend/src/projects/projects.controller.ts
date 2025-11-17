@@ -19,7 +19,7 @@ import {
 } from "./validation/project.validation";
 import { AuthGuard } from "../auth/auth.guard";
 import {
-  ProjectResponse,
+  Project,
   ProjectStats,
   DeleteResponse,
   ApiResponse,
@@ -34,12 +34,11 @@ export class ProjectsController {
   async create(
     @Body() createProjectDto: CreateProjectDto,
     @Request() req
-  ): Promise<ApiResponse<ProjectResponse>> {
+  ): Promise<ApiResponse<Project>> {
     try {
       const data = await this.projectsService.createProject(
         createProjectDto,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -52,11 +51,10 @@ export class ProjectsController {
     @Request() req,
     @Query("includeInactive", new DefaultValuePipe(false), ParseBoolPipe)
     includeInactive: boolean
-  ): Promise<ApiResponse<ProjectResponse[]>> {
+  ): Promise<ApiResponse<Project[]>> {
     try {
       const data = await this.projectsService.findAllUserProjects(
         req.user.id,
-        req.accessToken,
         includeInactive
       );
       return { success: true, data };
@@ -66,12 +64,9 @@ export class ProjectsController {
   }
 
   @Get("deleted")
-  async findDeleted(@Request() req): Promise<ApiResponse<ProjectResponse[]>> {
+  async findDeleted(@Request() req): Promise<ApiResponse<Project[]>> {
     try {
-      const data = await this.projectsService.getDeletedProjects(
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.projectsService.getDeletedProjects(req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -82,13 +77,9 @@ export class ProjectsController {
   async findOne(
     @Param("id") id: string,
     @Request() req
-  ): Promise<ApiResponse<ProjectResponse>> {
+  ): Promise<ApiResponse<Project>> {
     try {
-      const data = await this.projectsService.findProjectById(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.projectsService.findProjectById(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -101,11 +92,7 @@ export class ProjectsController {
     @Request() req
   ): Promise<ApiResponse<ProjectStats>> {
     try {
-      const data = await this.projectsService.getProjectStats(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.projectsService.getProjectStats(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -117,13 +104,12 @@ export class ProjectsController {
     @Param("id") id: string,
     @Body() updateProjectDto: UpdateProjectDto,
     @Request() req
-  ): Promise<ApiResponse<ProjectResponse>> {
+  ): Promise<ApiResponse<Project>> {
     try {
-      const data = await this.projectsService.updateProject(
+      const data = await this.projectsService.updateProjectInfo(
         id,
         updateProjectDto,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -135,16 +121,9 @@ export class ProjectsController {
   async remove(
     @Param("id") id: string,
     @Request() req,
-    @Query("hard", new DefaultValuePipe(false), ParseBoolPipe)
-    hardDelete: boolean
   ): Promise<ApiResponse<DeleteResponse>> {
     try {
-      const data = await this.projectsService.deleteProject(
-        id,
-        req.user.id,
-        req.accessToken,
-        hardDelete
-      );
+      const data = await this.projectsService.deleteProject(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -155,13 +134,9 @@ export class ProjectsController {
   async restore(
     @Param("id") id: string,
     @Request() req
-  ): Promise<ApiResponse<ProjectResponse>> {
+  ): Promise<ApiResponse<Project>> {
     try {
-      const data = await this.projectsService.restoreProject(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.projectsService.restoreProject(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };

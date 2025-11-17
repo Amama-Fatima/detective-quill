@@ -19,6 +19,7 @@ export class CreateBlueprintDto implements ICreateBlueprintDto {
   project_id: string;
 
   @IsString()
+  @IsNotEmpty()
   @IsIn(["character", "timeline", "other"])
   type: BlueprintType;
 }

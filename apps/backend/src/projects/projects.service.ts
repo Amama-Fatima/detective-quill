@@ -2,79 +2,50 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import {
   CreateProjectDto,
   UpdateProjectDto,
-  ProjectResponse,
+  Project,
   ProjectStats,
   DeleteResponse,
 } from "@detective-quill/shared-types";
 
+// todo: add transactions where needed
+
 @Injectable()
 export class ProjectsService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+  ) {}
 
   async createProject(
     createProjectDto: CreateProjectDto,
-    userId: string,
-    accessToken: string
-  ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    userId: string
+  ): Promise<Project> {
+    const supabase = this.supabaseService.client;
 
-    try {
-      // Step 1: Create the project
-      const { data: project, error: projectError } = await supabase
-        .from("projects")
-        .insert({
-          title: createProjectDto.title,
-          description: createProjectDto.description || null,
-          author_id: userId,
-        })
-        .select()
-        .single();
+    const { data, error } = await supabase.rpc("create_project_with_author", {
+      p_title: createProjectDto.title,
+      p_description: createProjectDto.description || null,
+      p_user_id: userId,
+    });
 
-      if (projectError) {
-        throw new BadRequestException(
-          `Failed to create project: ${projectError.message}`
-        );
-      }
-
-      // Step 2: Add the creator as a project member
-      const { error: memberError } = await supabase
-        .from("projects_members")
-        .insert({
-          project_id: project.id,
-          user_id: userId,
-        });
-
-      if (memberError) {
-        // Cleanup: delete the project if member insertion fails
-        await supabase.from("projects").delete().eq("id", project.id);
-
-        throw new BadRequestException(
-          `Failed to add project member: ${memberError.message}`
-        );
-      }
-
-      return project;
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
+    if (error) {
       throw new BadRequestException(
         `Failed to create project: ${error.message}`
       );
     }
+    return data;
   }
 
   async findAllUserProjects(
     userId: string,
-    accessToken: string,
     includeInactive: boolean = false
-  ): Promise<ProjectResponse[]> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+  ): Promise<Project[]> {
+    const supabase = this.supabaseService.client;
 
     let query = supabase
       .from("projects")
@@ -99,10 +70,9 @@ export class ProjectsService {
 
   async findProjectById(
     projectId: string,
-    userId: string,
-    accessToken: string
-  ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    userId: string
+  ): Promise<Project> {
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("projects")
@@ -118,25 +88,24 @@ export class ProjectsService {
     return data;
   }
 
-  async updateProject(
+  // Update project information (title, description)
+  async updateProjectInfo(
     projectId: string,
-    updateProjectDto: UpdateProjectDto,
-    userId: string,
-    accessToken: string
-  ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    updateData: UpdateProjectDto,
+    userId: string
+  ): Promise<Project> {
+    const supabase = this.supabaseService.client;
 
-    // First check if project exists and belongs to user
-    await this.findProjectById(projectId, userId, accessToken);
+    // First verify the user is the project owner
+    await this.verifyProjectOwnership(projectId, userId);
 
     const { data, error } = await supabase
       .from("projects")
       .update({
-        ...updateProjectDto,
+        ...updateData,
         updated_at: new Date().toISOString(),
       })
       .eq("id", projectId)
-      .eq("author_id", userId)
       .select()
       .single();
 
@@ -151,57 +120,40 @@ export class ProjectsService {
 
   async deleteProject(
     projectId: string,
-    userId: string,
-    accessToken: string,
-    hardDelete: boolean = false
+    userId: string
   ): Promise<DeleteResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
-    // First check if project exists and belongs to user
-    await this.findProjectById(projectId, userId, accessToken);
+    // Verify the user is the project owner
+    await this.verifyProjectOwnership(projectId, userId);
 
-    if (hardDelete) {
-      // Hard delete - completely remove from database
-      const { error } = await supabase
-        .from("projects")
-        .delete()
-        .eq("id", projectId)
-        .eq("author_id", userId);
+    // First delete all project members
+    await supabase
+      .from("projects_members")
+      .delete()
+      .eq("project_id", projectId);
 
-      if (error) {
-        throw new BadRequestException(
-          `Failed to delete project: ${error.message}`
-        );
-      }
+    // Then delete the project
+    const { error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", projectId)
+      .eq("author_id", userId);
 
-      return { message: "Project permanently deleted" };
-    } else {
-      // Soft delete - mark as deleted
-      const { error } = await supabase
-        .from("projects")
-        .update({
-          is_deleted: true,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", projectId)
-        .eq("author_id", userId);
-
-      if (error) {
-        throw new BadRequestException(
-          `Failed to delete project: ${error.message}`
-        );
-      }
-
-      return { message: "Project moved to trash" };
+    if (error) {
+      throw new BadRequestException(
+        `Failed to delete project: ${error.message}`
+      );
     }
+
+    return { message: "Project permanently deleted" };
   }
 
   async restoreProject(
     projectId: string,
-    userId: string,
-    accessToken: string
-  ): Promise<ProjectResponse> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    userId: string
+  ): Promise<Project> {
+    const supabase = this.supabaseService.client;
 
     // Check if project exists (including deleted ones)
     const { data: existingProject, error: findError } = await supabase
@@ -239,11 +191,8 @@ export class ProjectsService {
     return data;
   }
 
-  async getDeletedProjects(
-    userId: string,
-    accessToken: string
-  ): Promise<ProjectResponse[]> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+  async getDeletedProjects(userId: string): Promise<Project[]> {
+    const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
       .from("projects")
@@ -263,13 +212,12 @@ export class ProjectsService {
 
   async getProjectStats(
     projectId: string,
-    userId: string,
-    accessToken: string
+    userId: string
   ): Promise<ProjectStats> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     // First verify project exists and belongs to user
-    await this.findProjectById(projectId, userId, accessToken);
+    await this.findProjectById(projectId, userId);
 
     // Get file and folder counts
     const { data: stats, error } = await supabase
@@ -303,5 +251,29 @@ export class ProjectsService {
       totalWordCount,
       lastModified,
     };
+  }
+
+  // Helper method to verify project ownership ( cannot make this private, need it in other places)
+  async verifyProjectOwnership(
+    projectId: string,
+    userId: string
+  ): Promise<void> {
+    const supabase = this.supabaseService.client;
+
+    const { data, error } = await supabase
+      .from("projects")
+      .select("author_id")
+      .eq("id", projectId)
+      .single();
+
+    if (error || !data) {
+      throw new NotFoundException("Project not found");
+    }
+
+    if (data.author_id !== userId) {
+      throw new ForbiddenException(
+        "Only the project owner can perform this action"
+      );
+    }
   }
 }

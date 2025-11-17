@@ -8,4 +8,12 @@ module.exports = {
       },
     ],
   },
+  webpack: (config: any, { isServer }: { isServer?: boolean }) => {
+    if (isServer) {
+      config.ignoreWarnings = [
+        { module: /node_modules\/@supabase\/realtime-js/ },
+      ];
+    }
+    return config;
+  },
 };

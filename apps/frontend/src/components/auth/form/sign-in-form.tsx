@@ -14,24 +14,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Eye,
-  EyeOff,
-  Loader2,
-  Mail,
-  Lock,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { SignInFormValues, signInSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import ConfirmationMessages from "../confirmation-messages";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams?.get("redirectTo") ?? "/";
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -55,6 +50,8 @@ export function SignInForm() {
       if (error) {
         throw error;
       }
+      // Redirect manually after successful sign-in
+      window.location.assign(`${window.location.origin}${redirectTo}`);
       console.log("data sign in is ", data);
     } catch (error) {
       setError("Invalid email or password");

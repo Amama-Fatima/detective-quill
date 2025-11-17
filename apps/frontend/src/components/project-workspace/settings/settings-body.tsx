@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useSettings } from "@/hooks/use-settings";
 import { ProjectMember } from "@detective-quill/shared-types";
 import { ProjectDetailsCard } from "./project-details-card";
-import { TeamMembersCard } from "./team-members-card";
 import { DangerZoneCard } from "./danger-zone-card";
 import { CaseInfoCard } from "./case-info-card";
 
@@ -32,12 +31,9 @@ const ProjectSettingsBody = ({
 }: ProjectSettingsBodyProps) => {
   const {
     members,
-    updating,
     addingMember,
-    updateProject,
     addMember,
     removeMember,
-    deleteProject,
   } = useSettings(project.id, initialMembers);
 
   const [isEditingProject, setIsEditingProject] = useState(false);
@@ -50,20 +46,6 @@ const ProjectSettingsBody = ({
 
   // Check if current user is the project owner
   const isOwner = project.author_id === currentUserId;
-
-  const handleSaveProject = async () => {
-    const success = await updateProject({
-      title: projectTitle,
-      description: projectDescription,
-    });
-
-    if (success) {
-      setIsEditingProject(false);
-      // Update local state to reflect the changes immediately
-      project.title = projectTitle;
-      project.description = projectDescription;
-    }
-  };
 
   const handleAddMember = async () => {
     if (!newMemberEmail.trim()) {
@@ -80,10 +62,6 @@ const ProjectSettingsBody = ({
 
   const handleRemoveMember = async (memberId: string) => {
     await removeMember(memberId);
-  };
-
-  const handleDeleteProject = async () => {
-    await deleteProject();
   };
 
   return (
@@ -106,7 +84,7 @@ const ProjectSettingsBody = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Settings */}
-          <div className="lg:col-span-2 space-y-8">
+          {/* <div className="lg:col-span-2 space-y-8">
             <ProjectDetailsCard
               project={project}
               isOwner={isOwner}
@@ -116,32 +94,12 @@ const ProjectSettingsBody = ({
               setProjectTitle={setProjectTitle}
               projectDescription={projectDescription}
               setProjectDescription={setProjectDescription}
-              onSave={handleSaveProject}
-              updating={updating}
             />
-
-            <TeamMembersCard
-              members={members}
-              isOwner={isOwner}
-              projectAuthorId={project.author_id}
-              isAddMemberOpen={isAddMemberOpen}
-              setIsAddMemberOpen={setIsAddMemberOpen}
-              newMemberEmail={newMemberEmail}
-              setNewMemberEmail={setNewMemberEmail}
-              onAddMember={handleAddMember}
-              onRemoveMember={handleRemoveMember}
-              addingMember={addingMember}
-            />
-          </div>
+          </div> */}
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {isOwner && (
-              <DangerZoneCard
-                projectTitle={project.title}
-                onDeleteProject={handleDeleteProject}
-              />
-            )}
+
 
             <CaseInfoCard project={project} teamSize={members.length} />
           </div>

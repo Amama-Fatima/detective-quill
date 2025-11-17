@@ -35,8 +35,7 @@ export class FsNodesController {
     try {
       const data = await this.fsNodesService.createNode(
         createNodeDto,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -52,8 +51,7 @@ export class FsNodesController {
     try {
       const data = await this.fsNodesService.getProjectTree(
         projectId,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -69,8 +67,7 @@ export class FsNodesController {
     try {
       const data = await this.fsNodesService.getProjectStats(
         projectId,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -84,11 +81,7 @@ export class FsNodesController {
     @Request() req
   ): Promise<ApiResponse<FsNodeResponse[]>> {
     try {
-      const data = await this.fsNodesService.getNodeChildren(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.fsNodesService.getNodeChildren(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -101,11 +94,7 @@ export class FsNodesController {
     @Request() req
   ): Promise<ApiResponse<FsNodeResponse>> {
     try {
-      const data = await this.fsNodesService.getNode(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.fsNodesService.getNode(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -122,8 +111,7 @@ export class FsNodesController {
       const data = await this.fsNodesService.updateNode(
         id,
         updateNodeDto,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {
@@ -137,11 +125,7 @@ export class FsNodesController {
     @Request() req
   ): Promise<ApiResponse<DeleteResponse>> {
     try {
-      const data = await this.fsNodesService.deleteNode(
-        id,
-        req.user.id,
-        req.accessToken
-      );
+      const data = await this.fsNodesService.deleteNode(id, req.user.id);
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message };
@@ -159,8 +143,7 @@ export class FsNodesController {
         id,
         moveData.parent_id,
         moveData.sort_order,
-        req.user.id,
-        req.accessToken
+        req.user.id
       );
       return { success: true, data };
     } catch (error) {

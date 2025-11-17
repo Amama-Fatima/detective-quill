@@ -10,10 +10,9 @@ export class BlueprintsService {
 
   async createBlueprint(
     userId: string,
-    accessToken: string,
     createBlueprintDto: CreateBlueprintDto
   ): Promise<Blueprint> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data: blueprint, error: blueprintError } = await supabase
       .from("blue_prints")
@@ -32,10 +31,9 @@ export class BlueprintsService {
   async updatedBlueprint(
     userId: string,
     blueprintId: string,
-    accessToken: string,
     updateBlueprintDto: UpdateBlueprintDto
   ): Promise<Blueprint | null> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { data: blueprint, error: blueprintError } = await supabase
       .from("blue_prints")
@@ -61,10 +59,9 @@ export class BlueprintsService {
 
   async deleteBlueprint(
     userId: string,
-    blueprintId: string,
-    accessToken: string
+    blueprintId: string
   ): Promise<void> {
-    const supabase = this.supabaseService.getClientWithAuth(accessToken);
+    const supabase = this.supabaseService.client;
 
     const { error: deleteError } = await supabase
       .from("blue_prints")

@@ -1,6 +1,7 @@
 // src/queue/queue.service.ts
 import { Injectable, Inject } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
+import { EmailSendingJobData } from "@detective-quill/shared-types";
 
 export interface EmbeddingJobData {
   fs_node_id: string;
@@ -14,7 +15,7 @@ export interface EmbeddingJobData {
   global_sequence?: number;
   timeline_path?: string;
 }
-
+// todo: where will errors that are thrown here be catched?
 @Injectable()
 export class QueueService {
   constructor(
@@ -33,6 +34,18 @@ export class QueueService {
       console.log(`Embedding job queued for fs_node_id: ${jobData.fs_node_id}`);
     } catch (error) {
       console.error("Failed to queue embedding job:", error);
+      throw error;
+    }
+  }
+
+  sendInviteEmailsJob(jobData: EmailSendingJobData) {
+    try {
+      this.rabbitClient.emit("invite_email_job", {
+        ...jobData,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Failed to queue invite emails job:", error);
       throw error;
     }
   }

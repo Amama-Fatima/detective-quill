@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import {
   FsNodeTreeResponse,
   FsNodeResponse,
-  ProjectResponse,
+  Project,
 } from "@detective-quill/shared-types";
 import { notFound, redirect } from "next/navigation";
 
@@ -60,7 +60,7 @@ async function fetchProject(
   supabase: any,
   projectId: string,
   userId: string
-): Promise<ProjectResponse> {
+): Promise<Project> {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
