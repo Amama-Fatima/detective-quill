@@ -2,8 +2,13 @@ import WorkspaceMainBody from "@/components/project-workspace/project-workspace-
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import React from "react";
-import { getProjectMembers } from "@/lib/supabase-calls/members";
+import {
+  getProjectMembers,
+  verifyMembership,
+} from "@/lib/supabase-calls/members";
 import ErrorMsg from "@/components/error-msg";
+import { getProjectInvitations } from "@/lib/supabase-calls/invitations";
+
 interface ProjectWorkspacePageProps {
   params: Promise<{
     projectId: string;
@@ -36,14 +41,31 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     return <ErrorMsg message="Project not found" />;
   }
 
+  const isMember = await verifyMembership(projectId, user.id, supabase);
+  if (!isMember) {
+    throw new Error("User is not authorized to view project");
+  }
+
+  // console.log("Project data:", data, isMember);
+
   let { members, error: membersError } = await getProjectMembers(
     projectId,
-    user.id
+    supabase
+  );
+
+  let { invitations, error: invitationsError } = await getProjectInvitations(
+    projectId,
+    supabase
   );
 
   if (membersError) {
     console.error("Error fetching project members:", membersError);
     members = [];
+  }
+
+  if (invitationsError) {
+    console.error("Error fetching project invitations:", invitationsError);
+    invitations = [];
   }
 
   return (
@@ -52,6 +74,7 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
         project={data}
         userId={user.id}
         members={members || []}
+        invitations={invitations || []}
       />
     </div>
   );

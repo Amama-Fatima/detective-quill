@@ -49,9 +49,9 @@ export async function inviteProjectMembers(
 
 // Remove project member
 export async function removeProjectMember(
+  accessToken: string,
   projectId: string,
   memberId: string,
-  accessToken: string
 ): Promise<ApiResponse<void>> {
   return makeAuthenticatedRequest<void>(
     `/projects/${projectId}/members/${memberId}`,

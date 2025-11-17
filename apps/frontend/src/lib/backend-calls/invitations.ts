@@ -1,5 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-import { ApiResponse, Invitation } from "@detective-quill/shared-types";
+import { ApiResponse } from "@detective-quill/shared-types";
 
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
@@ -44,16 +44,6 @@ export async function respondToInvitation(
     throw new Error(`Failed to respond to invitation: ${apiResponse.message}`);
   }
   return apiResponse;
-}
-
-export async function getProjectInvitations(
-  projectId: string,
-  accessToken: string
-): Promise<ApiResponse<Invitation[]>> {
-  return makeAuthenticatedRequest<Invitation[]>(
-    `/invitations/${projectId}`,
-    accessToken
-  );
 }
 
 export async function deleteInvitation(

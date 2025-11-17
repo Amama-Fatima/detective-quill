@@ -17,6 +17,8 @@ import { inviteProjectMembers } from "@/lib/backend-calls/members";
 import { EmailSendingApiRequestDto } from "@detective-quill/shared-types";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import { validateEmails } from "@/lib/utils/invitation-utils";
+import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 
 interface InviteMembersDialogProps {
   inviteDialogOpen: boolean;
@@ -35,7 +37,6 @@ const InviteMembersDialog = ({
   const { user, session } = useAuth();
   const username = user?.user_metadata.full_name || "Someone";
   const accessToken = session?.access_token || "";
-  console.log("user", user);
 
   const handleAddEmailField = () => setEmails([...emails, ""]);
 
@@ -44,20 +45,34 @@ const InviteMembersDialog = ({
     updated[index] = value;
     setEmails(updated);
   };
+  const { setNotAllowedEmails, notAllowedEmails } = useBetaReaderEmailsStore();
 
   const handleSendInvitations = async () => {
     try {
       setLoading(true);
+      const { validEmails, invalidEmails } = validateEmails(
+        emails,
+        notAllowedEmails
+      );
+      if (invalidEmails.length > 0) {
+        toast.error(
+          `Emails already invited: ${invalidEmails.join(
+            ", "
+          )}. Enter valid emails and try again.`
+        );
+        return;
+      }
       const requestData: EmailSendingApiRequestDto = {
         projectId,
-        emails,
+        emails: validEmails,
         inviterName: username,
       };
-      console.log("Inviting:", emails);
       await inviteProjectMembers(requestData, accessToken);
-      toast.success("Invitation emails sent successfully");
+      const updatedNotAllowedEmails = [...notAllowedEmails, ...validEmails];
+      setNotAllowedEmails(updatedNotAllowedEmails);
       setInviteDialogOpen(false);
       setEmails([""]);
+      toast.success("Invitation emails sent successfully");
     } catch (error) {
       console.error("Error sending invitations:", error);
       toast.error("Failed to send invitation emails");
@@ -75,7 +90,9 @@ const InviteMembersDialog = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="mystery-title text-xl">Invite Beta Readers</DialogTitle>
+          <DialogTitle className="mystery-title text-xl">
+            Invite Beta Readers
+          </DialogTitle>
           <DialogDescription className="noir-text text-[1rem]">
             Enter the email addresses of the readers you’d like to invite.
           </DialogDescription>
@@ -85,7 +102,7 @@ const InviteMembersDialog = ({
           {emails.map((email, index) => (
             <Input
               key={index}
-              type="email"    
+              type="email"
               placeholder="Enter email"
               value={email}
               onChange={(e) => handleEmailChange(index, e.target.value)}

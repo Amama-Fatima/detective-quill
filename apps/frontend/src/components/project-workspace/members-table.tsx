@@ -18,6 +18,7 @@ import { removeProjectMember } from "@/lib/backend-calls/members";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { Card, CardContent } from "../ui/card";
+import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 
 const MembersTable = ({
   isOwner,
@@ -34,6 +35,7 @@ const MembersTable = ({
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(
     null
   );
+  const { setNotAllowedEmails, notAllowedEmails } = useBetaReaderEmailsStore();
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -44,8 +46,6 @@ const MembersTable = ({
     setMemberToRemove(member);
     setRemoveDialogOpen(true);
   };
-
-  console.log("members are ", members);
 
   const confirmRemoveMember = async () => {
     if (memberToRemove) {
@@ -59,6 +59,11 @@ const MembersTable = ({
         setMembers(members.filter((m) => m.user_id !== memberToRemove.user_id));
         setRemoveDialogOpen(false);
         setMemberToRemove(null);
+
+        const updatedNotAllowedEmails = notAllowedEmails.filter(
+          (email) => email !== memberToRemove.email
+        );
+        setNotAllowedEmails(updatedNotAllowedEmails);
         toast.success("Member removed successfully");
       } catch (error) {
         console.error("Error removing member:", error);

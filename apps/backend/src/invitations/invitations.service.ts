@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
-import { type Invitation } from "@detective-quill/shared-types";
 import { MembersService } from "../members/members.service";
 import { ProjectsService } from "../projects/projects.service";
 
@@ -47,18 +46,6 @@ export class InvitationsService {
     }
 
     return;
-  }
-
-  async getProjectInvitations(projectId: string): Promise<Invitation[]> {
-    const supabase = this.supabaseService.client;
-    const { data, error } = await supabase
-      .from("invitations")
-      .select("*")
-      .eq("project_id", projectId);
-    if (error) {
-      throw new Error(`Failed to get project invitations: ${error.message}`);
-    }
-    return data || [];
   }
 
   async deleteInvitation(

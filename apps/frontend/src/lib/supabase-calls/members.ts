@@ -3,15 +3,9 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 
 export async function getProjectMembers(
   projectId: string,
-  userId: string
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ members: ProjectMember[] | null; error: string | null }> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const isMember = await verifyMembership(projectId, userId, supabase);
-    if (!isMember) {
-      throw new Error("User is not authorized to view project members");
-    }
-
     const { data, error } = await supabase
       .from("projects_members")
       .select(
@@ -62,18 +56,18 @@ export async function getProjectMembers(
   }
 }
 
-async function verifyMembership(
+export async function verifyMembership(
   projectId: string,
   userId: string,
-  supabase: any
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<boolean> {
   try {
     const { data: member, error: memberError } = await supabase
       .from("projects_members")
       .select("*")
       .eq("project_id", projectId)
-      .eq("user_id", userId)
-    if (member) {
+      .eq("user_id", userId);
+    if (member && member.length > 0) {
       return true;
     }
 

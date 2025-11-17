@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   UseGuards,
   Request,
   Post,
@@ -11,36 +10,13 @@ import {
   Param,
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
-import { ApiResponse, type Invitation } from "@detective-quill/shared-types";
+import { ApiResponse } from "@detective-quill/shared-types";
 import { InvitationsService } from "./invitations.service";
 
 @Controller("invitations")
 @UseGuards(AuthGuard)
 export class InvitationsController {
   constructor(private readonly invitationsService: InvitationsService) {}
-
-  @Get(":projectId")
-  async getProjectInvitations(
-    @Request() req
-  ): Promise<ApiResponse<Invitation[]>> {
-    const projectId = req.params.projectId;
-    try {
-      const invitations =
-        await this.invitationsService.getProjectInvitations(projectId);
-      return {
-        success: true,
-        message: "Project invitations retrieved successfully",
-        data: invitations,
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
-      );
-    }
-  }
 
   @Post(":inviteCode/respond")
   async respondToInvitation(

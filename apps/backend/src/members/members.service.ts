@@ -55,22 +55,6 @@ export class MembersService {
     return;
   }
 
-  // async addProjectAuthor(projectId: string, userId: string): Promise<void> {
-  //   const supabase = this.supabaseService.client;
-  //   const { data, error } = await supabase
-  //     .from("projects_members")
-  //     .insert({
-  //       project_id: projectId,
-  //       user_id: userId,
-  //       is_author: true,
-  //     })
-  //     .single();
-  //   if (error) {
-  //     throw new BadRequestException(`Failed to add author: ${error.message}`);
-  //   }
-  //   return;
-  // }
-
   // Remove a member from the project
   async removeProjectMember(
     projectId: string,
@@ -141,6 +125,8 @@ export class MembersService {
     }
   }
 
+
+
   // Helper method to verify project access (owner or member)
   // private async verifyProjectAccess(
   //   projectId: string,
@@ -172,4 +158,21 @@ export class MembersService {
   //     throw new ForbiddenException("Access denied to this project");
   //   }
   // }
+
+    // async addProjectAuthor(projectId: string, userId: string): Promise<void> {
+  //   const supabase = this.supabaseService.client;
+  //   const { data, error } = await supabase
+  //     .from("projects_members")
+  //     .insert({
+  //       project_id: projectId,
+  //       user_id: userId,
+  //       is_author: true,
+  //     })
+  //     .single();
+  //   if (error) {
+  //     throw new BadRequestException(`Failed to add author: ${error.message}`);
+  //   }
+  //   return;
+  // }
+
 }
