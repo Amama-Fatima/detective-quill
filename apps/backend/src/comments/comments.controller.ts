@@ -13,6 +13,9 @@ import {
   Query,
   ParseBoolPipe,
   DefaultValuePipe,
+  InternalServerErrorException,
+  NotFoundException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { CommentsService } from "./comments.service";
 import {
@@ -44,7 +47,9 @@ export class CommentsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -63,7 +68,12 @@ export class CommentsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -79,7 +89,15 @@ export class CommentsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -92,7 +110,12 @@ export class CommentsController {
       const data = await this.commentsService.findCommentById(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -110,7 +133,12 @@ export class CommentsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -123,7 +151,15 @@ export class CommentsController {
       const data = await this.commentsService.deleteComment(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -140,7 +176,15 @@ export class CommentsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -157,7 +201,15 @@ export class CommentsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 }

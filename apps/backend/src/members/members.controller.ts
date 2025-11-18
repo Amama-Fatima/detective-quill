@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Param,
-  Delete,
-  UseGuards,
-  Request,
-} from "@nestjs/common";
+import { Controller, Param, Delete, UseGuards, Request, NotFoundException, InternalServerErrorException, ForbiddenException } from "@nestjs/common";
 import { MembersService } from "./members.service";
 import { AuthGuard } from "../auth/auth.guard";
 import type { ApiResponse } from "@detective-quill/shared-types";
@@ -25,11 +19,19 @@ export class MembersController {
       await this.membersService.removeProjectMember(
         projectId,
         memberId,
-        req.user.id,
+        req.user.id
       );
       return { success: true, message: "Member removed successfully" };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 }

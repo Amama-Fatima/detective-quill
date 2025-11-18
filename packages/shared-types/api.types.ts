@@ -141,6 +141,7 @@ export interface UpdateCardTypeDto {
 
 export interface CreateBlueprintCardDto {
   content: string | null;
+  title: string | null;
   position_x: number;
   position_y: number;
 }

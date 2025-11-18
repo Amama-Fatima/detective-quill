@@ -2,6 +2,10 @@ import { SignUpForm } from "@/components/auth/form/sign-up-form";
 import { SocialAuth } from "@/components/auth/social-auth";
 import { Separator } from "@/components/ui/separator";
 
+export const metadata = {
+  title: "Sign Up",
+};
+
 export default function SignUpPage() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">

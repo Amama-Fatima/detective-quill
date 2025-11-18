@@ -2,10 +2,13 @@ import {
   Body,
   Controller,
   Delete,
+  InternalServerErrorException,
+  NotFoundException,
   Post,
   Put,
   Req,
   UseGuards,
+  ParseArrayPipe,
 } from "@nestjs/common";
 import { AuthGuard } from "src/auth/auth.guard";
 import { BlueprintCardsService } from "./blueprint_cards.service";
@@ -23,7 +26,8 @@ export class BlueprintCardsController {
   @Post(":blueprintId")
   async createBlueprintCard(
     @Req() request: any,
-    @Body() cardData: CreateBlueprintCardDto[]
+    @Body(new ParseArrayPipe({ items: CreateBlueprintCardDto }))
+    cardData: CreateBlueprintCardDto[]
   ): Promise<ApiResponse<BlueprintCard[]>> {
     const blueprintId = request.params.blueprintId;
     const userId = request.user.id;
@@ -40,10 +44,9 @@ export class BlueprintCardsController {
         message: "Blueprint card created successfully",
       };
     } catch (error) {
-      return {
-        success: false,
-        error: "Error creating blueprint card: " + error.message,
-      };
+      throw new InternalServerErrorException(
+        `Error creating blueprint card: ${error.message}`
+      );
     }
   }
 
@@ -70,10 +73,12 @@ export class BlueprintCardsController {
         message: "Blueprint card updated successfully",
       };
     } catch (error) {
-      return {
-        success: false,
-        error: "Error updating blueprint card: " + error.message,
-      };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -87,7 +92,7 @@ export class BlueprintCardsController {
       await this.blueprintCardsService.deleteBlueprintCard(
         cardId,
         userId,
-        blueprintId,
+        blueprintId
       );
 
       return {
@@ -95,38 +100,12 @@ export class BlueprintCardsController {
         message: "Blueprint card deleted successfully",
       };
     } catch (error) {
-      return {
-        success: false,
-        error: "Error deleting blueprint card: " + error.message,
-      };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 }
-
-// @Get(":blueprintId")
-// async getAllCardsOfBlueprint(
-//   @Req() request: any
-// ): Promise<ApiResponse<BlueprintCard[]>> {
-//   const blueprintId = request.params.blueprintId;
-//   const userId = request.user.id;
-//   const accessToken = request.accessToken;
-
-//   try {
-//     const cards = await this.blueprintCardsService.fetchAllCardsOfBlueprint(
-//       blueprintId,
-//       userId,
-//       accessToken
-//     );
-
-//     return {
-//       success: true,
-//       data: cards ?? [],
-//       error: "Blueprint cards retrieved successfully",
-//     };
-//   } catch (error) {
-//     return {
-//       success: false,
-//       error: "Error retrieving blueprint cards: " + error.message,
-//     };
-//   }
-// }

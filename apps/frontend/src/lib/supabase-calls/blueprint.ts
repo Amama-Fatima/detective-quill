@@ -2,11 +2,10 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import type { Blueprint } from "@detective-quill/shared-types";
 
 export async function getUserBlueprints(
-  userId: string
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ blueprints: Blueprint[]; error: string | null }> {
   try {
-    const supabase = await createSupabaseServerClient();
-
     const { data, error } = await supabase
       .from("blue_prints")
       .select("*")
@@ -29,11 +28,10 @@ export async function getUserBlueprints(
 
 export async function getUserBlueprintById(
   blueprintId: string,
-  userId: string
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ blueprint: Blueprint | null; error: string | null }> {
   try {
-    const supabase = await createSupabaseServerClient();
-
     const { data, error } = await supabase
       .from("blue_prints")
       .select("*")
@@ -54,6 +52,35 @@ export async function getUserBlueprintById(
         err instanceof Error
           ? err.message
           : "Unknown error fetching user blueprint",
+    };
+  }
+}
+
+export async function getBlueprintTitle(
+  blueprintId: string,
+  projectId: string,
+): Promise<{ title: string | null; error: string | null }> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("blue_prints")
+      .select("title")
+      .eq("id", blueprintId)
+      .eq("project_id", projectId)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to get blueprint title: ${error.message}`);
+    }
+    return { title: data?.title || null, error: null };
+  } catch (err) {
+    console.error("Error in getBlueprintTitle:", err);
+    return {
+      title: null,
+      error:
+        err instanceof Error
+          ? err.message
+          : "Unknown error fetching blueprint title",
     };
   }
 }

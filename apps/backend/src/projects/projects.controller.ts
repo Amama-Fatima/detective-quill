@@ -11,6 +11,9 @@ import {
   Query,
   ParseBoolPipe,
   DefaultValuePipe,
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
 } from "@nestjs/common";
 import { ProjectsService } from "./projects.service";
 import {
@@ -42,7 +45,12 @@ export class ProjectsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -59,19 +67,27 @@ export class ProjectsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
-  @Get("deleted")
-  async findDeleted(@Request() req): Promise<ApiResponse<Project[]>> {
-    try {
-      const data = await this.projectsService.getDeletedProjects(req.user.id);
-      return { success: true, data };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+  // @Get("deleted")
+  // async findDeleted(@Request() req): Promise<ApiResponse<Project[]>> {
+  //   try {
+  //     const data = await this.projectsService.getDeletedProjects(req.user.id);
+  //     return { success: true, data };
+  //   } catch (error) {
+  //     return { success: false, error: error.message };
+  //   }
+  // }
 
   @Get(":id")
   async findOne(
@@ -82,7 +98,15 @@ export class ProjectsController {
       const data = await this.projectsService.findProjectById(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -95,7 +119,15 @@ export class ProjectsController {
       const data = await this.projectsService.getProjectStats(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -113,20 +145,36 @@ export class ProjectsController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
   @Delete(":id")
   async remove(
     @Param("id") id: string,
-    @Request() req,
+    @Request() req
   ): Promise<ApiResponse<DeleteResponse>> {
     try {
       const data = await this.projectsService.deleteProject(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -139,7 +187,15 @@ export class ProjectsController {
       const data = await this.projectsService.restoreProject(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 }

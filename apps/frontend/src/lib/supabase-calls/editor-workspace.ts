@@ -7,10 +7,17 @@ import {
 } from "@detective-quill/shared-types";
 import { notFound, redirect } from "next/navigation";
 
-async function getEditorWorkspaceData(projectId: string, nodeId?: string) {
-  const supabase = await createSupabaseServerClient();
-
+async function getEditorWorkspaceData(
+  projectId: string,
+  nodeId?: string
+): Promise<{
+  project: Project;
+  nodes: FsNodeTreeResponse[];
+  currentNode: FsNodeResponse | null;
+  user: any;
+}> {
   // Get current user
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
     error: authError,
@@ -57,7 +64,7 @@ async function getEditorWorkspaceData(projectId: string, nodeId?: string) {
 }
 
 async function fetchProject(
-  supabase: any,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   projectId: string,
   userId: string
 ): Promise<Project> {
@@ -76,7 +83,7 @@ async function fetchProject(
 }
 
 async function fetchProjectTree(
-  supabase: any,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   projectId: string,
   userId: string
 ): Promise<FsNodeTreeResponse[]> {
@@ -99,7 +106,7 @@ async function fetchProjectTree(
 }
 
 async function fetchNode(
-  supabase: any,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   nodeId: string,
   userId: string
 ): Promise<FsNodeResponse> {
@@ -122,6 +129,7 @@ async function fetchNode(
   return node;
 }
 
+// todo: add type as FsNodeTreeResponse if that is accurate
 function buildTreeFromView(nodes: any[]): FsNodeTreeResponse[] {
   const nodeMap = new Map<string, FsNodeTreeResponse>();
   const rootNodes: FsNodeTreeResponse[] = [];

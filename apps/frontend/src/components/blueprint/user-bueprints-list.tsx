@@ -17,16 +17,20 @@ export const UserBlueprintsList = ({
 }: UserBlueprintsListProps) => {
   if (blueprints.length === 0) {
     return (
-      <div className="text-center py-16">
-        <div className="mx-auto max-w-md">
-          <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h2 className="mystery-title text-lg font-semibold mb-2">
-            No blueprints yet
-          </h2>
-          <p className="text-muted-foreground noir-text mb-6">
-            Get started by creating your first blueprint to organize and reuse
-            your designs.
-          </p>
+      <div className="text-center py-16 border-2 border-muted bg-gradient-to-br from-card/70 to-chart-5/30">
+        <div>
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="rounded-full bg-primary/10 p-8">
+              <FileText className="h-12 w-12 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="mystery-title text-2xl">No Blueprints</h3>
+              <p className="text-muted-foreground noir-text max-w-md">
+                You haven't created any blueprints yet. Create a blueprint to 
+                start organizing your thoughts and story elements!
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -66,7 +70,9 @@ export const UserBlueprintsList = ({
               >
                 <>
                   <Tag />
-                  <p className="case-file text-lg font-medium">{blueprint.type}</p>
+                  <p className="case-file text-lg font-medium">
+                    {blueprint.type}
+                  </p>
                 </>
               </div>
             </CardContent>

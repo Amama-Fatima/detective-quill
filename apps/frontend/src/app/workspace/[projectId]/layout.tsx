@@ -1,14 +1,34 @@
 import ErrorMsg from "@/components/error-msg";
+import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import React from "react";
-
+import type { Metadata } from "next";
 
 interface ProjectWorkspacePageProps {
   params: Promise<{
     projectId: string;
   }>;
   children: React.ReactNode;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { projectId: string };
+}): Promise<Metadata> {
+  const { projectId } = params;
+  const { title, error } = await fetchProjectTitle(projectId);
+  if (error || !title) {
+    return {
+      title: "Workspace",
+      description: "Project workspace",
+    };
+  }
+  return {
+    title: `${title} - Workspace`,
+    description: `Workspace for project ${title}`,
+  };
 }
 
 const WorkspaceLayout = async ({
@@ -29,21 +49,16 @@ const WorkspaceLayout = async ({
     redirect("/auth/sign-in");
   }
 
-  const { data, error } = await supabase
-    .from("projects")
-    .select("title")
-    .eq("id", projectId)
-    // .eq("author_id", user.id)
-    .single();
+  const { title, error } = await fetchProjectTitle(projectId);
 
-  if (error || !data) {
+  if (error || !title) {
     return <ErrorMsg message="Failed to load project data." />;
   }
 
   return (
     <div>
       <div className="border-b border-border bg-gradient-to-r from-secondary-foreground via-card to-background shadow-sm">
-        <h1 className="mystery-title text-center text-4xl mb-2">{data?.title}</h1>
+        <h1 className="mystery-title text-center text-4xl mb-2">{title}</h1>
       </div>
       {children}
     </div>

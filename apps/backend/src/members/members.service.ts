@@ -36,7 +36,7 @@ export class MembersService {
       .single();
 
     if (existingMember) {
-      throw new BadRequestException("User is already a member of this project");
+      throw new Error("User is already a member of this project");
     }
 
     // Add the member
@@ -50,7 +50,7 @@ export class MembersService {
       .single();
 
     if (error) {
-      throw new BadRequestException(`Failed to add member: ${error.message}`);
+      throw new Error(`Failed to add member: ${error.message}`);
     }
     return;
   }

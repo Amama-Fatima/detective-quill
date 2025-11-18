@@ -7,18 +7,17 @@ import {
   IsNotEmpty,
   IsOptional,
   IsNumber,
-  IsEmpty
 } from 'class-validator';
 
 
 export class CreateBlueprintCardDto implements ICreateBlueprintCardDto {
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     content: string;
 
     @IsString()
-    @IsNotEmpty()
-    card_type_id: string;
+    @IsOptional()
+    title: string;
 
     @IsNumber()
     @IsNotEmpty()
@@ -27,10 +26,6 @@ export class CreateBlueprintCardDto implements ICreateBlueprintCardDto {
     @IsNumber()
     @IsNotEmpty()
     position_y: number;
-
-    @IsString()
-    @IsNotEmpty()
-    card_type_title: string;
 }
 
 export class UpdateBlueprintCardDto implements IUpdateBlueprintCardDto {

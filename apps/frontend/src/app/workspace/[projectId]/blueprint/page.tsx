@@ -5,10 +5,31 @@ import CreateBlueprintBtns from "@/components/blueprint/create-blueprint-btns";
 import { getUserBlueprints } from "@/lib/supabase-calls/blueprint";
 import { UserBlueprintsList } from "@/components/blueprint/user-bueprints-list";
 import ErrorMsg from "@/components/error-msg";
+import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 
 interface BlueprintPageProps {
   params: {
     projectId: string;
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { projectId: string };
+}): Promise<Metadata> {
+  const { projectId } = params;
+  const { title, error } = await fetchProjectTitle(projectId);
+  if (error || !title) {
+    return {
+      title: "Blueprints",
+      description: "Project Blueprints page",
+    };
+  }
+  return {
+    title: `${title} - Blueprints`,
+    description: `Blueprints page for project ${title}`,
   };
 }
 
@@ -26,7 +47,7 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
 
   const userId = user.id;
 
-  const { blueprints, error } = await getUserBlueprints(userId);
+  const { blueprints, error } = await getUserBlueprints(userId, supabase);
 
   if (error) {
     return <ErrorMsg message="Failed to load blueprints" />;

@@ -29,14 +29,14 @@ export class FsNodesService {
 
   async createNode(
     createNodeDto: CreateFsNodeDto,
-    userId: string,
+    userId: string
   ): Promise<FsNodeResponse> {
     const supabase = this.supabaseService.client;
 
     // Verify project ownership
     await this.projectsService.findProjectById(
       createNodeDto.project_id,
-      userId,
+      userId
     );
 
     // If parent_id is provided, verify it exists and belongs to the same project
@@ -113,7 +113,7 @@ export class FsNodesService {
   // ✅ Use the project_file_tree view instead of manual tree building
   async getProjectTree(
     projectId: string,
-    userId: string,
+    userId: string
   ): Promise<FsNodeTreeResponse[]> {
     const supabase = this.supabaseService.client;
 
@@ -140,7 +140,7 @@ export class FsNodesService {
   // ✅ OPTIMIZED: Use get_node_children function for getting children
   async getNodeChildren(
     nodeId: string,
-    userId: string,
+    userId: string
   ): Promise<FsNodeResponse[]> {
     const supabase = this.supabaseService.client;
 
@@ -153,18 +153,13 @@ export class FsNodesService {
     });
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to fetch node children: ${error.message}`
-      );
+      throw new Error(`Failed to fetch node children: ${error.message}`);
     }
 
     return children || [];
   }
 
-  async getNode(
-    nodeId: string,
-    userId: string,
-  ): Promise<FsNodeResponse> {
+  async getNode(nodeId: string, userId: string): Promise<FsNodeResponse> {
     const supabase = this.supabaseService.client;
 
     const { data: node, error } = await supabase
@@ -189,7 +184,7 @@ export class FsNodesService {
   async updateNode(
     nodeId: string,
     updateNodeDto: UpdateFsNodeDto,
-    userId: string,
+    userId: string
   ): Promise<FsNodeResponse> {
     const supabase = this.supabaseService.client;
 
@@ -209,17 +204,15 @@ export class FsNodesService {
           .single();
 
         if (parentError || !parent) {
-          throw new BadRequestException("New parent node not found");
+          throw new Error("New parent node not found");
         }
 
         if (parent.project_id !== existingNode.project_id) {
-          throw new BadRequestException(
-            "Cannot move node to different project"
-          );
+          throw new Error("Cannot move node to different project");
         }
 
         if (parent.node_type !== "folder") {
-          throw new BadRequestException("Parent must be a folder");
+          throw new Error("Parent must be a folder");
         }
       }
     }
@@ -258,10 +251,7 @@ export class FsNodesService {
     return node;
   }
 
-  async deleteNode(
-    nodeId: string,
-    userId: string,
-  ): Promise<DeleteResponse> {
+  async deleteNode(nodeId: string, userId: string): Promise<DeleteResponse> {
     // todo: try to remove the use of delete response, shift to general api response
     const supabase = this.supabaseService.client;
 
@@ -277,7 +267,7 @@ export class FsNodesService {
       );
 
       if (childrenError) {
-        throw new BadRequestException(
+        throw new Error(
           `Failed to check folder contents: ${childrenError.message}`
         );
       }
@@ -301,7 +291,7 @@ export class FsNodesService {
     const { error } = await supabase.from("fs_nodes").delete().eq("id", nodeId);
 
     if (error) {
-      throw new BadRequestException(`Failed to delete node: ${error.message}`);
+      throw new Error(`Failed to delete node: ${error.message}`);
     }
 
     return {
@@ -316,7 +306,7 @@ export class FsNodesService {
     nodeId: string,
     newParentId: string | null,
     newSortOrder: number,
-    userId: string,
+    userId: string
   ): Promise<FsNodeResponse> {
     // ✅ updateNode will handle path/depth recalculation via triggers
     return this.updateNode(
@@ -325,14 +315,14 @@ export class FsNodesService {
         parent_id: newParentId === null ? undefined : newParentId,
         sort_order: newSortOrder,
       },
-      userId,
+      userId
     );
   }
 
   // ✅ NEW: Get project statistics using the view
   async getProjectStats(
     projectId: string,
-    userId: string,
+    userId: string
   ): Promise<{
     totalFiles: number;
     totalFolders: number;
@@ -351,9 +341,7 @@ export class FsNodesService {
       .eq("project_id", projectId);
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to get project stats: ${error.message}`
-      );
+      throw new Error(`Failed to get project stats: ${error.message}`);
     }
 
     const totalFiles =

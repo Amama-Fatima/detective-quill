@@ -12,6 +12,7 @@ import {
 import { AuthGuard } from "../auth/auth.guard";
 import { ApiResponse } from "@detective-quill/shared-types";
 import { InvitationsService } from "./invitations.service";
+import { DeleteInvitationDto, RespondToInvitationDto } from "./dto/invitations.dto";
 
 @Controller("invitations")
 @UseGuards(AuthGuard)
@@ -20,9 +21,8 @@ export class InvitationsController {
 
   @Post(":inviteCode/respond")
   async respondToInvitation(
-    @Request() req,
     @Param("inviteCode") inviteCode: string,
-    @Body() body: { response: "accept" | "reject"; projectId: string }
+    @Body() body: RespondToInvitationDto
   ): Promise<ApiResponse<void>> {
     const projectId = body.projectId;
     const response = body.response; // "accept" or "reject"
@@ -49,7 +49,7 @@ export class InvitationsController {
   @Delete(":inviteCode")
   async deleteInvitation(
     @Request() req,
-    @Body() body: { projectId: string }
+    @Body() body: DeleteInvitationDto
   ): Promise<ApiResponse<void>> {
     const projectId = body.projectId;
     const inviteCode = req.params.inviteCode;

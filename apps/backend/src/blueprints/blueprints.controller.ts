@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  InternalServerErrorException,
   NotFoundException,
   Post,
   Put,
@@ -37,10 +38,9 @@ export class BlueprintsController {
         message: "Blueprint created successfully",
       };
     } catch (error) {
-      return {
-        success: false,
-        message: "Error creating blueprint: " + error.message,
-      };
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -69,10 +69,12 @@ export class BlueprintsController {
         message: "Blueprint updated successfully",
       };
     } catch (error) {
-      return {
-        success: false,
-        message: "Error updating blueprint: " + error.message,
-      };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -82,75 +84,18 @@ export class BlueprintsController {
     const blueprintId = request.params.id;
 
     try {
-      await this.blueprintsService.deleteBlueprint(
-        userId,
-        blueprintId,
-      );
+      await this.blueprintsService.deleteBlueprint(userId, blueprintId);
       return {
         success: true,
         message: "Blueprint deleted successfully",
       };
     } catch (error) {
-      return {
-        success: false,
-        message: "Error deleting blueprint: " + error.message,
-      };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 }
-
-
-  // @Get()
-  // async getUserBlueprints(
-  //   @Req() request: any
-  // ): Promise<ApiResponse<Blueprint[]>> {
-  //   const userId = request.user.id;
-  //   const accessToken = request.accessToken;
-
-  //   try {
-  //     const blueprints = await this.blueprintsService.fetchUserBlueprints(
-  //       userId,
-  //       accessToken
-  //     );
-
-  //     return {
-  //       success: true,
-  //       data: blueprints ?? [],
-  //       message: "Blueprints retrieved successfully",
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       data: [],
-  //       message: "Error retrieving blueprints: " + error.message,
-  //     };
-  //   }
-  // }
-
-  // @Get(":id")
-  // async getUserBlueprintById(
-  //   @Req() request: any
-  // ): Promise<ApiResponse<Blueprint>> {
-  //   const userId = request.user.id;
-  //   const accessToken = request.accessToken;
-  //   const blueprintId = request.params.id;
-
-  //   try {
-  //     const blueprint = await this.blueprintsService.fetchUserBlueprintById(
-  //       userId,
-  //       accessToken,
-  //       blueprintId
-  //     );
-
-  //     return {
-  //       success: true,
-  //       data: blueprint,
-  //       message: "Blueprint retrieved successfully",
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       message: "Error retrieving blueprint by ID: " + error.message,
-  //     };
-  //   }
-  // }

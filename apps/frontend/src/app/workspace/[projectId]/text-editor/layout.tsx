@@ -1,9 +1,25 @@
 import { WorkspaceLayout } from "@/components/editor-workspace/workspace-layout";
+import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
+import { Metadata } from "next";
 
-export const metadata = {
-  title: "Workspace",
-  description: "Markdown editor workspace with file management",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: { projectId: string };
+}): Promise<Metadata> {
+  const { projectId } = params;
+  const { title, error } = await fetchProjectTitle(projectId);
+  if (error || !title) {
+    return {
+      title: "Text Editor",
+      description: "Markdown editor workspace with file management",
+    };
+  }
+  return {
+    title: `${title} - Text Editor`,
+    description: `Markdown editor workspace for project ${title}`,
+  };
+}
 
 interface WorkspaceLayoutPageProps {
   children: React.ReactNode;
