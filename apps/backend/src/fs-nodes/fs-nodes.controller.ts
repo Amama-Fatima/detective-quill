@@ -8,6 +8,10 @@ import {
   Delete,
   UseGuards,
   Request,
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
+  BadRequestException,
 } from "@nestjs/common";
 import { FsNodesService } from "./fs-nodes.service";
 import {
@@ -39,10 +43,16 @@ export class FsNodesController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
+  // todo: forbidden is not thrown in the service any where, add it there jab time milay
   @Get("project/:projectId/tree")
   async getProjectTree(
     @Param("projectId") projectId: string,
@@ -55,7 +65,15 @@ export class FsNodesController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -71,7 +89,15 @@ export class FsNodesController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -84,7 +110,15 @@ export class FsNodesController {
       const data = await this.fsNodesService.getNodeChildren(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -97,7 +131,15 @@ export class FsNodesController {
       const data = await this.fsNodesService.getNode(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -115,7 +157,15 @@ export class FsNodesController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -128,7 +178,15 @@ export class FsNodesController {
       const data = await this.fsNodesService.deleteNode(id, req.user.id);
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 
@@ -147,7 +205,15 @@ export class FsNodesController {
       );
       return { success: true, data };
     } catch (error) {
-      return { success: false, error: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 }

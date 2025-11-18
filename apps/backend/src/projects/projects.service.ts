@@ -17,9 +17,7 @@ import {
 
 @Injectable()
 export class ProjectsService {
-  constructor(
-    private supabaseService: SupabaseService,
-  ) {}
+  constructor(private supabaseService: SupabaseService) {}
 
   async createProject(
     createProjectDto: CreateProjectDto,
@@ -34,9 +32,7 @@ export class ProjectsService {
     });
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to create project: ${error.message}`
-      );
+      throw new Error(`Failed to create project: ${error.message}`);
     }
     return data;
   }
@@ -60,18 +56,13 @@ export class ProjectsService {
     const { data, error } = await query;
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to fetch projects: ${error.message}`
-      );
+      throw new Error(`Failed to fetch projects: ${error.message}`);
     }
 
     return data || [];
   }
 
-  async findProjectById(
-    projectId: string,
-    userId: string
-  ): Promise<Project> {
+  async findProjectById(projectId: string, userId: string): Promise<Project> {
     const supabase = this.supabaseService.client;
 
     const { data, error } = await supabase
@@ -110,9 +101,7 @@ export class ProjectsService {
       .single();
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to update project: ${error.message}`
-      );
+      throw new Error(`Failed to update project: ${error.message}`);
     }
 
     return data;
@@ -141,18 +130,13 @@ export class ProjectsService {
       .eq("author_id", userId);
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to delete project: ${error.message}`
-      );
+      throw new Error(`Failed to delete project: ${error.message}`);
     }
 
     return { message: "Project permanently deleted" };
   }
 
-  async restoreProject(
-    projectId: string,
-    userId: string
-  ): Promise<Project> {
+  async restoreProject(projectId: string, userId: string): Promise<Project> {
     const supabase = this.supabaseService.client;
 
     // Check if project exists (including deleted ones)
@@ -168,7 +152,7 @@ export class ProjectsService {
     }
 
     if (!existingProject.is_deleted) {
-      throw new BadRequestException("Project is not deleted");
+      throw new Error("Project is not deleted");
     }
 
     const { data, error } = await supabase
@@ -183,9 +167,7 @@ export class ProjectsService {
       .single();
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to restore project: ${error.message}`
-      );
+      throw new Error(`Failed to restore project: ${error.message}`);
     }
 
     return data;
@@ -202,9 +184,7 @@ export class ProjectsService {
       .order("updated_at", { ascending: false });
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to fetch deleted projects: ${error.message}`
-      );
+      throw new Error(`Failed to fetch deleted projects: ${error.message}`);
     }
 
     return data || [];
@@ -226,9 +206,7 @@ export class ProjectsService {
       .eq("project_id", projectId);
 
     if (error) {
-      throw new BadRequestException(
-        `Failed to get project stats: ${error.message}`
-      );
+      throw new Error(`Failed to get project stats: ${error.message}`);
     }
 
     const totalFiles =

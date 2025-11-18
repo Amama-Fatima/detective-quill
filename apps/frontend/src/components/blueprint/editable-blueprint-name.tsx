@@ -26,6 +26,7 @@ export default function EditableProjectName({
 
   const onSave = async (newName: string) => {
     await onSaveBlueprintName(newName, setLoading, accessToken, blueprintId);
+    document.title = `${newName} Blueprint`;
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {

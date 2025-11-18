@@ -7,6 +7,10 @@ import {
 } from "@/lib/supabase-calls/user-projects";
 import ErrorMsg from "@/components/error-msg";
 
+export const metadata = {
+  title: "My Cases",
+};
+
 export default async function CasesPage() {
   const supabase = await createSupabaseServerClient();
 
@@ -21,9 +25,9 @@ export default async function CasesPage() {
     redirect("/auth/sign-in");
   }
 
-  const { projects, error } = await getUserProjects(user.id);
+  const { projects, error } = await getUserProjects(user.id, supabase);
   const { projects: invitedProjects, error: invitedError } =
-    await getInvitedProjects(user.id);
+    await getInvitedProjects(user.id, supabase);
 
   if (error) {
     return <ErrorMsg message="Failed to load projects" />;

@@ -60,7 +60,7 @@ export default function CanvasCardNode({
                      text-gray-800 text-md leading-relaxed transition-all"
             />
           ) : (
-            <Badge className={`text-lg font-medium border`}>{data.title}</Badge>
+            <Badge className={`text-lg font-medium border whitespace-pre-wrap break-words break-all text-left`}>{data.title}</Badge>
           )}
         </div>
 
@@ -69,7 +69,7 @@ export default function CanvasCardNode({
             variant="ghost"
             size="sm"
             onClick={() => setIsEditing(!isEditing)}
-            className={`h-7 w-7 p-0 opacity-0 cursor-pointer text-gray-900 group-hover:opacity-100 transition-opacity ${
+            className={`h-7 w-7 p-0 opacity-0 cursor-pointer  group-hover:opacity-100 transition-opacity ${
               isEditing ? "opacity-100 bg-muted" : "hover:bg-gray-100"
             }`}
           >
@@ -79,7 +79,7 @@ export default function CanvasCardNode({
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 text-gray-900 transition-opacity hover:bg-gray-100 cursor-pointer hover:text-red-500"
+            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 cursor-pointer hover:text-red-500"
             onClick={data.onDelete}
           >
             <Trash className="w-3 h-3" />
@@ -106,11 +106,11 @@ export default function CanvasCardNode({
           />
         ) : (
           <div
-            className="min-h-48 p-3 bg-gray-200 rounded-lg border border-gray-100 text-gray-800 text-md cursor-text"
+            className="min-h-48 p-3 bg-gray-200 rounded-lg border border-gray-100 text-md cursor-text"
             onClick={() => setIsEditing(true)}
           >
             {data.content ? (
-              <div className="whitespace-pre-wrap">{data.content}</div>
+              <div className="whitespace-pre-wrap break-words break-all">{data.content}</div>
             ) : (
               <div className="text-gray-400 italic">
                 Click to add content...

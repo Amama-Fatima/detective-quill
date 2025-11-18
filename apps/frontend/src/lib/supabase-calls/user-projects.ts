@@ -2,10 +2,10 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import { Project } from "@detective-quill/shared-types";
 
 export async function getUserProjects(
-  userId: string
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ projects: Project[]; error: string | null }> {
   try {
-    const supabase = await createSupabaseServerClient();
     const { data: projects, error } = await supabase
       .from("projects")
       .select("*")
@@ -28,10 +28,10 @@ export async function getUserProjects(
 }
 
 export async function getInvitedProjects(
-  userId: string
+  userId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ projects: Project[]; error: string | null }> {
   try {
-    const supabase = await createSupabaseServerClient();
     const { data: memberRows, error } = await supabase
       .from("projects_members")
       .select("project:project_id (*)")

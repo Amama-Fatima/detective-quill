@@ -1,11 +1,34 @@
 import { Suspense } from "react";
 import Canvas from "@/components/blueprint/canvas";
 import { BlueprintType } from "@detective-quill/shared-types";
-import { getUserBlueprintById } from "@/lib/supabase-calls/blueprint";
+import {
+  getUserBlueprintById,
+  getBlueprintTitle,
+} from "@/lib/supabase-calls/blueprint";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/dist/client/components/navigation";
 import { getAllCardsOfBlueprint } from "@/lib/supabase-calls/blueprint-cards";
 import ErrorMsg from "@/components/error-msg";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { projectId: string; blueprintId: string };
+}): Promise<Metadata> {
+  const { projectId, blueprintId } = params;
+  const { title, error } = await getBlueprintTitle(blueprintId, projectId);
+  if (error || !title) {
+    return {
+      title: "Create Blueprint",
+      description: "Create or Edit Blueprint page",
+    };
+  }
+  return {
+    title: `${title} Blueprint`,
+    description: `Create or Edit Blueprint page for ${title} blueprint`,
+  };
+}
 
 interface CreateBlueprintPageProps {
   params: {
@@ -37,14 +60,16 @@ export default async function CreateBlueprintPage({
 
   const { blueprint, error: blueprintError } = await getUserBlueprintById(
     blueprintId,
-    userId
+    userId,
+    supabase
   );
   if (blueprintError || !blueprint) {
     return <ErrorMsg message="Failed to load blueprint data" />;
   }
   const { blueprint_cards, error: cardsError } = await getAllCardsOfBlueprint(
     blueprintId,
-    userId
+    userId,
+    supabase
   );
 
   if (cardsError) {

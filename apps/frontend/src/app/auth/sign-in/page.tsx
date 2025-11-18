@@ -2,6 +2,10 @@ import { SignInForm } from "@/components/auth/form/sign-in-form";
 import { SocialAuth } from "@/components/auth/social-auth";
 import { Separator } from "@/components/ui/separator";
 
+export const metadata = {
+  title: "Sign In",
+};
+
 export default function SignInPage() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-2">

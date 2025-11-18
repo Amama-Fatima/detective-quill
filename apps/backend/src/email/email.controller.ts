@@ -1,4 +1,13 @@
-import { Controller, Post, UseGuards, Request, Body } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Body,
+  InternalServerErrorException,
+  ForbiddenException,
+  NotFoundException,
+} from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { EmailService } from "./email.service";
 import { type EmailSendingApiRequestDto } from "./dto/email.dto";
@@ -21,11 +30,19 @@ export class EmailController {
         projectId,
         emails,
         req.user.id,
-        inviterName,
+        inviterName
       );
       return { success: true, message: "Invitations sent successfully" };
     } catch (error) {
-      return { success: false, message: error.message };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to get project invitations: ${error.message}`
+      );
     }
   }
 }

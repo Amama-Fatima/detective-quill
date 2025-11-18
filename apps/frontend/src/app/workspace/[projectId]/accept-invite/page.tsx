@@ -1,5 +1,7 @@
 import AcceptRejectProject from "@/components/project-workspace/accept-reject-project";
+import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { createSupabaseServerClient } from "@/supabase/server-client";
+import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 interface AcceptInvitePageProps {
@@ -10,6 +12,25 @@ interface AcceptInvitePageProps {
     email: string;
     projectTitle: string;
     code: string;
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { projectId: string };
+}): Promise<Metadata> {
+  const { projectId } = params;
+  const { title, error } = await fetchProjectTitle(projectId);
+  if (error || !title) {
+    return {
+      title: "Accept Invite",
+      description: "Project Accept Invite page",
+    };
+  }
+  return {
+    title: `${title} - Accept Invite`,
+    description: `Accept invite page for project ${title}`,
   };
 }
 

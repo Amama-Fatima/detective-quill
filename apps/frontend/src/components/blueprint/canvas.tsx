@@ -142,6 +142,7 @@ export default function Canvas({
     try {
       // create new cards
       if (createList.length > 0) {
+        console.log("Creating cards:", createListWoId);
         await createBlueprintCard(accessToken!, blueprintId, createListWoId);
       }
 
@@ -197,7 +198,7 @@ export default function Canvas({
             onClick={() => {
               onSave();
             }}
-            disabled={isSaving}
+            disabled={isSaving || !isDirty}
           >
             Save
           </Button>
