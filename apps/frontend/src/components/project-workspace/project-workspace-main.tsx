@@ -89,7 +89,7 @@ const WorkspaceMainBody = ({
         {/* Action Buttons */}
         {isOwner && (
           <div className="flex items-center gap-4">
-            <ChangeStateDropDown />
+            <ChangeStateDropDown projectId={project.id} status={project.status} />
             <InviteMembersDialog
               inviteDialogOpen={inviteDialogOpen}
               setInviteDialogOpen={setInviteDialogOpen}

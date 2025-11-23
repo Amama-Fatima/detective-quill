@@ -14,6 +14,7 @@ import {
   ForbiddenException,
   InternalServerErrorException,
   NotFoundException,
+  BadRequestException,
 } from "@nestjs/common";
 import { ProjectsService } from "./projects.service";
 import {
@@ -79,16 +80,6 @@ export class ProjectsController {
     }
   }
 
-  // @Get("deleted")
-  // async findDeleted(@Request() req): Promise<ApiResponse<Project[]>> {
-  //   try {
-  //     const data = await this.projectsService.getDeletedProjects(req.user.id);
-  //     return { success: true, data };
-  //   } catch (error) {
-  //     return { success: false, error: error.message };
-  //   }
-  // }
-
   @Get(":id")
   async findOne(
     @Param("id") id: string,
@@ -153,6 +144,31 @@ export class ProjectsController {
       }
       throw new InternalServerErrorException(
         `Failed to get project invitations: ${error.message}`
+      );
+    }
+  }
+
+  @Patch(":id/status")
+  async changeStatus(
+    @Param("id") id: string,
+    @Body("status") status: "active" | "completed" | "archived",
+    @Request() req
+  ): Promise<ApiResponse<Project>> {
+    if (!["active", "completed", "archived"].includes(status)) {
+      throw new BadRequestException("Invalid status value");
+    }
+    try {
+      await this.projectsService.changeProjectStatus(id, status, req.user.id);
+      return { success: true, message: "Project status updated successfully" };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to update project status: ${error.message}`
       );
     }
   }

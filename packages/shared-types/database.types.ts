@@ -312,7 +312,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
-          is_active: boolean | null
+          status: Database["public"]["Enums"]["project_status"]
           title: string
           updated_at: string | null
         }
@@ -321,7 +321,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
-          is_active?: boolean | null
+          status?: Database["public"]["Enums"]["project_status"]
           title: string
           updated_at?: string | null
         }
@@ -330,7 +330,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
-          is_active?: boolean | null
+          status?: Database["public"]["Enums"]["project_status"]
           title?: string
           updated_at?: string | null
         }
@@ -340,20 +340,20 @@ export type Database = {
         Row: {
           created_at: string
           is_author: boolean | null
-          project_id: string | null
-          user_id: string | null
+          project_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
           is_author?: boolean | null
-          project_id?: string | null
-          user_id?: string | null
+          project_id?: string
+          user_id?: string
         }
         Update: {
           created_at?: string
           is_author?: boolean | null
-          project_id?: string | null
-          user_id?: string | null
+          project_id?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -477,6 +477,10 @@ export type Database = {
       }
     }
     Functions: {
+      create_project_with_author: {
+        Args: { p_description: string; p_title: string; p_user_id: string }
+        Returns: Json
+      }
       get_node_children: {
         Args: { node_uuid: string }
         Returns: {
@@ -494,6 +498,7 @@ export type Database = {
       blueprint_types: "character" | "timeline" | "other"
       invitation_status: "pending" | "rejected"
       node_type: "folder" | "file"
+      project_status: "active" | "archived" | "completed"
       user_role: "writer" | "reader"
     }
     CompositeTypes: {
@@ -626,6 +631,7 @@ export const Constants = {
       blueprint_types: ["character", "timeline", "other"],
       invitation_status: ["pending", "rejected"],
       node_type: ["folder", "file"],
+      project_status: ["active", "archived", "completed"],
       user_role: ["writer", "reader"],
     },
   },

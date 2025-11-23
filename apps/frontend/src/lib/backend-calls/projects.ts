@@ -134,17 +134,22 @@ export async function getProjectStats(
   return response;
 }
 
-export async function getDeletedProjects(
+export async function changeProjectStatus(
+  projectId: string,
+  status: "active" | "completed" | "archived",
   accessToken: string
-): Promise<ApiResponse<Project[]>> {
-  const response = await makeAuthenticatedRequest<Project[]>(
-    "/projects/deleted",
-    accessToken
+): Promise<ApiResponse<void>> {
+  const response = await makeAuthenticatedRequest<void>(
+    `/projects/${projectId}/status`,
+    accessToken,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }
   );
-
   if (!response.success) {
-    throw new Error(`Failed to get deleted projects: ${response.error}`);
+    throw new Error(`Failed to change project status: ${response.error}`);
   }
-
   return response;
 }
+
