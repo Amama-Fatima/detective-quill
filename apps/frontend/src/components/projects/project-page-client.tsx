@@ -29,6 +29,11 @@ export function ProjectsPageClient({
   const searchParams = useSearchParams();
   const { projects, creating, createProject } = useProjects(initialProjects);
 
+  const activeProjects = projects.filter((project) => project.status === "active"); 
+  const completedProjects = projects.filter((project) => project.status === "completed");
+  const archivedProjects = projects.filter((project) => project.status === "archived");
+
+
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<FilterOption>("all");
@@ -150,13 +155,13 @@ export function ProjectsPageClient({
             <ProjectsDisplay projects={projects} />
           </TabsContent>
           <TabsContent value="active">
-            <ProjectsDisplay projects={projects} />
+            <ProjectsDisplay projects={activeProjects} />
           </TabsContent>
           <TabsContent value="completed">
-            <ProjectsDisplay projects={projects} />
+            <ProjectsDisplay projects={completedProjects} />
           </TabsContent>
           <TabsContent value="archived">
-            <ProjectsDisplay projects={projects} />
+            <ProjectsDisplay projects={archivedProjects} />
           </TabsContent>
           <TabsContent value="invited">
             <ProjectsDisplay projects={invitedProjects} />

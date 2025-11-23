@@ -55,9 +55,13 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
               <CardTitle className="font-serif text-xl group-hover:text-primary transition-colors line-clamp-1">
                 <Link href={`/workspace/${project.id}`}>{project.title}</Link>
               </CardTitle>
-              <Badge className="text-xs case-file mt-1">
-                <Archive className="h-2 w-2" />
-                <span className="ml-1">Archived</span>
+              <Badge
+                className={`text-xs case-file mt-1 ${getStatusColor(
+                  project.status
+                )}`}
+              >
+                {getStatusIcon(project.status)}
+                <span className="ml-1">{project.status.toUpperCase()}</span>
               </Badge>
             </div>
           </div>

@@ -173,23 +173,6 @@ export class ProjectsService {
     return data;
   }
 
-  async getDeletedProjects(userId: string): Promise<Project[]> {
-    const supabase = this.supabaseService.client;
-
-    const { data, error } = await supabase
-      .from("projects")
-      .select("*")
-      .eq("author_id", userId)
-      .eq("is_deleted", true)
-      .order("updated_at", { ascending: false });
-
-    if (error) {
-      throw new Error(`Failed to fetch deleted projects: ${error.message}`);
-    }
-
-    return data || [];
-  }
-
   async getProjectStats(
     projectId: string,
     userId: string
@@ -229,6 +212,32 @@ export class ProjectsService {
       totalWordCount,
       lastModified,
     };
+  }
+
+  async changeProjectStatus(
+    projectId: string,
+    newStatus: "active" | "completed" | "archived",
+    userId: string
+  ): Promise<void> {
+    const supabase = this.supabaseService.client;
+    // Verify the user is the project owner
+    await this.verifyProjectOwnership(projectId, userId);
+    const { data, error } = await supabase
+      .from("projects")
+      .update({
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", projectId)
+      .select();
+    if (error) {
+      throw new Error(`Failed to update project status: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new NotFoundException("Project not found");
+    }
+    return;
   }
 
   // Helper method to verify project ownership ( cannot make this private, need it in other places)

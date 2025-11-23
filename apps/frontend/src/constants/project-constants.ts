@@ -46,30 +46,30 @@ const getCurrentTab = () => {
 export const tab_message = [
   {
     tab: "all",
-    title: "No Cases",
+    title: "Cases",
     description:
       "The detective's desk is empty. Time to start a new investigation!",
   },
   {
     tab: "active",
-    title: "No Active Cases",
+    title: "Active Cases",
     description:
       "The detective's desk is empty. Time to start a new investigation!",
   },
   {
     tab: "completed",
-    title: "No Completed Cases",
+    title: "Completed Cases",
     description: "No cases have been solved yet. Time to crack some mysteries!",
   },
   {
     tab: "archived",
-    title: "No Archived Cases",
+    title: "Archived Cases",
     description:
       "No cases have been archived yet. Your detective work is still ongoing!",
   },
   {
     tab: "invited",
-    title: "No Invited Cases",
+    title: "Invited Cases",
     description:
       "You haven't been invited to any cases yet. Check back later for new mysteries to solve!",
   },
