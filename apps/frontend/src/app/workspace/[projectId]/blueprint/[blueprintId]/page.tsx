@@ -11,22 +11,12 @@ import { getAllCardsOfBlueprint } from "@/lib/supabase-calls/blueprint-cards";
 import ErrorMsg from "@/components/error-msg";
 import { Metadata } from "next";
 
-export async function generateMetadata({
-  params,
-}: {
+export async function generateMetadata({}: {
   params: { projectId: string; blueprintId: string };
 }): Promise<Metadata> {
-  const { projectId, blueprintId } = params;
-  const { title, error } = await getBlueprintTitle(blueprintId, projectId);
-  if (error || !title) {
-    return {
-      title: "Create Blueprint",
-      description: "Create or Edit Blueprint page",
-    };
-  }
   return {
-    title: `${title} Blueprint`,
-    description: `Create or Edit Blueprint page for ${title} blueprint`,
+    title: "Create Blueprint",
+    description: "Create or Edit Blueprint page",
   };
 }
 

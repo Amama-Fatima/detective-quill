@@ -69,9 +69,13 @@ export async function getBlueprintTitle(
       .eq("project_id", projectId)
       .single();
 
+
+    console.log("Fetched blueprint title:", data);
+    console.log(error)
     if (error) {
       throw new Error(`Failed to get blueprint title: ${error.message}`);
     }
+
     return { title: data?.title || null, error: null };
   } catch (err) {
     console.error("Error in getBlueprintTitle:", err);

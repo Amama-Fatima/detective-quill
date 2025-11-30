@@ -57,7 +57,9 @@ const WorkspaceLayout = async ({
 
   return (
     <div>
-      <div className="border-b border-border bg-gradient-to-r from-secondary-foreground via-card to-background shadow-sm">
+      <div className="bg-gradient-to-r from-background to-card border-b border-border
+
+">
         <h1 className="mystery-title text-center text-4xl mb-2">{title}</h1>
       </div>
       {children}

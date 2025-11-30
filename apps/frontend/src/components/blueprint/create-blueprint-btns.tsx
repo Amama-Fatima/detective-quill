@@ -53,6 +53,18 @@ export default function CreateBlueprintBtns({
             >
               Timeline
             </Button>
+            <Button
+              className="cursor-pointer"
+              onClick={() => handleCreate("character")}
+            >
+              Item
+            </Button>
+            <Button
+              className="cursor-pointer"
+              onClick={() => handleCreate("timeline")}
+            >
+              Location
+            </Button>
           </div>
         </PopoverContent>
       </Popover>

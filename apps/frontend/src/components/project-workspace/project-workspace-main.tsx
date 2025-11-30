@@ -73,7 +73,7 @@ const WorkspaceMainBody = ({
       <div className="flex items-start justify-between mb-6">
         <div>
           <h4 className="font-bold text-xl">Description</h4>
-          <p className="text-[1.1rem] w-[70%] noir-text mb-2">
+          <p className="text-[1.1rem] w-[100%] noir-text mb-2">
             {project.description ??
               "This section provides an overview and notes for the ongoing project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."}
           </p>

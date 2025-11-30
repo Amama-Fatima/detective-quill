@@ -12,11 +12,11 @@ export default function Header() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3">
               <Image
-                src="/quill.svg"
+                src="/quill-logo.png"
                 alt="Detective's Quill Logo"
-                width={60}
-                height={60}
-                className="text-primary"
+                width={140}
+                height={130}
+                className="text-primary background-transparent"
               />
               {/* <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 Detective's Quill
@@ -28,20 +28,20 @@ export default function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               href="/dashboard"
-              className="text-[1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
+              className="text-[1.1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
               Dashboard
             </Link>
             <Link
               href="/profile"
-              className="text-[1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
+              className="text-[1.1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
               Profile
             </Link>
 
             <Link
               href="/cases"
-              className="text-[1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
+              className="text-[1.1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
               Cases
             </Link>

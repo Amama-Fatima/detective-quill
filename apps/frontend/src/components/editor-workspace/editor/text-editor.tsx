@@ -104,7 +104,8 @@ export function TextEditor({
                   onClick={toggleAppFocus}
                   className={cn(
                     "transition-colors",
-                    focusMode === "APP" && "bg-primary/10 text-primary"
+                    focusMode === "APP" &&
+                      "bg-primary/10 text-primary cursor-pointer"
                   )}
                 >
                   <Focus className="h-4 w-4" />
@@ -125,7 +126,8 @@ export function TextEditor({
                   onClick={toggleBrowserFullscreen}
                   className={cn(
                     "transition-colors",
-                    focusMode === "BROWSER" && "bg-primary/10 text-primary"
+                    focusMode === "BROWSER" &&
+                      "bg-primary/10 text-primary cursor-pointer"
                   )}
                 >
                   {isFullscreen ? (
@@ -151,7 +153,10 @@ export function TextEditor({
                   size="sm"
                   onClick={onSave}
                   disabled={isSaving || !isDirty}
-                  className={cn("gap-2 cursor-pointer", isSaving && "animate-pulse cursor-disabled")}
+                  className={cn(
+                    "gap-2 cursor-pointer",
+                    isSaving && "animate-pulse cursor-disabled"
+                  )}
                 >
                   {isSaving ? (
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -173,7 +178,7 @@ export function TextEditor({
                 variant="ghost"
                 size="icon"
                 onClick={onDelete}
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

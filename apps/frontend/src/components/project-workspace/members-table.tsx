@@ -136,7 +136,7 @@ const MembersTable = ({
                               src={member.avatar_url ?? undefined}
                               alt={member.full_name}
                             />
-                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+                            <AvatarFallback className="bg-gradient-to-br from-chart-1 to-chart-3 text-white font-medium">
                               {member.full_name
                                 .split(" ")
                                 .map((n) => n[0])
