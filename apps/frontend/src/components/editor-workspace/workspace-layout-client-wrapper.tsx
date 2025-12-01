@@ -19,6 +19,8 @@ interface WorkspaceLayoutClientWrapperProps {
   currentNode: FsNode | null;
   projectId: string;
   nodeId?: string;
+  isActive: boolean;
+  isOwner: boolean;
 }
 
 export function WorkspaceLayoutClientWrapper({
@@ -28,6 +30,8 @@ export function WorkspaceLayoutClientWrapper({
   currentNode,
   projectId,
   nodeId,
+  isActive,
+  isOwner,
 }: WorkspaceLayoutClientWrapperProps) {
   // Client-side state for interactive features
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -67,6 +71,8 @@ export function WorkspaceLayoutClientWrapper({
           projectId={projectId}
           session={session}
           loading={false}
+          isOwner={isOwner}
+          isActive={isActive}
         />
       )}
 

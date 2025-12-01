@@ -19,7 +19,7 @@ const getContainerClass = (focusMode: FocusMode) =>
 const getHeaderClass = (focusMode: FocusMode) =>
   cn(
     "flex items-center justify-between border-b px-4 py-3 bg-card/50 flex-shrink-0 transition-all duration-300",
-    focusMode === "BROWSER" && "bg-black/80 backdrop-blur-sm"
+    focusMode === "BROWSER" && "backdrop-blur-sm"
   );
 
 const countNodes = (

@@ -4,6 +4,7 @@ import { fetchProject } from "@/lib/supabase-calls/editor-workspace";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { FileText, FolderOpen, Plus } from "lucide-react";
 import { redirect } from "next/navigation";
+import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 
 interface ProjectPageProps {
   params: Promise<{
@@ -24,7 +25,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     redirect("/auth/sign-in");
   }
 
-  const project = await fetchProject(supabase, projectId, user.id);
+  const { isActive, author_id } = await getProjectStatusAndAuthor(
+    projectId,
+    supabase
+  );
+  const userId = user.id;
+  const isOwner = author_id === userId;
+
+  const project = await fetchProject(supabase, projectId);
 
   if (!project) {
     return (
@@ -34,7 +42,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <FileText className="h-12 w-12 text-muted-foreground" />
           </div>
           <div className="space-y-2">
-            <h2 className="noir-text text-xl font-semibold">Project not found</h2>
+            <h2 className="noir-text text-xl font-semibold">
+              Project not found
+            </h2>
             <p className="noir-text text-sm text-muted-foreground">
               The project you're looking for doesn't exist or you don't have
               access to it.
@@ -66,7 +76,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </p>
 
           <div className="flex justify-center">
-            <Button className="gap-2 cursor-pointer">
+            <Button
+              className="gap-2 cursor-pointer"
+              disabled={!isOwner || !isActive}
+            >
               <Plus className="h-4 w-4" />
               Create a file
             </Button>

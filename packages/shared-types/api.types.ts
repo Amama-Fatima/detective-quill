@@ -2,7 +2,8 @@ import { Database } from "./database.types";
 
 export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type Blueprint = Database["public"]["Tables"]["blue_prints"]["Row"];
-export type BlueprintCard = Database["public"]["Tables"]["blueprint_cards"]["Row"];
+export type BlueprintCard =
+  Database["public"]["Tables"]["blueprint_cards"]["Row"];
 export type BlueprintType = Database["public"]["Enums"]["blueprint_type"];
 export type FsNode = Database["public"]["Tables"]["fs_nodes"]["Row"];
 export type Invitation = Database["public"]["Tables"]["invitations"]["Row"];
@@ -163,6 +164,7 @@ export interface CommentResponse {
   is_resolved: boolean;
   created_at: string;
   updated_at: string;
+  selected_text?: string; // Optional: stores the text that was selected when creating the comment
   // Author info (from join)
   author?: {
     user_id: string;
@@ -188,6 +190,7 @@ export interface CreateCommentDto {
   start_offset: number;
   end_offset: number;
   content: string;
+  selected_text?: string; // Optional: stores the text that was selected
 }
 
 export interface UpdateCommentDto {
@@ -215,7 +218,7 @@ export interface AddMemberDto {
   email: string;
 }
 
-export interface EmailSendingApiRequestDto{
+export interface EmailSendingApiRequestDto {
   projectId: string;
   emails: string[];
   inviterName: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -12,6 +12,7 @@ import {
   Maximize,
   Minimize,
   Focus,
+  MessageSquare,
 } from "lucide-react";
 import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {
@@ -23,6 +24,7 @@ import {
 import dynamic from "next/dynamic";
 import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
 import { useKeyboardShortcuts } from "@/hooks/text-editor/use-keyboard-shortcuts";
+import type { BlockNoteEditorRef } from "./block-note-editor";
 
 // Dynamically import BlockNote editor with no SSR
 const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
@@ -42,6 +44,11 @@ export type TextEditorProps = {
   onSave?: () => void;
   isDirty?: boolean;
   isSaving?: boolean;
+  showComments?: boolean;
+  onToggleComments?: () => void;
+  commentCount?: number;
+  editorRef?: React.RefObject<BlockNoteEditorRef | null>;
+  disabledCondition?: boolean;
 };
 
 export function TextEditor({
@@ -52,8 +59,15 @@ export function TextEditor({
   onSave = () => {},
   isDirty = false,
   isSaving = false,
+  showComments = false,
+  onToggleComments = () => {},
+  commentCount = 0,
+  editorRef,
+  disabledCondition = false,
 }: TextEditorProps) {
   const [internal, setInternal] = useState(value);
+  const internalEditorRef = useRef<BlockNoteEditorRef>(null);
+  const effectiveEditorRef = editorRef || internalEditorRef;
 
   // Custom hooks - now using Zustand for global state
   const {
@@ -103,7 +117,7 @@ export function TextEditor({
                   size="icon"
                   onClick={toggleAppFocus}
                   className={cn(
-                    "transition-colors",
+                    "transition-colors cursor-pointer",
                     focusMode === "APP" &&
                       "bg-primary/10 text-primary cursor-pointer"
                   )}
@@ -125,7 +139,7 @@ export function TextEditor({
                   size="icon"
                   onClick={toggleBrowserFullscreen}
                   className={cn(
-                    "transition-colors",
+                    "transition-colors cursor-pointer",
                     focusMode === "BROWSER" &&
                       "bg-primary/10 text-primary cursor-pointer"
                   )}
@@ -141,6 +155,32 @@ export function TextEditor({
                 {isFullscreen
                   ? "Exit Fullscreen (Cmd/Ctrl + Shift + F)"
                   : "Browser Fullscreen (Cmd/Ctrl + Shift + F)"}
+              </TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="h-6" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggleComments}
+                  className={cn(
+                    "relative transition-colors cursor-pointer",
+                    showComments && "bg-primary/10 text-primary"
+                  )}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {commentCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                      {commentCount > 9 ? "9+" : commentCount}
+                    </span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showComments ? "Hide comments" : "Show comments"}
               </TooltipContent>
             </Tooltip>
 
@@ -189,8 +229,10 @@ export function TextEditor({
         {/* Editor Content */}
         <div className="flex-1 min-h-0">
           <BlockNoteEditor
+            ref={effectiveEditorRef}
             initialContent={internal}
             onChange={handleContentChange}
+            disabledCondition={disabledCondition}
           />
         </div>
 

@@ -115,7 +115,7 @@ export function SignUpForm() {
                   <Input
                     type="text"
                     placeholder="Enter your full name"
-                    className="pl-10 h-11 border-slate-200 dark:border-slate-700"
+                    className="pl-10 h-11 border-slate-200"
                     {...field}
                   />
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />
@@ -131,7 +131,7 @@ export function SignUpForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <FormLabel className="text-sm font-medium text-slate-700">
                 Email
               </FormLabel>
               <FormControl>
@@ -155,7 +155,7 @@ export function SignUpForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <FormLabel className="text-sm font-medium text-slate-700">
                 Password
               </FormLabel>
               <FormControl>
@@ -163,7 +163,7 @@ export function SignUpForm() {
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a password"
-                    className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700"
+                    className="pl-10 pr-10 h-11 border-slate-200"
                     {...field}
                   />
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />
@@ -185,7 +185,7 @@ export function SignUpForm() {
               {password && (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all duration-300 ${passwordStrength.color}`}
                         style={{
@@ -193,7 +193,7 @@ export function SignUpForm() {
                         }}
                       />
                     </div>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 min-w-[3rem]">
+                    <span className="text-xs text-slate-500 min-w-[3rem]">
                       {passwordStrength.label}
                     </span>
                   </div>
@@ -209,7 +209,7 @@ export function SignUpForm() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <FormLabel className="text-sm font-medium text-slate-700">
                 Confirm Password
               </FormLabel>
               <FormControl>
@@ -217,7 +217,7 @@ export function SignUpForm() {
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
-                    className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700"
+                    className="pl-10 pr-10 h-11 border-slate-200"
                     {...field}
                   />
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />

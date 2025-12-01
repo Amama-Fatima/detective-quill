@@ -30,9 +30,9 @@ async function getEditorWorkspaceData(
   try {
     // Fetch all data in parallel
     const [projectResult, nodesResult, nodeResult] = await Promise.allSettled([
-      fetchProject(supabase, projectId, user.id),
-      fetchProjectTree(supabase, projectId, user.id),
-      nodeId ? fetchNode(supabase, nodeId, user.id) : Promise.resolve(null),
+      fetchProject(supabase, projectId),
+      fetchProjectTree(supabase, projectId),
+      nodeId ? fetchNode(supabase, nodeId) : Promise.resolve(null),
     ]);
 
     // Handle project result
@@ -65,14 +65,12 @@ async function getEditorWorkspaceData(
 
 async function fetchProject(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  projectId: string,
-  userId: string
+  projectId: string
 ): Promise<Project> {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
     .eq("id", projectId)
-    .eq("author_id", userId)
     .single();
 
   if (error || !data) {
@@ -84,11 +82,10 @@ async function fetchProject(
 
 async function fetchProjectTree(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  projectId: string,
-  userId: string
+  projectId: string
 ): Promise<FsNodeTreeResponse[]> {
   // First verify project ownership
-  await fetchProject(supabase, projectId, userId);
+  await fetchProject(supabase, projectId);
 
   // Fetch the project tree
   const { data: nodes, error } = await supabase
@@ -107,8 +104,7 @@ async function fetchProjectTree(
 
 async function fetchNode(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  nodeId: string,
-  userId: string
+  nodeId: string
 ): Promise<FsNode> {
   const { data: node, error } = await supabase
     .from("fs_nodes")
@@ -119,7 +115,6 @@ async function fetchNode(
     `
     )
     .eq("id", nodeId)
-    .eq("projects.author_id", userId)
     .single();
 
   if (error || !node) {

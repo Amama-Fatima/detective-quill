@@ -104,10 +104,10 @@ export function useComments({
       if (!session?.access_token) return null;
 
       try {
-        const response = await createComment(
-          { ...data, fs_node_id: fsNodeId },
-          session.access_token
-        );
+        const payload = { ...data, fs_node_id: fsNodeId };
+        console.log("useComments - addComment payload:", payload); // Debug log
+
+        const response = await createComment(payload, session.access_token);
 
         if (response.success && response.data) {
           setComments((prev) => [...prev, response.data!]);

@@ -2,6 +2,7 @@ import { TextEditorContainer } from "@/components/editor-workspace/editor/text-e
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import { fetchNode } from "@/lib/supabase-calls/editor-workspace";
+import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 
 interface NodePageProps {
   params: Promise<{
@@ -22,7 +23,12 @@ export default async function NodePage({ params }: NodePageProps) {
     redirect("/auth/sign-in");
   }
 
-  const node = await fetchNode(supabase, nodeId, user.id);
+  const node = await fetchNode(supabase, nodeId);
+  const { isActive, author_id } = await getProjectStatusAndAuthor(
+    projectId,
+    supabase
+  );
+  const isOwner = user.id === author_id;
 
-  return <TextEditorContainer projectId={projectId} node={node} />;
+  return <TextEditorContainer projectId={projectId} node={node} isActive={isActive} isOwner={isOwner} />;
 }

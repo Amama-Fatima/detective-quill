@@ -8,7 +8,6 @@ import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "../projects/projects.service";
 import { QueueService } from "src/queue/queue.service";
 import {
-  FsNode,
   FsNodeTreeResponse,
   DeleteResponse,
   type FsNode,
@@ -446,9 +445,9 @@ export class FsNodesService {
           // Remove from tracking
           this.sceneTimeouts.delete(nodeId);
 
-          console.log(
-            `Queued embedding job for ${nodeData.path}: ${nodeData.name}`
-          );
+          // console.log(
+          //   `Queued embedding job for ${nodeData.path}: ${nodeData.name}`
+          // );
         } catch (error) {
           console.error(`Failed to queue embedding job for ${nodeId}:`, error);
         }

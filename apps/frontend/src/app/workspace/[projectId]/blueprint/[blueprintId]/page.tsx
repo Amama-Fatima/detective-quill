@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Canvas from "@/components/blueprint/canvas";
 import { BlueprintType } from "@detective-quill/shared-types";
-import { getUserBlueprintById } from "@/lib/supabase-calls/blueprint";
+import { getProjectBlueprintById } from "@/lib/supabase-calls/blueprint";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/dist/client/components/navigation";
 import { getAllCardsOfBlueprint } from "@/lib/supabase-calls/blueprint-cards";
@@ -9,9 +9,7 @@ import ErrorMsg from "@/components/error-msg";
 import { Metadata } from "next";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 
-export async function generateMetadata({}: {
-  params: { projectId: string; blueprintId: string };
-}): Promise<Metadata> {
+export async function generateMetadata({}: {}): Promise<Metadata> {
   return {
     title: "Create Blueprint",
     description: "Create or Edit Blueprint page",
@@ -46,9 +44,9 @@ export default async function CreateBlueprintPage({
 
   const userId = user.id;
 
-  const { blueprint, error: blueprintError } = await getUserBlueprintById(
+  const { blueprint, error: blueprintError } = await getProjectBlueprintById(
     blueprintId,
-    userId,
+    params.projectId,
     supabase
   );
   if (blueprintError || !blueprint) {

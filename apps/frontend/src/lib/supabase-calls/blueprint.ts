@@ -1,19 +1,22 @@
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import type { Blueprint } from "@detective-quill/shared-types";
 
-export async function getUserBlueprints(
-  userId: string,
+export async function getProjectBlueprints(
+  projectId: string,
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ blueprints: Blueprint[]; error: string | null }> {
+  console.log("Fetching blueprints for projectId:", projectId);
   try {
     const { data, error } = await supabase
       .from("blue_prints")
       .select("*")
-      .eq("user_id", userId);
+      .eq("project_id", projectId);
 
     if (error) {
       throw new Error(`Failed to get user blueprints: ${error.message}`);
     }
+
+    console.log("Fetched blueprints data:", data);
 
     return { blueprints: data || [], error: null };
   } catch (err) {
@@ -26,9 +29,9 @@ export async function getUserBlueprints(
   }
 }
 
-export async function getUserBlueprintById(
+export async function getProjectBlueprintById(
   blueprintId: string,
-  userId: string,
+  projectId: string,
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ blueprint: Blueprint | null; error: string | null }> {
   try {
@@ -36,7 +39,7 @@ export async function getUserBlueprintById(
       .from("blue_prints")
       .select("*")
       .eq("id", blueprintId)
-      .eq("user_id", userId)
+      .eq("project_id", projectId)
       .single();
 
     if (error) {
@@ -58,7 +61,7 @@ export async function getUserBlueprintById(
 
 export async function getBlueprintTitle(
   blueprintId: string,
-  projectId: string,
+  projectId: string
 ): Promise<{ title: string | null; error: string | null }> {
   try {
     const supabase = await createSupabaseServerClient();
@@ -69,9 +72,8 @@ export async function getBlueprintTitle(
       .eq("project_id", projectId)
       .single();
 
-
     console.log("Fetched blueprint title:", data);
-    console.log(error)
+    console.log(error);
     if (error) {
       throw new Error(`Failed to get blueprint title: ${error.message}`);
     }

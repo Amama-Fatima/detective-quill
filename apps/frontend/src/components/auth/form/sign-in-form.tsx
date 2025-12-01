@@ -76,7 +76,7 @@ export function SignInForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <FormLabel className="text-sm font-medium text-slate-700">
                   Email
                 </FormLabel>
                 <FormControl>
@@ -84,7 +84,7 @@ export function SignInForm() {
                     <Input
                       type="email"
                       placeholder="Enter your email"
-                      className="pl-10 h-11 border-slate-200 dark:border-slate-700"
+                      className="pl-10 h-11 border-slate-200"
                       {...field}
                     />
                     <Mail className="absolute text-secondary-foreground left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" />
@@ -100,7 +100,7 @@ export function SignInForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium text-muted-foreground dark:text-slate-300">
+                <FormLabel className="text-sm font-medium text-muted-foreground ">
                   Password
                 </FormLabel>
                 <FormControl>
@@ -108,7 +108,7 @@ export function SignInForm() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-10 pr-10 h-11 border-slate-200 dark:border-slate-700"
+                      className="pl-10 pr-10 h-11 border-slate-200"
                       {...field}
                     />
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-foreground" />

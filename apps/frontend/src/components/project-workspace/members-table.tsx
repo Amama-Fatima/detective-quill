@@ -150,7 +150,7 @@ const MembersTable = ({
                               {member.full_name}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {`member${index + 1}@project.com`}
+                              {member.email}
                             </span>
                           </div>
                         </div>

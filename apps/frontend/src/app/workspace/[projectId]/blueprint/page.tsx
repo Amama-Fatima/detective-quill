@@ -2,8 +2,12 @@ import { Suspense } from "react";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import CreateBlueprintBtns from "@/components/blueprint/create-blueprint-btns";
-import { getUserBlueprints } from "@/lib/supabase-calls/blueprint";
+import {
+  getProjectBlueprintById,
+  getProjectBlueprints,
+} from "@/lib/supabase-calls/blueprint";
 import { UserBlueprintsList } from "@/components/blueprint/user-bueprints-list";
+import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import ErrorMsg from "@/components/error-msg";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
@@ -47,11 +51,18 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
 
   const userId = user.id;
 
-  const { blueprints, error } = await getUserBlueprints(userId, supabase);
+  const { blueprints, error } = await getProjectBlueprints(projectId, supabase);
 
   if (error) {
     return <ErrorMsg message="Failed to load blueprints" />;
   }
+
+  const { isActive, author_id } = await getProjectStatusAndAuthor(
+    projectId,
+    supabase
+  );
+
+  const isOwner = author_id === userId;
 
   return (
     <Suspense fallback={<BlueprintLandingSkeleton />}>
@@ -66,7 +77,9 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
                 templates
               </p>
             </div>
-            <CreateBlueprintBtns projectId={projectId} />
+            {isOwner && isActive && (
+              <CreateBlueprintBtns projectId={projectId} />
+            )}
           </div>
         </div>
 

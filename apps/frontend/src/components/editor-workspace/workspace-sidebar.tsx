@@ -3,9 +3,7 @@ import { cn } from "@/lib/utils/utils";
 import { WorkspaceHeader } from "@/components/editor-workspace/workspace-header";
 import { FileTree } from "./file-tree/file-tree";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
-import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
-import { createSupabaseServerClient } from "@/supabase/server-client";
-import { redirect } from "next/navigation";
+import { type Session } from "@supabase/supabase-js";
 
 interface WorkspaceSidebarProps {
   projectName: string;
@@ -14,11 +12,13 @@ interface WorkspaceSidebarProps {
   nodes: FsNodeTreeResponse[];
   onNodesChange: (nodes: FsNodeTreeResponse[]) => void;
   projectId: string;
-  session: any;
+  session: Session | null;
   loading: boolean;
+  isOwner: boolean;
+  isActive: boolean;
 }
 
-export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = async ({
+export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
   projectName,
   filesCount,
   foldersCount,
@@ -27,24 +27,9 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = async ({
   projectId,
   session,
   loading,
+  isOwner,
+  isActive,
 }) => {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/auth/sign-in");
-  }
-
-  const userId = user.id;
-  const { isActive, author_id } = await getProjectStatusAndAuthor(
-    projectId,
-    supabase
-  );
-
-  const isOwner = author_id === userId;
-
   return (
     <aside
       className={cn(

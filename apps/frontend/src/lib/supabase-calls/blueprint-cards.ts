@@ -12,7 +12,6 @@ export async function getAllCardsOfBlueprint(
       .from("blueprint_cards")
       .select("*")
       .eq("blueprint_id", blueprintId)
-      .eq("user_id", userId);
 
     if (error) {
       throw new Error(`Failed to fetch blueprint cards: ${error.message}`);

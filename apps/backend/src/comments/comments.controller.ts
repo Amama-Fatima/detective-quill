@@ -41,6 +41,7 @@ export class CommentsController {
     @Request() req
   ): Promise<ApiResponse<CommentResponse>> {
     try {
+      console.log("Controller received createCommentDto:", createCommentDto); // Debug log
       const data = await this.commentsService.createComment(
         createCommentDto,
         req.user.id
@@ -61,6 +62,7 @@ export class CommentsController {
     includeResolved: boolean
   ): Promise<ApiResponse<CommentResponse[]>> {
     try {
+      console.log("getting")
       const data = await this.commentsService.findCommentsByNode(
         fsNodeId,
         req.user.id,

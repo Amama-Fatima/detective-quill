@@ -47,6 +47,7 @@ export class CommentsService {
         end_offset: createCommentDto.end_offset,
         content: createCommentDto.content,
         author_id: userId,
+        selected_text: createCommentDto.selected_text,
       })
       .select(
         `
@@ -58,8 +59,7 @@ export class CommentsService {
           avatar_url
         )
       `
-      )
-      .single();
+      );
 
     if (error) {
       throw new BadRequestException(
@@ -67,7 +67,7 @@ export class CommentsService {
       );
     }
 
-    return data;
+    return data[0];
   }
 
   async findCommentsByNode(
@@ -76,10 +76,10 @@ export class CommentsService {
     includeResolved: boolean = true
   ): Promise<CommentResponse[]> {
     const supabase = this.supabaseService.client;
-
+    console.log("b4 verification");
     // Verify user has access to the node
-    await this.verifyNodeAccess(fsNodeId, userId);
-
+    // await this.verifyNodeAccess(fsNodeId, userId);
+    console.log("after verification");
     let query = supabase
       .from("comments")
       .select(
@@ -103,6 +103,7 @@ export class CommentsService {
     const { data, error } = await query;
 
     if (error) {
+      console.log("Error fetching comments:", error);
       throw new BadRequestException(
         `Failed to fetch comments: ${error.message}`
       );
@@ -113,7 +114,7 @@ export class CommentsService {
 
   async findCommentById(
     commentId: string,
-    userId: string,
+    userId: string
   ): Promise<CommentWithRelations> {
     const supabase = this.supabaseService.client;
 
@@ -134,38 +135,34 @@ export class CommentsService {
         )
       `
       )
-      .eq("id", commentId)
-      .single();
+      .eq("id", commentId);
 
     if (error || !data) {
       throw new NotFoundException("Comment not found");
     }
 
     // Verify user has access (either author of comment or project owner)
-    const project = Array.isArray(data.fs_node?.project)
-      ? data.fs_node.project[0]
-      : data.fs_node?.project;
+    const project = Array.isArray(data[0].fs_node?.project)
+      ? data[0].fs_node.project[0]
+      : data[0].fs_node?.project;
     const projectAuthorId = project?.author_id;
 
-    if (data.author_id !== userId && projectAuthorId !== userId) {
+    if (data[0].author_id !== userId && projectAuthorId !== userId) {
       throw new ForbiddenException("Access denied");
     }
 
-    return data;
+    return data[0];
   }
 
   async updateComment(
     commentId: string,
     updateCommentDto: UpdateCommentDto,
-    userId: string,
+    userId: string
   ): Promise<CommentResponse> {
     const supabase = this.supabaseService.client;
 
     // First verify the comment exists and user has permission
-    const existingComment = await this.findCommentById(
-      commentId,
-      userId,
-    );
+    const existingComment = await this.findCommentById(commentId, userId);
 
     // Only allow author to update content, but project owner can resolve
     const project = Array.isArray(existingComment.fs_node?.project)
@@ -220,8 +217,7 @@ export class CommentsService {
 
   async deleteComment(
     commentId: string,
-    userId: string,
-
+    userId: string
   ): Promise<DeleteResponse> {
     const supabase = this.supabaseService.client;
 
@@ -259,7 +255,7 @@ export class CommentsService {
     const supabase = this.supabaseService.client;
 
     // Verify user has access to the node
-    await this.verifyNodeAccess(fsNodeId, userId);
+    // await this.verifyNodeAccess(fsNodeId, userId);
 
     const { data, error } = await supabase
       .from("comments")

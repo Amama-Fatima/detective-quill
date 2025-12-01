@@ -25,6 +25,7 @@ async function makeAuthenticatedRequest<T>(
   });
 
   if (!response.ok) {
+    console.log("API request failed:", response);
     throw new Error(
       `API request failed: ${response.status} ${response.statusText}`
     );
@@ -38,6 +39,7 @@ export async function createComment(
   data: CreateCommentDto,
   accessToken: string
 ): Promise<ApiResponse<CommentResponse>> {
+  console.log("API call - createComment data:", data); // Debug log
   return makeAuthenticatedRequest<CommentResponse>("/comments", accessToken, {
     method: "POST",
     body: JSON.stringify(data),
