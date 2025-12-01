@@ -1,15 +1,13 @@
 import { Suspense } from "react";
 import Canvas from "@/components/blueprint/canvas";
 import { BlueprintType } from "@detective-quill/shared-types";
-import {
-  getUserBlueprintById,
-  getBlueprintTitle,
-} from "@/lib/supabase-calls/blueprint";
+import { getUserBlueprintById } from "@/lib/supabase-calls/blueprint";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/dist/client/components/navigation";
 import { getAllCardsOfBlueprint } from "@/lib/supabase-calls/blueprint-cards";
 import ErrorMsg from "@/components/error-msg";
 import { Metadata } from "next";
+import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 
 export async function generateMetadata({}: {
   params: { projectId: string; blueprintId: string };
@@ -66,6 +64,13 @@ export default async function CreateBlueprintPage({
     return <ErrorMsg message="Failed to load blueprint cards" />;
   }
 
+  const { isActive, author_id } = await getProjectStatusAndAuthor(
+    String(blueprint.project_id),
+    supabase
+  );
+
+  const isOwner = author_id === userId;
+
   return (
     <Suspense fallback={<CreateBlueprintPageSkeleton />}>
       <div>
@@ -74,6 +79,8 @@ export default async function CreateBlueprintPage({
           type={type}
           projectName={blueprint?.title || "Untitled Blueprint"}
           prevBlueprintCards={blueprint_cards}
+          isOwner={isOwner}
+          isActive={isActive}
         />
       </div>
     </Suspense>

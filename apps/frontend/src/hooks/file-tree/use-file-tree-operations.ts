@@ -9,7 +9,7 @@ import {
 import {
   CreateFsNodeDto,
   FsNodeTreeResponse,
-  FsNodeResponse,
+  FsNode,
   UpdateFsNodeDto,
 } from "@detective-quill/shared-types";
 import { toast } from "sonner";

@@ -19,13 +19,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, FileText, Folder, Home } from "lucide-react";
-import { FsNodeResponse } from "@detective-quill/shared-types";
+import { FsNode } from "@detective-quill/shared-types";
 
 interface MoveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (newParentId: string | null) => Promise<void>;
-  node: FsNodeResponse | null;
+  node: FsNode | null;
   availableFolders: Array<{ id: string; name: string; path: string }>;
   loading?: boolean;
 }

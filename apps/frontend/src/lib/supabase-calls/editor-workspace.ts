@@ -2,7 +2,7 @@
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import {
   FsNodeTreeResponse,
-  FsNodeResponse,
+  FsNode,
   Project,
 } from "@detective-quill/shared-types";
 import { notFound, redirect } from "next/navigation";
@@ -13,7 +13,7 @@ async function getEditorWorkspaceData(
 ): Promise<{
   project: Project;
   nodes: FsNodeTreeResponse[];
-  currentNode: FsNodeResponse | null;
+  currentNode: FsNode | null;
   user: any;
 }> {
   // Get current user
@@ -109,7 +109,7 @@ async function fetchNode(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   nodeId: string,
   userId: string
-): Promise<FsNodeResponse> {
+): Promise<FsNode> {
   const { data: node, error } = await supabase
     .from("fs_nodes")
     .select(

@@ -20,7 +20,7 @@ import {
 } from "./validation/fs-nodes.validation";
 import { AuthGuard } from "../auth/auth.guard";
 import {
-  FsNodeResponse,
+  FsNode,
   FsNodeTreeResponse,
   DeleteResponse,
   ApiResponse,
@@ -35,7 +35,7 @@ export class FsNodesController {
   async create(
     @Body() createNodeDto: CreateFsNodeDto,
     @Request() req
-  ): Promise<ApiResponse<FsNodeResponse>> {
+  ): Promise<ApiResponse<FsNode>> {
     try {
       const data = await this.fsNodesService.createNode(
         createNodeDto,
@@ -105,7 +105,7 @@ export class FsNodesController {
   async getNodeChildren(
     @Param("id") id: string,
     @Request() req
-  ): Promise<ApiResponse<FsNodeResponse[]>> {
+  ): Promise<ApiResponse<FsNode[]>> {
     try {
       const data = await this.fsNodesService.getNodeChildren(id, req.user.id);
       return { success: true, data };
@@ -126,7 +126,7 @@ export class FsNodesController {
   async findOne(
     @Param("id") id: string,
     @Request() req
-  ): Promise<ApiResponse<FsNodeResponse>> {
+  ): Promise<ApiResponse<FsNode>> {
     try {
       const data = await this.fsNodesService.getNode(id, req.user.id);
       return { success: true, data };
@@ -148,7 +148,7 @@ export class FsNodesController {
     @Param("id") id: string,
     @Body() updateNodeDto: UpdateFsNodeDto,
     @Request() req
-  ): Promise<ApiResponse<FsNodeResponse>> {
+  ): Promise<ApiResponse<FsNode>> {
     try {
       const data = await this.fsNodesService.updateNode(
         id,
@@ -195,7 +195,7 @@ export class FsNodesController {
     @Param("id") id: string,
     @Body() moveData: { parent_id: string | null; sort_order: number },
     @Request() req
-  ): Promise<ApiResponse<FsNodeResponse>> {
+  ): Promise<ApiResponse<FsNode>> {
     try {
       const data = await this.fsNodesService.moveNode(
         id,

@@ -55,3 +55,35 @@ export async function getInvitedProjects(
     return { projects: [], error: msg };
   }
 }
+
+export async function getProjectStatusAndAuthor(
+  projectId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
+): Promise<{
+  isActive: boolean;
+  author_id: string | null;
+  error: string | null;
+}> {
+  try {
+    const { data: project, error } = await supabase
+      .from("projects")
+      .select("status, author_id")
+      .eq("id", projectId)
+      .single();
+    if (error || !project) {
+      throw new Error(`Failed to get project status: ${error?.message}`);
+    }
+    return {
+      isActive: project.status === "active",
+      author_id: project.author_id,
+      error: null,
+    };
+  } catch (err) {
+    console.error("Error in getProjectStatus:", err);
+    const msg =
+      err instanceof Error
+        ? err.message
+        : "Unknown error fetching project status";
+    return { isActive: false, author_id: "", error: msg };
+  }
+}

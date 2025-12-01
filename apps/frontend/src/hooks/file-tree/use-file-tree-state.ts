@@ -1,8 +1,5 @@
 import { useState, useMemo } from "react";
-import {
-  FsNodeTreeResponse,
-  FsNodeResponse,
-} from "@detective-quill/shared-types";
+import { FsNodeTreeResponse, FsNode } from "@detective-quill/shared-types";
 import { TreeViewElement } from "@/lib/types/workspace";
 
 interface UseFileTreeStateProps {
@@ -14,7 +11,7 @@ export const useFileTreeState = ({ nodes }: UseFileTreeStateProps) => {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
-  const [selectedNode, setSelectedNode] = useState<FsNodeResponse | null>(null);
+  const [selectedNode, setSelectedNode] = useState<FsNode | null>(null);
   const [createType, setCreateType] = useState<"file" | "folder">("file");
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [hoveredFolder, setHoveredFolder] = useState<string | null>(null);
@@ -64,12 +61,12 @@ export const useFileTreeState = ({ nodes }: UseFileTreeStateProps) => {
     setCreateDialogOpen(true);
   };
 
-  const openRenameDialog = (node: FsNodeResponse) => {
+  const openRenameDialog = (node: FsNode) => {
     setSelectedNode(node);
     setRenameDialogOpen(true);
   };
 
-  const openMoveDialog = (node: FsNodeResponse) => {
+  const openMoveDialog = (node: FsNode) => {
     setSelectedNode(node);
     setMoveDialogOpen(true);
   };

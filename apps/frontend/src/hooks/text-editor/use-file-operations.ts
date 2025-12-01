@@ -6,19 +6,19 @@ import {
   updateFsNode,
   deleteFsNode,
 } from "@/lib/backend-calls/fs-nodes";
-import { UpdateFsNodeDto, FsNodeResponse } from "@detective-quill/shared-types";
+import { UpdateFsNodeDto, FsNode } from "@detective-quill/shared-types";
 import { toast } from "sonner";
 
 interface UseFileOperationsProps {
   projectId: string;
-  initialNode: FsNodeResponse;
+  initialNode: FsNode;
 }
 
 export const useFileOperations = ({
   projectId,
   initialNode,
 }: UseFileOperationsProps) => {
-  const [node, setNode] = useState<FsNodeResponse | null>(initialNode);
+  const [node, setNode] = useState<FsNode | null>(initialNode);
   const [saving, setSaving] = useState(false);
   const { session } = useAuth();
   const router = useRouter();

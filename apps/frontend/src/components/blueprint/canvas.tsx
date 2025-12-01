@@ -31,6 +31,8 @@ interface CanvasProps {
   blueprintId: string;
   type: BlueprintType;
   prevBlueprintCards: BlueprintCard[] | null;
+  isOwner: boolean;
+  isActive: boolean;
 }
 
 export default function Canvas({
@@ -38,6 +40,8 @@ export default function Canvas({
   type,
   projectName,
   prevBlueprintCards,
+  isOwner,
+  isActive,
 }: CanvasProps) {
   const deleteCard = (nodeId: string) => {
     setNodes((nds) => {
@@ -114,6 +118,8 @@ export default function Canvas({
           onTitleChange: (newTitle: string) =>
             updateNodeTitle(reactFlowId, newTitle),
           onDelete: () => deleteCard(reactFlowId),
+          isOwner,
+          isActive,
         },
         position: {
           x: Math.random() * 400,
@@ -142,7 +148,6 @@ export default function Canvas({
     try {
       // create new cards
       if (createList.length > 0) {
-        console.log("Creating cards:", createListWoId);
         await createBlueprintCard(accessToken!, blueprintId, createListWoId);
       }
 
@@ -191,6 +196,8 @@ export default function Canvas({
           type={type}
           blueprintId={blueprintId}
           accessToken={accessToken!}
+          isOwner={isOwner}
+          isActive={isActive}
         />
         <div className="flex gap-1">
           <Button
@@ -198,12 +205,13 @@ export default function Canvas({
             onClick={() => {
               onSave();
             }}
-            disabled={isSaving || !isDirty}
+            disabled={isSaving || !isDirty || !isOwner || !isActive}
           >
             Save
           </Button>
           <Button
             onClick={() => addCard()}
+            disabled={!isOwner || !isActive}
             className="text-left cursor-pointer bg-primary hover:bg-primary/90 shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           >
             + Add Card{" "}

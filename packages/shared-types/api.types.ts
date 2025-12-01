@@ -91,7 +91,6 @@ export interface UpdateFsNodeDto {
   sort_order?: number;
 }
 
-export interface FsNodeResponse extends FsNode {}
 
 export interface FsNodeTreeResponse {
   id: string;

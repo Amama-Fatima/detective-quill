@@ -8,6 +8,8 @@ interface EditableProjectNameProps {
   type: string;
   blueprintId: string;
   accessToken: string;
+  isOwner: boolean;
+  isActive: boolean;
 }
 
 export default function EditableProjectName({
@@ -15,6 +17,8 @@ export default function EditableProjectName({
   type,
   blueprintId,
   accessToken,
+  isOwner,
+  isActive,
 }: EditableProjectNameProps) {
   const [name, setName] = useState(initialName || "Untitled Project");
   const [isEditing, setIsEditing] = useState(false);
@@ -47,6 +51,7 @@ export default function EditableProjectName({
             value={name}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
+            disabled={loading || !isOwner || !isActive}
             autoFocus
             className="bg-secondary-foreground border border-gray-600 rounded px-2 py-1 text-white text-lg font-semibold"
           />

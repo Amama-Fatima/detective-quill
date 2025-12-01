@@ -5,11 +5,11 @@ import { TextEditor } from "@/components/editor-workspace/editor/text-editor";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
 import { FileNotFoundState } from "./loading-states";
-import { FsNodeResponse } from "@detective-quill/shared-types";
+import { FsNode } from "@detective-quill/shared-types";
 
 interface TextEditorContainerProps {
   projectId: string;
-  node: FsNodeResponse;
+  node: FsNode;
 }
 
 export function TextEditorContainer({

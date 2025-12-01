@@ -7,7 +7,7 @@ import { WorkspaceHeaderBar } from "@/components/editor-workspace/workspace-head
 import { countNodes } from "@/lib/utils/utils";
 import {
   FsNodeTreeResponse,
-  FsNodeResponse,
+  FsNode,
   Project,
 } from "@detective-quill/shared-types";
 import { useAuth } from "@/context/auth-context";
@@ -16,7 +16,7 @@ interface WorkspaceLayoutClientWrapperProps {
   children: React.ReactNode;
   project: Project;
   initialNodes: FsNodeTreeResponse[];
-  currentNode: FsNodeResponse | null;
+  currentNode: FsNode | null;
   projectId: string;
   nodeId?: string;
 }

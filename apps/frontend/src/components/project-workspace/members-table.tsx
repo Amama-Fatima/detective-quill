@@ -25,11 +25,13 @@ const MembersTable = ({
   initialMembers,
   projectId,
   userId,
+  isActive,
 }: {
   isOwner: boolean;
   initialMembers: ProjectMember[] | [];
   projectId: string;
   userId: string;
+  isActive: boolean;
 }) => {
   const [members, setMembers] = useState<ProjectMember[]>(initialMembers);
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(
@@ -166,6 +168,7 @@ const MembersTable = ({
                           <Button
                             variant="ghost"
                             size="icon"
+                            disabled={!isActive || deleting}
                             onClick={() => handleRemoveMember(member)}
                             className="hover:bg-red-50 hover:text-red-600 cursor-pointer transition-colors"
                           >

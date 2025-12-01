@@ -1,5 +1,5 @@
 import {
-  FsNodeResponse,
+  FsNode,
   FsNodeTreeResponse,
   CreateFsNodeDto,
   UpdateFsNodeDto,
@@ -35,8 +35,8 @@ async function makeAuthenticatedRequest<T>(
 export async function createFsNode(
   data: CreateFsNodeDto,
   accessToken: string
-): Promise<ApiResponse<FsNodeResponse>> {
-  return makeAuthenticatedRequest<FsNodeResponse>("/fs-nodes", accessToken, {
+): Promise<ApiResponse<FsNode>> {
+  return makeAuthenticatedRequest<FsNode>("/fs-nodes", accessToken, {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -55,26 +55,19 @@ export async function getProjectTree(
 export async function getFsNode(
   nodeId: string,
   accessToken: string
-): Promise<ApiResponse<FsNodeResponse>> {
-  return makeAuthenticatedRequest<FsNodeResponse>(
-    `/fs-nodes/${nodeId}`,
-    accessToken
-  );
+): Promise<ApiResponse<FsNode>> {
+  return makeAuthenticatedRequest<FsNode>(`/fs-nodes/${nodeId}`, accessToken);
 }
 
 export async function updateFsNode(
   nodeId: string,
   data: UpdateFsNodeDto,
   accessToken: string
-): Promise<ApiResponse<FsNodeResponse>> {
-  return makeAuthenticatedRequest<FsNodeResponse>(
-    `/fs-nodes/${nodeId}`,
-    accessToken,
-    {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    }
-  );
+): Promise<ApiResponse<FsNode>> {
+  return makeAuthenticatedRequest<FsNode>(`/fs-nodes/${nodeId}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 
 export async function deleteFsNode(
@@ -103,8 +96,8 @@ export async function moveFsNode(
   parentId: string | null,
   sortOrder: number,
   accessToken: string
-): Promise<ApiResponse<FsNodeResponse>> {
-  return makeAuthenticatedRequest<FsNodeResponse>(
+): Promise<ApiResponse<FsNode>> {
+  return makeAuthenticatedRequest<FsNode>(
     `/fs-nodes/${nodeId}/move`,
     accessToken,
     {

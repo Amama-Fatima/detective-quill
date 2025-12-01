@@ -12,6 +12,8 @@ interface CanvasCardNodeProps {
   onContentChange: (newContent: string) => void;
   onTitleChange: (newTitle: string) => void;
   onDelete?: () => void;
+  isOwner: boolean;
+  isActive: boolean;
 }
 
 export default function CanvasCardNode({
@@ -51,6 +53,7 @@ export default function CanvasCardNode({
           {/* title area */}
           {isEditing ? (
             <input
+              disabled={!data.isOwner || !data.isActive}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               ref={titleRef}
@@ -60,7 +63,11 @@ export default function CanvasCardNode({
                      text-gray-800 text-md leading-relaxed transition-all"
             />
           ) : (
-            <Badge className={`text-lg font-medium border whitespace-pre-wrap break-words break-all text-left`}>{data.title}</Badge>
+            <Badge
+              className={`text-lg font-medium border whitespace-pre-wrap break-words break-all text-left`}
+            >
+              {data.title}
+            </Badge>
           )}
         </div>
 
@@ -68,6 +75,7 @@ export default function CanvasCardNode({
           <Button
             variant="ghost"
             size="sm"
+            disabled={!data.isOwner || !data.isActive}
             onClick={() => setIsEditing(!isEditing)}
             className={`h-7 w-7 p-0 opacity-0 cursor-pointer  group-hover:opacity-100 transition-opacity ${
               isEditing ? "opacity-100 bg-muted" : "hover:bg-gray-100"
@@ -79,6 +87,7 @@ export default function CanvasCardNode({
           <Button
             variant="ghost"
             size="sm"
+            disabled={!data.isOwner || !data.isActive}
             className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 cursor-pointer hover:text-red-500"
             onClick={data.onDelete}
           >
@@ -91,6 +100,7 @@ export default function CanvasCardNode({
       <div className="px-4 pb-4">
         {isEditing ? (
           <textarea
+            disabled={!data.isOwner || !data.isActive}
             ref={textareaRef}
             value={data.content}
             onChange={(e) => data.onContentChange(e.target.value)}
@@ -110,7 +120,9 @@ export default function CanvasCardNode({
             onClick={() => setIsEditing(true)}
           >
             {data.content ? (
-              <div className="whitespace-pre-wrap break-words break-all">{data.content}</div>
+              <div className="whitespace-pre-wrap break-words break-all">
+                {data.content}
+              </div>
             ) : (
               <div className="text-gray-400 italic">
                 Click to add content...

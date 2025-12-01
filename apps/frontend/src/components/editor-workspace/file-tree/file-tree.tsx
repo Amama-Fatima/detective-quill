@@ -2,10 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  FsNodeTreeResponse,
-  FsNodeResponse,
-} from "@detective-quill/shared-types";
+import { FsNodeTreeResponse, FsNode } from "@detective-quill/shared-types";
 import { toast } from "sonner";
 import {
   FileText,
@@ -51,6 +48,8 @@ interface FileTreeProps {
   projectName: string;
   session: any;
   loading: boolean;
+  isOwner: boolean;
+  isActive: boolean;
 }
 
 export function FileTree({
@@ -60,6 +59,8 @@ export function FileTree({
   projectName,
   session,
   loading,
+  isOwner,
+  isActive,
 }: FileTreeProps) {
   const params = useParams();
   const selectedNodeId = params.nodeId as string;
@@ -162,7 +163,11 @@ export function FileTree({
         <div className="flex gap-2 mb-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" className="flex-1 gap-2 cursor-pointer">
+              <Button
+                size="sm"
+                className="flex-1 gap-2 cursor-pointer"
+                disabled={!isOwner || !isActive}
+              >
                 <Plus className="h-4 w-4" />
                 New
               </Button>
@@ -171,6 +176,7 @@ export function FileTree({
               <DropdownMenuItem
                 onClick={() => openCreateDialog("file")}
                 className="cursor-pointer"
+                disabled={!isOwner || !isActive}
               >
                 <FileText className="h-4 w-4 mr-2" />
                 New File
@@ -178,6 +184,7 @@ export function FileTree({
               <DropdownMenuItem
                 onClick={() => openCreateDialog("folder")}
                 className="cursor-pointer"
+                disabled={!isOwner || !isActive}
               >
                 <FolderPlus className="h-4 w-4 mr-2" />
                 New Folder
@@ -212,11 +219,14 @@ export function FileTree({
         {treeElements.length === 0 ? (
           <div className="text-center text-muted-foreground py-8 px-4">
             <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-[1rem] noir-text mb-4">No files or folders yet</p>
+            <p className="text-[1rem] noir-text mb-4">
+              No files or folders yet
+            </p>
             <Button
               size="sm"
               onClick={() => openCreateDialog("file")}
               className="w-full cursor-pointer"
+              disabled={!isOwner || !isActive}
             >
               Create your first file
             </Button>
@@ -246,6 +256,8 @@ export function FileTree({
                 nodes={nodes}
                 hoveredFolder={hoveredFolder}
                 setHoveredFolder={setHoveredFolder}
+                isOwner={isOwner}
+                isActive={isActive}
               />
             ))}
           </Tree>
@@ -253,34 +265,42 @@ export function FileTree({
       </div>
 
       {/* Dialogs */}
-      <CreateNodeDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onSubmit={handleCreateNode}
-        creating={creating}
-        nodeType={createType}
-        folderName={
-          selectedFolder ? findNodeById(nodes, selectedFolder)?.name : undefined
-        }
-        availableFolders={folderNodes}
-      />
+      {isActive && isOwner && (
+        <CreateNodeDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onSubmit={handleCreateNode}
+          creating={creating}
+          nodeType={createType}
+          folderName={
+            selectedFolder
+              ? findNodeById(nodes, selectedFolder)?.name
+              : undefined
+          }
+          availableFolders={folderNodes}
+        />
+      )}
 
-      <RenameDialog
-        open={renameDialogOpen}
-        onOpenChange={setRenameDialogOpen}
-        onSubmit={handleRenameNode}
-        node={selectedNode}
-        loading={renaming}
-      />
+      {isOwner && isActive && (
+        <RenameDialog
+          open={renameDialogOpen}
+          onOpenChange={setRenameDialogOpen}
+          onSubmit={handleRenameNode}
+          node={selectedNode}
+          loading={renaming}
+        />
+      )}
 
-      <MoveDialog
-        open={moveDialogOpen}
-        onOpenChange={setMoveDialogOpen}
-        onSubmit={handleMoveNode}
-        node={selectedNode}
-        availableFolders={folderNodes}
-        loading={moving}
-      />
+      {isOwner && isActive && (
+        <MoveDialog
+          open={moveDialogOpen}
+          onOpenChange={setMoveDialogOpen}
+          onSubmit={handleMoveNode}
+          node={selectedNode}
+          availableFolders={folderNodes}
+          loading={moving}
+        />
+      )}
     </div>
   );
 }
@@ -298,18 +318,22 @@ function TreeItem({
   nodes,
   hoveredFolder,
   setHoveredFolder,
+  isOwner,
+  isActive,
 }: {
   element: TreeViewElement;
   selectedNodeId: string;
   onNodeSelect: (nodeId: string) => void;
   onCreateFile: (folderId: string) => void;
   onCreateFolder: (folderId: string) => void;
-  onRenameNode: (node: FsNodeResponse) => void;
-  onMoveNode: (node: FsNodeResponse) => void;
+  onRenameNode: (node: FsNode) => void;
+  onMoveNode: (node: FsNode) => void;
   onDeleteNode: (nodeId: string) => void;
   nodes: FsNodeTreeResponse[];
   hoveredFolder: string | null;
   setHoveredFolder: (id: string | null) => void;
+  isOwner: boolean;
+  isActive: boolean;
 }) {
   const node = findNodeById(nodes, element.id);
   const isSelected = selectedNodeId === element.id;
@@ -342,6 +366,8 @@ function TreeItem({
               nodes={nodes}
               hoveredFolder={hoveredFolder}
               setHoveredFolder={setHoveredFolder}
+              isOwner={isOwner}
+              isActive={isActive}
             />
           ))}
 
@@ -355,6 +381,7 @@ function TreeItem({
             <div className="flex gap-1">
               <Button
                 size="sm"
+                disabled={!isOwner || !isActive}
                 variant="ghost"
                 className="h-6 text-xs cursor-pointer"
                 onClick={() => onCreateFile(element.id)}
@@ -363,6 +390,7 @@ function TreeItem({
                 File
               </Button>
               <Button
+                disabled={!isOwner || !isActive}
                 size="sm"
                 variant="ghost"
                 className="h-6 text-xs cursor-pointer"
@@ -398,15 +426,17 @@ function TreeItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
-                onClick={() => node && onRenameNode(node as FsNodeResponse)}
+                onClick={() => node && onRenameNode(node as FsNode)}
                 className="cursor-pointer"
+                disabled={!isOwner || !isActive}
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => node && onMoveNode(node as FsNodeResponse)}
+                onClick={() => node && onMoveNode(node as FsNode)}
                 className="cursor-pointer"
+                disabled={!isOwner || !isActive}
               >
                 <FolderX className="h-4 w-4 mr-2" />
                 Move to...
@@ -415,6 +445,7 @@ function TreeItem({
               <DropdownMenuItem
                 className="text-destructive cursor-pointer"
                 onClick={() => onDeleteNode(element.id)}
+                disabled={!isOwner || !isActive}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
@@ -462,21 +493,24 @@ function TreeItem({
                   e.stopPropagation();
                   e.preventDefault();
                 }}
+                disabled={!isOwner || !isActive}
               >
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
-                onClick={() => node && onRenameNode(node as FsNodeResponse)}
+                onClick={() => node && onRenameNode(node as FsNode)}
                 className="cursor-pointer"
+                disabled={!isOwner || !isActive}
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => node && onMoveNode(node as FsNodeResponse)}
+                onClick={() => node && onMoveNode(node as FsNode)}
                 className="cursor-pointer"
+                disabled={!isOwner || !isActive}
               >
                 <FolderX className="h-4 w-4 mr-2" />
                 Move to...
@@ -485,6 +519,7 @@ function TreeItem({
               <DropdownMenuItem
                 className="text-destructive cursor-pointer"
                 onClick={() => onDeleteNode(element.id)}
+                disabled={!isOwner || !isActive}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete

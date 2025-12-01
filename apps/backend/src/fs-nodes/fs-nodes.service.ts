@@ -8,7 +8,7 @@ import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "../projects/projects.service";
 import { QueueService } from "src/queue/queue.service";
 import {
-  FsNodeResponse,
+  FsNode,
   FsNodeTreeResponse,
   DeleteResponse,
   type FsNode,
@@ -30,7 +30,7 @@ export class FsNodesService {
   async createNode(
     createNodeDto: CreateFsNodeDto,
     userId: string
-  ): Promise<FsNodeResponse> {
+  ): Promise<FsNode> {
     const supabase = this.supabaseService.client;
 
     // Verify project ownership
@@ -138,10 +138,7 @@ export class FsNodesService {
   }
 
   // ✅ OPTIMIZED: Use get_node_children function for getting children
-  async getNodeChildren(
-    nodeId: string,
-    userId: string
-  ): Promise<FsNodeResponse[]> {
+  async getNodeChildren(nodeId: string, userId: string): Promise<FsNode[]> {
     const supabase = this.supabaseService.client;
 
     // Verify node exists and user owns it
@@ -159,7 +156,7 @@ export class FsNodesService {
     return children || [];
   }
 
-  async getNode(nodeId: string, userId: string): Promise<FsNodeResponse> {
+  async getNode(nodeId: string, userId: string): Promise<FsNode> {
     const supabase = this.supabaseService.client;
 
     const { data: node, error } = await supabase
@@ -185,7 +182,7 @@ export class FsNodesService {
     nodeId: string,
     updateNodeDto: UpdateFsNodeDto,
     userId: string
-  ): Promise<FsNodeResponse> {
+  ): Promise<FsNode> {
     const supabase = this.supabaseService.client;
 
     // Verify node exists and user owns it
@@ -307,7 +304,7 @@ export class FsNodesService {
     newParentId: string | null,
     newSortOrder: number,
     userId: string
-  ): Promise<FsNodeResponse> {
+  ): Promise<FsNode> {
     // ✅ updateNode will handle path/depth recalculation via triggers
     return this.updateNode(
       nodeId,

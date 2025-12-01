@@ -67,6 +67,8 @@ const WorkspaceMainBody = ({
     }
   }, [invitations, members, setInvitations, setNotAllowedEmails]);
 
+  const isActive = project.status === "active";
+
   return (
     <div className="min-h-[80vh] px-10 py-6">
       {/* Header */}
@@ -89,12 +91,17 @@ const WorkspaceMainBody = ({
         {/* Action Buttons */}
         {isOwner && (
           <div className="flex items-center gap-4">
-            <ChangeStateDropDown projectId={project.id} status={project.status} />
-            <InviteMembersDialog
-              inviteDialogOpen={inviteDialogOpen}
-              setInviteDialogOpen={setInviteDialogOpen}
+            <ChangeStateDropDown
               projectId={project.id}
+              status={project.status}
             />
+            {isActive && (
+              <InviteMembersDialog
+                inviteDialogOpen={inviteDialogOpen}
+                setInviteDialogOpen={setInviteDialogOpen}
+                projectId={project.id}
+              />
+            )}
           </div>
         )}
       </div>
@@ -127,9 +134,10 @@ const WorkspaceMainBody = ({
         initialMembers={members}
         projectId={project.id}
         userId={userId}
+        isActive={isActive}
       />
 
-      {isOwner && <PendingInvitations projectId={project.id} />}
+      {isOwner && isActive && <PendingInvitations projectId={project.id} />}
     </div>
   );
 };
