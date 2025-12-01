@@ -15,7 +15,7 @@ import { MessageSquare } from "lucide-react";
 interface NewCommentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (content: string) => Promise<void>;
+  onSubmit: (content: string, selectedText?: string) => Promise<void>;
   selectedText?: string;
 }
 
@@ -33,7 +33,7 @@ export function NewCommentDialog({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(content);
+      await onSubmit(content, selectedText);
       setContent("");
       onOpenChange(false);
     } catch (error) {

@@ -449,9 +449,9 @@ export class FsNodesService {
           // Remove from tracking
           this.sceneTimeouts.delete(nodeId);
 
-          console.log(
-            `Queued embedding job for ${nodeData.path}: ${nodeData.name}`
-          );
+          // console.log(
+          //   `Queued embedding job for ${nodeData.path}: ${nodeData.name}`
+          // );
         } catch (error) {
           console.error(`Failed to queue embedding job for ${nodeId}:`, error);
         }

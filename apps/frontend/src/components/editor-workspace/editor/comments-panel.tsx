@@ -32,6 +32,7 @@ interface CommentsPanelProps {
   onEditComment: (commentId: string, content: string) => Promise<void>;
   onDeleteComment: (commentId: string) => Promise<void>;
   onResolveComment: (commentId: string, isResolved: boolean) => Promise<void>;
+  onCommentClick?: (comment: CommentResponse) => void;
   isLoading?: boolean;
 }
 
@@ -41,6 +42,7 @@ export function CommentsPanel({
   onEditComment,
   onDeleteComment,
   onResolveComment,
+  onCommentClick,
   isLoading = false,
 }: CommentsPanelProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -122,6 +124,7 @@ export function CommentsPanel({
                         onCancelEdit={handleCancelEdit}
                         onDelete={onDeleteComment}
                         onResolve={onResolveComment}
+                        onClick={onCommentClick}
                         formatDate={formatDate}
                       />
                     ))}
@@ -147,6 +150,7 @@ export function CommentsPanel({
                         onCancelEdit={handleCancelEdit}
                         onDelete={onDeleteComment}
                         onResolve={onResolveComment}
+                        onClick={onCommentClick}
                         formatDate={formatDate}
                       />
                     ))}
@@ -171,6 +175,7 @@ interface CommentItemProps {
   onCancelEdit: () => void;
   onDelete: (commentId: string) => Promise<void>;
   onResolve: (commentId: string, isResolved: boolean) => Promise<void>;
+  onClick?: (comment: CommentResponse) => void;
   formatDate: (dateString: string) => string;
 }
 
@@ -184,14 +189,19 @@ function CommentItem({
   onCancelEdit,
   onDelete,
   onResolve,
+  onClick,
   formatDate,
 }: CommentItemProps) {
+  // Extract selected text from comment
+  const selectedText = comment.selected_text || null;
+
   return (
     <div
       className={cn(
-        "group rounded-lg border p-3 transition-colors",
+        "group rounded-lg border p-3 transition-colors cursor-pointer hover:border-primary/50",
         comment.is_resolved ? "bg-muted/50 opacity-75" : "bg-card"
       )}
+      onClick={() => onClick?.(comment)}
     >
       {/* Comment Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -234,6 +244,11 @@ function CommentItem({
         </div>
       ) : (
         <>
+          {selectedText && (
+            <div className="mb-2 rounded bg-muted/50 px-2 py-1 text-xs italic text-muted-foreground border-l-2 border-primary/50">
+              "{selectedText}"
+            </div>
+          )}
           <p className="text-sm whitespace-pre-wrap mb-3">{comment.content}</p>
 
           {/* Comment Actions */}
@@ -243,7 +258,10 @@ function CommentItem({
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => onStartEdit(comment)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStartEdit(comment);
+                  }}
                   className="h-7 px-2"
                 >
                   <Edit2 className="h-3 w-3" />
@@ -257,7 +275,10 @@ function CommentItem({
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => onResolve(comment.id, !comment.is_resolved)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onResolve(comment.id, !comment.is_resolved);
+                  }}
                   className="h-7 px-2"
                 >
                   <CheckCircle2 className="h-3 w-3" />
@@ -273,7 +294,10 @@ function CommentItem({
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => onDelete(comment.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(comment.id);
+                  }}
                   className="h-7 px-2 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-3 w-3" />

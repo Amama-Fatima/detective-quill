@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -24,6 +24,7 @@ import {
 import dynamic from "next/dynamic";
 import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
 import { useKeyboardShortcuts } from "@/hooks/text-editor/use-keyboard-shortcuts";
+import type { BlockNoteEditorRef } from "./block-note-editor";
 
 // Dynamically import BlockNote editor with no SSR
 const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
@@ -46,6 +47,7 @@ export type TextEditorProps = {
   showComments?: boolean;
   onToggleComments?: () => void;
   commentCount?: number;
+  editorRef?: React.RefObject<BlockNoteEditorRef | null>;
 };
 
 export function TextEditor({
@@ -59,8 +61,11 @@ export function TextEditor({
   showComments = false,
   onToggleComments = () => {},
   commentCount = 0,
+  editorRef,
 }: TextEditorProps) {
   const [internal, setInternal] = useState(value);
+  const internalEditorRef = useRef<BlockNoteEditorRef>(null);
+  const effectiveEditorRef = editorRef || internalEditorRef;
 
   // Custom hooks - now using Zustand for global state
   const {
@@ -222,6 +227,7 @@ export function TextEditor({
         {/* Editor Content */}
         <div className="flex-1 min-h-0">
           <BlockNoteEditor
+            ref={effectiveEditorRef}
             initialContent={internal}
             onChange={handleContentChange}
           />

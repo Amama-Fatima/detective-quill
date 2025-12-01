@@ -41,6 +41,7 @@ export class CommentsController {
     @Request() req
   ): Promise<ApiResponse<CommentResponse>> {
     try {
+      console.log("Controller received createCommentDto:", createCommentDto); // Debug log
       const data = await this.commentsService.createComment(
         createCommentDto,
         req.user.id

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { TextEditor } from "@/components/editor-workspace/editor/text-editor";
 import { CommentsPanel } from "@/components/editor-workspace/editor/comments-panel";
 import { NewCommentDialog } from "@/components/editor-workspace/editor/new-comment-dialog";
@@ -8,10 +8,11 @@ import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
 import { useComments } from "@/hooks/use-comments";
 import { FileNotFoundState } from "./loading-states";
-import { FsNodeResponse } from "@detective-quill/shared-types";
+import { FsNodeResponse, CommentResponse } from "@detective-quill/shared-types";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { MessageSquarePlus } from "lucide-react";
+import type { BlockNoteEditorRef } from "./block-note-editor";
 
 interface TextEditorContainerProps {
   projectId: string;
@@ -25,6 +26,15 @@ export function TextEditorContainer({
   const { session } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [showNewCommentDialog, setShowNewCommentDialog] = useState(false);
+  const [selectedTextForComment, setSelectedTextForComment] =
+    useState<string>("");
+  const [selectionData, setSelectionData] = useState<{
+    text: string;
+    blockId: string;
+    startOffset: number;
+    endOffset: number;
+  } | null>(null);
+  const editorRef = useRef<BlockNoteEditorRef>(null);
 
   // File operations (load, save, delete)
   const { saving, saveFile, deleteFile } = useFileOperations({
@@ -65,17 +75,61 @@ export function TextEditorContainer({
     return <FileNotFoundState />;
   }
 
-  const handleAddComment = async (commentContent: string) => {
+  const handleAddComment = async (
+    commentContent: string,
+    selectedText?: string
+  ) => {
     if (!session?.access_token) return;
 
-    // For now, we'll use placeholder values for block_id and offsets
-    // In a full implementation, you'd capture the actual selection in the editor
-    await addComment({
-      block_id: "default-block",
-      start_offset: 0,
-      end_offset: 0,
-      content: commentContent,
-    });
+    console.log("Creating comment with selection data:", selectionData); // Debug log
+
+    if (selectionData) {
+      // Use stored selection data from when dialog was opened
+      await addComment({
+        block_id: selectionData.blockId,
+        start_offset: selectionData.startOffset,
+        end_offset: selectionData.endOffset,
+        content: commentContent,
+        selected_text: selectionData.text,
+      });
+    } else {
+      // Fallback to placeholder values if no selection
+      await addComment({
+        block_id: "default-block",
+        start_offset: 0,
+        end_offset: 0,
+        content: commentContent,
+        selected_text: selectedText || "",
+      });
+    }
+
+    setSelectedTextForComment("");
+    setSelectionData(null);
+  };
+
+  const handleOpenNewCommentDialog = () => {
+    // Get current selection when opening the dialog
+    const selection = editorRef.current?.getSelection();
+    console.log("Selection captured:", selection); // Debug log
+    if (selection?.text) {
+      setSelectedTextForComment(selection.text);
+      setSelectionData(selection);
+    } else {
+      setSelectedTextForComment("");
+      setSelectionData(null);
+    }
+    setShowNewCommentDialog(true);
+  };
+
+  const handleCommentClick = (comment: CommentResponse) => {
+    // Highlight the text associated with this comment
+    if (editorRef.current && comment.block_id) {
+      editorRef.current.highlightText(
+        comment.block_id,
+        comment.start_offset,
+        comment.end_offset
+      );
+    }
   };
 
   const handleEditComment = async (
@@ -111,6 +165,7 @@ export function TextEditorContainer({
           showComments={showComments}
           onToggleComments={() => setShowComments(!showComments)}
           commentCount={stats?.unresolved || 0}
+          editorRef={editorRef}
         />
       </div>
 
@@ -118,7 +173,7 @@ export function TextEditorContainer({
         <div className="w-80 flex flex-col">
           <div className="p-2 border-b">
             <Button
-              onClick={() => setShowNewCommentDialog(true)}
+              onClick={handleOpenNewCommentDialog}
               size="sm"
               className="w-full gap-2"
             >
@@ -133,6 +188,7 @@ export function TextEditorContainer({
               onEditComment={handleEditComment}
               onDeleteComment={handleDeleteComment}
               onResolveComment={handleResolveComment}
+              onCommentClick={handleCommentClick}
               isLoading={commentsLoading}
             />
           </div>
@@ -143,6 +199,7 @@ export function TextEditorContainer({
         open={showNewCommentDialog}
         onOpenChange={setShowNewCommentDialog}
         onSubmit={handleAddComment}
+        selectedText={selectedTextForComment}
       />
     </div>
   );

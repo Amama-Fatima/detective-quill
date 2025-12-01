@@ -47,6 +47,7 @@ export class CommentsService {
         end_offset: createCommentDto.end_offset,
         content: createCommentDto.content,
         author_id: userId,
+        selected_text: createCommentDto.selected_text,
       })
       .select(
         `
@@ -113,7 +114,7 @@ export class CommentsService {
 
   async findCommentById(
     commentId: string,
-    userId: string,
+    userId: string
   ): Promise<CommentWithRelations> {
     const supabase = this.supabaseService.client;
 
@@ -157,15 +158,12 @@ export class CommentsService {
   async updateComment(
     commentId: string,
     updateCommentDto: UpdateCommentDto,
-    userId: string,
+    userId: string
   ): Promise<CommentResponse> {
     const supabase = this.supabaseService.client;
 
     // First verify the comment exists and user has permission
-    const existingComment = await this.findCommentById(
-      commentId,
-      userId,
-    );
+    const existingComment = await this.findCommentById(commentId, userId);
 
     // Only allow author to update content, but project owner can resolve
     const project = Array.isArray(existingComment.fs_node?.project)
@@ -220,8 +218,7 @@ export class CommentsService {
 
   async deleteComment(
     commentId: string,
-    userId: string,
-
+    userId: string
   ): Promise<DeleteResponse> {
     const supabase = this.supabaseService.client;
 

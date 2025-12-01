@@ -100,6 +100,7 @@ export type Database = {
           fs_node_id: string
           id: string
           is_resolved: boolean | null
+          selected_text: string | null
           start_offset: number
           updated_at: string | null
         }
@@ -112,6 +113,7 @@ export type Database = {
           fs_node_id: string
           id?: string
           is_resolved?: boolean | null
+          selected_text?: string | null
           start_offset: number
           updated_at?: string | null
         }
@@ -124,6 +126,7 @@ export type Database = {
           fs_node_id?: string
           id?: string
           is_resolved?: boolean | null
+          selected_text?: string | null
           start_offset?: number
           updated_at?: string | null
         }
