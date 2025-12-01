@@ -12,6 +12,7 @@ import {
   Maximize,
   Minimize,
   Focus,
+  MessageSquare,
 } from "lucide-react";
 import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {
@@ -42,6 +43,9 @@ export type TextEditorProps = {
   onSave?: () => void;
   isDirty?: boolean;
   isSaving?: boolean;
+  showComments?: boolean;
+  onToggleComments?: () => void;
+  commentCount?: number;
 };
 
 export function TextEditor({
@@ -52,6 +56,9 @@ export function TextEditor({
   onSave = () => {},
   isDirty = false,
   isSaving = false,
+  showComments = false,
+  onToggleComments = () => {},
+  commentCount = 0,
 }: TextEditorProps) {
   const [internal, setInternal] = useState(value);
 
@@ -141,6 +148,32 @@ export function TextEditor({
                 {isFullscreen
                   ? "Exit Fullscreen (Cmd/Ctrl + Shift + F)"
                   : "Browser Fullscreen (Cmd/Ctrl + Shift + F)"}
+              </TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="h-6" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggleComments}
+                  className={cn(
+                    "relative transition-colors cursor-pointer",
+                    showComments && "bg-primary/10 text-primary"
+                  )}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {commentCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                      {commentCount > 9 ? "9+" : commentCount}
+                    </span>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showComments ? "Hide comments" : "Show comments"}
               </TooltipContent>
             </Tooltip>
 
