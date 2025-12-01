@@ -253,41 +253,62 @@ function CommentItem({
 
           {/* Comment Actions */}
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStartEdit(comment);
-                  }}
-                  className="h-7 px-2"
-                >
-                  <Edit2 className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Edit comment</TooltipContent>
-            </Tooltip>
+            {!comment.is_resolved && (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onStartEdit(comment);
+                      }}
+                      className="h-7 px-2"
+                    >
+                      <Edit2 className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit comment</TooltipContent>
+                </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onResolve(comment.id, !comment.is_resolved);
-                  }}
-                  className="h-7 px-2"
-                >
-                  <CheckCircle2 className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {comment.is_resolved ? "Unresolve" : "Resolve"}
-              </TooltipContent>
-            </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onResolve(comment.id, true);
+                      }}
+                      className="h-7 px-2"
+                    >
+                      <CheckCircle2 className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Resolve</TooltipContent>
+                </Tooltip>
+              </>
+            )}
+
+            {comment.is_resolved && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onResolve(comment.id, false);
+                    }}
+                    className="h-7 px-2"
+                  >
+                    <CheckCircle2 className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Unresolve</TooltipContent>
+              </Tooltip>
+            )}
 
             <Tooltip>
               <TooltipTrigger asChild>
