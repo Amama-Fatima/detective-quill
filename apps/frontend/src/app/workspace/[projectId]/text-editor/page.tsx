@@ -31,10 +31,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   );
   const userId = user.id;
   const isOwner = author_id === userId;
+  let project;
 
-  const project = await fetchProject(supabase, projectId);
-
-  if (!project) {
+  try {
+    project = await fetchProject(supabase, projectId);
+  } catch (error) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center space-y-4">

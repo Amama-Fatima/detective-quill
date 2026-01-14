@@ -8,6 +8,7 @@ import {
 } from "@/lib/supabase-calls/members";
 import ErrorMsg from "@/components/error-msg";
 import { getProjectInvitations } from "@/lib/supabase-calls/invitations";
+import { notFound } from "next/navigation";
 
 interface ProjectWorkspacePageProps {
   params: Promise<{
@@ -43,7 +44,7 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
 
   const isMember = await verifyMembership(projectId, user.id, supabase);
   if (!isMember) {
-    throw new Error("User is not authorized to view project");
+    return notFound();
   }
 
   // console.log("Project data:", data, isMember);

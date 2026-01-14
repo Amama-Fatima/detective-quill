@@ -43,26 +43,19 @@ export default function Canvas({
   isOwner,
   isActive,
 }: CanvasProps) {
-  const deleteCard = (nodeId: string) => {
-    setNodes((nds) => {
-      const nodeToDelete = nds.find((n) => n.id === nodeId);
-      if (nodeToDelete?.data.id) {
-        setDeletedCards((prev) => [...prev, String(nodeToDelete.data.id)]);
-      }
-      return nds.filter((n) => n.id !== nodeId);
-    });
-  };
-
   const [nodes, setNodes] = useState<Node[]>(() =>
     prevBlueprintCards
       ? blueprintCardsToNodes(
           prevBlueprintCards,
           (id, newContent) => updateNodeContent(id, newContent),
           (id, newTitle) => updateNodeTitle(id, newTitle),
-          (id) => deleteCard(id)
+          (id) => deleteCard(id),
+          isOwner,
+          isActive
         )
       : []
   );
+
   const [deletedCards, setDeletedCards] = useState<string[]>([]);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -73,14 +66,24 @@ export default function Canvas({
   // Warn user if they try to refresh/close the tab when there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!isDirty) return;
+      if (!isDirty && !isOwner) return;
       e.preventDefault();
       return "";
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
+  }, [isDirty, isOwner]);
+
+  const deleteCard = (nodeId: string) => {
+    setNodes((nds) => {
+      const nodeToDelete = nds.find((n) => n.id === nodeId);
+      if (nodeToDelete?.data.id) {
+        setDeletedCards((prev) => [...prev, String(nodeToDelete.data.id)]);
+      }
+      return nds.filter((n) => n.id !== nodeId);
+    });
+  };
 
   const updateNodeContent = useCallback((id: string, newContent: string) => {
     setNodes((nds) =>

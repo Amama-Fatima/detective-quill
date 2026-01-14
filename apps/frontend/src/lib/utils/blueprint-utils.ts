@@ -8,6 +8,8 @@ export const blueprintCardsToNodes = (
   updateNodeContent: (id: string, newContent: string) => void,
   updateNodeTitle: (id: string, newTitle: string) => void,
   deleteCard: (id: string) => void,
+  isOwner: boolean,
+  isActive: boolean
 ): Node[] => {
   return cards.map((card) => ({
     id: card.id,
@@ -23,6 +25,8 @@ export const blueprintCardsToNodes = (
       onContentChange: (newContent: string) => updateNodeContent(card.id, newContent),
       onTitleChange: (newTitle: string) => updateNodeTitle(card.id, newTitle),
       onDelete: () => deleteCard(card.id),
+      isOwner,
+      isActive,
     },
   }));
 };

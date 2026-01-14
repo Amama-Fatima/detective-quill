@@ -8,25 +8,14 @@ import {
 import { notFound, redirect } from "next/navigation";
 
 async function getEditorWorkspaceData(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   projectId: string,
   nodeId?: string
 ): Promise<{
   project: Project;
   nodes: FsNodeTreeResponse[];
   currentNode: FsNode | null;
-  user: any;
 }> {
-  // Get current user
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    redirect("/auth/sign-in");
-  }
-
   try {
     // Fetch all data in parallel
     const [projectResult, nodesResult, nodeResult] = await Promise.allSettled([
@@ -55,7 +44,6 @@ async function getEditorWorkspaceData(
       project: projectResult.value,
       nodes: nodesResult.value,
       currentNode,
-      user,
     };
   } catch (error) {
     console.error("Error fetching workspace data:", error);
@@ -84,10 +72,7 @@ async function fetchProjectTree(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   projectId: string
 ): Promise<FsNodeTreeResponse[]> {
-  // First verify project ownership
-  await fetchProject(supabase, projectId);
 
-  // Fetch the project tree
   const { data: nodes, error } = await supabase
     .from("project_file_tree")
     .select("*")

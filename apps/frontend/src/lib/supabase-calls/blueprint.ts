@@ -5,28 +5,18 @@ export async function getProjectBlueprints(
   projectId: string,
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ blueprints: Blueprint[]; error: string | null }> {
-  console.log("Fetching blueprints for projectId:", projectId);
-  try {
-    const { data, error } = await supabase
-      .from("blue_prints")
-      .select("*")
-      .eq("project_id", projectId);
+  const { data, error } = await supabase
+    .from("blue_prints")
+    .select("*")
+    .eq("project_id", projectId);
 
-    if (error) {
-      throw new Error(`Failed to get user blueprints: ${error.message}`);
-    }
-
-    console.log("Fetched blueprints data:", data);
-
-    return { blueprints: data || [], error: null };
-  } catch (err) {
-    console.error("Error in getUserBlueprints:", err);
-    const msg =
-      err instanceof Error
-        ? err.message
-        : "Unknown error fetching user blueprints";
-    return { blueprints: [], error: msg };
+  if (error) {
+    return { blueprints: [], error: error.message };
   }
+
+  console.log("Fetched blueprints data:", data);
+
+  return { blueprints: data || [], error: null };
 }
 
 export async function getProjectBlueprintById(
@@ -34,59 +24,36 @@ export async function getProjectBlueprintById(
   projectId: string,
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ blueprint: Blueprint | null; error: string | null }> {
-  try {
-    const { data, error } = await supabase
-      .from("blue_prints")
-      .select("*")
-      .eq("id", blueprintId)
-      .eq("project_id", projectId)
-      .single();
+  const { data, error } = await supabase
+    .from("blue_prints")
+    .select("*")
+    .eq("id", blueprintId)
+    .eq("project_id", projectId)
+    .single();
 
-    if (error) {
-      throw new Error(`Failed to get user blueprint: ${error.message}`);
-    }
-
-    return { blueprint: data as Blueprint, error: null };
-  } catch (err) {
-    console.error("Error in getUserBlueprintById:", err);
-    return {
-      blueprint: null,
-      error:
-        err instanceof Error
-          ? err.message
-          : "Unknown error fetching user blueprint",
-    };
+  if (error) {
+    return { blueprint: null, error: error.message };
   }
+
+  return { blueprint: data as Blueprint, error: null };
 }
 
 export async function getBlueprintTitle(
   blueprintId: string,
   projectId: string
 ): Promise<{ title: string | null; error: string | null }> {
-  try {
-    const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase
-      .from("blue_prints")
-      .select("title")
-      .eq("id", blueprintId)
-      .eq("project_id", projectId)
-      .single();
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("blue_prints")
+    .select("title")
+    .eq("id", blueprintId)
+    .eq("project_id", projectId)
+    .single();
 
-    console.log("Fetched blueprint title:", data);
-    console.log(error);
-    if (error) {
-      throw new Error(`Failed to get blueprint title: ${error.message}`);
-    }
-
-    return { title: data?.title || null, error: null };
-  } catch (err) {
-    console.error("Error in getBlueprintTitle:", err);
-    return {
-      title: null,
-      error:
-        err instanceof Error
-          ? err.message
-          : "Unknown error fetching blueprint title",
-    };
+  console.log(error);
+  if (error) {
+    return { title: null, error: error.message };
   }
+
+  return { title: data?.title || null, error: null };
 }

@@ -54,7 +54,7 @@ export default function CanvasCardNode({
           {/* title area */}
           {isEditing ? (
             <input
-              disabled={!data.isOwner || !data.isActive}
+              disabled={!data.isActive || !data.isOwner}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               ref={titleRef}

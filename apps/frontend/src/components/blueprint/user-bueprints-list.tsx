@@ -9,11 +9,15 @@ import { DeleteBlueprintButton } from "./delete-blueprint-btn";
 interface UserBlueprintsListProps {
   blueprints: Blueprint[];
   projectId: string;
+  isOwner: boolean;
+  isActive: boolean;
 }
 
 export const UserBlueprintsList = ({
   blueprints,
   projectId,
+  isOwner,
+  isActive,
 }: UserBlueprintsListProps) => {
   if (blueprints.length === 0) {
     return (
@@ -26,7 +30,7 @@ export const UserBlueprintsList = ({
             <div className="space-y-2">
               <h3 className="mystery-title text-2xl">No Blueprints</h3>
               <p className="text-muted-foreground noir-text max-w-md">
-                You haven't created any blueprints yet. Create a blueprint to 
+                You haven't created any blueprints yet. Create a blueprint to
                 start organizing your thoughts and story elements!
               </p>
             </div>
@@ -57,7 +61,9 @@ export const UserBlueprintsList = ({
                         {blueprint.title}
                       </CardTitle>
                     </Link>
-                    <DeleteBlueprintButton blueprintId={blueprint.id} />
+                    {isOwner && isActive && (
+                      <DeleteBlueprintButton blueprintId={blueprint.id} />
+                    )}{" "}
                   </div>
                 </div>
               </div>

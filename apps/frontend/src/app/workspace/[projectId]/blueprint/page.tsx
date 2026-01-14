@@ -3,7 +3,6 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import CreateBlueprintBtns from "@/components/blueprint/create-blueprint-btns";
 import {
-  getProjectBlueprintById,
   getProjectBlueprints,
 } from "@/lib/supabase-calls/blueprint";
 import { UserBlueprintsList } from "@/components/blueprint/user-bueprints-list";
@@ -84,7 +83,7 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
         </div>
 
         {/* Blueprints List */}
-        <UserBlueprintsList blueprints={blueprints} projectId={projectId} />
+        <UserBlueprintsList blueprints={blueprints} projectId={projectId} isOwner={isOwner} isActive={isActive} />
       </div>
     </Suspense>
   );
@@ -103,17 +102,3 @@ function BlueprintLandingSkeleton() {
     </div>
   );
 }
-
-// Todo: can do?
-
-/**
- * If you want to avoid the extra call to supabase.auth.getUser(),
- * you can use Next.js middleware to attach the user to the request,
- * then access it via cookies or headers in your page.
- *
- * Example (not implemented here):
- * - In middleware, verify the user and set a cookie/header with user info.
- * - In your page, read the user info from the cookie/header instead of calling getUser().
- *
- * This avoids the extra round trip to Supabase for user info.
- */

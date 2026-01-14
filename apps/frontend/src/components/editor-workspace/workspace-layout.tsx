@@ -17,24 +17,25 @@ export async function WorkspaceLayout({
   projectId,
   nodeId,
 }: WorkspaceLayoutProps) {
-   const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-  
-    if (!user) {
-      redirect("/auth/sign-in");
-    }
-  
-    const userId = user.id;
-    const { isActive, author_id } = await getProjectStatusAndAuthor(
-      projectId,
-      supabase
-    );
-  
-    const isOwner = author_id === userId;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/auth/sign-in");
+  }
+
+  const userId = user.id;
+  const { isActive, author_id } = await getProjectStatusAndAuthor(
+    projectId,
+    supabase
+  );
+
+  const isOwner = author_id === userId;
   try {
-    const { project, nodes, currentNode, user } = await getEditorWorkspaceData(
+    const { project, nodes, currentNode } = await getEditorWorkspaceData(
+      supabase,
       projectId,
       nodeId
     );

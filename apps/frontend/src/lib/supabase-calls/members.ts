@@ -5,11 +5,10 @@ export async function getProjectMembers(
   projectId: string,
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ members: ProjectMember[] | null; error: string | null }> {
-  try {
-    const { data, error } = await supabase
-      .from("projects_members")
-      .select(
-        `
+  const { data, error } = await supabase
+    .from("projects_members")
+    .select(
+      `
         user_id,
         created_at,
         is_author,
@@ -21,39 +20,31 @@ export async function getProjectMembers(
           avatar_url
         )
       `
-      )
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: true });
+    )
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: true });
 
-    if (error) {
-      console.error("Supabase error fetching project members:", error);
-      throw new Error(`Failed to fetch project members: ${error.message}`);
-    }
-
-    const members = data?.map((member) => {
-      const profile = Array.isArray(member.profile)
-        ? member.profile[0]
-        : member.profile;
-      return {
-        user_id: member.user_id,
-        full_name: profile?.full_name ?? profile?.username ?? null,
-        user_name: profile?.username ?? null,
-        email: profile?.email,
-        avatar: profile?.avatar_url ?? null,
-        created_at: member.created_at,
-        is_author: member.is_author,
-      };
-    });
-
-    return { members: members as unknown as ProjectMember[], error: null };
-  } catch (err) {
-    console.error(err);
-    const msg =
-      err instanceof Error
-        ? err.message
-        : "Unknown error fetching project members";
-    return { members: null, error: msg };
+  if (error) {
+    console.error("Supabase error fetching project members:", error);
+    return { members: null, error: error.message };
   }
+
+  const members = data?.map((member) => {
+    const profile = Array.isArray(member.profile)
+      ? member.profile[0]
+      : member.profile;
+    return {
+      user_id: member.user_id,
+      full_name: profile?.full_name ?? profile?.username ?? null,
+      user_name: profile?.username ?? null,
+      email: profile?.email,
+      avatar: profile?.avatar_url ?? null,
+      created_at: member.created_at,
+      is_author: member.is_author,
+    };
+  });
+
+  return { members: members as unknown as ProjectMember[], error: null };
 }
 
 export async function verifyMembership(
@@ -61,22 +52,17 @@ export async function verifyMembership(
   userId: string,
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<boolean> {
-  try {
-    const { data: member, error: memberError } = await supabase
-      .from("projects_members")
-      .select("*")
-      .eq("project_id", projectId)
-      .eq("user_id", userId);
-    if (member && member.length > 0) {
-      return true;
-    }
+  const { data, error } = await supabase
+    .from("projects_members")
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("user_id", userId)
+    .maybeSingle();
 
-    if (memberError) {
-      console.error("Supabase error verifying membership:", memberError);
-      throw new Error(`Failed to verify membership: ${memberError?.message}`);
-    }
-    return false;
-  } catch (error) {
+  if (error) {
+    console.error("Supabase error verifying membership:", error);
     return false;
   }
+
+  return !!data;
 }
