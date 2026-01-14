@@ -20,6 +20,11 @@ export class EmailService {
     userId: string,
     inviterName: string
   ): Promise<void> {
+    console.log("-----------------")
+    console.log("project id:", projectId);
+    console.log("emails:", emails);
+    console.log("user id:", userId);
+    
     await this.verifyProjectOwnership(projectId, userId);
     const projectTitle = await this.fetchProjectTitle(projectId);
     const registeredUsers = await this.verifyRegisteredUsers(emails);
@@ -67,12 +72,14 @@ export class EmailService {
     userId: string
   ): Promise<void> {
     const supabase = this.supabaseService.client;
-
+    console.log("Verifying project ownership for user:", userId, "and projectId:", projectId);
     const { data, error } = await supabase
       .from("projects")
       .select("author_id")
       .eq("id", projectId)
       .single();
+
+      console.log("Project data fetched:", data, "Error:", error);
 
     if (error || !data) {
       throw new NotFoundException("Project not found");
@@ -86,6 +93,7 @@ export class EmailService {
   }
 
   private async fetchProjectTitle(projectId: string): Promise<string> {
+    console.log("Fetching project title for projectId:", projectId);
     const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("projects")
@@ -102,6 +110,7 @@ export class EmailService {
   private async verifyRegisteredUsers(
     emails: string[]
   ): Promise<{ email: string; user_id: string }[]> {
+    console.log("Verifying registered users for emails:", emails);
     const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("profiles")
@@ -119,6 +128,7 @@ export class EmailService {
     projectId: string,
     user_emails: { email: string; user_id: string }[]
   ): Promise<{ email: string; user_id: string }[]> {
+    console.log("Getting users not invited for projectId:", projectId);
     const supabase = this.supabaseService.client;
 
     // Fetch emails that ARE already invited or members

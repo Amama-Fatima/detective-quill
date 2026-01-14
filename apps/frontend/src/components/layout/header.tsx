@@ -2,8 +2,22 @@ import React from "react";
 import Link from "next/link";
 import AuthButtons from "./auth-buttons";
 import Image from "next/image";
+import { createSupabaseServerClient } from "@/supabase/server-client";
 
-export default function Header() {
+export default async function Header() {
+  const supabase = await createSupabaseServerClient();
+
+  // Get the current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let loggedIn = false;
+
+  if (user) {
+    loggedIn = true;
+  }
+
   return (
     <div className="sticky top-0 z-50 w-full p-4">
       <header className="mx-auto max-w-7xl rounded-2xl border border-border bg-chart-4 backdrop-blur supports-[backdrop-filter]:bg-chart-4/18 shadow-sm">
@@ -32,19 +46,23 @@ export default function Header() {
             >
               Dashboard
             </Link>
-            <Link
-              href="/profile"
-              className="text-[1.1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
-            >
-              Profile
-            </Link>
+            {loggedIn && (
+              <Link
+                href="/profile"
+                className="text-[1.1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
+              >
+                Profile
+              </Link>
+            )}
 
-            <Link
-              href="/cases"
-              className="text-[1.1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
-            >
-              Cases
-            </Link>
+            {loggedIn && (
+              <Link
+                href="/cases"
+                className="text-[1.1rem] font-medium text-foreground/80 hover:text-foreground transition-colors"
+              >
+                Cases
+              </Link>
+            )}
           </nav>
 
           {/* Auth Buttons */}

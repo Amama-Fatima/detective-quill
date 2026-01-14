@@ -179,7 +179,7 @@ export function TextEditorContainer({
           <div className="p-2 border-b">
             <Button
               onClick={handleOpenNewCommentDialog}
-              disabled={!isActive || !isOwner}
+              disabled={!isActive}
               size="sm"
               className="w-full gap-2 cursor-pointer"
             >

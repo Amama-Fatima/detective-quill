@@ -20,7 +20,7 @@ export class CreateBlueprintDto implements ICreateBlueprintDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsIn(["character", "timeline", "other"])
+  @IsIn(["character", "timeline", "item", "location"])
   type: BlueprintType;
 }
 

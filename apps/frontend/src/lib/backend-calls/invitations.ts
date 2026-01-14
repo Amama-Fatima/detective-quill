@@ -14,6 +14,7 @@ async function makeAuthenticatedRequest<T>(
       ...options.headers,
     },
   });
+  console.log("Response status:", response.status);
 
   if (!response.ok) {
     throw new Error(

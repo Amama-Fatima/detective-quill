@@ -27,7 +27,7 @@ export function ProjectsPageClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { projects, creating, createProject } = useProjects(initialProjects);
+  const { projects, creating, createProject } = useProjects([...initialProjects, ...invitedProjects]);
 
   const activeProjects = projects.filter((project) => project.status === "active"); 
   const completedProjects = projects.filter((project) => project.status === "completed");

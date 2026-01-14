@@ -1,20 +1,16 @@
-import { IsString, IsNotEmpty, IsIn } from "class-validator";
+import { IsString, IsNotEmpty, IsArray, ArrayNotEmpty, IsEmail } from "class-validator";
 
-import { EmailSendingApiRequestDto as IEmailSendingApiRequestDto } from "@detective-quill/shared-types";
-
-export class EmailSendingApiRequestDto implements IEmailSendingApiRequestDto {
+export class EmailSendingApiRequestDto {
   @IsString()
   @IsNotEmpty()
   projectId: string;
 
-  @IsNotEmpty({ each: true })
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsEmail({}, { each: true })
   emails: string[];
 
   @IsString()
   @IsNotEmpty()
   inviterName: string;
-  
-  @IsString()
-  @IsNotEmpty()
-  projectTitle: string;
 }

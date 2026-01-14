@@ -23,6 +23,7 @@ async function makeAuthenticatedRequest<T>(
   });
 
   if (!response.ok) {
+    console.log("Response not ok:", response);
     throw new Error(
       `API request failed: ${response.status} ${response.statusText}`
     );
@@ -35,6 +36,7 @@ export async function inviteProjectMembers(
   data: EmailSendingApiRequestDto,
   accessToken: string
 ): Promise<ApiResponse<void>> {
+  console.log("Inviting project members with data:", data);
   const response = await makeAuthenticatedRequest<void>(
     `/email/send-invite`,
     accessToken,

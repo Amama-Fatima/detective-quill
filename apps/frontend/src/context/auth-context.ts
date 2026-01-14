@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabaseBrowserClient } from '@/supabase/browser-client'; 
 import { toast } from 'sonner';
+import { redirect } from 'next/navigation';
 
 interface AuthContextType {
   session: Session | null;
@@ -44,9 +45,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await supabaseBrowserClient.auth.signOut();
       setSession(null);
+      window.location.href = '/'; // Redirect to home page after sign out
     } catch (error) {
       console.error('Error signing out:', error);
-      toast.error('Failed to sign out');
+      toast.error('Failed to sign out', );
     }
   };
 

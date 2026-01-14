@@ -217,6 +217,7 @@ export function TextEditor({
               <Button
                 variant="ghost"
                 size="icon"
+                disabled={disabledCondition}
                 onClick={onDelete}
                 className="text-destructive hover:text-destructive cursor-pointer"
               >

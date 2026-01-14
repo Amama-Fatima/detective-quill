@@ -18,7 +18,7 @@ export default function CreateBlueprintBtns({
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
 
-  const handleCreate = async (type: "character" | "timeline") => {
+  const handleCreate = async (type: "character" | "timeline" | "item" | "location") => {
     const result = await createBlueprint(accessToken, {
       type,
       project_id: projectId,
@@ -55,13 +55,13 @@ export default function CreateBlueprintBtns({
             </Button>
             <Button
               className="cursor-pointer"
-              onClick={() => handleCreate("character")}
+              onClick={() => handleCreate("item")}
             >
               Item
             </Button>
             <Button
               className="cursor-pointer"
-              onClick={() => handleCreate("timeline")}
+              onClick={() => handleCreate("location")}
             >
               Location
             </Button>
