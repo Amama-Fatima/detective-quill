@@ -13,7 +13,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
   accessToken: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -27,7 +27,7 @@ async function makeAuthenticatedRequest<T>(
   if (!response.ok) {
     console.log("API request failed:", response);
     throw new Error(
-      `API request failed: ${response.status} ${response.statusText}`
+      `API request failed: ${response.status} ${response.statusText}`,
     );
   }
 
@@ -37,9 +37,8 @@ async function makeAuthenticatedRequest<T>(
 // Comment API functions
 export async function createComment(
   data: CreateCommentDto,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
-  console.log("API call - createComment data:", data); // Debug log
   return makeAuthenticatedRequest<CommentResponse>("/comments", accessToken, {
     method: "POST",
     body: JSON.stringify(data),
@@ -47,89 +46,96 @@ export async function createComment(
 }
 
 export async function getCommentsByNode(
+  projectId: string,
   fsNodeId: string,
   accessToken: string,
-  includeResolved: boolean = true
+  includeResolved: boolean = true,
 ): Promise<ApiResponse<CommentResponse[]>> {
   const query = includeResolved
     ? "?includeResolved=true"
     : "?includeResolved=false";
   return makeAuthenticatedRequest<CommentResponse[]>(
-    `/comments/node/${fsNodeId}${query}`,
-    accessToken
+    `/comments/${projectId}/${fsNodeId}${query}`,
+    accessToken,
   );
 }
 
 export async function getComment(
+  projectId: string,
   commentId: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
   return makeAuthenticatedRequest<CommentResponse>(
-    `/comments/${commentId}`,
-    accessToken
+    `/comments/${projectId}/${commentId}`,
+    accessToken,
   );
 }
 
 export async function updateComment(
+  projectId: string,
   commentId: string,
   data: UpdateCommentDto,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
   return makeAuthenticatedRequest<CommentResponse>(
-    `/comments/${commentId}`,
+    `/comments/${projectId}/${commentId}`,
     accessToken,
     {
       method: "PATCH",
       body: JSON.stringify(data),
-    }
+    },
   );
 }
 
 export async function deleteComment(
+  projectId: string,
   commentId: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<DeleteResponse>> {
   return makeAuthenticatedRequest<DeleteResponse>(
-    `/comments/${commentId}`,
+    `/comments/${projectId}/${commentId}`,
     accessToken,
     {
       method: "DELETE",
-    }
+    },
   );
 }
 
 export async function resolveComment(
+  projectId: string,
   commentId: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
   return makeAuthenticatedRequest<CommentResponse>(
-    `/comments/${commentId}/resolve`,
+    `/comments/${projectId}/${commentId}/resolve`,
     accessToken,
     {
       method: "POST",
-    }
+    },
   );
 }
 
 export async function unresolveComment(
+  projectId: string,
   commentId: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
   return makeAuthenticatedRequest<CommentResponse>(
-    `/comments/${commentId}/unresolve`,
+    `/comments/${projectId}/${commentId}/unresolve`,
     accessToken,
     {
       method: "POST",
-    }
+    },
   );
 }
 
 export async function getCommentStats(
+  projectId: string,
   fsNodeId: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<CommentStats>> {
   return makeAuthenticatedRequest<CommentStats>(
-    `/comments/node/${fsNodeId}/stats`,
-    accessToken
+    `/comments/${projectId}/${fsNodeId}/stats`,
+    accessToken,
   );
 }

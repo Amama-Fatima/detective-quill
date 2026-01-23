@@ -50,7 +50,7 @@ export class ProjectsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to create project: ${error.message}`
       );
     }
   }
@@ -75,7 +75,7 @@ export class ProjectsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to get projects: ${error.message}`
       );
     }
   }
@@ -96,7 +96,7 @@ export class ProjectsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to get project: ${error.message}`
       );
     }
   }
@@ -117,7 +117,7 @@ export class ProjectsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to get project stats: ${error.message}`
       );
     }
   }
@@ -143,7 +143,7 @@ export class ProjectsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to update project: ${error.message}`
       );
     }
   }
@@ -189,7 +189,7 @@ export class ProjectsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to delete project: ${error.message}`
       );
     }
   }
@@ -210,7 +210,7 @@ export class ProjectsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to restore project: ${error.message}`
       );
     }
   }

@@ -4,7 +4,7 @@ import { createBlueprint } from "@/lib/backend-calls/blueprints";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
-import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
+import { Popover, PopoverTrigger, PopoverContent } from "../../ui/popover";
 
 import { Button } from "@/components/ui/button";
 
@@ -18,7 +18,9 @@ export default function CreateBlueprintBtns({
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
 
-  const handleCreate = async (type: "character" | "timeline" | "item" | "location") => {
+  const handleCreate = async (
+    type: "character" | "timeline" | "item" | "location",
+  ) => {
     const result = await createBlueprint(accessToken, {
       type,
       project_id: projectId,

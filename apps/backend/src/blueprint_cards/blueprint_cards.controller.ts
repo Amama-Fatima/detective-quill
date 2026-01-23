@@ -77,7 +77,7 @@ export class BlueprintCardsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to update blueprint card: ${error.message}`
       );
     }
   }
@@ -104,7 +104,7 @@ export class BlueprintCardsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to delete blueprint card: ${error.message}`
       );
     }
   }

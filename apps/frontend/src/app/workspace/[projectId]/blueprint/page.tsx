@@ -1,10 +1,8 @@
 import { Suspense } from "react";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
-import CreateBlueprintBtns from "@/components/blueprint/create-blueprint-btns";
-import {
-  getProjectBlueprints,
-} from "@/lib/supabase-calls/blueprint";
+import CreateBlueprintBtns from "@/components/blueprint/btns/create-blueprint-btns";
+import { getProjectBlueprints } from "@/lib/supabase-calls/blueprint";
 import { UserBlueprintsList } from "@/components/blueprint/user-bueprints-list";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import ErrorMsg from "@/components/error-msg";
@@ -58,7 +56,7 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
 
   const { isActive, author_id } = await getProjectStatusAndAuthor(
     projectId,
-    supabase
+    supabase,
   );
 
   const isOwner = author_id === userId;
@@ -83,7 +81,12 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
         </div>
 
         {/* Blueprints List */}
-        <UserBlueprintsList blueprints={blueprints} projectId={projectId} isOwner={isOwner} isActive={isActive} />
+        <UserBlueprintsList
+          blueprints={blueprints}
+          projectId={projectId}
+          isOwner={isOwner}
+          isActive={isActive}
+        />
       </div>
     </Suspense>
   );

@@ -47,7 +47,7 @@ export class FsNodesController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to add node: ${error.message}`
       );
     }
   }
@@ -72,7 +72,7 @@ export class FsNodesController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to get project tree: ${error.message}`
       );
     }
   }
@@ -96,7 +96,7 @@ export class FsNodesController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to get project stats: ${error.message}`
       );
     }
   }
@@ -117,7 +117,7 @@ export class FsNodesController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to get node children: ${error.message}`
       );
     }
   }
@@ -138,7 +138,7 @@ export class FsNodesController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to get node: ${error.message}`
       );
     }
   }
@@ -164,7 +164,7 @@ export class FsNodesController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to update node: ${error.message}`
       );
     }
   }
@@ -185,7 +185,7 @@ export class FsNodesController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to delete node: ${error.message}`
       );
     }
   }
@@ -212,7 +212,7 @@ export class FsNodesController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to move node: ${error.message}`
       );
     }
   }

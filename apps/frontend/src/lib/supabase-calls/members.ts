@@ -54,7 +54,7 @@ export async function verifyMembership(
 ): Promise<boolean> {
   const { data, error } = await supabase
     .from("projects_members")
-    .select("id")
+    .select("project_id")
     .eq("project_id", projectId)
     .eq("user_id", userId)
     .maybeSingle();

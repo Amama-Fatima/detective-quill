@@ -13,7 +13,7 @@ export class MembersService {
   // Add a new member to the project
   async addProjectMemberWithEmail(
     projectId: string,
-    email: string
+    email: string,
   ): Promise<void> {
     const supabase = this.supabaseService.client;
     // First, find the user by email
@@ -59,7 +59,7 @@ export class MembersService {
   async removeProjectMember(
     projectId: string,
     memberId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     const supabase = this.supabaseService.client;
 
@@ -81,7 +81,7 @@ export class MembersService {
     // Prevent removing the project owner
     if (member.user_id === userId) {
       throw new BadRequestException(
-        "Project owner cannot be removed from the project"
+        "Project owner cannot be removed from the project",
       );
     }
 
@@ -94,7 +94,7 @@ export class MembersService {
 
     if (error) {
       throw new BadRequestException(
-        `Failed to remove member: ${error.message}`
+        `Failed to remove member: ${error.message}`,
       );
     }
 
@@ -104,7 +104,7 @@ export class MembersService {
   // Helper method to verify project ownership
   private async verifyProjectOwnership(
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     const supabase = this.supabaseService.client;
 
@@ -120,59 +120,41 @@ export class MembersService {
 
     if (data.author_id !== userId) {
       throw new ForbiddenException(
-        "Only the project owner can perform this action"
+        "Only the project owner can perform this action",
       );
     }
   }
 
+  // verify project access (owner or member)
+  async verifyProjectAccess(
+    projectId: string,
+    userId: string,
+  ): Promise<{ hasAccess: boolean; role: "owner" | "member" | null }> {
+    const supabase = this.supabaseService.client;
 
+    // Check if user is the owner
+    const { data: project } = await supabase
+      .from("projects")
+      .select("author_id")
+      .eq("id", projectId)
+      .single();
 
-  // Helper method to verify project access (owner or member)
-  // private async verifyProjectAccess(
-  //   projectId: string,
-  //   userId: string,
-  //   accessToken: string
-  // ): Promise<void> {
-  //   const supabase = this.supabaseService.client;
+    if (project?.author_id === userId) {
+      return { hasAccess: true, role: "owner" };
+    }
 
-  //   // Check if user is the owner
-  //   const { data: project } = await supabase
-  //     .from("projects")
-  //     .select("author_id")
-  //     .eq("id", projectId)
-  //     .single();
+    // Check if user is a member
+    const { data: member, error } = await supabase
+      .from("projects_members")
+      .select("user_id")
+      .eq("project_id", projectId)
+      .eq("user_id", userId)
+      .single();
 
-  //   if (project?.author_id === userId) {
-  //     return; // User is the owner
-  //   }
+    if (!member) {
+      return { hasAccess: false, role: null };
+    }
 
-  //   // Check if user is a member
-  //   const { data: member } = await supabase
-  //     .from("projects_members")
-  //     .select("id")
-  //     .eq("project_id", projectId)
-  //     .eq("user_id", userId)
-  //     .single();
-
-  //   if (!member) {
-  //     throw new ForbiddenException("Access denied to this project");
-  //   }
-  // }
-
-    // async addProjectAuthor(projectId: string, userId: string): Promise<void> {
-  //   const supabase = this.supabaseService.client;
-  //   const { data, error } = await supabase
-  //     .from("projects_members")
-  //     .insert({
-  //       project_id: projectId,
-  //       user_id: userId,
-  //       is_author: true,
-  //     })
-  //     .single();
-  //   if (error) {
-  //     throw new BadRequestException(`Failed to add author: ${error.message}`);
-  //   }
-  //   return;
-  // }
-
+    return { hasAccess: true, role: "member" };
+  }
 }

@@ -53,7 +53,7 @@ testBody(@Body() body: any) {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to send invite emails: ${error.message}`
       );
     }
   }

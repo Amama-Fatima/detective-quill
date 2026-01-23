@@ -19,7 +19,7 @@ import { supabaseBrowserClient } from "@/supabase/browser-client";
 import Link from "next/link";
 import { z } from "zod";
 import { forgotPasswordSchema } from "@/lib/schema";
-import PasswordResetInstruction from "../password-reset-instruction";
+import PasswordResetInstruction from "../instructions/password-reset-instruction";
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
@@ -45,7 +45,7 @@ export function ForgotPasswordForm() {
         values.email,
         {
           redirectTo: `${window.location.origin}/auth/reset-password`,
-        }
+        },
       );
 
       if (error) {
@@ -57,7 +57,7 @@ export function ForgotPasswordForm() {
     } catch (error: any) {
       console.error("Error sending reset email:", error);
       setError(
-        error.message || "Failed to send reset email. Please try again."
+        error.message || "Failed to send reset email. Please try again.",
       );
     } finally {
       setIsLoading(false);

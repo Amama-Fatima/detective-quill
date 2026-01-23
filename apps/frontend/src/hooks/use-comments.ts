@@ -11,15 +11,19 @@ import {
   updateComment,
   deleteComment,
   resolveComment,
-  unresolveComment,
   getCommentStats,
 } from "@/lib/backend-calls/comments";
 import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
 
 export interface UseCommentsOptions {
   fsNodeId: string;
   includeResolved?: boolean;
+  projectId: string;
 }
+
+// If you call the hook multiple times with the same props, React will reuse the same hook instance, so no duplicate fetches occur.
+// That is why we can do fetching inside the hook itself on mount.
 
 export interface UseCommentsReturn {
   comments: CommentResponse[];
@@ -28,18 +32,13 @@ export interface UseCommentsReturn {
   error: string | null;
 
   // Actions
-  addComment: (
-    data: Omit<CreateCommentDto, "fs_node_id">
-  ) => Promise<CommentResponse | null>;
+  addComment: (data: CreateCommentDto) => Promise<CommentResponse | null>;
   editComment: (
     commentId: string,
-    data: UpdateCommentDto
+    data: UpdateCommentDto,
   ) => Promise<CommentResponse | null>;
   removeComment: (commentId: string) => Promise<boolean>;
-  toggleResolve: (
-    commentId: string,
-    isResolved: boolean
-  ) => Promise<CommentResponse | null>;
+  toggleResolve: (commentId: string) => Promise<CommentResponse | null>;
   refreshComments: () => Promise<void>;
   refreshStats: () => Promise<void>;
 }
@@ -47,15 +46,15 @@ export interface UseCommentsReturn {
 export function useComments({
   fsNodeId,
   includeResolved = true,
+  projectId,
 }: UseCommentsOptions): UseCommentsReturn {
-  const { session } = useAuth(); // Adjust based on your auth hook
+  const { session } = useAuth();
 
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [stats, setStats] = useState<CommentStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch comments
   const fetchComments = useCallback(async () => {
     if (!session?.access_token || !fsNodeId) return;
 
@@ -64,9 +63,10 @@ export function useComments({
 
     try {
       const response = await getCommentsByNode(
+        projectId,
         fsNodeId,
         session.access_token,
-        includeResolved
+        includeResolved,
       );
 
       if (response.success && response.data) {
@@ -81,12 +81,15 @@ export function useComments({
     }
   }, [fsNodeId, session?.access_token, includeResolved]);
 
-  // Fetch stats
   const fetchStats = useCallback(async () => {
     if (!session?.access_token || !fsNodeId) return;
 
     try {
-      const response = await getCommentStats(fsNodeId, session.access_token);
+      const response = await getCommentStats(
+        projectId,
+        fsNodeId,
+        session.access_token,
+      );
 
       if (response.success && response.data) {
         setStats(response.data);
@@ -94,129 +97,163 @@ export function useComments({
     } catch (err) {
       console.error("Failed to fetch comment stats:", err);
     }
-  }, [fsNodeId, session?.access_token]);
+  }, [fsNodeId, session?.access_token, projectId]);
 
-  // Add comment
   const addComment = useCallback(
-    async (
-      data: Omit<CreateCommentDto, "fs_node_id">
-    ): Promise<CommentResponse | null> => {
+    async (data: CreateCommentDto): Promise<CommentResponse | null> => {
       if (!session?.access_token) return null;
 
       try {
-        const payload = { ...data, fs_node_id: fsNodeId };
-        console.log("useComments - addComment payload:", payload); // Debug log
+        const payload = { ...data };
 
         const response = await createComment(payload, session.access_token);
 
         if (response.success && response.data) {
           setComments((prev) => [...prev, response.data!]);
-          await fetchStats(); // Refresh stats
+          setStats((prev) => {
+            if (!prev) {
+              return { total: 1, resolved: 0, unresolved: 1 };
+            }
+            return {
+              total: prev.total + 1,
+              resolved: prev.resolved,
+              unresolved: prev.unresolved + 1,
+            };
+          });
+
+          toast.success("Comment added successfully");
           return response.data;
         } else {
-          setError(response.error || "Failed to create comment");
-          return null;
+          throw new Error(response.error || "Failed to add comment");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        toast.error(
+          err instanceof Error ? err.message : "Failed to add comment",
+        );
         return null;
       }
     },
-    [session?.access_token, fsNodeId, fetchStats]
+    [session?.access_token],
   );
 
-  // Edit comment
   const editComment = useCallback(
     async (
       commentId: string,
-      data: UpdateCommentDto
+      data: UpdateCommentDto,
     ): Promise<CommentResponse | null> => {
       if (!session?.access_token) return null;
 
       try {
         const response = await updateComment(
+          projectId,
           commentId,
           data,
-          session.access_token
+          session.access_token,
         );
 
         if (response.success && response.data) {
           setComments((prev) =>
             prev.map((comment) =>
-              comment.id === commentId ? response.data! : comment
-            )
+              comment.id === commentId ? response.data! : comment,
+            ),
           );
-          await fetchStats(); // Refresh stats if resolution status changed
+          toast.success("Comment edited successfully");
           return response.data;
         } else {
-          setError(response.error || "Failed to update comment");
-          return null;
+          throw new Error(response.error || "Failed to edit comment");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        toast.error(err instanceof Error ? err.message : "Unknown error");
         return null;
       }
     },
-    [session?.access_token, fetchStats]
+    [session?.access_token, projectId],
   );
 
-  // Remove comment
   const removeComment = useCallback(
     async (commentId: string): Promise<boolean> => {
       if (!session?.access_token) return false;
 
       try {
-        const response = await deleteComment(commentId, session.access_token);
+        const response = await deleteComment(
+          projectId,
+          commentId,
+          session.access_token,
+        );
 
         if (response.success) {
-          setComments((prev) =>
-            prev.filter((comment) => comment.id !== commentId)
-          );
-          await fetchStats(); // Refresh stats
+          let wasResolved: boolean | undefined;
+          setComments((prev) => {
+            wasResolved = prev.find(
+              (comment) => comment.id === commentId,
+            )?.is_resolved;
+            return prev.filter((comment) => comment.id !== commentId);
+          });
+
+          setStats((prev) => {
+            if (!prev) return prev;
+            return {
+              total: prev.total - 1,
+              resolved: wasResolved ? prev.resolved - 1 : prev.resolved,
+              unresolved: wasResolved ? prev.unresolved : prev.unresolved - 1,
+            };
+          });
+
+          toast.success("Comment deleted successfully");
           return true;
         } else {
-          setError(response.error || "Failed to delete comment");
+          toast.error(response.error || "Failed to delete comment");
           return false;
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        toast.error(err instanceof Error ? err.message : "Unknown error");
         return false;
       }
     },
-    [session?.access_token, fetchStats]
+    [session?.access_token, projectId],
   );
 
-  // Toggle resolve status
   const toggleResolve = useCallback(
-    async (
-      commentId: string,
-      isResolved: boolean
-    ): Promise<CommentResponse | null> => {
+    async (commentId: string): Promise<CommentResponse | null> => {
       if (!session?.access_token) return null;
 
       try {
-        const response = isResolved
-          ? await resolveComment(commentId, session.access_token)
-          : await unresolveComment(commentId, session.access_token);
+        const response = await resolveComment(
+          projectId,
+          commentId,
+          session.access_token,
+        );
 
         if (response.success && response.data) {
           setComments((prev) =>
             prev.map((comment) =>
-              comment.id === commentId ? response.data! : comment
-            )
+              comment.id === commentId ? response.data! : comment,
+            ),
           );
-          await fetchStats(); // Refresh stats
+          setStats((prev) => {
+            if (!prev) return prev;
+            const isNowResolved = response.data!.is_resolved;
+            const newStats = {
+              total: prev.total,
+              resolved: isNowResolved ? prev.resolved + 1 : prev.resolved - 1,
+              unresolved: isNowResolved
+                ? prev.unresolved - 1
+                : prev.unresolved + 1,
+            };
+            return newStats;
+          });
+          toast.success(`Comment resolved successfully`);
           return response.data;
         } else {
-          setError(response.error || "Failed to update comment status");
+          toast.error(response.error || "Failed to update comment status");
           return null;
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        toast.error(err instanceof Error ? err.message : "Unknown error");
         return null;
       }
     },
-    [session?.access_token, fetchStats]
+    [session?.access_token, fsNodeId, projectId],
   );
 
   // Initial fetch
