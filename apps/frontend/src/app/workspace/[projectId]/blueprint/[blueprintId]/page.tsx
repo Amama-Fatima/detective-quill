@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import Canvas from "@/components/blueprint/canvas";
+import Canvas from "@/components/blueprint/canvas/canvas";
 import { BlueprintType } from "@detective-quill/shared-types";
 import { getProjectBlueprintById } from "@/lib/supabase-calls/blueprint";
 import { createSupabaseServerClient } from "@/supabase/server-client";

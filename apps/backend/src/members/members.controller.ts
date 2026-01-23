@@ -30,7 +30,7 @@ export class MembersController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to remove member: ${error.message}`
       );
     }
   }

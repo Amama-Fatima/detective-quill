@@ -17,7 +17,7 @@ import {
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { SignInFormValues, signInSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
-import ConfirmationMessages from "../confirmation-messages";
+import ConfirmationMessages from "../instructions/confirmation-messages";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 

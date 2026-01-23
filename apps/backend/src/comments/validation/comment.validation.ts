@@ -19,6 +19,10 @@ import {
 export class CreateCommentDto implements ICreateCommentDto {
   @IsUUID()
   @IsNotEmpty()
+  project_id: string;
+
+  @IsUUID()
+  @IsNotEmpty()
   fs_node_id: string;
 
   @IsString()

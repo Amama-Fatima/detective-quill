@@ -11,42 +11,83 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare } from "lucide-react";
+import { CreateCommentDto, CommentResponse } from "@detective-quill/shared-types";
 
 interface NewCommentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (content: string, selectedText?: string) => Promise<void>;
   selectedText?: string;
+  selectionData: {
+    text: string;
+    blockId: string;
+    startOffset: number;
+    endOffset: number;
+  } | null;
+  setSelectedTextForComment: React.Dispatch<React.SetStateAction<string>>;
+  setSelectionData: React.Dispatch<
+    React.SetStateAction<{
+      text: string;
+      blockId: string;
+      startOffset: number;
+      endOffset: number;
+    } | null>
+  >;
+  setShowNewCommentDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  addComment: (data: CreateCommentDto) => Promise<CommentResponse | null>;
+  projectId: string;
+  nodeId: string;
 }
 
 export function NewCommentDialog({
   open,
   onOpenChange,
-  onSubmit,
   selectedText,
+  selectionData,
+  setSelectedTextForComment,
+  setSelectionData,
+  setShowNewCommentDialog,
+  addComment,
+  projectId,
+  nodeId,
 }: NewCommentDialogProps) {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleAddComment = async (commentContent: string) => {
+    const result = await addComment({
+      fs_node_id: nodeId,
+      project_id: projectId,
+      block_id: selectionData ? selectionData.blockId : "default-block",
+      start_offset: selectionData ? selectionData.startOffset : 0,
+      end_offset: selectionData ? selectionData.endOffset : 0,
+      content: commentContent,
+      selected_text: selectionData ? selectionData.text : "",
+    });
+
+    if (result) {
+      setSelectedTextForComment("");
+      setSelectionData(null);
+      setShowNewCommentDialog(false);
+      return result;
+    } else {
+      return null;
+    }
+  };
+
+  const onSubmit = async () => {
     if (!content.trim()) return;
 
     setIsSubmitting(true);
     try {
-      await onSubmit(content, selectedText);
-      setContent("");
-      onOpenChange(false);
+      const result = await handleAddComment(content);
+      if (result) {
+        setContent("");
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error("Failed to create comment:", error);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      handleSubmit();
     }
   };
 
@@ -75,13 +116,9 @@ export function NewCommentDialog({
               placeholder="Write your comment..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              onKeyDown={handleKeyDown}
               className="min-h-[120px] resize-none"
               autoFocus
             />
-            <p className="text-xs text-muted-foreground">
-              Press Cmd/Ctrl + Enter to submit
-            </p>
           </div>
         </div>
 
@@ -94,8 +131,9 @@ export function NewCommentDialog({
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
+            onClick={onSubmit}
             disabled={!content.trim() || isSubmitting}
+            className="cursor-pointer disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Adding..." : "Add Comment"}
           </Button>

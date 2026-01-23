@@ -39,7 +39,7 @@ export class BlueprintsController {
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to create blueprint: ${error.message}`
       );
     }
   }
@@ -73,7 +73,7 @@ export class BlueprintsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to update blueprint: ${error.message}`
       );
     }
   }
@@ -94,7 +94,7 @@ export class BlueprintsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to delete blueprint: ${error.message}`
       );
     }
   }

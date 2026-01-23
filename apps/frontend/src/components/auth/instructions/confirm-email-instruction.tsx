@@ -1,6 +1,6 @@
 import { CheckCircle, Link } from "lucide-react";
 import React, { Dispatch, SetStateAction } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { SignUpFormValues } from "@/lib/schema";
 

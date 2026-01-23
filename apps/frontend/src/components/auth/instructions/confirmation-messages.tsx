@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Alert, AlertDescription } from "../ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, XCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 

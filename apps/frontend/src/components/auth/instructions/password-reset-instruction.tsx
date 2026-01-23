@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { UseFormReturn } from "react-hook-form";

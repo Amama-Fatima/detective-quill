@@ -41,7 +41,7 @@ export class InvitationsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to respond to invitation: ${error.message}`
       );
     }
   }
@@ -69,7 +69,7 @@ export class InvitationsController {
         throw error;
       }
       throw new InternalServerErrorException(
-        `Failed to get project invitations: ${error.message}`
+        `Failed to delete invitation: ${error.message}`
       );
     }
   }

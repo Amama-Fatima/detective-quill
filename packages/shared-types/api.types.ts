@@ -185,6 +185,7 @@ export interface CommentWithRelations extends CommentResponse {
 }
 
 export interface CreateCommentDto {
+  project_id: string;
   fs_node_id: string;
   block_id: string;
   start_offset: number;
