@@ -17,7 +17,7 @@ export async function generateMetadata({
 }: {
   params: { projectId: string };
 }): Promise<Metadata> {
-  const { projectId } = params;
+  const { projectId } = await params;
   const { title, error } = await fetchProjectTitle(projectId);
   if (error || !title) {
     return {
@@ -57,9 +57,11 @@ const WorkspaceLayout = async ({
 
   return (
     <div>
-      <div className="bg-gradient-to-r from-background to-card border-b border-border
+      <div
+        className="bg-gradient-to-r from-background to-card border-b border-border
 
-">
+"
+      >
         <h1 className="mystery-title text-center text-4xl mb-2">{title}</h1>
       </div>
       {children}
