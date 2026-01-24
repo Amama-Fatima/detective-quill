@@ -84,14 +84,16 @@ export interface CreateFsNodeDto {
   sort_order?: number;
 }
 
-export interface UpdateFsNodeDto {
+export interface UpdateNodeMetadataDto {
   name?: string;
   description?: string;
-  content?: string;
   parent_id?: string;
   sort_order?: number;
 }
 
+export interface UpdateFileContentDto {
+  content: string;
+}
 
 export interface FsNodeTreeResponse {
   id: string;

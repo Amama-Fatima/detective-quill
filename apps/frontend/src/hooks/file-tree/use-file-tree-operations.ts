@@ -2,15 +2,14 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   createFsNode,
-  updateFsNode,
   deleteFsNode,
   moveFsNode,
+  updateNodeMetadata,
 } from "@/lib/backend-calls/fs-nodes";
 import {
   CreateFsNodeDto,
   FsNodeTreeResponse,
-  FsNode,
-  UpdateFsNodeDto,
+  UpdateNodeMetadataDto,
 } from "@detective-quill/shared-types";
 import { toast } from "sonner";
 
@@ -37,7 +36,7 @@ export const useFileTreeOperations = ({
       name: string,
       nodeType: "file" | "folder",
       parentId?: string,
-      description?: string
+      description?: string,
     ): Promise<boolean> => {
       if (!session?.access_token) {
         toast.error("No session available");
@@ -58,12 +57,12 @@ export const useFileTreeOperations = ({
 
         const response = await createFsNode(
           createNodeData,
-          session.access_token
+          session.access_token,
         );
 
         if (response.success && response.data) {
           toast.success(
-            `${nodeType === "file" ? "File" : "Folder"} created successfully`
+            `${nodeType === "file" ? "File" : "Folder"} created successfully`,
           );
 
           // Refresh the page to get updated data
@@ -72,7 +71,7 @@ export const useFileTreeOperations = ({
           // Navigate to file if it's a file
           if (nodeType === "file") {
             router.push(
-              `/workspace/${projectId}/text-editor/${response.data.id}`
+              `/workspace/${projectId}/text-editor/${response.data.id}`,
             );
           }
 
@@ -89,7 +88,7 @@ export const useFileTreeOperations = ({
         setCreating(false);
       }
     },
-    [projectId, session, router]
+    [projectId, session, router],
   );
 
   const renameNode = useCallback(
@@ -101,14 +100,14 @@ export const useFileTreeOperations = ({
 
       setRenaming(true);
       try {
-        const updateData: UpdateFsNodeDto = {
+        const updateData: UpdateNodeMetadataDto = {
           name: newName,
         };
 
-        const response = await updateFsNode(
+        const response = await updateNodeMetadata(
           nodeId,
           updateData,
-          session.access_token
+          session.access_token,
         );
 
         if (response.success) {
@@ -127,7 +126,7 @@ export const useFileTreeOperations = ({
         setRenaming(false);
       }
     },
-    [session]
+    [session],
   );
 
   const moveNode = useCallback(
@@ -140,7 +139,7 @@ export const useFileTreeOperations = ({
       setMoving(true);
       try {
         const flattenNodes = (
-          nodeList: FsNodeTreeResponse[]
+          nodeList: FsNodeTreeResponse[],
         ): FsNodeTreeResponse[] => {
           const flattened: FsNodeTreeResponse[] = [];
           const traverse = (nodes: FsNodeTreeResponse[]) => {
@@ -164,7 +163,7 @@ export const useFileTreeOperations = ({
           nodeId,
           newParentId,
           newSortOrder,
-          session.access_token
+          session.access_token,
         );
 
         if (response.success) {
@@ -183,7 +182,7 @@ export const useFileTreeOperations = ({
         setMoving(false);
       }
     },
-    [session, nodes]
+    [session, nodes],
   );
 
   const deleteNode = useCallback(
@@ -233,7 +232,7 @@ export const useFileTreeOperations = ({
           nodeId,
           session.access_token,
           false,
-          cascadeDelete
+          cascadeDelete,
         );
 
         if (response.success) {
@@ -257,7 +256,7 @@ export const useFileTreeOperations = ({
         return false;
       }
     },
-    [session, nodes, selectedNodeId, projectId, router]
+    [session, nodes, selectedNodeId, projectId, router],
   );
 
   return {
@@ -274,7 +273,7 @@ export const useFileTreeOperations = ({
 // Helper function
 function findNodeById(
   nodes: FsNodeTreeResponse[],
-  nodeId: string
+  nodeId: string,
 ): FsNodeTreeResponse | null {
   for (const node of nodes) {
     if (node.id === nodeId) return node;

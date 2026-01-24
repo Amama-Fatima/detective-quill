@@ -1,12 +1,8 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import {
-  getFsNode,
-  updateFsNode,
-  deleteFsNode,
-} from "@/lib/backend-calls/fs-nodes";
-import { UpdateFsNodeDto, FsNode } from "@detective-quill/shared-types";
+import { deleteFsNode, updateFileContent } from "@/lib/backend-calls/fs-nodes";
+import { FsNode, UpdateFileContentDto } from "@detective-quill/shared-types";
 import { toast } from "sonner";
 
 interface UseFileOperationsProps {
@@ -33,12 +29,12 @@ export const useFileOperations = ({
 
       setSaving(true);
       try {
-        const updateData: UpdateFsNodeDto = { content };
+        const updateData: UpdateFileContentDto = { content };
 
-        const response = await updateFsNode(
+        const response = await updateFileContent(
           node.id,
           updateData,
-          session.access_token
+          session.access_token,
         );
 
         if (response.success && response.data) {
@@ -57,7 +53,7 @@ export const useFileOperations = ({
         setSaving(false);
       }
     },
-    [node, session?.access_token]
+    [node, session?.access_token],
   );
 
   const deleteFile = useCallback(async () => {

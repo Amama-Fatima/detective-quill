@@ -11,6 +11,8 @@ import {
   FsNodeTreeResponse,
   DeleteResponse,
   type FsNode,
+  UpdateFileContentDto,
+  UpdateNodeMetadataDto,
 } from "@detective-quill/shared-types";
 import {
   CreateFsNodeDto,
@@ -166,75 +168,90 @@ export class FsNodesService {
 
     return node;
   }
-  // todo: try to separate move and update logic if possible
-  async updateNode(
+
+  async updateFileContent(
     nodeId: string,
-    updateNodeDto: UpdateFsNodeDto,
+    updateContentDta: UpdateFileContentDto,
     userId: string,
   ): Promise<FsNode> {
     const supabase = this.supabaseService.client;
 
-    // Verify node exists and user owns it
     const existingNode = await this.getNode(nodeId, userId);
 
-    // If moving to a different parent, verify the new parent
-    if (
-      updateNodeDto.parent_id !== undefined &&
-      updateNodeDto.parent_id !== existingNode.parent_id
-    ) {
-      if (updateNodeDto.parent_id) {
-        const { data: parent, error: parentError } = await supabase
-          .from("fs_nodes")
-          .select("project_id, node_type")
-          .eq("id", updateNodeDto.parent_id)
-          .single();
-
-        if (parentError || !parent) {
-          throw new Error("New parent node not found");
-        }
-
-        if (parent.project_id !== existingNode.project_id) {
-          throw new Error("Cannot move node to different project");
-        }
-
-        if (parent.node_type !== "folder") {
-          throw new Error("Parent must be a folder");
-        }
-      }
+    if (existingNode.node_type !== "file") {
+      throw new BadRequestException("Only file nodes can have content updated");
     }
 
-    // Update word count if content changed
-    const updates: any = { ...updateNodeDto };
-    if (updateNodeDto.content !== undefined) {
-      updates.word_count = this.countWords(updateNodeDto.content);
-    }
-
-    // ✅ SIMPLIFIED: Let the DB trigger handle path/depth updates when parent_id changes
-    // The update_node_hierarchy() trigger will automatically recalculate path and depth
     const { data, error } = await supabase
       .from("fs_nodes")
-      .update(updates)
+      .update({
+        content: updateContentDta.content,
+        word_count: this.countWords(updateContentDta.content),
+      })
       .eq("id", nodeId)
       .select()
       .single();
 
-    const node = data as FsNode;
-
     if (error) {
-      // ✅ SIMPLIFIED: Circular reference prevention is handled by the trigger
-      throw new BadRequestException(`Failed to update node: ${error.message}`);
-    }
-
-    if (node.node_type === "file" && updateNodeDto.content !== undefined) {
-      await this.handleSceneUpdate(
-        nodeId,
-        node,
-        updateNodeDto.content,
-        userId,
-        supabase,
+      throw new BadRequestException(
+        `Failed to update file content: ${error.message}`,
       );
     }
-    return node;
+
+    return data as FsNode;
+  }
+
+  async updateNodeMetadata(
+    nodeId: string,
+    updateMetadataDto: UpdateNodeMetadataDto,
+    userId: string,
+  ): Promise<FsNode> {
+    const supabase = this.supabaseService.client;
+
+    const existingNode = await this.getNode(nodeId, userId);
+
+    if (
+      updateMetadataDto.parent_id !== undefined &&
+      updateMetadataDto.parent_id !== existingNode.parent_id
+    ) {
+      if (updateMetadataDto.parent_id) {
+        const { data: parent, error: parentError } = await supabase
+          .from("fs_nodes")
+          .select("project_id, node_type")
+          .eq("id", updateMetadataDto.parent_id)
+          .single();
+
+        if (parentError || !parent) {
+          throw new BadRequestException("New parent node not found");
+        }
+
+        if (parent.project_id !== existingNode.project_id) {
+          throw new BadRequestException(
+            "Cannot move node to different project",
+          );
+        }
+
+        if (parent.node_type !== "folder") {
+          throw new BadRequestException("Parent must be a folder");
+        }
+      }
+    }
+
+    // Update metadata (triggers will handle path/depth/global_sequence)
+    const { data, error } = await supabase
+      .from("fs_nodes")
+      .update(updateMetadataDto)
+      .eq("id", nodeId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new BadRequestException(
+        `Failed to update metadata: ${error.message}`,
+      );
+    }
+
+    return data;
   }
 
   async deleteNode(nodeId: string, userId: string): Promise<DeleteResponse> {
@@ -294,8 +311,7 @@ export class FsNodesService {
     newSortOrder: number,
     userId: string,
   ): Promise<FsNode> {
-    // ✅ updateNode will handle path/depth recalculation via triggers
-    return this.updateNode(
+    return this.updateNodeMetadata(
       nodeId,
       {
         parent_id: newParentId === null ? undefined : newParentId,
@@ -305,7 +321,6 @@ export class FsNodesService {
     );
   }
 
-  // ✅ NEW: Get project statistics using the view
   async getProjectStats(
     projectId: string,
     userId: string,
