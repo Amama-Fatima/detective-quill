@@ -20,12 +20,12 @@ interface CreateFolderDialogProps {
   creating?: boolean;
 }
 
-export function CreateFolderDialog({
+const CreateFolderDialog = ({
   open,
   onOpenChange,
   onSubmit,
   creating = false,
-}: CreateFolderDialogProps) {
+}: CreateFolderDialogProps) => {
   const [name, setName] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,3 +101,5 @@ export function CreateFolderDialog({
     </Dialog>
   );
 }
+
+export default CreateFolderDialog;

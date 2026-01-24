@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils/utils";
-import { WorkspaceHeader } from "@/components/editor-workspace/workspace-header";
-import { FileTree } from "./file-tree/file-tree";
+import WorkspaceHeader from "@/components/editor-workspace/workspace-layout/workspace-header";
+import FileTree from "../file-tree/file-tree";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
 import { type Session } from "@supabase/supabase-js";
 
@@ -18,7 +18,7 @@ interface WorkspaceSidebarProps {
   isActive: boolean;
 }
 
-export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
+export default function WorkspaceSidebar({
   projectName,
   filesCount,
   foldersCount,
@@ -29,11 +29,11 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
   loading,
   isOwner,
   isActive,
-}) => {
+}: WorkspaceSidebarProps) {
   return (
     <aside
       className={cn(
-        "w-80 border-r bg-gradient-to-b from-card/50 to-card/30 flex flex-col shadow-sm transition-all duration-300"
+        "w-80 border-r bg-gradient-to-b from-card/50 to-card/30 flex flex-col shadow-sm transition-all duration-300",
       )}
     >
       <WorkspaceHeader
@@ -53,4 +53,4 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
       />
     </aside>
   );
-};
+}

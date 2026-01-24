@@ -39,7 +39,7 @@ export async function createComment(
   data: CreateCommentDto,
   accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
-  return makeAuthenticatedRequest<CommentResponse>("/comments", accessToken, {
+  return makeAuthenticatedRequest<CommentResponse>(`${data.project_id}/comments`, accessToken, {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -55,7 +55,7 @@ export async function getCommentsByNode(
     ? "?includeResolved=true"
     : "?includeResolved=false";
   return makeAuthenticatedRequest<CommentResponse[]>(
-    `/comments/${projectId}/${fsNodeId}${query}`,
+    `/${projectId}/comments/${fsNodeId}${query}`,
     accessToken,
   );
 }
@@ -66,7 +66,7 @@ export async function getComment(
   accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
   return makeAuthenticatedRequest<CommentResponse>(
-    `/comments/${projectId}/${commentId}`,
+    `/${projectId}/comments/${commentId}`,
     accessToken,
   );
 }
@@ -78,7 +78,7 @@ export async function updateComment(
   accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
   return makeAuthenticatedRequest<CommentResponse>(
-    `/comments/${projectId}/${commentId}`,
+    `/${projectId}/comments/${commentId}`,
     accessToken,
     {
       method: "PATCH",
@@ -93,7 +93,7 @@ export async function deleteComment(
   accessToken: string,
 ): Promise<ApiResponse<DeleteResponse>> {
   return makeAuthenticatedRequest<DeleteResponse>(
-    `/comments/${projectId}/${commentId}`,
+    `/${projectId}/comments/${commentId}`,
     accessToken,
     {
       method: "DELETE",
@@ -107,7 +107,7 @@ export async function resolveComment(
   accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
   return makeAuthenticatedRequest<CommentResponse>(
-    `/comments/${projectId}/${commentId}/resolve`,
+    `/${projectId}/comments/${commentId}/resolve`,
     accessToken,
     {
       method: "POST",
@@ -121,7 +121,7 @@ export async function unresolveComment(
   accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
   return makeAuthenticatedRequest<CommentResponse>(
-    `/comments/${projectId}/${commentId}/unresolve`,
+    `/${projectId}/comments/${commentId}/unresolve`,
     accessToken,
     {
       method: "POST",
@@ -135,7 +135,7 @@ export async function getCommentStats(
   accessToken: string,
 ): Promise<ApiResponse<CommentStats>> {
   return makeAuthenticatedRequest<CommentStats>(
-    `/comments/${projectId}/${fsNodeId}/stats`,
+    `/${projectId}/comments/${fsNodeId}/stats`,
     accessToken,
   );
 }

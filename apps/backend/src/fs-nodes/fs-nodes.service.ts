@@ -33,7 +33,7 @@ export class FsNodesService {
     const supabase = this.supabaseService.client;
 
     // Verify project ownership
-    await this.projectsService.findProjectById(
+    await this.projectsService.verifyProjectOwnership(
       createNodeDto.project_id,
       userId,
     );
@@ -166,7 +166,7 @@ export class FsNodesService {
 
     return node;
   }
-  // todo: try to separate move and update logic
+  // todo: try to separate move and update logic if possible
   async updateNode(
     nodeId: string,
     updateNodeDto: UpdateFsNodeDto,

@@ -8,13 +8,13 @@ export class InvitationsService {
   constructor(
     private supabaseService: SupabaseService,
     private membersService: MembersService,
-    private projectsService: ProjectsService
+    private projectsService: ProjectsService,
   ) {}
 
   async respondToInvitation(
     projectId: string,
     inviteCode: string,
-    response: "accept" | "reject"
+    response: "accept" | "reject",
   ): Promise<void> {
     const supabase = this.supabaseService.client;
     // insert member if accepted
@@ -27,15 +27,20 @@ export class InvitationsService {
 
       if (fetchError) {
         throw new Error(
-          `Failed to fetch invitation details: ${fetchError?.message}`
+          `Failed to fetch invitation details: ${fetchError?.message}`,
         );
       }
       if (!data || data.length === 0) {
         // explicit not found
         throw new NotFoundException("Invitation not found");
       }
-      await this.membersService.addProjectMemberWithEmail(projectId, data[0].email);
+      await this.membersService.addProjectMemberWithEmail(
+        projectId,
+        data[0].email,
+      );
     }
+
+    // delete the invitation after response (this delete action can be done by the invitee so we will not verify ownership here)
     const { error } = await supabase
       .from("invitations")
       .delete()
@@ -48,10 +53,11 @@ export class InvitationsService {
     return;
   }
 
+  // this deletes an invitation, only the project owner can do this
   async deleteInvitation(
     inviteCode: string,
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     // this user id is of the owner who has requested deletion not the invitee
     await this.projectsService.verifyProjectOwnership(projectId, userId);
@@ -59,7 +65,8 @@ export class InvitationsService {
     const { error } = await supabase
       .from("invitations")
       .delete()
-      .eq("invite_code", inviteCode);
+      .eq("invite_code", inviteCode)
+      .eq("project_id", projectId);
     if (error) {
       throw new Error(`Failed to delete invitation: ${error.message}`);
     }

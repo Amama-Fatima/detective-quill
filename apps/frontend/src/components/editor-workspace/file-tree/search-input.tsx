@@ -21,11 +21,11 @@ interface SearchInputProps {
   className?: string;
 }
 
-export function SearchInput({
+const SearchInput = ({
   nodes,
   onResultSelect,
   className,
-}: SearchInputProps) {
+}: SearchInputProps) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -232,3 +232,5 @@ function highlightMatch(text: string, query: string): JSX.Element {
     </span>
   );
 }
+
+export default SearchInput;

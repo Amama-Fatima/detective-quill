@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
   ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
@@ -21,7 +20,7 @@ export class ProjectsService {
 
   async createProject(
     createProjectDto: CreateProjectDto,
-    userId: string
+    userId: string,
   ): Promise<Project> {
     const supabase = this.supabaseService.client;
 
@@ -39,7 +38,7 @@ export class ProjectsService {
 
   async findAllUserProjects(
     userId: string,
-    includeInactive: boolean = false
+    includeInactive: boolean = false,
   ): Promise<Project[]> {
     const supabase = this.supabaseService.client;
 
@@ -79,15 +78,13 @@ export class ProjectsService {
     return data;
   }
 
-  // Update project information (title, description)
   async updateProjectInfo(
     projectId: string,
     updateData: UpdateProjectDto,
-    userId: string
+    userId: string,
   ): Promise<Project> {
     const supabase = this.supabaseService.client;
 
-    // First verify the user is the project owner
     await this.verifyProjectOwnership(projectId, userId);
 
     const { data, error } = await supabase
@@ -109,11 +106,10 @@ export class ProjectsService {
 
   async deleteProject(
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<DeleteResponse> {
     const supabase = this.supabaseService.client;
 
-    // Verify the user is the project owner
     await this.verifyProjectOwnership(projectId, userId);
 
     // First delete all project members
@@ -175,7 +171,7 @@ export class ProjectsService {
 
   async getProjectStats(
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<ProjectStats> {
     const supabase = this.supabaseService.client;
 
@@ -217,7 +213,7 @@ export class ProjectsService {
   async changeProjectStatus(
     projectId: string,
     newStatus: "active" | "completed" | "archived",
-    userId: string
+    userId: string,
   ): Promise<void> {
     const supabase = this.supabaseService.client;
     // Verify the user is the project owner
@@ -240,10 +236,9 @@ export class ProjectsService {
     return;
   }
 
-  // Helper method to verify project ownership ( cannot make this private, need it in other places)
   async verifyProjectOwnership(
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     const supabase = this.supabaseService.client;
 
@@ -259,8 +254,22 @@ export class ProjectsService {
 
     if (data.author_id !== userId) {
       throw new ForbiddenException(
-        "Only the project owner can perform this action"
+        "Only the project owner can perform this action",
       );
     }
+  }
+
+  async fetchProjectTitle(projectId: string): Promise<string> {
+    console.log("Fetching project title for projectId:", projectId);
+    const supabase = this.supabaseService.client;
+    const { data, error } = await supabase
+      .from("projects")
+      .select("title")
+      .eq("id", projectId)
+      .single();
+    if (error || !data) {
+      throw new NotFoundException("Project not found");
+    }
+    return data.title;
   }
 }

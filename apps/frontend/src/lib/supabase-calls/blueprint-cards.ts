@@ -4,7 +4,6 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 // todo: add RLS policies on supabase side to security
 export async function getAllCardsOfBlueprint(
   blueprintId: string,
-  userId: string,
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<{ blueprint_cards: BlueprintCard[] | null; error: string | null }> {
   const { data, error } = await supabase

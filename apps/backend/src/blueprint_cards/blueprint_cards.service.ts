@@ -84,23 +84,3 @@ export class BlueprintCardsService {
     }
   }
 }
-
-// async fetchAllCardsOfBlueprint(
-//   blueprintId: string,
-//   userId: string,
-//   accessToken: string
-// ): Promise<BlueprintCard[]> {
-//   const supabase = this.supabaseService.getClientWithAuth(accessToken);
-
-//   const { data: blueprintCards, error } = await supabase
-//     .from("blueprint_cards")
-//     .select("*")
-//     .eq("blueprint_id", blueprintId)
-//     .eq("user_id", userId);
-
-//   if (error) {
-//     throw new Error(`Failed to fetch cards: ${error.message}`);
-//   }
-
-//   return (blueprintCards as BlueprintCard[]) || [];
-// }

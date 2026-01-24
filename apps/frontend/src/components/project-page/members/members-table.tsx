@@ -12,12 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import RemoveMemberDialog from "./remove-member-dialog";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { ProjectMember } from "@detective-quill/shared-types";
 import { removeProjectMember } from "@/lib/backend-calls/members";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 
 const MembersTable = ({

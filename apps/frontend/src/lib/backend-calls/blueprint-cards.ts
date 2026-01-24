@@ -11,7 +11,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
   accessToken: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -24,7 +24,7 @@ async function makeAuthenticatedRequest<T>(
 
   if (!response.ok) {
     throw new Error(
-      `API request failed: ${response.status} ${response.statusText}`
+      `API request failed: ${response.status} ${response.statusText}`,
     );
   }
 
@@ -34,16 +34,20 @@ async function makeAuthenticatedRequest<T>(
 export async function createBlueprintCard(
   accessToken: string,
   blueprintId: string,
-  cardData: CreateBlueprintCardDto[]
+  cardData: CreateBlueprintCardDto[],
+  projectId: string,
 ): Promise<ApiResponse<BlueprintCard[]>> {
+  console.log("Creating blueprint card:");
   const response = await makeAuthenticatedRequest<BlueprintCard[]>(
-    `/blueprint-cards/${blueprintId}`,
+    `/${projectId}/blueprints/${blueprintId}/blueprint-cards`,
     accessToken,
     {
       method: "POST",
       body: JSON.stringify(cardData),
-    }
+    },
   );
+
+  console.log("Create response:", response);
 
   if (!response.success) {
     throw new Error(`Failed to create blueprint card: ${response.error}`);
@@ -56,16 +60,20 @@ export async function updateBlueprintCard(
   accessToken: string,
   blueprintId: string,
   cardId: string,
-  cardData: UpdateBlueprintCardDto
+  cardData: UpdateBlueprintCardDto,
+  projectId: string,
 ): Promise<ApiResponse<BlueprintCard>> {
+  console.log("Updating blueprint card:");
   const response = await makeAuthenticatedRequest<BlueprintCard>(
-    `/blueprint-cards/${blueprintId}/${cardId}`,
+    `/${projectId}/blueprints/${blueprintId}/blueprint-cards/${cardId}`,
     accessToken,
     {
       method: "PUT",
       body: JSON.stringify(cardData),
-    }
+    },
   );
+
+  console.log("Update response:", response);
 
   if (!response.success) {
     throw new Error(`Failed to update blueprint card: ${response.error}`);
@@ -77,14 +85,15 @@ export async function updateBlueprintCard(
 export async function deleteBlueprintCard(
   accessToken: string,
   blueprintId: string,
-  cardId: string
+  cardId: string,
+  projectId: string,
 ): Promise<ApiResponse<void>> {
   const response = await makeAuthenticatedRequest<void>(
-    `/blueprint-cards/${blueprintId}/${cardId}`,
+    `/${projectId}/blueprints/${blueprintId}/blueprint-cards/${cardId}`,
     accessToken,
     {
       method: "DELETE",
-    }
+    },
   );
 
   if (!response.success) {

@@ -1,6 +1,6 @@
 import React from "react";
-import { SidebarToggle } from "./side-bar-toggle";
-import { Breadcrumbs } from "./bread-crumbs";
+import SidebarToggle from "./side-bar-toggle";
+import Breadcrumbs from "./bread-crumbs";
 
 interface WorkspaceHeaderBarProps {
   sidebarOpen: boolean;
@@ -10,13 +10,13 @@ interface WorkspaceHeaderBarProps {
   currentNodePath?: string;
 }
 
-export const WorkspaceHeaderBar: React.FC<WorkspaceHeaderBarProps> = ({
+export default function WorkspaceHeaderBar({
   sidebarOpen,
   onSidebarToggle,
   projectName,
   nodeId,
   currentNodePath,
-}) => {
+}: WorkspaceHeaderBarProps) {
   return (
     <div className="flex items-center justify-between border-b px-4 py-2 bg-card/30">
       <div className="flex items-center gap-2">
@@ -32,4 +32,4 @@ export const WorkspaceHeaderBar: React.FC<WorkspaceHeaderBarProps> = ({
       </div>
     </div>
   );
-};
+}

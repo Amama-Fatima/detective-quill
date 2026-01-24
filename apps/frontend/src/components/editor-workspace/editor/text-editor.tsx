@@ -51,7 +51,7 @@ export type TextEditorProps = {
   disabledCondition?: boolean;
 };
 
-export function TextEditor({
+const TextEditor = ({
   fileName = "Untitled.md",
   value = "",
   onChange = () => {},
@@ -64,7 +64,7 @@ export function TextEditor({
   commentCount = 0,
   editorRef,
   disabledCondition = false,
-}: TextEditorProps) {
+}: TextEditorProps) => {
   const [internal, setInternal] = useState(value);
   const internalEditorRef = useRef<BlockNoteEditorRef>(null);
   const effectiveEditorRef = editorRef || internalEditorRef;
@@ -247,3 +247,5 @@ export function TextEditor({
     </TooltipProvider>
   );
 }
+
+export default TextEditor;

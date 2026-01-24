@@ -21,7 +21,7 @@ interface CreateProjectDialogProps {
   creating: boolean;
 }
 
-export function CreateProjectDialog({
+export default function CreateProjectDialog ({
   open,
   onOpenChange,
   onCreate,

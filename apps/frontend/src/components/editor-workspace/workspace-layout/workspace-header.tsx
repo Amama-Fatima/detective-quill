@@ -6,7 +6,7 @@ interface WorkspaceHeaderProps {
   foldersCount: number;
 }
 
-export function WorkspaceHeader({
+export default function WorkspaceHeader({
   projectName,
   filesCount,
   foldersCount,

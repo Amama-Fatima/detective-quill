@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { TextEditor } from "@/components/editor-workspace/editor/text-editor";
-import { CommentsPanel } from "@/components/editor-workspace/comments/comments-panel";
-import { NewCommentDialog } from "@/components/editor-workspace/comments/new-comment-dialog";
+import TextEditor from "@/components/editor-workspace/editor/text-editor";
+import CommentsPanel from "@/components/editor-workspace/comments/comments-panel";
+import NewCommentDialog from "@/components/editor-workspace/comments/new-comment-dialog";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
 import { useComments } from "@/hooks/use-comments";
@@ -20,7 +20,7 @@ interface TextEditorContainerProps {
   isOwner: boolean;
 }
 
-export function TextEditorContainer({
+export default function TextEditorContainer ({
   projectId,
   node,
   isActive,

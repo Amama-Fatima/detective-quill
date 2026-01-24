@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { ProjectsPageClient } from "@/components/projects/project-page-client";
+import UserProjectsPage  from "@/components/projects/user-projects-page";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import {
   getUserProjects,
@@ -38,7 +38,7 @@ export default async function CasesPage() {
   }
 
   return (
-    <ProjectsPageClient
+    <UserProjectsPage
       user={user}
       initialProjects={projects || []}
       invitedProjects={invitedProjects || []}

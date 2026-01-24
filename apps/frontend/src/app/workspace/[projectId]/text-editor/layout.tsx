@@ -1,4 +1,4 @@
-import { WorkspaceLayout } from "@/components/editor-workspace/workspace-layout";
+import WorkspaceLayout from "@/components/editor-workspace/workspace-layout/workspace-layout";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { Metadata } from "next";
 

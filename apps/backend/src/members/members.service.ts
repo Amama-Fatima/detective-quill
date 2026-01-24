@@ -2,13 +2,16 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-  ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
+import { ProjectsService } from "src/projects/projects.service";
 
 @Injectable()
 export class MembersService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private projectsService: ProjectsService,
+  ) {}
 
   // Add a new member to the project
   async addProjectMemberWithEmail(
@@ -64,7 +67,7 @@ export class MembersService {
     const supabase = this.supabaseService.client;
 
     // Verify the user is the project owner
-    await this.verifyProjectOwnership(projectId, userId);
+    await this.projectsService.verifyProjectOwnership(projectId, userId);
 
     // Check if the member exists and get their details
     const { data: member, error: memberError } = await supabase
@@ -99,30 +102,6 @@ export class MembersService {
     }
 
     return;
-  }
-
-  // Helper method to verify project ownership
-  private async verifyProjectOwnership(
-    projectId: string,
-    userId: string,
-  ): Promise<void> {
-    const supabase = this.supabaseService.client;
-
-    const { data, error } = await supabase
-      .from("projects")
-      .select("author_id")
-      .eq("id", projectId)
-      .single();
-
-    if (error || !data) {
-      throw new NotFoundException("Project not found");
-    }
-
-    if (data.author_id !== userId) {
-      throw new ForbiddenException(
-        "Only the project owner can perform this action",
-      );
-    }
   }
 
   // verify project access (owner or member)

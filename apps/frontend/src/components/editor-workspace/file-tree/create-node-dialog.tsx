@@ -37,7 +37,7 @@ interface CreateNodeDialogProps {
   availableFolders?: Array<{ id: string; name: string; path: string }>;
 }
 
-export function CreateNodeDialog({
+const CreateNodeDialog = ({
   open,
   onOpenChange,
   onSubmit,
@@ -45,7 +45,7 @@ export function CreateNodeDialog({
   nodeType,
   folderName,
   availableFolders = [],
-}: CreateNodeDialogProps) {
+}: CreateNodeDialogProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<string>(
@@ -249,3 +249,5 @@ export function CreateNodeDialog({
     </Dialog>
   );
 }
+
+export default CreateNodeDialog;

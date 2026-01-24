@@ -21,7 +21,6 @@ export default function CanvasCardNode({
 }: {
   data: CanvasCardNodeProps;
 }) {
-  console.log("Rendering CanvasCardNode with data:", data);
   const [isEditing, setIsEditing] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

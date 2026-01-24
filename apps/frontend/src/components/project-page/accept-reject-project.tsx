@@ -14,11 +14,11 @@ interface AcceptRejectProjectProps {
   code: string;
 }
 
-const AcceptRejectProject = ({
+export default function AcceptRejectProject({
   projectId,
   projectTitle,
   code,
-}: AcceptRejectProjectProps) => {
+}: AcceptRejectProjectProps) {
   const [loading, setLoading] = useState(false);
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
@@ -81,5 +81,3 @@ const AcceptRejectProject = ({
     </div>
   );
 };
-
-export default AcceptRejectProject;

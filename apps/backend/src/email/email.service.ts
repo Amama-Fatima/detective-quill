@@ -1,16 +1,16 @@
 import {
   Injectable,
-  NotFoundException,
-  ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { QueueService } from "../queue/queue.service";
+import { ProjectsService } from "src/projects/projects.service";
 
 @Injectable()
 export class EmailService {
   constructor(
     private supabaseService: SupabaseService,
-    private queueService: QueueService
+    private queueService: QueueService,
+    private projectsService: ProjectsService
   ) {}
 
   // Invite new members to the project via email
@@ -20,20 +20,15 @@ export class EmailService {
     userId: string,
     inviterName: string
   ): Promise<void> {
-    console.log("-----------------")
-    console.log("project id:", projectId);
-    console.log("emails:", emails);
-    console.log("user id:", userId);
     
-    await this.verifyProjectOwnership(projectId, userId);
-    const projectTitle = await this.fetchProjectTitle(projectId);
+    await this.projectsService.verifyProjectOwnership(projectId, userId);
+    const projectTitle = await this.projectsService.fetchProjectTitle(projectId);
     const registeredUsers = await this.verifyRegisteredUsers(emails);
     let notInvitedUsers = await this.getUsersNotInvited(
       projectId,
       registeredUsers
     );
     if (notInvitedUsers.length === 0) {
-      console.log("No registered emails to send invitations to.");
       return;
     }
 
@@ -53,7 +48,6 @@ export class EmailService {
 
     const notInvitedEmails = notInvitedUsers.map((u) => u.email);
     if (notInvitedEmails.length === 0) {
-      console.log("No emails to send invitations to after filtering members.");
       return;
     }
 
@@ -66,51 +60,10 @@ export class EmailService {
     return;
   }
 
-  // Helper method to verify project ownership
-  private async verifyProjectOwnership(
-    projectId: string,
-    userId: string
-  ): Promise<void> {
-    const supabase = this.supabaseService.client;
-    console.log("Verifying project ownership for user:", userId, "and projectId:", projectId);
-    const { data, error } = await supabase
-      .from("projects")
-      .select("author_id")
-      .eq("id", projectId)
-      .single();
-
-      console.log("Project data fetched:", data, "Error:", error);
-
-    if (error || !data) {
-      throw new NotFoundException("Project not found");
-    }
-
-    if (data.author_id !== userId) {
-      throw new ForbiddenException(
-        "Only the project owner can perform this action"
-      );
-    }
-  }
-
-  private async fetchProjectTitle(projectId: string): Promise<string> {
-    console.log("Fetching project title for projectId:", projectId);
-    const supabase = this.supabaseService.client;
-    const { data, error } = await supabase
-      .from("projects")
-      .select("title")
-      .eq("id", projectId)
-      .single();
-    if (error || !data) {
-      throw new NotFoundException("Project not found");
-    }
-    return data.title;
-  }
-
   // only return emails and user id of users that are already registered users
   private async verifyRegisteredUsers(
     emails: string[]
   ): Promise<{ email: string; user_id: string }[]> {
-    console.log("Verifying registered users for emails:", emails);
     const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("profiles")
@@ -128,7 +81,6 @@ export class EmailService {
     projectId: string,
     user_emails: { email: string; user_id: string }[]
   ): Promise<{ email: string; user_id: string }[]> {
-    console.log("Getting users not invited for projectId:", projectId);
     const supabase = this.supabaseService.client;
 
     // Fetch emails that ARE already invited or members
