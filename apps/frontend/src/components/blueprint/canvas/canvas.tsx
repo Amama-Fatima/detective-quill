@@ -19,7 +19,7 @@ import {
 } from "@/lib/backend-calls/blueprint-cards";
 import CanvasCardNode from "./canvas-card-node";
 import { useAuth } from "@/context/auth-context";
-import EditableProjectName from "./editable-blueprint-name";
+import EditableBlueprintName from "./editable-blueprint-name";
 import {
   blueprintCardsToNodes,
   mapNodesToBlueprintCards,
@@ -214,11 +214,10 @@ export default function Canvas({
     <div className="w-full h-[85vh] flex flex-col">
       {/* Top Bar */}
       <div className="flex bg-secondary justify-between m-2 rounded-lg items-center px-4 py-2 border border-secondary-foreground">
-        <EditableProjectName
+        <EditableBlueprintName
           initialName={projectName}
           type={type}
           blueprintId={blueprintId}
-          accessToken={accessToken!}
           isOwner={isOwner}
           isActive={isActive}
         />

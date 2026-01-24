@@ -2,9 +2,6 @@
 import React from "react";
 import { useState } from "react";
 import { Trash } from "lucide-react";
-import { deleteBlueprintById } from "@/lib/backend-calls/blueprints";
-import { useAuth } from "@/context/auth-context";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useBlueprints } from "@/hooks/use-blueprints";
 
 interface DeleteBlueprintButtonProps {
   blueprintId: string;
@@ -23,22 +21,12 @@ interface DeleteBlueprintButtonProps {
 export const DeleteBlueprintButton = ({
   blueprintId,
 }: DeleteBlueprintButtonProps) => {
-  const { session } = useAuth();
-  const accessToken = session?.access_token;
+  const { delete: deleteBlueprint, loading } = useBlueprints();
   const [openDialogId, setOpenDialogId] = useState<string | null>(null);
+
   const onDelete = async (blueprintId: string) => {
-    if (!accessToken) {
-      toast.error("No access token found. Please log in again.");
-      return;
-    }
-    try {
-      await deleteBlueprintById(accessToken, blueprintId);
-      toast.success("Blueprint deleted successfully");
-      setOpenDialogId(null);
-    } catch (error) {
-      toast.error("Error deleting blueprint");
-      console.error(error);
-    }
+    await deleteBlueprint(blueprintId);
+    setOpenDialogId(null);
   };
   return (
     <div>
@@ -64,6 +52,8 @@ export const DeleteBlueprintButton = ({
             <Button
               variant="outline"
               className="cursor-pointer"
+              onClick={() => setOpenDialogId(null)}
+              disabled={loading}
             >
               Cancel
             </Button>
@@ -71,8 +61,9 @@ export const DeleteBlueprintButton = ({
               variant="destructive"
               onClick={() => onDelete(blueprintId)}
               className="cursor-pointer"
+              disabled={loading}
             >
-              Delete Blueprint
+              {loading ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
