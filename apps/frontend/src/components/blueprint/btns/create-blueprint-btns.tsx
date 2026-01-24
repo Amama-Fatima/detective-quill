@@ -1,37 +1,25 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { createBlueprint } from "@/lib/backend-calls/blueprints";
-import { useAuth } from "@/context/auth-context";
-import { toast } from "sonner";
 import { usePathname } from "next/navigation";
 import { Popover, PopoverTrigger, PopoverContent } from "../../ui/popover";
-
+import { useBlueprints } from "@/hooks/use-blueprints";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function CreateBlueprintBtns({
   projectId,
 }: {
   projectId: string;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
-  const { session } = useAuth();
-  const accessToken = session?.access_token || "";
+  const router = useRouter();
 
+  const { create, loading } = useBlueprints();
   const handleCreate = async (
     type: "character" | "timeline" | "item" | "location",
   ) => {
-    const result = await createBlueprint(accessToken, {
-      type,
-      project_id: projectId,
-      title: "Untitled",
-    });
-    if (result.success && result.data?.id) {
-      toast.success("Blueprint created successfully!");
-      router.push(`${pathname}/${result.data.id}?type=${type}`);
-    } else {
-      console.log("Failed to create blueprint:", result);
-      toast.error("Failed to create blueprint.");
+    const newBlueprint = await create(type, projectId);
+    if (newBlueprint) {
+      router.push(`${pathname}/${newBlueprint.id}?type=${type}`);
     }
   };
 
@@ -52,6 +40,7 @@ export default function CreateBlueprintBtns({
             <Button
               className="cursor-pointer"
               onClick={() => handleCreate("timeline")}
+              disabled={loading}
             >
               Timeline
             </Button>
@@ -67,6 +56,12 @@ export default function CreateBlueprintBtns({
             >
               Location
             </Button>
+
+            {loading && (
+              <div className="text-sm text-muted-foreground">
+                Creating and navigating to the new blueprint...
+              </div>
+            )}
           </div>
         </PopoverContent>
       </Popover>
