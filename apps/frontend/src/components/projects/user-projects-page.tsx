@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Briefcase } from "lucide-react";
 import { CreateProjectDto, Project } from "@detective-quill/shared-types";
-import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
+import CreateProjectDialog  from "@/components/projects/create-project-dialog";
 import { useProjects } from "@/hooks/use-projects";
 import ProjectsDisplay from "./project-display";
 
@@ -19,8 +19,7 @@ interface ProjectsPageClientProps {
   initialProjects: Project[];
   invitedProjects?: Project[];
 }
-
-export function ProjectsPageClient({
+export default function UserProjectsPage ({
   initialProjects,
   invitedProjects = [],
 }: ProjectsPageClientProps) {
@@ -150,7 +149,6 @@ export function ProjectsPageClient({
             </div>
           </div>
           {/* todo: add proper filteration for these, just filter on client side based on status, can do this inside the useProjects hook as well */}
-          {/* Content Tabs */}
           <TabsContent value="all">
             <ProjectsDisplay projects={projects} />
           </TabsContent>

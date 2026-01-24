@@ -4,7 +4,7 @@ interface WorkspaceErrorProps {
   error: string;
 }
 
-export const WorkspaceError: React.FC<WorkspaceErrorProps> = ({ error }) => {
+const WorkspaceError: React.FC<WorkspaceErrorProps> = ({ error }) => {
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="text-center">
@@ -14,3 +14,5 @@ export const WorkspaceError: React.FC<WorkspaceErrorProps> = ({ error }) => {
     </div>
   );
 };
+
+export default WorkspaceError;

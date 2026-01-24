@@ -1,4 +1,4 @@
-import { TextEditorContainer } from "@/components/editor-workspace/editor/text-editor-container";
+import TextEditorContainer from "@/components/editor-workspace/editor/text-editor-container";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import { fetchNode } from "@/lib/supabase-calls/editor-workspace";

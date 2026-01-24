@@ -23,13 +23,13 @@ interface RenameDialogProps {
   loading?: boolean;
 }
 
-export function RenameDialog({
+const RenameDialog = ({
   open,
   onOpenChange,
   onSubmit,
   node,
   loading = false,
-}: RenameDialogProps) {
+}: RenameDialogProps) => {
   const [name, setName] = useState("");
 
   // Set initial name when dialog opens
@@ -132,4 +132,6 @@ export function RenameDialog({
       </DialogContent>
     </Dialog>
   );
-}
+};
+
+export default RenameDialog;

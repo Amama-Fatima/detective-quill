@@ -4,7 +4,7 @@ import React from "react";
 import { Tag, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { getBlueprintTypeColor } from "@/lib/utils/blueprint-utils";
-import { DeleteBlueprintButton } from "./delete-blueprint-btn";
+import { DeleteBlueprintButton } from "./btns/delete-blueprint-btn";
 
 interface UserBlueprintsListProps {
   blueprints: Blueprint[];

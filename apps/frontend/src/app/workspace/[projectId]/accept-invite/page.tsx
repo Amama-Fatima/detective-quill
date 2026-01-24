@@ -1,4 +1,4 @@
-import AcceptRejectProject from "@/components/project-workspace/accept-reject-project";
+import AcceptRejectProject from "@/components/project-page/accept-reject-project";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { Metadata } from "next";
@@ -50,7 +50,7 @@ export default async function AcceptInvitePage({
   const code = await searchParams?.code;
   const { projectId } = await params;
   const query = new URLSearchParams(
-    Object.entries(searchParams ?? {}).filter(([, v]) => v != null) as any
+    Object.entries(searchParams ?? {}).filter(([, v]) => v != null) as any,
   ).toString();
   const callbackUrl = `/workspace/${projectId}/accept-invite${
     query ? `?${query}` : ""

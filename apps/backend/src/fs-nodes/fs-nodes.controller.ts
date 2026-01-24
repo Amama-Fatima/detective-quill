@@ -8,10 +8,6 @@ import {
   Delete,
   UseGuards,
   Request,
-  ForbiddenException,
-  InternalServerErrorException,
-  NotFoundException,
-  BadRequestException,
 } from "@nestjs/common";
 import { FsNodesService } from "./fs-nodes.service";
 import {
@@ -34,186 +30,93 @@ export class FsNodesController {
   @Post()
   async create(
     @Body() createNodeDto: CreateFsNodeDto,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<FsNode>> {
-    try {
-      const data = await this.fsNodesService.createNode(
-        createNodeDto,
-        req.user.id
-      );
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to add node: ${error.message}`
-      );
-    }
+    const data = await this.fsNodesService.createNode(
+      createNodeDto,
+      req.user.id,
+    );
+    return { success: true, data };
   }
 
   // todo: forbidden is not thrown in the service any where, add it there jab time milay
   @Get("project/:projectId/tree")
   async getProjectTree(
     @Param("projectId") projectId: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<FsNodeTreeResponse[]>> {
-    try {
-      const data = await this.fsNodesService.getProjectTree(
-        projectId,
-        req.user.id
-      );
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get project tree: ${error.message}`
-      );
-    }
+    const data = await this.fsNodesService.getProjectTree(
+      projectId,
+      req.user.id,
+    );
+    return { success: true, data };
   }
 
   @Get("project/:projectId/stats")
   async getProjectStats(
     @Param("projectId") projectId: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<any>> {
-    try {
-      const data = await this.fsNodesService.getProjectStats(
-        projectId,
-        req.user.id
-      );
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get project stats: ${error.message}`
-      );
-    }
+    const data = await this.fsNodesService.getProjectStats(
+      projectId,
+      req.user.id,
+    );
+    return { success: true, data };
   }
 
   @Get(":id/children")
   async getNodeChildren(
     @Param("id") id: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<FsNode[]>> {
-    try {
-      const data = await this.fsNodesService.getNodeChildren(id, req.user.id);
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get node children: ${error.message}`
-      );
-    }
+    const data = await this.fsNodesService.getNodeChildren(id, req.user.id);
+    return { success: true, data };
   }
 
   @Get(":id")
   async findOne(
     @Param("id") id: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<FsNode>> {
-    try {
-      const data = await this.fsNodesService.getNode(id, req.user.id);
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get node: ${error.message}`
-      );
-    }
+    const data = await this.fsNodesService.getNode(id, req.user.id);
+    return { success: true, data };
   }
 
   @Patch(":id")
   async update(
     @Param("id") id: string,
     @Body() updateNodeDto: UpdateFsNodeDto,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<FsNode>> {
-    try {
-      const data = await this.fsNodesService.updateNode(
-        id,
-        updateNodeDto,
-        req.user.id
-      );
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to update node: ${error.message}`
-      );
-    }
+    const data = await this.fsNodesService.updateNode(
+      id,
+      updateNodeDto,
+      req.user.id,
+    );
+    return { success: true, data };
   }
 
   @Delete(":id")
   async remove(
     @Param("id") id: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<DeleteResponse>> {
-    try {
-      const data = await this.fsNodesService.deleteNode(id, req.user.id);
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to delete node: ${error.message}`
-      );
-    }
+    const data = await this.fsNodesService.deleteNode(id, req.user.id);
+    return { success: true, data };
   }
 
   @Patch(":id/move")
   async move(
     @Param("id") id: string,
     @Body() moveData: { parent_id: string | null; sort_order: number },
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<FsNode>> {
-    try {
-      const data = await this.fsNodesService.moveNode(
-        id,
-        moveData.parent_id,
-        moveData.sort_order,
-        req.user.id
-      );
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to move node: ${error.message}`
-      );
-    }
+    const data = await this.fsNodesService.moveNode(
+      id,
+      moveData.parent_id,
+      moveData.sort_order,
+      req.user.id,
+    );
+    return { success: true, data };
   }
 }

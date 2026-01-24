@@ -2,12 +2,12 @@ import { Module } from "@nestjs/common";
 import { CommentsService } from "./comments.service";
 import { CommentsController } from "./comments.controller";
 import { SupabaseModule } from "../supabase/supabase.module";
-import { MembersService } from "src/members/members.service";
+import { MembersModule } from "../members/members.module";
 
 @Module({
-  imports: [SupabaseModule],
+  imports: [SupabaseModule, MembersModule],
   controllers: [CommentsController],
-  providers: [CommentsService, MembersService],
+  providers: [CommentsService],
   exports: [CommentsService],
 })
 export class CommentsModule {}

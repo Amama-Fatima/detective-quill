@@ -11,8 +11,6 @@ import {
   Query,
   ParseBoolPipe,
   DefaultValuePipe,
-  InternalServerErrorException,
-  NotFoundException,
   ForbiddenException,
   BadRequestException,
 } from "@nestjs/common";
@@ -30,7 +28,7 @@ import {
   ApiResponse,
 } from "@detective-quill/shared-types";
 
-@Controller("comments")
+@Controller(":projectId/comments")
 @UseGuards(AuthGuard)
 export class CommentsController {
   constructor(
@@ -43,7 +41,6 @@ export class CommentsController {
     @Body() createCommentDto: CreateCommentDto,
     @Request() req,
   ): Promise<ApiResponse<CommentResponse>> {
-    try {
       if (createCommentDto.start_offset > createCommentDto.end_offset) {
         throw new BadRequestException(
           "Start_offset cannot be greater than end_offset",
@@ -65,17 +62,9 @@ export class CommentsController {
       );
 
       return { success: true, data };
-    } catch (error) {
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to add comment: ${error.message}`,
-      );
-    }
   }
 
-  @Get(":projectId/:fsNodeId")
+  @Get(":fsNodeId")
   async findByNode(
     @Param("projectId") projectId: string,
     @Param("fsNodeId") fsNodeId: string,
@@ -83,7 +72,6 @@ export class CommentsController {
     @Query("includeResolved", new DefaultValuePipe(true), ParseBoolPipe)
     includeResolved: boolean,
   ): Promise<ApiResponse<CommentResponse[]>> {
-    try {
       const { hasAccess } = await this.membersService.verifyProjectAccess(
         projectId,
         req.user.id,
@@ -93,33 +81,20 @@ export class CommentsController {
         throw new ForbiddenException("You do not have access to this project.");
       }
 
-      console.log("getting");
       const data = await this.commentsService.findCommentsByNode(
         fsNodeId,
         req.user.id,
         includeResolved,
       );
       return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get comments: ${error.message}`,
-      );
-    }
   }
 
-  @Get(":projectId/:fsNodeId/stats")
+  @Get(":fsNodeId/stats")
   async getNodeStats(
     @Param("projectId") projectId: string,
     @Param("fsNodeId") fsNodeId: string,
     @Request() req,
   ): Promise<ApiResponse<CommentStats>> {
-    try {
       const { hasAccess } = await this.membersService.verifyProjectAccess(
         projectId,
         req.user.id,
@@ -131,26 +106,15 @@ export class CommentsController {
 
       const data = await this.commentsService.getCommentStats(fsNodeId);
       return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get comment stats: ${error.message}`,
-      );
-    }
+    
   }
 
-  @Get(":projectId/:id")
+  @Get(":id")
   async findOne(
     @Param("projectId") projectId: string,
     @Param("id") id: string,
     @Request() req,
   ): Promise<ApiResponse<CommentResponse>> {
-    try {
       const { hasAccess } = await this.membersService.verifyProjectAccess(
         projectId,
         req.user.id,
@@ -162,27 +126,16 @@ export class CommentsController {
 
       const data = await this.commentsService.findCommentById(id);
       return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get comment: ${error.message}`,
-      );
-    }
+    
   }
 
-  @Patch(":projectId/:id")
+  @Patch(":id")
   async update(
     @Param("projectId") projectId: string,
     @Param("id") id: string,
     @Body() updateCommentDto: UpdateCommentDto,
     @Request() req,
   ): Promise<ApiResponse<CommentResponse>> {
-    try {
       const { hasAccess, role } = await this.membersService.verifyProjectAccess(
         projectId,
         req.user.id,
@@ -217,26 +170,15 @@ export class CommentsController {
         updateCommentDto,
       );
       return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to update comment: ${error.message}`,
-      );
-    }
+    
   }
 
-  @Delete(":projectId/:id")
+  @Delete(":id")
   async remove(
     @Param("projectId") projectId: string,
     @Param("id") id: string,
     @Request() req,
   ): Promise<ApiResponse<DeleteResponse>> {
-    try {
       const { hasAccess, role } = await this.membersService.verifyProjectAccess(
         projectId,
         req.user.id,
@@ -260,26 +202,15 @@ export class CommentsController {
 
       const data = await this.commentsService.deleteComment(id);
       return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to delete comment: ${error.message}`,
-      );
-    }
+  
   }
 
-  @Post("/:projectId/:id/resolve")
+  @Post(":id/resolve")
   async resolve(
     @Param("projectId") projectId: string,
     @Param("id") id: string,
     @Request() req,
   ): Promise<ApiResponse<CommentResponse>> {
-    try {
       const { hasAccess, role } = await this.membersService.verifyProjectAccess(
         projectId,
         req.user.id,
@@ -307,17 +238,7 @@ export class CommentsController {
         is_resolved: true,
       });
       return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to resolve comment: ${error.message}`,
-      );
-    }
+   
   }
 
   // @Post("/:projectId/:id/unresolve")

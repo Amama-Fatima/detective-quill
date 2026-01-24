@@ -16,7 +16,7 @@ interface ProjectCardProps {
   project: Project;
 }
 
-const ProjectCard = ({ project }: ProjectCardProps) => {
+export default function ProjectCard({ project }: ProjectCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -57,7 +57,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
               </CardTitle>
               <Badge
                 className={`text-xs case-file mt-1 ${getStatusColor(
-                  project.status
+                  project.status,
                 )}`}
               >
                 {getStatusIcon(project.status)}
@@ -94,6 +94,4 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
       </CardContent>
     </Card>
   );
-};
-
-export default ProjectCard;
+}

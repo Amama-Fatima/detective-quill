@@ -6,9 +6,10 @@ import { InvitationsModule } from "../invitations/invitations.module";
 import { QueueModule } from "../queue/queue.module";
 import { WorkerEmailService } from "./worker-email.service";
 import { ConfigModule } from "@nestjs/config";
+import { ProjectsModule } from "src/projects/projects.module";
 
 @Module({
-  imports: [SupabaseModule, InvitationsModule, QueueModule, ConfigModule],
+  imports: [SupabaseModule, InvitationsModule, QueueModule, ConfigModule, ProjectsModule],
   controllers: [EmailController],
   providers: [EmailService, WorkerEmailService],
   exports: [EmailService, WorkerEmailService],

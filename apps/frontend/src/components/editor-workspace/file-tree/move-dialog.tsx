@@ -30,14 +30,14 @@ interface MoveDialogProps {
   loading?: boolean;
 }
 
-export function MoveDialog({
+const MoveDialog = ({
   open,
   onOpenChange,
   onSubmit,
   node,
   availableFolders,
   loading = false,
-}: MoveDialogProps) {
+}: MoveDialogProps) => {
   const [selectedParent, setSelectedParent] = useState<string>("");
 
   // Set initial parent when dialog opens
@@ -187,3 +187,5 @@ export function MoveDialog({
     </Dialog>
   );
 }
+
+export default MoveDialog;

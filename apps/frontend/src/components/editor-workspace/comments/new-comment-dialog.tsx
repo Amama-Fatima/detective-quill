@@ -38,7 +38,7 @@ interface NewCommentDialogProps {
   nodeId: string;
 }
 
-export function NewCommentDialog({
+export default function NewCommentDialog ({
   open,
   onOpenChange,
   selectedText,

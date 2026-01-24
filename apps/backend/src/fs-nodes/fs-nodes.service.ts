@@ -23,19 +23,19 @@ export class FsNodesService {
   constructor(
     private supabaseService: SupabaseService,
     private projectsService: ProjectsService,
-    private queueService: QueueService
+    private queueService: QueueService,
   ) {}
 
   async createNode(
     createNodeDto: CreateFsNodeDto,
-    userId: string
+    userId: string,
   ): Promise<FsNode> {
     const supabase = this.supabaseService.client;
 
     // Verify project ownership
-    await this.projectsService.findProjectById(
+    await this.projectsService.verifyProjectOwnership(
       createNodeDto.project_id,
-      userId
+      userId,
     );
 
     // If parent_id is provided, verify it exists and belongs to the same project
@@ -52,7 +52,7 @@ export class FsNodesService {
 
       if (parent.project_id !== createNodeDto.project_id) {
         throw new BadRequestException(
-          "Parent node belongs to different project"
+          "Parent node belongs to different project",
         );
       }
 
@@ -98,11 +98,11 @@ export class FsNodesService {
       throw new BadRequestException(`Failed to create node: ${error.message}`);
     }
 
-    // 🎯 NEW: Update global sequences after creating a file (scene)
+    // NEW: Update global sequences after creating a file
     if (data.node_type === "file") {
       // Run this in background (don't await to avoid slowing down the response)
       this.updateGlobalSequences(data.project_id, supabase).catch((err) =>
-        console.error("Background global sequence update failed:", err)
+        console.error("Background global sequence update failed:", err),
       );
     }
 
@@ -112,7 +112,7 @@ export class FsNodesService {
   // ✅ Use the project_file_tree view instead of manual tree building
   async getProjectTree(
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<FsNodeTreeResponse[]> {
     const supabase = this.supabaseService.client;
 
@@ -129,7 +129,7 @@ export class FsNodesService {
 
     if (error) {
       throw new BadRequestException(
-        `Failed to fetch project tree: ${error.message}`
+        `Failed to fetch project tree: ${error.message}`,
       );
     }
 
@@ -164,7 +164,7 @@ export class FsNodesService {
         `
         *,
         projects!inner(author_id)
-      `
+      `,
       )
       .eq("id", nodeId)
       .eq("projects.author_id", userId)
@@ -176,11 +176,11 @@ export class FsNodesService {
 
     return node;
   }
-  // todo: try to separate move and update logic
+  // todo: try to separate move and update logic if possible
   async updateNode(
     nodeId: string,
     updateNodeDto: UpdateFsNodeDto,
-    userId: string
+    userId: string,
   ): Promise<FsNode> {
     const supabase = this.supabaseService.client;
 
@@ -241,7 +241,7 @@ export class FsNodesService {
         node,
         updateNodeDto.content,
         userId,
-        supabase
+        supabase,
       );
     }
     return node;
@@ -259,12 +259,12 @@ export class FsNodesService {
       // Get all children recursively using the database function
       const { data: allChildren, error: childrenError } = await supabase.rpc(
         "get_node_children",
-        { node_uuid: nodeId }
+        { node_uuid: nodeId },
       );
 
       if (childrenError) {
         throw new Error(
-          `Failed to check folder contents: ${childrenError.message}`
+          `Failed to check folder contents: ${childrenError.message}`,
         );
       }
 
@@ -274,7 +274,7 @@ export class FsNodesService {
       if (children.length > 0) {
         // Sort by depth descending to delete deepest items first
         const sortedChildren = children.sort(
-          (a, b) => (b.depth || 0) - (a.depth || 0)
+          (a, b) => (b.depth || 0) - (a.depth || 0),
         );
 
         for (const child of sortedChildren) {
@@ -302,7 +302,7 @@ export class FsNodesService {
     nodeId: string,
     newParentId: string | null,
     newSortOrder: number,
-    userId: string
+    userId: string,
   ): Promise<FsNode> {
     // ✅ updateNode will handle path/depth recalculation via triggers
     return this.updateNode(
@@ -311,14 +311,14 @@ export class FsNodesService {
         parent_id: newParentId === null ? undefined : newParentId,
         sort_order: newSortOrder,
       },
-      userId
+      userId,
     );
   }
 
   // ✅ NEW: Get project statistics using the view
   async getProjectStats(
     projectId: string,
-    userId: string
+    userId: string,
   ): Promise<{
     totalFiles: number;
     totalFolders: number;
@@ -414,7 +414,7 @@ export class FsNodesService {
     nodeData: FsNode,
     content: string,
     userId: string,
-    supabase: any
+    supabase: any,
   ): Promise<void> {
     // Clear existing timeout if any
     const existingTimeout = this.sceneTimeouts.get(nodeId);
@@ -452,20 +452,20 @@ export class FsNodesService {
           console.error(`Failed to queue embedding job for ${nodeId}:`, error);
         }
       },
-      10 * 60 * 1000
+      10 * 60 * 1000,
     ); // 10 minutes = 600,000 ms
 
     // Store the timeout
     this.sceneTimeouts.set(nodeId, timeout);
 
     console.log(
-      `⏰ Scene update tracked: ${nodeData.name} (embedding job in 10 min if no more updates)`
+      `⏰ Scene update tracked: ${nodeData.name} (embedding job in 10 min if no more updates)`,
     );
   }
 
   private async getParentInfo(
     nodeData: FsNode,
-    supabase: any
+    supabase: any,
   ): Promise<{
     chapter_name?: string;
     chapter_sort_order?: number;
@@ -504,7 +504,7 @@ export class FsNodesService {
   // todo: shift this to a cloud function that is run when ever a new node is created, deleted or moved
   private async updateGlobalSequences(
     projectId: string,
-    supabase: any
+    supabase: any,
   ): Promise<void> {
     try {
       // Get all chapters in order

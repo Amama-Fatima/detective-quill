@@ -1,4 +1,4 @@
-import WorkspaceMainBody from "@/components/project-workspace/project-workspace-main";
+import WorkspaceMainBody from "@/components/project-page/project-workspace-main";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -51,12 +51,12 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
 
   let { members, error: membersError } = await getProjectMembers(
     projectId,
-    supabase
+    supabase,
   );
 
   let { invitations, error: invitationsError } = await getProjectInvitations(
     projectId,
-    supabase
+    supabase,
   );
 
   if (membersError) {

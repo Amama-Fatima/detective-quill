@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { Trash, MailX } from "lucide-react";
 import { deleteInvitation } from "@/lib/backend-calls/invitations";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
@@ -22,11 +22,11 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
       await deleteInvitation(invitation.invite_code, projectId, accessToken!);
 
       setInvitations(
-        invitations.filter((inv) => inv.email != invitation.email)
+        invitations.filter((inv) => inv.email != invitation.email),
       );
 
       const updatedNotAllowedEmails = notAllowedEmails.filter(
-        (email) => email !== invitation.email
+        (email) => email !== invitation.email,
       );
       setNotAllowedEmails(updatedNotAllowedEmails);
       toast.success("Invitation deleted successfully");

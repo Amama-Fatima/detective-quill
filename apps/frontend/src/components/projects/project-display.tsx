@@ -6,7 +6,7 @@ interface ProjectsDisplayProps {
   projects: any[];
 }
 
-const ProjectsDisplay = ({ projects }: ProjectsDisplayProps) => {
+export default function ProjectsDisplay({ projects }: ProjectsDisplayProps) {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
   if (projects.length === 0) {
@@ -42,6 +42,4 @@ const ProjectsDisplay = ({ projects }: ProjectsDisplayProps) => {
       ))}
     </div>
   );
-};
-
-export default ProjectsDisplay;
+}

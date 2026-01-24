@@ -45,6 +45,7 @@ export async function createBlueprint(
   );
 
   if (!response.success) {
+    console.log(response);
     throw new Error(`Failed to create user blueprint: ${response.error}`);
   }
   return response;
@@ -55,6 +56,7 @@ export async function updateBlueprintById(
   blueprintId: string,
   updateData: UpdateBlueprintDto
 ): Promise<ApiResponse<Blueprint>> {
+  console.log("Updating blueprint:");
   const response = await makeAuthenticatedRequest<Blueprint>(
     `/blueprints/${blueprintId}`,
     accessToken,
@@ -63,6 +65,8 @@ export async function updateBlueprintById(
       body: JSON.stringify(updateData),
     }
   );
+
+  console.log("Update response:", response);
 
   if (!response.success) {
     throw new Error(`Failed to update user blueprint: ${response.error}`);

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 
 import React from "react";
 
-const ResetFormStates = () => {
+export default function ResetFormStates() {
   const [success, setSuccess] = useState(false);
   const [isValidSession, setIsValidSession] = useState<boolean | null>(null);
   const searchParams = useSearchParams();
@@ -56,8 +56,6 @@ const ResetFormStates = () => {
     return <ResetPasswordSuccess />;
   }
 };
-
-export default ResetFormStates;
 
 function ResetPasswordLoading() {
   return (

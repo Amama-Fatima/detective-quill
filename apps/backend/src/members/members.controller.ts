@@ -1,4 +1,4 @@
-import { Controller, Param, Delete, UseGuards, Request, NotFoundException, InternalServerErrorException, ForbiddenException } from "@nestjs/common";
+import { Controller, Param, Delete, UseGuards, Request } from "@nestjs/common";
 import { MembersService } from "./members.service";
 import { AuthGuard } from "../auth/auth.guard";
 import type { ApiResponse } from "@detective-quill/shared-types";
@@ -13,25 +13,13 @@ export class MembersController {
   async removeProjectMember(
     @Param("projectId") projectId: string,
     @Param("memberId") memberId: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<void>> {
-    try {
-      await this.membersService.removeProjectMember(
-        projectId,
-        memberId,
-        req.user.id
-      );
-      return { success: true, message: "Member removed successfully" };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to remove member: ${error.message}`
-      );
-    }
+    await this.membersService.removeProjectMember(
+      projectId,
+      memberId,
+      req.user.id,
+    );
+    return { success: true, message: "Member removed successfully" };
   }
 }

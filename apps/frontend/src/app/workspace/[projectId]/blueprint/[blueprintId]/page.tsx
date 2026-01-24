@@ -54,7 +54,6 @@ export default async function CreateBlueprintPage({
   }
   const { blueprint_cards, error: cardsError } = await getAllCardsOfBlueprint(
     blueprintId,
-    userId,
     supabase
   );
 
@@ -79,6 +78,7 @@ export default async function CreateBlueprintPage({
           prevBlueprintCards={blueprint_cards}
           isOwner={isOwner}
           isActive={isActive}
+          projectId={String(blueprint.project_id)}
         />
       </div>
     </Suspense>

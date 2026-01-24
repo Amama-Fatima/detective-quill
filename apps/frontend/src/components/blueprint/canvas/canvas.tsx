@@ -33,6 +33,7 @@ interface CanvasProps {
   prevBlueprintCards: BlueprintCard[] | null;
   isOwner: boolean;
   isActive: boolean;
+  projectId: string;
 }
 
 export default function Canvas({
@@ -42,6 +43,7 @@ export default function Canvas({
   prevBlueprintCards,
   isOwner,
   isActive,
+  projectId,
 }: CanvasProps) {
   const [nodes, setNodes] = useState<Node[]>(() =>
     prevBlueprintCards
@@ -51,9 +53,9 @@ export default function Canvas({
           (id, newTitle) => updateNodeTitle(id, newTitle),
           (id) => deleteCard(id),
           isOwner,
-          isActive
+          isActive,
         )
-      : []
+      : [],
   );
 
   const [deletedCards, setDeletedCards] = useState<string[]>([]);
@@ -65,8 +67,15 @@ export default function Canvas({
 
   // Warn user if they try to refresh/close the tab when there are unsaved changes
   useEffect(() => {
+    console.log("is dirty effect", isDirty, isOwner);
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!isDirty && !isOwner) return;
+      console.log("isDirty:", isDirty, "isOwner:", isOwner);
+      if (isOwner) {
+        if (!isDirty) {
+          console.log("No unsaved changes or not owner, allowing unload.");
+          return;
+        }
+      }
       e.preventDefault();
       return "";
     };
@@ -90,8 +99,8 @@ export default function Canvas({
       nds.map((node) =>
         node.id === id
           ? { ...node, data: { ...node.data, content: newContent } }
-          : node
-      )
+          : node,
+      ),
     );
   }, []);
 
@@ -100,8 +109,8 @@ export default function Canvas({
       nds.map((node) =>
         node.id === id
           ? { ...node, data: { ...node.data, title: newTitle } }
-          : node
-      )
+          : node,
+      ),
     );
   }, []);
 
@@ -151,28 +160,39 @@ export default function Canvas({
     try {
       // create new cards
       if (createList.length > 0) {
-        await createBlueprintCard(accessToken!, blueprintId, createListWoId);
+        await createBlueprintCard(
+          accessToken!,
+          blueprintId,
+          createListWoId,
+          projectId,
+        );
       }
 
       // update existing cards
       if (updateList.length > 0) {
         await Promise.all(
           updateList.map((card) =>
-            updateBlueprintCard(accessToken!, blueprintId, String(card.id), {
-              content: card.content,
-              title: card.title,
-              position_x: card.position_x,
-              position_y: card.position_y,
-            })
-          )
+            updateBlueprintCard(
+              accessToken!,
+              blueprintId,
+              String(card.id),
+              {
+                content: card.content,
+                title: card.title,
+                position_x: card.position_x,
+                position_y: card.position_y,
+              },
+              projectId,
+            ),
+          ),
         );
       }
 
       if (deletedCards.length > 0) {
         await Promise.all(
           deletedCards.map((cardId) =>
-            deleteBlueprintCard(accessToken!, blueprintId, cardId)
-          )
+            deleteBlueprintCard(accessToken!, blueprintId, cardId, projectId),
+          ),
         );
         setDeletedCards([]); // clear after save
       }

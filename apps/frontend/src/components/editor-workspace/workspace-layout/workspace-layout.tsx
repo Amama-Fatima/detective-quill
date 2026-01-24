@@ -1,7 +1,7 @@
 import React from "react";
-import { WorkspaceError } from "./workspace-error";
+import WorkspaceError from "./workspace-error";
 import { getEditorWorkspaceData } from "@/lib/supabase-calls/editor-workspace";
-import { WorkspaceLayoutClientWrapper } from "./workspace-layout-client-wrapper";
+import WorkspaceLayoutClientWrapper from "./workspace-layout-client-wrapper";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
@@ -12,7 +12,7 @@ interface WorkspaceLayoutProps {
   nodeId?: string;
 }
 
-export async function WorkspaceLayout({
+export default async function WorkspaceLayout({
   children,
   projectId,
   nodeId,
@@ -29,7 +29,7 @@ export async function WorkspaceLayout({
   const userId = user.id;
   const { isActive, author_id } = await getProjectStatusAndAuthor(
     projectId,
-    supabase
+    supabase,
   );
 
   const isOwner = author_id === userId;
@@ -37,7 +37,7 @@ export async function WorkspaceLayout({
     const { project, nodes, currentNode } = await getEditorWorkspaceData(
       supabase,
       projectId,
-      nodeId
+      nodeId,
     );
 
     return (

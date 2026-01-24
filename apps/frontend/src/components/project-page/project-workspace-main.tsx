@@ -5,14 +5,14 @@ import Link from "next/link";
 import { Clock } from "lucide-react";
 import { NAV_ITEMS } from "@/constants/project-constants";
 import ChangeStateDropDown from "./change-state-dropdown";
-import InviteMembersDialog from "./invite-memebers-dialog";
+import InviteMembersDialog from "./members/invite-memebers-dialog";
 import {
   Project,
   ProjectMember,
   Invitation,
 } from "@detective-quill/shared-types";
-import MembersTable from "./members-table";
-import PendingInvitations from "./pending-invitations";
+import MembersTable from "./members/members-table";
+import PendingInvitations from "./members/pending-invitations";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 
 interface WorkspaceMainBodyProps {
@@ -22,12 +22,12 @@ interface WorkspaceMainBodyProps {
   invitations: Invitation[] | [];
 }
 
-const WorkspaceMainBody = ({
+export default function WorkspaceMainBody({
   project,
   userId,
   members,
   invitations,
-}: WorkspaceMainBodyProps) => {
+}: WorkspaceMainBodyProps) {
   const navItems = NAV_ITEMS.map((item) => ({
     ...item,
     href: item.href.replace("123", project.id),
@@ -71,7 +71,6 @@ const WorkspaceMainBody = ({
 
   return (
     <div className="min-h-[80vh] px-10 py-6">
-      {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
           <h4 className="font-bold text-xl">Description</h4>
@@ -88,7 +87,6 @@ const WorkspaceMainBody = ({
           </p>
         </div>
 
-        {/* Action Buttons */}
         {isOwner && (
           <div className="flex items-center gap-4">
             <ChangeStateDropDown
@@ -106,7 +104,6 @@ const WorkspaceMainBody = ({
         )}
       </div>
 
-      {/* Navigation */}
       <nav className="flex flex-wrap gap-4 mb-8 justify-center">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -128,7 +125,6 @@ const WorkspaceMainBody = ({
         })}
       </nav>
 
-      {/* Members Table */}
       <MembersTable
         isOwner={isOwner}
         initialMembers={members}
@@ -140,6 +136,4 @@ const WorkspaceMainBody = ({
       {isOwner && isActive && <PendingInvitations projectId={project.id} />}
     </div>
   );
-};
-
-export default WorkspaceMainBody;
+}

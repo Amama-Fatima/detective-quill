@@ -6,10 +6,10 @@ interface BreadcrumbsProps {
   filePath?: string;
 }
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+export default function Breadcrumbs({
   projectName,
   filePath,
-}) => {
+}: BreadcrumbsProps) {
   if (!filePath) {
     return (
       <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -31,7 +31,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
             className={cn(
               index === pathParts.length - 1
                 ? "text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground cursor-pointer"
+                : "text-muted-foreground hover:text-foreground cursor-pointer",
             )}
           >
             {part}
@@ -40,4 +40,4 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
       ))}
     </div>
   );
-};
+}

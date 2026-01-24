@@ -30,7 +30,7 @@ interface CreateChapterDialogProps {
   folders?: Array<{ id: string; name: string }>; // Available folders
 }
 
-export function CreateChapterDialog({
+const CreateChapterDialog = ({
   open,
   onOpenChange,
   onSubmit,
@@ -42,7 +42,7 @@ export function CreateChapterDialog({
     { id: "characters", name: "Character Development" },
     { id: "world-building", name: "World Building" },
   ],
-}: CreateChapterDialogProps) {
+}: CreateChapterDialogProps) => {
   const [title, setTitle] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<string>(
     folderName ? folders.find((f) => f.name === folderName)?.id || "" : ""
@@ -199,3 +199,6 @@ export function CreateChapterDialog({
     </Dialog>
   );
 }
+
+
+export default CreateChapterDialog;

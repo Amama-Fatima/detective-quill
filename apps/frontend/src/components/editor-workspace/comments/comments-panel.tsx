@@ -23,7 +23,7 @@ interface CommentsPanelProps {
   toggleResolve: (commentId: string) => Promise<CommentResponse | null>;
 }
 
-export function CommentsPanel({
+export default function CommentsPanel({
   comments,
   isLoading,
   stats,

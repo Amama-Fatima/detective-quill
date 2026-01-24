@@ -1,15 +1,15 @@
 import React from "react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 
 interface SidebarToggleProps {
   isOpen: boolean;
   onToggle: () => void;
 }
 
-export const SidebarToggle: React.FC<SidebarToggleProps> = ({
+export default function SidebarToggle({
   isOpen,
   onToggle,
-}) => {
+}: SidebarToggleProps) {
   return (
     <Button
       variant="ghost"
@@ -20,4 +20,4 @@ export const SidebarToggle: React.FC<SidebarToggleProps> = ({
       {isOpen ? "←" : "→"}
     </Button>
   );
-};
+}

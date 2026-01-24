@@ -11,9 +11,6 @@ import {
   Query,
   ParseBoolPipe,
   DefaultValuePipe,
-  ForbiddenException,
-  InternalServerErrorException,
-  NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
 import { ProjectsService } from "./projects.service";
@@ -34,184 +31,92 @@ import {
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
+  // todo: access checks are made inside the service methods but try to use them in proper middlewares
   @Post()
   async create(
     @Body() createProjectDto: CreateProjectDto,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<Project>> {
-    try {
-      const data = await this.projectsService.createProject(
-        createProjectDto,
-        req.user.id
-      );
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to create project: ${error.message}`
-      );
-    }
+    const data = await this.projectsService.createProject(
+      createProjectDto,
+      req.user.id,
+    );
+    return { success: true, data };
   }
 
   @Get()
   async findAll(
     @Request() req,
     @Query("includeInactive", new DefaultValuePipe(false), ParseBoolPipe)
-    includeInactive: boolean
+    includeInactive: boolean,
   ): Promise<ApiResponse<Project[]>> {
-    try {
-      const data = await this.projectsService.findAllUserProjects(
-        req.user.id,
-        includeInactive
-      );
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get projects: ${error.message}`
-      );
-    }
+    const data = await this.projectsService.findAllUserProjects(
+      req.user.id,
+      includeInactive,
+    );
+    return { success: true, data };
   }
 
   @Get(":id")
   async findOne(
     @Param("id") id: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<Project>> {
-    try {
-      const data = await this.projectsService.findProjectById(id, req.user.id);
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get project: ${error.message}`
-      );
-    }
+    const data = await this.projectsService.findProjectById(id, req.user.id);
+    return { success: true, data };
   }
 
   @Get(":id/stats")
   async getStats(
     @Param("id") id: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<ProjectStats>> {
-    try {
-      const data = await this.projectsService.getProjectStats(id, req.user.id);
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to get project stats: ${error.message}`
-      );
-    }
+    const data = await this.projectsService.getProjectStats(id, req.user.id);
+    return { success: true, data };
   }
 
   @Patch(":id")
   async update(
     @Param("id") id: string,
     @Body() updateProjectDto: UpdateProjectDto,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<Project>> {
-    try {
-      const data = await this.projectsService.updateProjectInfo(
-        id,
-        updateProjectDto,
-        req.user.id
-      );
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to update project: ${error.message}`
-      );
-    }
+    const data = await this.projectsService.updateProjectInfo(
+      id,
+      updateProjectDto,
+      req.user.id,
+    );
+    return { success: true, data };
   }
 
   @Patch(":id/status")
   async changeStatus(
     @Param("id") id: string,
     @Body("status") status: "active" | "completed" | "archived",
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<Project>> {
     if (!["active", "completed", "archived"].includes(status)) {
       throw new BadRequestException("Invalid status value");
     }
-    try {
-      await this.projectsService.changeProjectStatus(id, status, req.user.id);
-      return { success: true, message: "Project status updated successfully" };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to update project status: ${error.message}`
-      );
-    }
+    await this.projectsService.changeProjectStatus(id, status, req.user.id);
+    return { success: true, message: "Project status updated successfully" };
   }
 
   @Delete(":id")
   async remove(
     @Param("id") id: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<DeleteResponse>> {
-    try {
-      const data = await this.projectsService.deleteProject(id, req.user.id);
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to delete project: ${error.message}`
-      );
-    }
+    const data = await this.projectsService.deleteProject(id, req.user.id);
+    return { success: true, data, message: "Project deleted successfully" };
   }
 
   @Post(":id/restore")
   async restore(
     @Param("id") id: string,
-    @Request() req
+    @Request() req,
   ): Promise<ApiResponse<Project>> {
-    try {
-      const data = await this.projectsService.restoreProject(id, req.user.id);
-      return { success: true, data };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      if (error instanceof ForbiddenException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to restore project: ${error.message}`
-      );
-    }
+    const data = await this.projectsService.restoreProject(id, req.user.id);
+    return { success: true, data };
   }
 }

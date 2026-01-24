@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useFocusModeStore } from "@/stores/use-focus-mode-store";
-import { WorkspaceSidebar } from "@/components/editor-workspace/workspace-sidebar";
-import { WorkspaceHeaderBar } from "@/components/editor-workspace/workspace-header-bar";
+import WorkspaceSidebar from "@/components/editor-workspace/workspace-layout/workspace-sidebar";
+import WorkspaceHeaderBar from "@/components/editor-workspace/workspace-layout/workspace-header-bar";
 import { countNodes } from "@/lib/utils/utils";
 import {
   FsNodeTreeResponse,
@@ -23,7 +23,7 @@ interface WorkspaceLayoutClientWrapperProps {
   isOwner: boolean;
 }
 
-export function WorkspaceLayoutClientWrapper({
+export default function WorkspaceLayoutClientWrapper({
   children,
   project,
   initialNodes,
@@ -33,15 +33,12 @@ export function WorkspaceLayoutClientWrapper({
   isActive,
   isOwner,
 }: WorkspaceLayoutClientWrapperProps) {
-  // Client-side state for interactive features
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [nodes, setNodes] = useState<FsNodeTreeResponse[]>(initialNodes);
   const { session } = useAuth();
 
-  // Global focus mode state
   const focusMode = useFocusModeStore((state) => state.focusMode);
 
-  // Event handlers
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -60,7 +57,6 @@ export function WorkspaceLayoutClientWrapper({
 
   return (
     <div className="flex h-screen w-full bg-background">
-      {/* Sidebar */}
       {showSidebar && (
         <WorkspaceSidebar
           projectName={project.title}
@@ -76,9 +72,7 @@ export function WorkspaceLayoutClientWrapper({
         />
       )}
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Header Bar */}
         {showHeader && (
           <WorkspaceHeaderBar
             sidebarOpen={sidebarOpen}
@@ -89,7 +83,6 @@ export function WorkspaceLayoutClientWrapper({
           />
         )}
 
-        {/* Children */}
         <div className="flex-1">{children}</div>
       </main>
     </div>

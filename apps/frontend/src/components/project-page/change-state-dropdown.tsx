@@ -12,13 +12,13 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { useState } from "react";
 
-const ChangeStateDropDown = ({
+export default function ChangeStateDropDown({
   projectId,
   status,
 }: {
   projectId: string;
   status: "active" | "completed" | "archived";
-}) => {
+}) {
   const [loading, setLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status);
   const { session } = useAuth();
@@ -83,5 +83,3 @@ const ChangeStateDropDown = ({
     </div>
   );
 };
-
-export default ChangeStateDropDown;
