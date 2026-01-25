@@ -1,8 +1,4 @@
-import {
-  ApiResponse,
-  ProjectMember,
-  AddMemberDto,
-} from "@detective-quill/shared-types";
+import { ApiResponse } from "@detective-quill/shared-types";
 import { EmailSendingApiRequestDto } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -11,7 +7,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
   accessToken: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -25,7 +21,7 @@ async function makeAuthenticatedRequest<T>(
   if (!response.ok) {
     console.log("Response not ok:", response);
     throw new Error(
-      `API request failed: ${response.status} ${response.statusText}`
+      `API request failed: ${response.status} ${response.statusText}`,
     );
   }
 
@@ -34,7 +30,7 @@ async function makeAuthenticatedRequest<T>(
 
 export async function inviteProjectMembers(
   data: EmailSendingApiRequestDto,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<void>> {
   console.log("Inviting project members with data:", data);
   const response = await makeAuthenticatedRequest<void>(
@@ -43,7 +39,7 @@ export async function inviteProjectMembers(
     {
       method: "POST",
       body: JSON.stringify(data),
-    }
+    },
   );
 
   return response;
@@ -60,6 +56,6 @@ export async function removeProjectMember(
     accessToken,
     {
       method: "DELETE",
-    }
+    },
   );
 }

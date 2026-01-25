@@ -9,11 +9,11 @@ interface BetaReaderEmailsState {
 }
 
 export const useBetaReaderEmailsStore = create<BetaReaderEmailsState>(
-  (set, get) => ({
+  (set) => ({
     invitations: [],
     notAllowedEmails: [],
     setInvitations: (invitations: Invitation[]) => set({ invitations }),
     setNotAllowedEmails: (emails: string[]) =>
       set({ notAllowedEmails: emails }),
-  })
+  }),
 );

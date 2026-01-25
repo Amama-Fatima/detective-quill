@@ -6,7 +6,6 @@ export interface DetectiveProfile {
   bio: string;
   avatar_url: string;
   detective_rank: string;
-  joined_date: string;
   writing_stats: {
     total_words: number;
     completed_stories: number;

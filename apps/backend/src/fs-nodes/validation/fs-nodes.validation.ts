@@ -9,7 +9,10 @@ import {
 import {
   CreateFsNodeDto as ICreateFsNodeDto,
   UpdateFsNodeDto as IUpdateFsNodeDto,
+  UpdateFileContentDto as IUpdateFileContentDto,
+  UpdateNodeMetadataDto as IUpdateNodeMetadataDto,
 } from "@detective-quill/shared-types";
+import e from "express";
 
 export class CreateFsNodeDto implements ICreateFsNodeDto {
   @IsUUID()
@@ -56,6 +59,30 @@ export class UpdateFsNodeDto implements IUpdateFsNodeDto {
   @IsString()
   @IsOptional()
   content?: string;
+
+  @IsUUID()
+  @IsOptional()
+  parent_id?: string;
+
+  @IsNumber()
+  @IsOptional()
+  sort_order?: number;
+}
+
+export class UpdateFileContentDto implements IUpdateFileContentDto {
+  @IsString()
+  @IsNotEmpty()
+  content: string;
+}
+
+export class UpdateNodeMetadataDto implements IUpdateNodeMetadataDto {
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
 
   @IsUUID()
   @IsOptional()

@@ -8,30 +8,37 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Briefcase } from "lucide-react";
 import { CreateProjectDto, Project } from "@detective-quill/shared-types";
-import CreateProjectDialog  from "@/components/projects/create-project-dialog";
+import CreateProjectDialog from "@/components/projects/create-project-dialog";
 import { useProjects } from "@/hooks/use-projects";
 import ProjectsDisplay from "./project-display";
 
 type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
 interface ProjectsPageClientProps {
-  user: User;
   initialProjects: Project[];
   invitedProjects?: Project[];
 }
-export default function UserProjectsPage ({
+export default function UserProjectsPage({
   initialProjects,
   invitedProjects = [],
 }: ProjectsPageClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { projects, creating, createProject } = useProjects([...initialProjects, ...invitedProjects]);
+  const { projects, creating, createProject } = useProjects([
+    ...initialProjects,
+    ...invitedProjects,
+  ]);
 
-  const activeProjects = projects.filter((project) => project.status === "active"); 
-  const completedProjects = projects.filter((project) => project.status === "completed");
-  const archivedProjects = projects.filter((project) => project.status === "archived");
-
+  const activeProjects = projects.filter(
+    (project) => project.status === "active",
+  );
+  const completedProjects = projects.filter(
+    (project) => project.status === "completed",
+  );
+  const archivedProjects = projects.filter(
+    (project) => project.status === "archived",
+  );
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,7 +52,7 @@ export default function UserProjectsPage ({
     if (
       initialFilter &&
       ["all", "active", "completed", "archived", "invited"].includes(
-        initialFilter
+        initialFilter,
       )
     ) {
       setFilter(initialFilter);

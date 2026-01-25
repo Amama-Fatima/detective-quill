@@ -18,7 +18,7 @@ import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react";
 import { SignUpFormValues, signUpSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { getPasswordStrength } from "@/lib/utils/utils";
-import ConfirmEmailInstruction from "../confirm-email-instruction";
+import ConfirmEmailInstruction from "../instructions/confirm-email-instruction";
 
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
