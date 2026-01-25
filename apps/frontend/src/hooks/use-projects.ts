@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import {
   Project,
@@ -7,7 +7,6 @@ import {
 } from "@detective-quill/shared-types";
 import {
   createProject,
-  getProjects,
   deleteProject,
   updateProject,
 } from "@/lib/backend-calls/projects";
@@ -16,7 +15,7 @@ import { toast } from "sonner";
 export function useProjects(initialProjects?: Project[]) {
   const { session } = useAuth();
   const [projects, setProjects] = useState<Project[]>(initialProjects || []);
-  const [loading, setLoading] = useState(!initialProjects);
+  const [loading] = useState(!initialProjects);
   const [creating, setCreating] = useState(false);
 
   // const fetchProjects = async () => {
@@ -65,7 +64,7 @@ export function useProjects(initialProjects?: Project[]) {
 
   const updateExistingProject = async (
     projectId: string,
-    data: UpdateProjectDto
+    data: UpdateProjectDto,
   ) => {
     if (!session?.access_token) return false;
 
@@ -73,13 +72,13 @@ export function useProjects(initialProjects?: Project[]) {
       const response = await updateProject(
         projectId,
         data,
-        session.access_token
+        session.access_token,
       );
 
       if (response.success && response.data) {
         toast.success("Project updated successfully");
         setProjects((prev) =>
-          prev.map((p) => (p.id === projectId ? response.data! : p))
+          prev.map((p) => (p.id === projectId ? response.data! : p)),
         );
         return true;
       } else {

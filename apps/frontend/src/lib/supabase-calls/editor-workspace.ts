@@ -5,12 +5,12 @@ import {
   FsNode,
   Project,
 } from "@detective-quill/shared-types";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 async function getEditorWorkspaceData(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   projectId: string,
-  nodeId?: string
+  nodeId?: string,
 ): Promise<{
   project: Project;
   nodes: FsNodeTreeResponse[];
@@ -53,7 +53,7 @@ async function getEditorWorkspaceData(
 
 async function fetchProject(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  projectId: string
+  projectId: string,
 ): Promise<Project> {
   const { data, error } = await supabase
     .from("projects")
@@ -70,9 +70,8 @@ async function fetchProject(
 
 async function fetchProjectTree(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  projectId: string
+  projectId: string,
 ): Promise<FsNodeTreeResponse[]> {
-
   const { data: nodes, error } = await supabase
     .from("project_file_tree")
     .select("*")
@@ -89,7 +88,7 @@ async function fetchProjectTree(
 
 async function fetchNode(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-  nodeId: string
+  nodeId: string,
 ): Promise<FsNode> {
   const { data: node, error } = await supabase
     .from("fs_nodes")
@@ -97,7 +96,7 @@ async function fetchNode(
       `
       *,
       projects!inner(author_id)
-    `
+    `,
     )
     .eq("id", nodeId)
     .single();
@@ -149,7 +148,7 @@ function buildTreeFromView(nodes: any[]): FsNodeTreeResponse[] {
 }
 
 async function fetchProjectTitle(
-  projectId: string
+  projectId: string,
 ): Promise<{ title: string; error: string | null }> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
