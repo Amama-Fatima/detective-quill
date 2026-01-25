@@ -1,5 +1,6 @@
 import AcceptRejectProject from "@/components/project-page/accept-reject-project";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -40,10 +41,7 @@ export default async function AcceptInvitePage({
 }: AcceptInvitePageProps) {
   const supabase = await createSupabaseServerClient();
   // Get the current user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
   const email = await searchParams?.email;
   const projectTitle = await searchParams?.projectTitle;
@@ -56,8 +54,7 @@ export default async function AcceptInvitePage({
     query ? `?${query}` : ""
   }`;
 
-  // Redirect to sign-in if not authenticated
-  if (authError || !user) {
+  if (!user || !user.sub) {
     redirect(`/auth/sign-in?redirectTo=${encodeURIComponent(callbackUrl)}`);
   }
 

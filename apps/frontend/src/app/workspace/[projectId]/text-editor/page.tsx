@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import { FileText, FolderOpen, Plus } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 interface ProjectPageProps {
   params: Promise<{
@@ -16,20 +17,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const { projectId } = await params;
 
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
-  if (!user?.id) {
+  if (!user) {
     redirect("/auth/sign-in");
   }
 
   const { isActive, author_id } = await getProjectStatusAndAuthor(
     projectId,
-    supabase
+    supabase,
   );
-  const userId = user.id;
+  const userId = user.sub;
   const isOwner = author_id === userId;
   let project;
 
