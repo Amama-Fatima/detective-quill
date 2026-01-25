@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { jwtDecode } from "jwt-decode";
 import { SupabaseJwtPayload } from "../types/user";
+import { cache } from "react";
 
 interface SupabaseSession {
   access_token: string;
@@ -18,56 +19,59 @@ const PROJECT_REF = process.env
 
 const COOKIE_PREFIX = `sb-${PROJECT_REF}-auth-token`;
 
-export async function getUserFromCookie(): Promise<SupabaseJwtPayload | null> {
-  const cookieStore = await cookies();
+export const getUserFromCookie = cache(
+  async (): Promise<SupabaseJwtPayload | null> => {
+    console.time("getUserFromCookie-cached");
+    const cookieStore = await cookies();
 
-  console.log(
-    "Auth cookie chunks:",
-    cookieStore
+    console.log(
+      "Auth cookie chunks:",
+      cookieStore
+        .getAll()
+        .filter((c) => c.name.startsWith(COOKIE_PREFIX))
+        .map((c) => ({ name: c.name, size: c.value.length })),
+    );
+
+    const tokenChunks = cookieStore
       .getAll()
       .filter((c) => c.name.startsWith(COOKIE_PREFIX))
-      .map((c) => ({ name: c.name, size: c.value.length })),
-  );
+      .sort((a, b) => {
+        const aIndex = Number(a.name.split(".").pop());
+        const bIndex = Number(b.name.split(".").pop());
+        return aIndex - bIndex;
+      })
+      .map((c) => c.value);
 
-  // 1️⃣ Get all chunks: .0, .1, .2, ...
-  const tokenChunks = cookieStore
-    .getAll()
-    .filter((c) => c.name.startsWith(COOKIE_PREFIX))
-    .sort((a, b) => {
-      const aIndex = Number(a.name.split(".").pop());
-      const bIndex = Number(b.name.split(".").pop());
-      return aIndex - bIndex;
-    })
-    .map((c) => c.value);
-
-  if (tokenChunks.length === 0) return null;
-
-  // 2️⃣ Reconstruct full cookie value
-  let cookieValue = tokenChunks.join("");
-
-  try {
-    // 3️⃣ Remove 'base64-' prefix and decode
-    if (cookieValue.startsWith("base64-")) {
-      cookieValue = cookieValue.substring(7);
-    }
-
-    // 4️⃣ Decode base64 to get the session JSON
-    const sessionJson = Buffer.from(cookieValue, "base64").toString("utf-8");
-    const session: SupabaseSession = JSON.parse(sessionJson);
-
-    // 5️⃣ Extract and decode the access_token JWT
-    const decoded = jwtDecode<SupabaseJwtPayload>(session.access_token);
-
-    // 6️⃣ Optional: expiry guard
-    if (decoded.exp * 1000 < Date.now()) {
-      console.log("Token expired");
+    if (tokenChunks.length === 0) {
+      console.timeEnd("getUserFromCookie-cached");
       return null;
     }
 
-    console.log("Decoded JWT:", decoded);
-    return decoded;
-  } catch (err) {
-    console.error("Error decoding session:", err);
-    return null;
-  }
-}
+    let cookieValue = tokenChunks.join("");
+
+    try {
+      if (cookieValue.startsWith("base64-")) {
+        cookieValue = cookieValue.substring(7);
+      }
+
+      const sessionJson = Buffer.from(cookieValue, "base64").toString("utf-8");
+      const session: SupabaseSession = JSON.parse(sessionJson);
+
+      const decoded = jwtDecode<SupabaseJwtPayload>(session.access_token);
+
+      if (decoded.exp * 1000 < Date.now()) {
+        console.log("Token expired");
+        console.timeEnd("getUserFromCookie-cached");
+        return null;
+      }
+
+      console.log("Decoded JWT:", decoded);
+      console.timeEnd("getUserFromCookie-cached");
+      return decoded;
+    } catch (err) {
+      console.error("Error decoding session:", err);
+      console.timeEnd("getUserFromCookie-cached");
+      return null;
+    }
+  },
+);
