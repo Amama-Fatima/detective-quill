@@ -1,9 +1,9 @@
 import ErrorMsg from "@/components/error-msg";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
-import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import React from "react";
 import type { Metadata } from "next";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 interface ProjectWorkspacePageProps {
   params: Promise<{
@@ -35,17 +35,14 @@ const WorkspaceLayout = async ({
   params,
   children,
 }: ProjectWorkspacePageProps) => {
-  const supabase = await createSupabaseServerClient();
+  console.log("LAYOUT");
 
   const { projectId } = await params;
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
+  console.log("user in workspace layout:", user);
 
-  // Redirect to sign-in if not authenticated
-  if (authError || !user) {
+  if (!user || !user.sub) {
     redirect("/auth/sign-in");
   }
 
@@ -57,11 +54,7 @@ const WorkspaceLayout = async ({
 
   return (
     <div>
-      <div
-        className="bg-gradient-to-r from-background to-card border-b border-border
-
-"
-      >
+      <div className="bg-gradient-to-r from-background to-card border-b border-border">
         <h1 className="mystery-title text-center text-4xl mb-2">{title}</h1>
       </div>
       {children}

@@ -8,6 +8,7 @@ import { getAllCardsOfBlueprint } from "@/lib/supabase-calls/blueprint-cards";
 import ErrorMsg from "@/components/error-msg";
 import { Metadata } from "next";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 export async function generateMetadata({}: {}): Promise<Metadata> {
   return {
@@ -34,27 +35,25 @@ export default async function CreateBlueprintPage({
   const type = await searchParams?.type;
 
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
   if (!user) {
     redirect("/auth/sign-in");
   }
 
-  const userId = user.id;
+  const userId = user.sub;
 
   const { blueprint, error: blueprintError } = await getProjectBlueprintById(
     blueprintId,
     params.projectId,
-    supabase
+    supabase,
   );
   if (blueprintError || !blueprint) {
     return <ErrorMsg message="Failed to load blueprint data" />;
   }
   const { blueprint_cards, error: cardsError } = await getAllCardsOfBlueprint(
     blueprintId,
-    supabase
+    supabase,
   );
 
   if (cardsError) {
@@ -63,7 +62,7 @@ export default async function CreateBlueprintPage({
 
   const { isActive, author_id } = await getProjectStatusAndAuthor(
     String(blueprint.project_id),
-    supabase
+    supabase,
   );
 
   const isOwner = author_id === userId;

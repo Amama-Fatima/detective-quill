@@ -2,15 +2,10 @@ import React from "react";
 import Link from "next/link";
 import AuthButtons from "./auth-buttons";
 import Image from "next/image";
-import { createSupabaseServerClient } from "@/supabase/server-client";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 export default async function Header() {
-  const supabase = await createSupabaseServerClient();
-
-  // Get the current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
   let loggedIn = false;
 

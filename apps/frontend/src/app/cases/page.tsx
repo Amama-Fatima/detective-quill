@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
-import UserProjectsPage  from "@/components/projects/user-projects-page";
+import UserProjectsPage from "@/components/projects/user-projects-page";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import {
   getUserProjects,
   getInvitedProjects,
 } from "@/lib/supabase-calls/user-projects";
 import ErrorMsg from "@/components/error-msg";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 export const metadata = {
   title: "My Cases",
@@ -14,20 +15,14 @@ export const metadata = {
 export default async function CasesPage() {
   const supabase = await createSupabaseServerClient();
 
-  // Get the current user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
-  // Redirect to sign-in if not authenticated
-  if (authError || !user) {
+  if (!user || !user.sub) {
     redirect("/auth/sign-in");
   }
-
-  const { projects, error } = await getUserProjects(user.id, supabase);
+  const { projects, error } = await getUserProjects(user.sub, supabase);
   const { projects: invitedProjects, error: invitedError } =
-    await getInvitedProjects(user.id, supabase);
+    await getInvitedProjects(user.sub, supabase);
 
   if (error) {
     return <ErrorMsg message="Failed to load projects" />;
@@ -39,7 +34,6 @@ export default async function CasesPage() {
 
   return (
     <UserProjectsPage
-      user={user}
       initialProjects={projects || []}
       invitedProjects={invitedProjects || []}
     />
