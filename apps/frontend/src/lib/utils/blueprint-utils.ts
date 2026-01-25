@@ -43,24 +43,6 @@ export const mapNodesToBlueprintCards = (nodes: Node[]) => {
   return result;
 };
 
-export async function onSaveBlueprintName(
-  newName: string,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  accessToken: string,
-  blueprintId: string
-) {
-  try {
-    setLoading(true);
-    await updateBlueprintById(accessToken, blueprintId, { title: newName });
-    toast.success("Blueprint updated successfully");
-  } catch (error) {
-    console.error("Failed to update blueprint:", error);
-    toast.error("Failed to update blueprint");
-  } finally {
-    setLoading(false);
-  }
-}
-
 export function getBlueprintTypeColor(type: string) {
   const colors = {
     character: "text-blue-800 p-1 rounded-md",

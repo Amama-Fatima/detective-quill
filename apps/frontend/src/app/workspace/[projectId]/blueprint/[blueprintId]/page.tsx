@@ -73,7 +73,7 @@ export default async function CreateBlueprintPage({
         <Canvas
           blueprintId={blueprintId}
           type={type}
-          projectName={blueprint?.title || "Untitled Blueprint"}
+          blueprintName={blueprint?.title || "Untitled Blueprint"}
           prevBlueprintCards={blueprint_cards}
           isOwner={isOwner}
           isActive={isActive}
