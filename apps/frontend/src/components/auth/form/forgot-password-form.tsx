@@ -19,7 +19,7 @@ import { supabaseBrowserClient } from "@/supabase/browser-client";
 import Link from "next/link";
 import { z } from "zod";
 import { forgotPasswordSchema } from "@/lib/schema";
-import PasswordResetInstruction from "../instructions/password-reset-instruction";
+import PasswordResetInstruction from "../msgs-instructions/password-reset-instruction";
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 

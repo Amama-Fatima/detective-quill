@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { Popover, PopoverTrigger, PopoverContent } from "../../ui/popover";
-import { useBlueprints } from "@/hooks/use-blueprints";
+import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
@@ -13,13 +13,17 @@ export default function CreateBlueprintBtns({
   const pathname = usePathname();
   const router = useRouter();
 
-  const { create, loading } = useBlueprints();
+  const { createMutation } = useBlueprints();
+  const loading = createMutation.isPending;
   const handleCreate = async (
     type: "character" | "timeline" | "item" | "location",
   ) => {
-    const newBlueprint = await create(type, projectId);
-    if (newBlueprint) {
-      router.push(`${pathname}/${newBlueprint.id}?type=${type}`);
+    const newBlueprintId = await createMutation.mutateAsync({
+      type,
+      project_id: projectId,
+    });
+    if (newBlueprintId) {
+      router.push(`${pathname}/${newBlueprintId}?type=${type}`);
     }
   };
 
@@ -34,6 +38,7 @@ export default function CreateBlueprintBtns({
             <Button
               className="cursor-pointer"
               onClick={() => handleCreate("character")}
+              disabled={loading}
             >
               Character
             </Button>
@@ -47,12 +52,14 @@ export default function CreateBlueprintBtns({
             <Button
               className="cursor-pointer"
               onClick={() => handleCreate("item")}
+              disabled={loading}
             >
               Item
             </Button>
             <Button
               className="cursor-pointer"
               onClick={() => handleCreate("location")}
+              disabled={loading}
             >
               Location
             </Button>

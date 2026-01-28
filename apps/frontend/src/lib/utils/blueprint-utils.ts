@@ -1,7 +1,5 @@
 import { BlueprintCard } from "@detective-quill/shared-types";
-import { Node } from "@xyflow/react"; // or the correct library providing your Node type
-import { toast } from "sonner";
-import { updateBlueprintById } from "../backend-calls/blueprints";
+import { Node } from "@xyflow/react";
 
 export const blueprintCardsToNodes = (
   cards: BlueprintCard[],

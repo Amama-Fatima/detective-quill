@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useBlueprints } from "@/hooks/use-blueprints";
+import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 
 interface DeleteBlueprintButtonProps {
   blueprintId: string;
@@ -21,13 +21,15 @@ interface DeleteBlueprintButtonProps {
 export const DeleteBlueprintButton = ({
   blueprintId,
 }: DeleteBlueprintButtonProps) => {
-  const { delete: deleteBlueprint, loading } = useBlueprints();
+  const { deleteMutation } = useBlueprints();
   const [openDialogId, setOpenDialogId] = useState<string | null>(null);
 
   const onDelete = async (blueprintId: string) => {
-    await deleteBlueprint(blueprintId);
+    await deleteMutation.mutateAsync(blueprintId);
     setOpenDialogId(null);
   };
+
+  const loading = deleteMutation.isPending;
   return (
     <div>
       <Dialog

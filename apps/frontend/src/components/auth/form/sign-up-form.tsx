@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -17,14 +16,14 @@ import {
 import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react";
 import { SignUpFormValues, signUpSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
-import { getPasswordStrength } from "@/lib/utils/utils";
-import ConfirmEmailInstruction from "../confirm-email-instruction";
+import { getPasswordStrength } from "@/lib/utils/auth-utils";
+import ConfirmEmailInstruction from "../msgs-instructions/confirm-email-instruction";
+import { toast } from "sonner";
 
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
@@ -43,7 +42,6 @@ export function SignUpForm() {
 
   const onSubmit = async (formData: SignUpFormValues) => {
     setIsLoading(true);
-    setError("");
 
     try {
       const { data, error } = await supabaseBrowserClient.auth.signUp({
@@ -61,7 +59,7 @@ export function SignUpForm() {
 
       if (error) {
         console.error("Supabase auth error:", error);
-        setError(error.message || "Failed to create account");
+        toast.error(error.message || "Failed to create account");
         return;
       }
 
@@ -70,40 +68,25 @@ export function SignUpForm() {
         if (data.user && !data.session) {
           setUserEmail(formData.email);
           setSignupSuccess(true);
-          setError(""); // Clear any errors
         } else {
           // User is immediately authenticated (email confirmation disabled)
         }
       }
     } catch (err) {
       console.error("Error during sign up:", err);
-      setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Show success message after signup
   if (signupSuccess) {
-    return (
-      <ConfirmEmailInstruction
-        userEmail={userEmail}
-        setSignupSuccess={setSignupSuccess}
-        setError={setError}
-        form={form}
-      />
-    );
+    return <ConfirmEmailInstruction userEmail={userEmail} />;
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {error && (
-          <Alert variant="destructive" className="text-sm">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         <FormField
           control={form.control}
           name="name"
