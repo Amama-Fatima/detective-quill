@@ -16,20 +16,20 @@ import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 
 interface DeleteBlueprintButtonProps {
   blueprintId: string;
+  deleteMutation: ReturnType<typeof useBlueprints>["deleteMutation"];
 }
 
 export const DeleteBlueprintButton = ({
   blueprintId,
+  deleteMutation,
 }: DeleteBlueprintButtonProps) => {
-  const { deleteMutation } = useBlueprints();
   const [openDialogId, setOpenDialogId] = useState<string | null>(null);
-
+  const loading = deleteMutation.isPending;
   const onDelete = async (blueprintId: string) => {
     await deleteMutation.mutateAsync(blueprintId);
     setOpenDialogId(null);
   };
 
-  const loading = deleteMutation.isPending;
   return (
     <div>
       <Dialog

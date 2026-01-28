@@ -7,10 +7,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { changeProjectStatus } from "@/lib/backend-calls/projects";
-import { toast } from "sonner";
-import { useAuth } from "@/context/auth-context";
 import { useState } from "react";
+import { useProject } from "@/hooks/projects/use-project";
 
 export default function ChangeStateDropDown({
   projectId,
@@ -19,28 +17,18 @@ export default function ChangeStateDropDown({
   projectId: string;
   status: "active" | "completed" | "archived";
 }) {
-  const [loading, setLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status);
-  const { session } = useAuth();
-  const accessToken = session?.access_token || "";
+  const { changeStatusMutation } = useProject();
+  const loading = changeStatusMutation.isPending;
 
   const handleChangeState = async (
-    status: "active" | "completed" | "archived"
+    status: "active" | "completed" | "archived",
   ) => {
-    try {
-      setLoading(true);
-      const response = await changeProjectStatus(
-        projectId,
-        status,
-        accessToken
-      );
-      console.log("Change status response:", response);
-      toast.success(`Project status changed to ${status}`);
-    } catch (error) {
-      console.error("Error changing project status:", error);
-      toast.error("Failed to change project status.");
-    } finally {
-      setLoading(false);
+    const response = await changeStatusMutation.mutateAsync({
+      projectId,
+      status,
+    });
+    if (response.success) {
       setCurrentStatus(status);
     }
   };
@@ -54,7 +42,9 @@ export default function ChangeStateDropDown({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 bg-secondary" align="start">
-          <DropdownMenuLabel className="text-xl font-semibold">Change State</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-xl font-semibold">
+            Change State
+          </DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem
               onClick={() => handleChangeState("active")}
@@ -82,4 +72,4 @@ export default function ChangeStateDropDown({
       </DropdownMenu>
     </div>
   );
-};
+}

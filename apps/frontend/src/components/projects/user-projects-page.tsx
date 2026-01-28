@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Briefcase } from "lucide-react";
-import { CreateProjectDto, Project } from "@detective-quill/shared-types";
-import CreateProjectDialog  from "@/components/projects/create-project-dialog";
-import { useProjects } from "@/hooks/use-projects";
-import ProjectsDisplay from "./project-display";
+import { Project } from "@detective-quill/shared-types";
+import CreateProjectDialog from "@/components/projects/create-project-dialog";
+import ProjectsDisplay from "./projects-display";
+import { useProjects } from "@/hooks/projects/use-projects";
 
 type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
@@ -19,42 +19,44 @@ interface ProjectsPageClientProps {
   initialProjects: Project[];
   invitedProjects?: Project[];
 }
-export default function UserProjectsPage ({
+
+export default function UserProjectsPage({
   initialProjects,
   invitedProjects = [],
 }: ProjectsPageClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { projects, creating, createProject } = useProjects([...initialProjects, ...invitedProjects]);
+  const { projects, createMutation } = useProjects(initialProjects);
 
-  const activeProjects = projects.filter((project) => project.status === "active"); 
-  const completedProjects = projects.filter((project) => project.status === "completed");
-  const archivedProjects = projects.filter((project) => project.status === "archived");
-
+  const activeProjects = projects.filter(
+    (project) => project.status === "active",
+  );
+  const completedProjects = projects.filter(
+    (project) => project.status === "completed",
+  );
+  const archivedProjects = projects.filter(
+    (project) => project.status === "archived",
+  );
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<FilterOption>("all");
   const [isClient, setIsClient] = useState(false);
 
-  // Only run client-side to avoid hydration issues
+  // Only run client-side to avoid hydration issues todo: is this necessary?
   useEffect(() => {
     setIsClient(true);
     const initialFilter = (searchParams.get("tab") as FilterOption) || "all";
     if (
       initialFilter &&
       ["all", "active", "completed", "archived", "invited"].includes(
-        initialFilter
+        initialFilter,
       )
     ) {
       setFilter(initialFilter);
     }
   }, [searchParams]);
-
-  const handleCreateProject = async (data: CreateProjectDto) => {
-    return await createProject(data);
-  };
 
   const updateTabUrl = (tab: FilterOption) => {
     if (tab == "all") {
@@ -171,8 +173,7 @@ export default function UserProjectsPage ({
       <CreateProjectDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
-        onCreate={handleCreateProject}
-        creating={creating}
+        createMutation={createMutation}
       />
     </div>
   );

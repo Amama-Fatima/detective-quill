@@ -54,6 +54,7 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
     return <ErrorMsg message="Failed to load blueprints" />;
   }
 
+  // todo: make this a context provider if used in multiple places
   const { isActive, author_id } = await getProjectStatusAndAuthor(
     projectId,
     supabase,

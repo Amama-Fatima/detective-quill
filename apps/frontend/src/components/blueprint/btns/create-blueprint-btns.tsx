@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { Popover, PopoverTrigger, PopoverContent } from "../../ui/popover";
-import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
+import { useBlueprint } from "@/hooks/blueprints/use-blueprint";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
@@ -13,7 +13,7 @@ export default function CreateBlueprintBtns({
   const pathname = usePathname();
   const router = useRouter();
 
-  const { createMutation } = useBlueprints();
+  const { createMutation } = useBlueprint();
   const loading = createMutation.isPending;
   const handleCreate = async (
     type: "character" | "timeline" | "item" | "location",

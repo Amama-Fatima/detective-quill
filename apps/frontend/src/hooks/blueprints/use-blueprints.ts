@@ -1,60 +1,27 @@
+import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
-import {
-  createBlueprint,
-  updateBlueprintById,
-  deleteBlueprintById,
-} from "@/lib/backend-calls/blueprints";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteBlueprintById } from "@/lib/backend-calls/blueprints";
+import { useMutation } from "@tanstack/react-query";
+import { Blueprint } from "@detective-quill/shared-types";
 
-export function useBlueprints() {
+export function useBlueprints(initialBlueprints: Blueprint[]) {
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
-
-  const createMutation = useMutation({
-    mutationFn: async (data: {
-      type: "character" | "timeline" | "item" | "location";
-      project_id: string;
-    }) => {
-      const response = await createBlueprint(accessToken, {
-        ...data,
-        title: "Untitled",
-      });
-      return response.data?.id;
-    },
-    onSuccess: () => {
-      toast.success("Blueprint created successfully!");
-    },
-    onError: () => {
-      toast.error("Failed to create blueprint.");
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async (data: { blueprintId: string; newName: string }) => {
-      return await updateBlueprintById(accessToken, data.blueprintId, {
-        title: data.newName,
-      });
-    },
-    onSuccess: () => {
-      toast.success("Blueprint updated successfully!");
-    },
-    onError: () => {
-      toast.error("Failed to update blueprint.");
-    },
-  });
+  const [blueprints, setBlueprints] = useState<Blueprint[]>(initialBlueprints);
 
   const deleteMutation = useMutation({
     mutationFn: (blueprintId: string) => {
       return deleteBlueprintById(accessToken, blueprintId);
     },
-    onSuccess: () => {
+    onSuccess: (_response, blueprintId) => {
       toast.success("Blueprint deleted successfully!");
+      setBlueprints((prev) => prev.filter((bp) => bp.id !== blueprintId));
     },
     onError: () => {
       toast.error("Failed to delete blueprint.");
     },
   });
 
-  return { createMutation, updateMutation, deleteMutation };
+  return { blueprints, deleteMutation };
 }

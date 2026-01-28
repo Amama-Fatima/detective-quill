@@ -1,4 +1,3 @@
-// components/create-project-dialog.tsx
 import { useState } from "react";
 import {
   Dialog,
@@ -13,32 +12,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateProjectDto } from "@detective-quill/shared-types";
+import { useProjects } from "@/hooks/projects/use-projects";
 
 interface CreateProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (data: CreateProjectDto) => Promise<boolean>;
-  creating: boolean;
+  createMutation: ReturnType<typeof useProjects>["createMutation"];
 }
 
-export default function CreateProjectDialog ({
+export default function CreateProjectDialog({
   open,
   onOpenChange,
-  onCreate,
-  creating,
+  createMutation,
 }: CreateProjectDialogProps) {
   const [formData, setFormData] = useState<CreateProjectDto>({
     title: "",
     description: "",
   });
+  const creating = createMutation.isPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.title.trim()) return;
 
-    const success = await onCreate(formData);
-    if (success) {
+    const response = await createMutation.mutateAsync(formData);
+    if (response.success) {
       setFormData({ title: "", description: "" });
       onOpenChange(false);
     }
@@ -58,7 +57,9 @@ export default function CreateProjectDialog ({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle className="text-primary text-2xl">Create New Project</DialogTitle>
+            <DialogTitle className="text-primary text-2xl">
+              Create New Project
+            </DialogTitle>
             <DialogDescription className="text-secondary-foreground text-[0.9rem]">
               Start a new writing project. Give it a name and description to get
               started.
@@ -83,7 +84,9 @@ export default function CreateProjectDialog ({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="description" className="text-[1rem]">Description (optional)</Label>
+              <Label htmlFor="description" className="text-[1rem]">
+                Description (optional)
+              </Label>
               <Textarea
                 id="description"
                 value={formData.description}
