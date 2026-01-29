@@ -1,14 +1,48 @@
-import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
-import { deleteBlueprintById } from "@/lib/backend-calls/blueprints";
+import {
+  createBlueprint,
+  deleteBlueprintById,
+  updateBlueprintById,
+} from "@/lib/backend-calls/blueprints";
 import { useMutation } from "@tanstack/react-query";
-import { Blueprint } from "@detective-quill/shared-types";
 
-export function useBlueprints(initialBlueprints: Blueprint[]) {
+export function useBlueprints() {
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
-  const [blueprints, setBlueprints] = useState<Blueprint[]>(initialBlueprints);
+
+  const createMutation = useMutation({
+    mutationFn: async (data: {
+      type: "character" | "timeline" | "item" | "location";
+      project_id: string;
+    }) => {
+      const response = await createBlueprint(accessToken, {
+        ...data,
+        title: "Untitled",
+      });
+      return response.data?.id;
+    },
+    onSuccess: () => {
+      toast.success("Blueprint created successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to create blueprint.");
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: { blueprintId: string; newName: string }) => {
+      return await updateBlueprintById(accessToken, data.blueprintId, {
+        title: data.newName,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Blueprint updated successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to update blueprint.");
+    },
+  });
 
   const deleteMutation = useMutation({
     mutationFn: (blueprintId: string) => {
@@ -16,12 +50,11 @@ export function useBlueprints(initialBlueprints: Blueprint[]) {
     },
     onSuccess: (_response, blueprintId) => {
       toast.success("Blueprint deleted successfully!");
-      setBlueprints((prev) => prev.filter((bp) => bp.id !== blueprintId));
     },
     onError: () => {
       toast.error("Failed to delete blueprint.");
     },
   });
 
-  return { blueprints, deleteMutation };
+  return { createMutation, updateMutation, deleteMutation };
 }

@@ -11,26 +11,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CreateProjectDto } from "@detective-quill/shared-types";
-import { useProjects } from "@/hooks/projects/use-projects";
+import { CreateProjectDto, Project } from "@detective-quill/shared-types";
+import { useProjects } from "@/hooks/use-projects";
 
 interface CreateProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  createMutation: ReturnType<typeof useProjects>["createMutation"];
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
 }
 
 export default function CreateProjectDialog({
   open,
   onOpenChange,
-  createMutation,
+  setProjects,
 }: CreateProjectDialogProps) {
   const [formData, setFormData] = useState<CreateProjectDto>({
     title: "",
     description: "",
   });
+  const { createMutation } = useProjects();
   const creating = createMutation.isPending;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -38,6 +38,7 @@ export default function CreateProjectDialog({
 
     const response = await createMutation.mutateAsync(formData);
     if (response.success) {
+      setProjects((prev) => [...prev, response.data!]);
       setFormData({ title: "", description: "" });
       onOpenChange(false);
     }

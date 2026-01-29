@@ -1,30 +1,56 @@
 import { useAuth } from "@/context/auth-context";
-import { Project, UpdateProjectDto } from "@detective-quill/shared-types";
 import {
+  Project,
+  CreateProjectDto,
+  UpdateProjectDto,
+} from "@detective-quill/shared-types";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import {
+  createProject,
   deleteProject,
   updateProject,
   changeProjectStatus,
 } from "@/lib/backend-calls/projects";
-import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
 
-export function useProject() {
+export function useProjects() {
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
 
-  if (!accessToken) {
-    throw new Error("No access token found in session");
-  }
+  const requireAccessToken = () => {
+    if (!accessToken) {
+      throw new Error("No access token found in session");
+    }
+    return accessToken;
+  };
+
+  const createMutation = useMutation({
+    mutationFn: async (data: CreateProjectDto) => {
+      const token = requireAccessToken();
+      const response = await createProject(data, token);
+      return response;
+    },
+    onSuccess: (response) => {
+      if (response.success && response.data) {
+        toast.success("Project created successfully");
+        // setProjects((prev) => [...prev, response.data!]);
+      }
+    },
+    onError: () => {
+      toast.error("Failed to create project");
+    },
+  });
 
   const updateMutation = useMutation({
     mutationFn: async (data: {
       projectId: string;
       updateData: UpdateProjectDto;
     }) => {
+      const token = requireAccessToken();
       const response = await updateProject(
         data.projectId,
         data.updateData,
-        accessToken,
+        token,
       );
       return response;
     },
@@ -40,7 +66,8 @@ export function useProject() {
 
   const deleteMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      const response = await deleteProject(projectId, accessToken);
+      const token = requireAccessToken();
+      const response = await deleteProject(projectId, token);
       return response;
     },
     onSuccess: (response, projectId) => {
@@ -58,10 +85,11 @@ export function useProject() {
       projectId: string;
       status: Project["status"];
     }) => {
+      const token = requireAccessToken();
       const response = await changeProjectStatus(
         data.projectId,
         data.status,
-        accessToken,
+        token,
       );
       return response;
     },
@@ -76,6 +104,7 @@ export function useProject() {
   });
 
   return {
+    createMutation,
     updateMutation,
     deleteMutation,
     changeStatusMutation,

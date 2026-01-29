@@ -2,7 +2,7 @@
 
 import { Blueprint } from "@detective-quill/shared-types/api";
 import Link from "next/dist/client/link";
-import React from "react";
+import React, { useState } from "react";
 import { Tag, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { getBlueprintTypeColor } from "@/lib/utils/blueprint-utils";
@@ -22,7 +22,15 @@ export const UserBlueprintsList = ({
   isOwner,
   isActive,
 }: UserBlueprintsListProps) => {
-  const { blueprints, deleteMutation } = useBlueprints(initialBlueprints);
+  const [blueprints, setBlueprints] = useState<Blueprint[]>(initialBlueprints);
+
+  const { deleteMutation } = useBlueprints();
+  const loading = deleteMutation.isPending;
+
+  const onDelete = async (blueprintId: string) => {
+    await deleteMutation.mutateAsync(blueprintId);
+    setBlueprints((prev) => prev.filter((bp) => bp.id !== blueprintId));
+  };
 
   if (blueprints.length === 0) {
     return (
@@ -69,7 +77,8 @@ export const UserBlueprintsList = ({
                     {isOwner && isActive && (
                       <DeleteBlueprintButton
                         blueprintId={blueprint.id}
-                        deleteMutation={deleteMutation}
+                        onDelete={onDelete}
+                        loading={loading}
                       />
                     )}{" "}
                   </div>

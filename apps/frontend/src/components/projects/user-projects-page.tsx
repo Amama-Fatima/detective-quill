@@ -10,7 +10,6 @@ import { Search, Plus, Briefcase } from "lucide-react";
 import { Project } from "@detective-quill/shared-types";
 import CreateProjectDialog from "@/components/projects/create-project-dialog";
 import ProjectsDisplay from "./projects-display";
-import { useProjects } from "@/hooks/projects/use-projects";
 
 type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
@@ -27,7 +26,10 @@ export default function UserProjectsPage({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { projects, createMutation } = useProjects(initialProjects);
+  const [projects, setProjects] = useState<Project[]>([
+    ...initialProjects,
+    ...invitedProjects,
+  ]);
 
   const activeProjects = projects.filter(
     (project) => project.status === "active",
@@ -173,7 +175,7 @@ export default function UserProjectsPage({
       <CreateProjectDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
-        createMutation={createMutation}
+        setProjects={setProjects}
       />
     </div>
   );

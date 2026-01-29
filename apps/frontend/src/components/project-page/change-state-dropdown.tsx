@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { useProject } from "@/hooks/projects/use-project";
+import { useProjects } from "@/hooks/use-projects";
 
 export default function ChangeStateDropDown({
   projectId,
@@ -18,7 +18,7 @@ export default function ChangeStateDropDown({
   status: "active" | "completed" | "archived";
 }) {
   const [currentStatus, setCurrentStatus] = useState(status);
-  const { changeStatusMutation } = useProject();
+  const { changeStatusMutation } = useProjects();
   const loading = changeStatusMutation.isPending;
 
   const handleChangeState = async (

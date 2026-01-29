@@ -4,6 +4,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { Inter, Crimson_Text, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/header";
+import { TanstackProvider } from "@/providers/tanstack-provider";
 
 const crimsonText = Crimson_Text({
   variable: "--font-crimson",
@@ -34,17 +35,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en" className="dark">
       <body
         className={`${crimsonText.variable} ${inter.variable} ${geistMono.variable} font-serif antialiased`}
       >
-        <AuthProvider>
-          <Header />
-          {children}
-          <Toaster richColors position="top-right" />
-        </AuthProvider>
+        <TanstackProvider>
+          <AuthProvider>
+            <Header />
+            {children}
+            <Toaster richColors position="top-right" />
+          </AuthProvider>
+        </TanstackProvider>
       </body>
     </html>
   );

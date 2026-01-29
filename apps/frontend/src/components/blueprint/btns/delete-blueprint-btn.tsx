@@ -12,21 +12,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 
 interface DeleteBlueprintButtonProps {
   blueprintId: string;
-  deleteMutation: ReturnType<typeof useBlueprints>["deleteMutation"];
+  onDelete: (blueprintId: string) => Promise<void>;
+  loading: boolean;
 }
 
 export const DeleteBlueprintButton = ({
   blueprintId,
-  deleteMutation,
+  onDelete,
+  loading,
 }: DeleteBlueprintButtonProps) => {
   const [openDialogId, setOpenDialogId] = useState<string | null>(null);
-  const loading = deleteMutation.isPending;
-  const onDelete = async (blueprintId: string) => {
-    await deleteMutation.mutateAsync(blueprintId);
+  const handleDelete = async (blueprintId: string) => {
+    await onDelete(blueprintId);
     setOpenDialogId(null);
   };
 
@@ -61,7 +61,7 @@ export const DeleteBlueprintButton = ({
             </Button>
             <Button
               variant="destructive"
-              onClick={() => onDelete(blueprintId)}
+              onClick={() => handleDelete(blueprintId)}
               className="cursor-pointer"
               disabled={loading}
             >
