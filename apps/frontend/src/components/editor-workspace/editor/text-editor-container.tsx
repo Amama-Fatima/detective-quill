@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import TextEditor from "@/components/editor-workspace/editor/text-editor";
 import CommentsPanel from "@/components/editor-workspace/comments/comments-panel";
 import NewCommentDialog from "@/components/editor-workspace/comments/new-comment-dialog";
@@ -20,7 +20,7 @@ interface TextEditorContainerProps {
   isOwner: boolean;
 }
 
-export default function TextEditorContainer ({
+export default function TextEditorContainer({
   projectId,
   node,
   isActive,
@@ -49,15 +49,7 @@ export default function TextEditorContainer ({
     onSave: saveFile,
   });
 
-  const {
-    stats,
-    addComment,
-    comments,
-    isLoading,
-    removeComment,
-    editComment,
-    toggleResolve,
-  } = useComments({
+  const { stats } = useComments({
     fsNodeId: node?.id || "",
     includeResolved: true,
     projectId,
@@ -70,7 +62,6 @@ export default function TextEditorContainer ({
   const handleOpenNewCommentDialog = () => {
     // Get current selection when opening the dialog
     const selection = editorRef.current?.getSelection();
-    console.log("Selection captured:", selection); // Debug log
     if (selection?.text) {
       setSelectedTextForComment(selection.text);
       setSelectionData(selection);
@@ -114,14 +105,7 @@ export default function TextEditorContainer ({
             </Button>
           </div>
           <div className="flex-1 overflow-hidden">
-            <CommentsPanel
-              comments={comments}
-              isLoading={isLoading}
-              stats={stats}
-              removeComment={removeComment}
-              editComment={editComment}
-              toggleResolve={toggleResolve}
-            />
+            <CommentsPanel />
           </div>
         </div>
       )}
@@ -134,7 +118,6 @@ export default function TextEditorContainer ({
         setSelectedTextForComment={setSelectedTextForComment}
         setSelectionData={setSelectionData}
         setShowNewCommentDialog={setShowNewCommentDialog}
-        addComment={addComment}
         projectId={projectId}
         nodeId={node?.id || ""}
       />

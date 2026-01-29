@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback } from "react";
 import {
   CommentResponse,
   CreateCommentDto,
@@ -15,6 +14,12 @@ import {
 } from "@/lib/backend-calls/comments";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseMutationResult,
+} from "@tanstack/react-query";
 
 export interface UseCommentsOptions {
   fsNodeId: string;
@@ -22,25 +27,27 @@ export interface UseCommentsOptions {
   projectId: string;
 }
 
-// If you call the hook multiple times with the same props, React will reuse the same hook instance, so no duplicate fetches occur.
-// That is why we can do fetching inside the hook itself on mount.
-
 export interface UseCommentsReturn {
   comments: CommentResponse[];
   stats: CommentStats | null;
   isLoading: boolean;
   error: string | null;
-
-  // Actions
-  addComment: (data: CreateCommentDto) => Promise<CommentResponse | null>;
-  editComment: (
-    commentId: string,
-    data: UpdateCommentDto,
-  ) => Promise<CommentResponse | null>;
-  removeComment: (commentId: string) => Promise<boolean>;
-  toggleResolve: (commentId: string) => Promise<CommentResponse | null>;
-  refreshComments: () => Promise<void>;
-  refreshStats: () => Promise<void>;
+  addCommentMutation: UseMutationResult<
+    CommentResponse | undefined,
+    Error,
+    CreateCommentDto
+  >;
+  editCommentMutation: UseMutationResult<
+    CommentResponse | undefined,
+    Error,
+    { commentId: string; data: UpdateCommentDto }
+  >;
+  removeCommentMutation: UseMutationResult<string, Error, string>;
+  toggleResolveMutation: UseMutationResult<
+    CommentResponse | undefined,
+    Error,
+    string
+  >;
 }
 
 export function useComments({
@@ -49,229 +56,194 @@ export function useComments({
   projectId,
 }: UseCommentsOptions): UseCommentsReturn {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const accessToken = session?.access_token || "";
 
-  const [comments, setComments] = useState<CommentResponse[]>([]);
-  const [stats, setStats] = useState<CommentStats | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchComments = useCallback(async () => {
-    if (!session?.access_token || !fsNodeId) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
+  // Fetch comments
+  const {
+    data: comments = [],
+    isLoading: commentsLoading,
+    error: commentsError,
+  } = useQuery({
+    queryKey: ["comments", projectId, fsNodeId, includeResolved],
+    queryFn: async () => {
+      if (!accessToken || !fsNodeId) return [];
       const response = await getCommentsByNode(
         projectId,
         fsNodeId,
-        session.access_token,
+        accessToken,
         includeResolved,
       );
+      return response.success && response.data ? response.data : [];
+    },
+    enabled: !!accessToken && !!fsNodeId,
+  });
 
-      if (response.success && response.data) {
-        setComments(response.data);
-      } else {
-        setError(response.error || "Failed to fetch comments");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [fsNodeId, session?.access_token, includeResolved]);
+  // Fetch stats
+  const { data: stats = null, isLoading: statsLoading } = useQuery({
+    queryKey: ["commentStats", projectId, fsNodeId],
+    queryFn: async () => {
+      if (!accessToken || !fsNodeId) return null;
+      const response = await getCommentStats(projectId, fsNodeId, accessToken);
+      return response.success && response.data ? response.data : null;
+    },
+    enabled: !!accessToken && !!fsNodeId,
+  });
 
-  const fetchStats = useCallback(async () => {
-    if (!session?.access_token || !fsNodeId) return;
+  // Add comment mutation
+  const addCommentMutation = useMutation({
+    mutationFn: async (data: CreateCommentDto) => {
+      const response = await createComment(data, accessToken);
+      if (!response.success) throw new Error(response.error);
+      return response.data;
+    },
+    onSuccess: (newComment) => {
+      // Update comments list
+      queryClient.setQueryData(
+        ["comments", projectId, fsNodeId, includeResolved],
+        (old: CommentResponse[]) => [...(old || []), newComment],
+      );
+      // Update stats
+      queryClient.setQueryData(
+        ["commentStats", projectId, fsNodeId],
+        (old: CommentStats | null) => {
+          if (!old) return { total: 1, resolved: 0, unresolved: 1 };
+          return {
+            total: old.total + 1,
+            resolved: old.resolved,
+            unresolved: old.unresolved + 1,
+          };
+        },
+      );
+      toast.success("Comment added successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to add comment",
+      );
+    },
+  });
 
-    try {
-      const response = await getCommentStats(
+  // Edit comment mutation
+  const editCommentMutation = useMutation({
+    mutationFn: async ({
+      commentId,
+      data,
+    }: {
+      commentId: string;
+      data: UpdateCommentDto;
+    }) => {
+      const response = await updateComment(
         projectId,
-        fsNodeId,
-        session.access_token,
+        commentId,
+        data,
+        accessToken,
+      );
+      if (!response.success) throw new Error(response.error);
+      return response.data;
+    },
+    onSuccess: (updatedComment) => {
+      if (!updatedComment) return;
+      queryClient.setQueryData(
+        ["comments", projectId, fsNodeId, includeResolved],
+        (old: CommentResponse[]) =>
+          (old || []).map((comment) =>
+            comment.id === updatedComment.id ? updatedComment : comment,
+          ),
+      );
+      toast.success("Comment edited successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to edit comment",
+      );
+    },
+  });
+
+  // Remove comment mutation
+  const removeCommentMutation = useMutation({
+    mutationFn: async (commentId: string) => {
+      const response = await deleteComment(projectId, commentId, accessToken);
+      if (!response.success) throw new Error(response.error);
+      return commentId;
+    },
+    onSuccess: (commentId) => {
+      // Get the comment to check if it was resolved
+      const comment = comments.find((c) => c.id === commentId);
+      const wasResolved = comment?.is_resolved || false;
+
+      queryClient.setQueryData(
+        ["comments", projectId, fsNodeId, includeResolved],
+        (old: CommentResponse[]) =>
+          (old || []).filter((comment) => comment.id !== commentId),
       );
 
-      if (response.success && response.data) {
-        setStats(response.data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch comment stats:", err);
-    }
-  }, [fsNodeId, session?.access_token, projectId]);
-
-  const addComment = useCallback(
-    async (data: CreateCommentDto): Promise<CommentResponse | null> => {
-      if (!session?.access_token) return null;
-
-      try {
-        const payload = { ...data };
-
-        const response = await createComment(payload, session.access_token);
-
-        if (response.success && response.data) {
-          setComments((prev) => [...prev, response.data!]);
-          setStats((prev) => {
-            if (!prev) {
-              return { total: 1, resolved: 0, unresolved: 1 };
-            }
-            return {
-              total: prev.total + 1,
-              resolved: prev.resolved,
-              unresolved: prev.unresolved + 1,
-            };
-          });
-
-          toast.success("Comment added successfully");
-          return response.data;
-        } else {
-          throw new Error(response.error || "Failed to add comment");
-        }
-      } catch (err) {
-        toast.error(
-          err instanceof Error ? err.message : "Failed to add comment",
-        );
-        return null;
-      }
+      queryClient.setQueryData(
+        ["commentStats", projectId, fsNodeId],
+        (old: CommentStats | null) => {
+          if (!old) return old;
+          return {
+            total: old.total - 1,
+            resolved: wasResolved ? old.resolved - 1 : old.resolved,
+            unresolved: wasResolved ? old.unresolved : old.unresolved - 1,
+          };
+        },
+      );
+      toast.success("Comment deleted successfully");
     },
-    [session?.access_token],
-  );
-
-  const editComment = useCallback(
-    async (
-      commentId: string,
-      data: UpdateCommentDto,
-    ): Promise<CommentResponse | null> => {
-      if (!session?.access_token) return null;
-
-      try {
-        const response = await updateComment(
-          projectId,
-          commentId,
-          data,
-          session.access_token,
-        );
-
-        if (response.success && response.data) {
-          setComments((prev) =>
-            prev.map((comment) =>
-              comment.id === commentId ? response.data! : comment,
-            ),
-          );
-          toast.success("Comment edited successfully");
-          return response.data;
-        } else {
-          throw new Error(response.error || "Failed to edit comment");
-        }
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Unknown error");
-        return null;
-      }
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete comment",
+      );
     },
-    [session?.access_token, projectId],
-  );
+  });
 
-  const removeComment = useCallback(
-    async (commentId: string): Promise<boolean> => {
-      if (!session?.access_token) return false;
-
-      try {
-        const response = await deleteComment(
-          projectId,
-          commentId,
-          session.access_token,
-        );
-
-        if (response.success) {
-          let wasResolved: boolean | undefined;
-          setComments((prev) => {
-            wasResolved = prev.find(
-              (comment) => comment.id === commentId,
-            )?.is_resolved;
-            return prev.filter((comment) => comment.id !== commentId);
-          });
-
-          setStats((prev) => {
-            if (!prev) return prev;
-            return {
-              total: prev.total - 1,
-              resolved: wasResolved ? prev.resolved - 1 : prev.resolved,
-              unresolved: wasResolved ? prev.unresolved : prev.unresolved - 1,
-            };
-          });
-
-          toast.success("Comment deleted successfully");
-          return true;
-        } else {
-          toast.error(response.error || "Failed to delete comment");
-          return false;
-        }
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Unknown error");
-        return false;
-      }
+  // Resolve comment mutation
+  const toggleResolveMutation = useMutation({
+    mutationFn: async (commentId: string) => {
+      const response = await resolveComment(projectId, commentId, accessToken);
+      if (!response.success) throw new Error(response.error);
+      return response.data;
     },
-    [session?.access_token, projectId],
-  );
+    onSuccess: (resolvedComment) => {
+      if (!resolvedComment) return;
+      queryClient.setQueryData(
+        ["comments", projectId, fsNodeId, includeResolved],
+        (old: CommentResponse[]) =>
+          (old || []).map((comment) =>
+            comment.id === resolvedComment.id ? resolvedComment : comment,
+          ),
+      );
 
-  const toggleResolve = useCallback(
-    async (commentId: string): Promise<CommentResponse | null> => {
-      if (!session?.access_token) return null;
-
-      try {
-        const response = await resolveComment(
-          projectId,
-          commentId,
-          session.access_token,
-        );
-
-        if (response.success && response.data) {
-          setComments((prev) =>
-            prev.map((comment) =>
-              comment.id === commentId ? response.data! : comment,
-            ),
-          );
-          setStats((prev) => {
-            if (!prev) return prev;
-            const isNowResolved = response.data!.is_resolved;
-            const newStats = {
-              total: prev.total,
-              resolved: isNowResolved ? prev.resolved + 1 : prev.resolved - 1,
-              unresolved: isNowResolved
-                ? prev.unresolved - 1
-                : prev.unresolved + 1,
-            };
-            return newStats;
-          });
-          toast.success(`Comment resolved successfully`);
-          return response.data;
-        } else {
-          toast.error(response.error || "Failed to update comment status");
-          return null;
-        }
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Unknown error");
-        return null;
-      }
+      queryClient.setQueryData(
+        ["commentStats", projectId, fsNodeId],
+        (old: CommentStats | null) => {
+          if (!old) return old;
+          const isNowResolved = resolvedComment.is_resolved;
+          return {
+            total: old.total,
+            resolved: isNowResolved ? old.resolved + 1 : old.resolved - 1,
+            unresolved: isNowResolved ? old.unresolved - 1 : old.unresolved + 1,
+          };
+        },
+      );
+      toast.success("Comment resolved successfully");
     },
-    [session?.access_token, fsNodeId, projectId],
-  );
-
-  // Initial fetch
-  useEffect(() => {
-    fetchComments();
-    fetchStats();
-  }, [fetchComments, fetchStats]);
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to resolve comment",
+      );
+    },
+  });
 
   return {
     comments,
     stats,
-    isLoading,
-    error,
-    addComment,
-    editComment,
-    removeComment,
-    toggleResolve,
-    refreshComments: fetchComments,
-    refreshStats: fetchStats,
+    isLoading: commentsLoading || statsLoading,
+    error: commentsError instanceof Error ? commentsError.message : null,
+    addCommentMutation,
+    editCommentMutation,
+    removeCommentMutation,
+    toggleResolveMutation,
   };
 }
