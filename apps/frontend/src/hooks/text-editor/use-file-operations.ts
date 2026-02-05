@@ -1,10 +1,10 @@
 import { useAuth } from "@/context/auth-context";
 import {
   getFsNode,
-  updateFsNode,
+  updateFileContent,
   deleteFsNode,
 } from "@/lib/backend-calls/fs-nodes";
-import { UpdateFsNodeDto } from "@detective-quill/shared-types";
+import { UpdateFileContentDto } from "@detective-quill/shared-types";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { requireAccessToken } from "@/lib/utils/utils";
@@ -39,9 +39,9 @@ export const useFileOperations = ({ nodeId }: UseFileOperationsProps) => {
   const saveFileMutation = useMutation({
     mutationFn: async (content: string) => {
       const token = requireAccessToken(accessToken);
-      const updateData: UpdateFsNodeDto = { content };
+      const updateData: UpdateFileContentDto = { content };
 
-      const response = await updateFsNode(nodeId, updateData, token);
+      const response = await updateFileContent(nodeId, updateData, token);
       if (response.success && response.data) {
         return response.data;
       } else {

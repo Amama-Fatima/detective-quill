@@ -1,25 +1,20 @@
-import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   createFsNode,
-  updateFsNode,
   deleteFsNode,
+  updateNodeMetadata,
   moveFsNode,
 } from "@/lib/backend-calls/fs-nodes";
 import {
   CreateFsNodeDto,
   FsNodeTreeResponse,
-  UpdateFsNodeDto,
+  UpdateNodeMetadataDto,
 } from "@detective-quill/shared-types";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/auth-context";
 import { getProjectTree } from "@/lib/backend-calls/fs-nodes";
-import {
-  findNodeById,
-  flattenNodes,
-  countChildren,
-} from "@/lib/utils/file-tree-utils";
+import { flattenNodes } from "@/lib/utils/file-tree-utils";
 import { requireAccessToken } from "@/lib/utils/utils";
 
 interface UseFileTreeOperationsProps {
@@ -109,10 +104,10 @@ export const useFileTreeOperations = ({
       newName: string;
     }) => {
       const token = requireAccessToken(accessToken);
-      const updateData: UpdateFsNodeDto = {
+      const updateData: UpdateNodeMetadataDto = {
         name: newName,
       };
-      const response = await updateFsNode(nodeId, updateData, token);
+      const response = await updateNodeMetadata(nodeId, updateData, token);
       if (response.success) {
         return true;
       }
@@ -205,6 +200,6 @@ export const useFileTreeOperations = ({
     deleteNodeMutation,
     nodes,
     isLoading,
-    isFetching
+    isFetching,
   };
 };

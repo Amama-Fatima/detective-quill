@@ -5,6 +5,7 @@ import WorkspaceLayoutClientWrapper from "./workspace-layout-client-wrapper";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
@@ -18,15 +19,13 @@ export default async function WorkspaceLayout({
   nodeId,
 }: WorkspaceLayoutProps) {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
   if (!user) {
     redirect("/auth/sign-in");
   }
 
-  const userId = user.id;
+  const userId = user.sub;
   const { isActive, author_id } = await getProjectStatusAndAuthor(
     projectId,
     supabase,

@@ -9,6 +9,7 @@ import {
 import ErrorMsg from "@/components/error-msg";
 import { getProjectInvitations } from "@/lib/supabase-calls/invitations";
 import { notFound } from "next/navigation";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 interface ProjectWorkspacePageProps {
   params: Promise<{
@@ -21,13 +22,9 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
 
   const { projectId } = await params;
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
-  // Redirect to sign-in if not authenticated
-  if (authError || !user) {
+  if (!user || !user.sub) {
     redirect("/auth/sign-in");
   }
 
@@ -42,7 +39,7 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     return <ErrorMsg message="Project not found" />;
   }
 
-  const isMember = await verifyMembership(projectId, user.id, supabase);
+  const isMember = await verifyMembership(projectId, user.sub, supabase);
   if (!isMember) {
     return notFound();
   }
@@ -73,7 +70,7 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     <div>
       <WorkspaceMainBody
         project={data}
-        userId={user.id}
+        userId={user.sub}
         members={members || []}
         invitations={invitations || []}
       />

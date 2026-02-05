@@ -2,9 +2,10 @@ import {
   FsNode,
   FsNodeTreeResponse,
   CreateFsNodeDto,
-  UpdateFsNodeDto,
   DeleteResponse,
   ApiResponse,
+  UpdateFileContentDto,
+  UpdateNodeMetadataDto,
   Project,
 } from "@detective-quill/shared-types";
 
@@ -82,15 +83,34 @@ export async function getFsNode(
   return makeAuthenticatedRequest<FsNode>(`/fs-nodes/${nodeId}`, accessToken);
 }
 
-export async function updateFsNode(
+export async function updateFileContent(
   nodeId: string,
-  data: UpdateFsNodeDto,
+  data: UpdateFileContentDto,
   accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
-  return makeAuthenticatedRequest<FsNode>(`/fs-nodes/${nodeId}`, accessToken, {
-    method: "PATCH",
-    body: JSON.stringify(data),
-  });
+  return makeAuthenticatedRequest<FsNode>(
+    `/fs-nodes/${nodeId}/content`,
+    accessToken,
+    {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    },
+  );
+}
+
+export async function updateNodeMetadata(
+  nodeId: string,
+  data: UpdateNodeMetadataDto,
+  accessToken: string,
+): Promise<ApiResponse<FsNode>> {
+  return makeAuthenticatedRequest<FsNode>(
+    `/fs-nodes/${nodeId}/metadata`,
+    accessToken,
+    {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    },
+  );
 }
 
 export async function deleteFsNode(

@@ -8,6 +8,7 @@ import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import ErrorMsg from "@/components/error-msg";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 interface BlueprintPageProps {
   params: {
@@ -38,15 +39,13 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
   const { projectId } = await params;
   const supabase = await createSupabaseServerClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
   if (!user) {
     redirect("/auth/sign-in");
   }
 
-  const userId = user.id;
+  const userId = user.sub;
 
   const { blueprints, error } = await getProjectBlueprints(projectId, supabase);
 

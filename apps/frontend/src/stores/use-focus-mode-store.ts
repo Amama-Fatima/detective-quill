@@ -29,7 +29,6 @@ export const useFocusModeStore = create<FocusModeState>((set, get) => ({
   },
 
   toggleBrowserFullscreen: async () => {
-    const { focusMode } = get();
     try {
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();

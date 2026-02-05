@@ -14,7 +14,6 @@ import ProjectsDisplay from "./projects-display";
 type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
 interface ProjectsPageClientProps {
-  user: User;
   initialProjects: Project[];
   invitedProjects?: Project[];
 }

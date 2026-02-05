@@ -12,7 +12,8 @@ import {
 import { FsNodesService } from "./fs-nodes.service";
 import {
   CreateFsNodeDto,
-  UpdateFsNodeDto,
+  UpdateFileContentDto,
+  UpdateNodeMetadataDto,
 } from "./validation/fs-nodes.validation";
 import { AuthGuard } from "../auth/auth.guard";
 import {
@@ -96,15 +97,29 @@ export class FsNodesController {
     return { success: true, data };
   }
 
-  @Patch(":id")
-  async update(
+  @Patch(":id/content")
+  async updateContent(
     @Param("id") id: string,
-    @Body() updateNodeDto: UpdateFsNodeDto,
+    @Body() updateContentDto: UpdateFileContentDto,
     @Request() req,
   ): Promise<ApiResponse<FsNode>> {
-    const data = await this.fsNodesService.updateNode(
+    const data = await this.fsNodesService.updateFileContent(
       id,
-      updateNodeDto,
+      updateContentDto,
+      req.user.id,
+    );
+    return { success: true, data };
+  }
+
+  @Patch(":id/metadata")
+  async updateMetadata(
+    @Param("id") id: string,
+    @Body() updateMetadataDto: UpdateNodeMetadataDto,
+    @Request() req,
+  ): Promise<ApiResponse<FsNode>> {
+    const data = await this.fsNodesService.updateNodeMetadata(
+      id,
+      updateMetadataDto,
       req.user.id,
     );
     return { success: true, data };

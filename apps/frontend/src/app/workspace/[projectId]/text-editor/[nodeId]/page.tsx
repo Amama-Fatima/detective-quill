@@ -2,6 +2,7 @@ import TextEditorContainer from "@/components/editor-workspace/editor/text-edito
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
+import { getUserFromCookie } from "@/lib/utils/get-user";
 
 interface NodePageProps {
   params: Promise<{
@@ -13,20 +14,17 @@ interface NodePageProps {
 export default async function NodePage({ params }: NodePageProps) {
   const { projectId } = await params;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getUserFromCookie();
 
-  if (!user?.id || authError) {
+  if (!user) {
     redirect("/auth/sign-in");
   }
 
   const { isActive, author_id } = await getProjectStatusAndAuthor(
     projectId,
-    supabase
+    supabase,
   );
-  const isOwner = user.id === author_id;
+  const isOwner = user.sub === author_id;
 
   return <TextEditorContainer isActive={isActive} isOwner={isOwner} />;
 }
