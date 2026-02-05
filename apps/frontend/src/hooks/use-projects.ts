@@ -12,21 +12,15 @@ import {
   updateProject,
   changeProjectStatus,
 } from "@/lib/backend-calls/projects";
+import { requireAccessToken } from "@/lib/utils/utils";
 
 export function useProjects() {
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
 
-  const requireAccessToken = () => {
-    if (!accessToken) {
-      throw new Error("No access token found in session");
-    }
-    return accessToken;
-  };
-
   const createMutation = useMutation({
     mutationFn: async (data: CreateProjectDto) => {
-      const token = requireAccessToken();
+      const token = requireAccessToken(accessToken);
       const response = await createProject(data, token);
       return response;
     },
@@ -46,7 +40,7 @@ export function useProjects() {
       projectId: string;
       updateData: UpdateProjectDto;
     }) => {
-      const token = requireAccessToken();
+      const token = requireAccessToken(accessToken);
       const response = await updateProject(
         data.projectId,
         data.updateData,
@@ -66,7 +60,7 @@ export function useProjects() {
 
   const deleteMutation = useMutation({
     mutationFn: async (projectId: string) => {
-      const token = requireAccessToken();
+      const token = requireAccessToken(accessToken);
       const response = await deleteProject(projectId, token);
       return response;
     },
@@ -85,7 +79,7 @@ export function useProjects() {
       projectId: string;
       status: Project["status"];
     }) => {
-      const token = requireAccessToken();
+      const token = requireAccessToken(accessToken);
       const response = await changeProjectStatus(
         data.projectId,
         data.status,

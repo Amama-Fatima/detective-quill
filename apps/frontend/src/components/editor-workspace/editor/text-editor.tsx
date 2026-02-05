@@ -23,9 +23,12 @@ import {
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
 import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
-import { useKeyboardShortcuts } from "@/hooks/text-editor/use-keyboard-shortcuts";
 import type { BlockNoteEditorRef } from "./block-note-editor";
+import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
+import { useContentManager } from "@/hooks/text-editor/use-content-manager";
+import { useRouter } from "next/navigation";
 
+// todo: look into this dynamic import performance impact
 // Dynamically import BlockNote editor with no SSR
 const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
   ssr: false,
@@ -39,37 +42,26 @@ const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
 export type TextEditorProps = {
   fileName?: string;
   value?: string;
-  onChange?: (next: string) => void;
-  onDelete?: () => void;
-  onSave?: () => void;
-  isDirty?: boolean;
-  isSaving?: boolean;
   showComments?: boolean;
   onToggleComments?: () => void;
   commentCount?: number;
   editorRef?: React.RefObject<BlockNoteEditorRef | null>;
   disabledCondition?: boolean;
+  projectId: string;
+  nodeId: string;
 };
 
 const TextEditor = ({
   fileName = "Untitled.md",
   value = "",
-  onChange = () => {},
-  onDelete = () => {},
-  onSave = () => {},
-  isDirty = false,
-  isSaving = false,
   showComments = false,
   onToggleComments = () => {},
   commentCount = 0,
   editorRef,
   disabledCondition = false,
+  projectId,
+  nodeId,
 }: TextEditorProps) => {
-  const [internal, setInternal] = useState(value);
-  const internalEditorRef = useRef<BlockNoteEditorRef>(null);
-  const effectiveEditorRef = editorRef || internalEditorRef;
-
-  // Custom hooks - now using Zustand for global state
   const {
     focusMode,
     isFullscreen,
@@ -78,21 +70,47 @@ const TextEditor = ({
     exitFocusMode,
   } = useFocusMode();
 
-  const { handleKeyDown } = useKeyboardShortcuts({
-    onSave,
+  const { saveFileMutation, deleteFileMutation } = useFileOperations({
+    nodeId,
   });
+  const isDeleting = deleteFileMutation.isPending;
 
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    await deleteFileMutation.mutateAsync();
+    router.push(`/workspace/${projectId}/text-editor`);
+    return true;
+  };
+
+  const { content, isDirty, updateContent, saveContent, isSaving } =
+    useContentManager({
+      initialContent: value,
+      saveFileMutation: saveFileMutation,
+    });
+
+  const [internal, setInternal] = useState(content);
+  const internalEditorRef = useRef<BlockNoteEditorRef>(null);
+  const effectiveEditorRef = editorRef || internalEditorRef;
+
+  // const { handleKeyDown } = useKeyboardShortcuts({
+  //   onSave: handleSave,
+  // });
+  // todo: is this necessary?
   // Keep internal state in sync
-  useEffect(() => setInternal(value), [value]);
+  useEffect(() => setInternal(content), [content]);
 
   const handleContentChange = (content: string) => {
     setInternal(content);
-    onChange(content);
+    updateContent(content);
   };
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className={getContainerClass(focusMode)} onKeyDown={handleKeyDown}>
+      <div
+        className={getContainerClass(focusMode)}
+        // onKeyDown={handleKeyDown}
+      >
         {/* Header - Always visible but styled differently in focus modes */}
         <div className={getHeaderClass(focusMode)}>
           <div className="flex min-w-0 items-center gap-3">
@@ -119,7 +137,7 @@ const TextEditor = ({
                   className={cn(
                     "transition-colors cursor-pointer",
                     focusMode === "APP" &&
-                      "bg-primary/10 text-primary cursor-pointer"
+                      "bg-primary/10 text-primary cursor-pointer",
                   )}
                 >
                   <Focus className="h-4 w-4" />
@@ -141,7 +159,7 @@ const TextEditor = ({
                   className={cn(
                     "transition-colors cursor-pointer",
                     focusMode === "BROWSER" &&
-                      "bg-primary/10 text-primary cursor-pointer"
+                      "bg-primary/10 text-primary cursor-pointer",
                   )}
                 >
                   {isFullscreen ? (
@@ -168,7 +186,7 @@ const TextEditor = ({
                   onClick={onToggleComments}
                   className={cn(
                     "relative transition-colors cursor-pointer",
-                    showComments && "bg-primary/10 text-primary"
+                    showComments && "bg-primary/10 text-primary",
                   )}
                 >
                   <MessageSquare className="h-4 w-4" />
@@ -191,11 +209,11 @@ const TextEditor = ({
                 <Button
                   variant={isDirty ? "default" : "outline"}
                   size="sm"
-                  onClick={onSave}
+                  onClick={saveContent}
                   disabled={isSaving || !isDirty}
                   className={cn(
                     "gap-2 cursor-pointer",
-                    isSaving && "animate-pulse cursor-disabled"
+                    isSaving && "animate-pulse cursor-disabled",
                   )}
                 >
                   {isSaving ? (
@@ -217,8 +235,8 @@ const TextEditor = ({
               <Button
                 variant="ghost"
                 size="icon"
-                disabled={disabledCondition}
-                onClick={onDelete}
+                disabled={disabledCondition || isDeleting}
+                onClick={handleDelete}
                 className="text-destructive hover:text-destructive cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
@@ -246,6 +264,6 @@ const TextEditor = ({
       </div>
     </TooltipProvider>
   );
-}
+};
 
 export default TextEditor;

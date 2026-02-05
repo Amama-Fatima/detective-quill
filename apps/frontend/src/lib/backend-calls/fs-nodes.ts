@@ -5,6 +5,7 @@ import {
   UpdateFsNodeDto,
   DeleteResponse,
   ApiResponse,
+  Project,
 } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -12,7 +13,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
   accessToken: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -25,7 +26,7 @@ async function makeAuthenticatedRequest<T>(
 
   if (!response.ok) {
     throw new Error(
-      `API request failed: ${response.status} ${response.statusText}`
+      `API request failed: ${response.status} ${response.statusText}`,
     );
   }
 
@@ -34,7 +35,7 @@ async function makeAuthenticatedRequest<T>(
 
 export async function createFsNode(
   data: CreateFsNodeDto,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
   return makeAuthenticatedRequest<FsNode>("/fs-nodes", accessToken, {
     method: "POST",
@@ -42,19 +43,41 @@ export async function createFsNode(
   });
 }
 
+export async function getEditorWorkspaceData(
+  projectId: string,
+  accessToken: string,
+  nodeId?: string,
+): Promise<
+  ApiResponse<{
+    project: Project;
+    nodes: FsNodeTreeResponse[];
+    currentNode: FsNode | null;
+  }>
+> {
+  const endpoint = nodeId
+    ? `/fs-nodes/project/${projectId}/workspace?nodeId=${nodeId}`
+    : `/fs-nodes/project/${projectId}/workspace`;
+
+  return makeAuthenticatedRequest<{
+    project: Project;
+    nodes: FsNodeTreeResponse[];
+    currentNode: FsNode | null;
+  }>(endpoint, accessToken);
+}
+
 export async function getProjectTree(
   projectId: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<FsNodeTreeResponse[]>> {
   return makeAuthenticatedRequest<FsNodeTreeResponse[]>(
     `/fs-nodes/project/${projectId}/tree`,
-    accessToken
+    accessToken,
   );
 }
 
 export async function getFsNode(
   nodeId: string,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
   return makeAuthenticatedRequest<FsNode>(`/fs-nodes/${nodeId}`, accessToken);
 }
@@ -62,7 +85,7 @@ export async function getFsNode(
 export async function updateFsNode(
   nodeId: string,
   data: UpdateFsNodeDto,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
   return makeAuthenticatedRequest<FsNode>(`/fs-nodes/${nodeId}`, accessToken, {
     method: "PATCH",
@@ -74,7 +97,7 @@ export async function deleteFsNode(
   nodeId: string,
   accessToken: string,
   hardDelete: boolean = false,
-  cascadeDelete: boolean = false
+  cascadeDelete: boolean = false,
 ): Promise<ApiResponse<DeleteResponse>> {
   const queryParams = new URLSearchParams();
   if (hardDelete) queryParams.append("hard", "true");
@@ -87,7 +110,7 @@ export async function deleteFsNode(
     accessToken,
     {
       method: "DELETE",
-    }
+    },
   );
 }
 
@@ -95,7 +118,7 @@ export async function moveFsNode(
   nodeId: string,
   parentId: string | null,
   sortOrder: number,
-  accessToken: string
+  accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
   return makeAuthenticatedRequest<FsNode>(
     `/fs-nodes/${nodeId}/move`,
@@ -103,6 +126,6 @@ export async function moveFsNode(
     {
       method: "PATCH",
       body: JSON.stringify({ parent_id: parentId, sort_order: sortOrder }),
-    }
+    },
   );
 }

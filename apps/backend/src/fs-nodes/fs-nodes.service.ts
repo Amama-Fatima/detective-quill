@@ -109,6 +109,31 @@ export class FsNodesService {
     return data;
   }
 
+  async getEditorWorkspaceData(
+    projectId: string,
+    userId: string,
+    nodeId?: string,
+  ): Promise<{
+    project: any;
+    nodes: FsNodeTreeResponse[];
+    currentNode: FsNode | null;
+  }> {
+    // Fetch all data in parallel
+    const [project, nodes, currentNode] = await Promise.all([
+      this.projectsService.findProjectById(projectId, userId),
+      this.getProjectTree(projectId, userId),
+      nodeId
+        ? this.getNode(nodeId, userId).catch(() => null)
+        : Promise.resolve(null),
+    ]);
+
+    return {
+      project,
+      nodes,
+      currentNode,
+    };
+  }
+
   // ✅ Use the project_file_tree view instead of manual tree building
   async getProjectTree(
     projectId: string,

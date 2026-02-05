@@ -1,32 +1,21 @@
 import React from "react";
 import { cn } from "@/lib/utils/utils";
-import WorkspaceHeader from "@/components/editor-workspace/workspace-layout/workspace-header";
 import FileTree from "../file-tree/file-tree";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
-import { type Session } from "@supabase/supabase-js";
+import { FolderTree } from "lucide-react";
 
 interface WorkspaceSidebarProps {
   projectName: string;
-  filesCount: number;
-  foldersCount: number;
   nodes: FsNodeTreeResponse[];
-  onNodesChange: (nodes: FsNodeTreeResponse[]) => void;
   projectId: string;
-  session: Session | null;
-  loading: boolean;
   isOwner: boolean;
   isActive: boolean;
 }
 
 export default function WorkspaceSidebar({
   projectName,
-  filesCount,
-  foldersCount,
   nodes,
-  onNodesChange,
   projectId,
-  session,
-  loading,
   isOwner,
   isActive,
 }: WorkspaceSidebarProps) {
@@ -36,18 +25,19 @@ export default function WorkspaceSidebar({
         "w-80 border-r bg-gradient-to-b from-card/50 to-card/30 flex flex-col shadow-sm transition-all duration-300",
       )}
     >
-      <WorkspaceHeader
-        projectName={projectName}
-        filesCount={filesCount}
-        foldersCount={foldersCount}
-      />
+      <div className="p-4 border-b bg-card">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <FolderTree className="h-5 w-5 text-primary" />
+            <h1 className="mystery-title text-lg font-semibold">
+              {projectName}
+            </h1>
+          </div>
+        </div>
+      </div>
       <FileTree
-        nodes={nodes}
-        onNodesChange={onNodesChange}
+        initialNodes={nodes}
         projectId={projectId}
-        projectName={projectName}
-        session={session}
-        loading={loading}
         isOwner={isOwner}
         isActive={isActive}
       />

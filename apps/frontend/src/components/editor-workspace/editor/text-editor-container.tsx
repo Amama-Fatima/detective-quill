@@ -5,27 +5,25 @@ import TextEditor from "@/components/editor-workspace/editor/text-editor";
 import CommentsPanel from "@/components/editor-workspace/comments/comments-panel";
 import NewCommentDialog from "@/components/editor-workspace/comments/new-comment-dialog";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
-import { useContentManager } from "@/hooks/text-editor/use-content-manager";
 import { useComments } from "@/hooks/use-comments";
 import { FileNotFoundState } from "./loading-states";
-import { FsNode } from "@detective-quill/shared-types";
 import { Button } from "@/components/ui/button";
 import { MessageSquarePlus } from "lucide-react";
 import type { BlockNoteEditorRef } from "./block-note-editor";
+import { useParams } from "next/navigation";
 
 interface TextEditorContainerProps {
-  projectId: string;
-  node: FsNode;
   isActive: boolean;
   isOwner: boolean;
 }
 
 export default function TextEditorContainer({
-  projectId,
-  node,
   isActive,
   isOwner,
 }: TextEditorContainerProps) {
+  const params = useParams();
+  const nodeId = params.nodeId as string;
+  const projectId = params.projectId as string;
   const [showComments, setShowComments] = useState(false);
   const [showNewCommentDialog, setShowNewCommentDialog] = useState(false);
   const [selectedTextForComment, setSelectedTextForComment] =
@@ -38,24 +36,25 @@ export default function TextEditorContainer({
   } | null>(null);
   const editorRef = useRef<BlockNoteEditorRef>(null);
 
-  const { saving, saveFile, deleteFile } = useFileOperations({
-    projectId,
-    initialNode: node,
-  });
-
-  const { content, isDirty, updateContent, saveContent } = useContentManager({
-    initialContent: node?.content || "",
-    autoSaveDelay: 2000,
-    onSave: saveFile,
+  const { nodeData, isLoading, error } = useFileOperations({
+    nodeId,
   });
 
   const { stats } = useComments({
-    fsNodeId: node?.id || "",
+    fsNodeId: nodeData?.id || "",
     includeResolved: true,
     projectId,
   });
 
-  if (!node) {
+  if (isLoading) {
+    return <div>Loading file...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading file: {error.message}</div>;
+  }
+
+  if (!nodeData) {
     return <FileNotFoundState />;
   }
 
@@ -72,22 +71,20 @@ export default function TextEditorContainer({
     setShowNewCommentDialog(true);
   };
 
+  // todo: bring the action buttons outside the text editor and into this container
   return (
     <div className="flex h-screen w-full">
       <div className={showComments ? "flex-1" : "w-full"}>
         <TextEditor
-          fileName={node.name}
-          value={content}
-          onChange={updateContent}
-          onDelete={deleteFile}
-          isDirty={isDirty}
-          isSaving={saving}
-          onSave={saveContent}
+          fileName={nodeData?.name || ""}
+          value={nodeData?.content || ""}
           showComments={showComments}
           onToggleComments={() => setShowComments(!showComments)}
           commentCount={stats?.unresolved || 0}
           editorRef={editorRef}
           disabledCondition={!isActive || !isOwner}
+          projectId={projectId}
+          nodeId={nodeData?.id || ""}
         />
       </div>
 
@@ -119,7 +116,7 @@ export default function TextEditorContainer({
         setSelectionData={setSelectionData}
         setShowNewCommentDialog={setShowNewCommentDialog}
         projectId={projectId}
-        nodeId={node?.id || ""}
+        nodeId={nodeData?.id || ""}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   createFsNode,
@@ -9,279 +9,202 @@ import {
 import {
   CreateFsNodeDto,
   FsNodeTreeResponse,
-  FsNode,
   UpdateFsNodeDto,
 } from "@detective-quill/shared-types";
 import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/auth-context";
+import { getProjectTree } from "@/lib/backend-calls/fs-nodes";
+import {
+  findNodeById,
+  flattenNodes,
+  countChildren,
+} from "@/lib/utils/file-tree-utils";
+import { requireAccessToken } from "@/lib/utils/utils";
 
 interface UseFileTreeOperationsProps {
   projectId: string;
-  session: any;
-  nodes: FsNodeTreeResponse[];
+  initialNodes: FsNodeTreeResponse[];
   selectedNodeId?: string;
 }
 
 export const useFileTreeOperations = ({
   projectId,
-  session,
-  nodes,
+  initialNodes,
   selectedNodeId,
 }: UseFileTreeOperationsProps) => {
-  const [creating, setCreating] = useState(false);
-  const [renaming, setRenaming] = useState(false);
-  const [moving, setMoving] = useState(false);
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const accessToken = session?.access_token || "";
+
   const router = useRouter();
 
-  const createNode = useCallback(
-    async (
-      name: string,
-      nodeType: "file" | "folder",
-      parentId?: string,
-      description?: string
-    ): Promise<boolean> => {
-      if (!session?.access_token) {
-        toast.error("No session available");
-        return false;
+  const {
+    data: nodes = [],
+    isLoading,
+    isFetching,
+  } = useQuery<FsNodeTreeResponse[]>({
+    queryKey: ["project-tree", projectId],
+    queryFn: async () => {
+      const token = requireAccessToken(accessToken);
+      const response = await getProjectTree(projectId, token);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || "Failed to fetch project tree");
       }
+      return response.data;
+    },
+    initialData: initialNodes, // From server
+  });
 
-      setCreating(true);
-      try {
-        const createNodeData: CreateFsNodeDto = {
-          project_id: projectId,
-          parent_id: parentId || undefined,
-          name,
-          node_type: nodeType,
-          content: nodeType === "file" ? "" : undefined,
-          file_extension: nodeType === "file" ? "md" : undefined,
-          description: description,
-        };
+  const createNodeMutation = useMutation({
+    mutationFn: async ({
+      name,
+      nodeType,
+      parentId,
+      description,
+    }: {
+      name: string;
+      nodeType: "file" | "folder";
+      parentId?: string;
+      description?: string;
+    }) => {
+      const token = requireAccessToken(accessToken);
+      const createNodeData: CreateFsNodeDto = {
+        project_id: projectId,
 
-        const response = await createFsNode(
-          createNodeData,
-          session.access_token
-        );
-
-        if (response.success && response.data) {
-          toast.success(
-            `${nodeType === "file" ? "File" : "Folder"} created successfully`
-          );
-
-          // Refresh the page to get updated data
-          window.location.reload();
-
-          // Navigate to file if it's a file
-          if (nodeType === "file") {
-            router.push(
-              `/workspace/${projectId}/text-editor/${response.data.id}`
-            );
-          }
-
-          return true;
-        } else {
-          toast.error(response.error || `Failed to create ${nodeType}`);
-          return false;
-        }
-      } catch (error) {
-        console.error(`Error creating ${nodeType}:`, error);
-        toast.error(`Failed to create ${nodeType}`);
-        return false;
-      } finally {
-        setCreating(false);
+        parent_id: parentId || undefined,
+        name,
+        node_type: nodeType,
+        content: nodeType === "file" ? "" : undefined,
+        file_extension: nodeType === "file" ? "md" : undefined,
+        description: description,
+      };
+      const response = await createFsNode(createNodeData, token);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      throw new Error(response.error || `Failed to create ${nodeType}`);
+    },
+    onSuccess: (newNode) => {
+      toast.success("Item created successfully");
+      // Invalidate and refetch the project tree
+      queryClient.invalidateQueries({ queryKey: ["project-tree", projectId] });
+      // Navigate to file if it's a file
+      if (newNode.node_type === "file") {
+        router.push(`/workspace/${projectId}/text-editor/${newNode.id}`);
       }
     },
-    [projectId, session, router]
-  );
+    onError: (error: any) => {
+      console.error("Error creating node:", error);
+      toast.error("Failed to create item");
+    },
+  });
 
-  const renameNode = useCallback(
-    async (nodeId: string, newName: string): Promise<boolean> => {
-      if (!session?.access_token) {
-        toast.error("No session available");
-        return false;
-      }
-
-      setRenaming(true);
-      try {
-        const updateData: UpdateFsNodeDto = {
-          name: newName,
-        };
-
-        const response = await updateFsNode(
-          nodeId,
-          updateData,
-          session.access_token
-        );
-
-        if (response.success) {
-          toast.success("Item renamed successfully");
-          window.location.reload();
-          return true;
-        } else {
-          toast.error(response.error || "Failed to rename");
-          return false;
-        }
-      } catch (error) {
-        console.error("Error renaming node:", error);
-        toast.error("Failed to rename");
-        return false;
-      } finally {
-        setRenaming(false);
+  const renameNodeMutation = useMutation({
+    mutationFn: async ({
+      nodeId,
+      newName,
+    }: {
+      nodeId: string;
+      newName: string;
+    }) => {
+      const token = requireAccessToken(accessToken);
+      const updateData: UpdateFsNodeDto = {
+        name: newName,
+      };
+      const response = await updateFsNode(nodeId, updateData, token);
+      if (response.success) {
+        return true;
       }
     },
-    [session]
-  );
+    onSuccess: () => {
+      toast.success("Item renamed successfully");
+      queryClient.invalidateQueries({ queryKey: ["project-tree", projectId] });
+    },
+    onError: (error: any) => {
+      console.error("Error renaming node:", error);
+      toast.error("Failed to rename");
+    },
+  });
 
-  const moveNode = useCallback(
-    async (nodeId: string, newParentId: string | null): Promise<boolean> => {
-      if (!session?.access_token) {
-        toast.error("No session available");
-        return false;
+  const moveNodeMutation = useMutation({
+    mutationFn: async ({
+      nodeId,
+      newParentId,
+    }: {
+      nodeId: string;
+      newParentId: string | null;
+    }) => {
+      const token = requireAccessToken(accessToken);
+
+      // Flatten tree to find siblings at destination parent level
+      const allNodes = flattenNodes(nodes);
+      const siblings = allNodes.filter((n) => n.parent_id === newParentId);
+
+      // Calculate new sort order (place at end of siblings)
+      const newSortOrder =
+        siblings.length > 0
+          ? Math.max(...siblings.map((s) => s.sort_order || 0)) + 1
+          : 1;
+
+      const response = await moveFsNode(
+        nodeId,
+        newParentId,
+        newSortOrder,
+        token,
+      );
+      if (response.success) {
+        return response.data;
       }
+      throw new Error(response.error || "Failed to move");
+    },
+    onSuccess: () => {
+      toast.success("Item moved successfully");
+      queryClient.invalidateQueries({ queryKey: ["project-tree", projectId] });
+    },
+    onError: (error: any) => {
+      console.error("Error moving node:", error);
+      toast.error("Failed to move");
+    },
+  });
 
-      setMoving(true);
-      try {
-        const flattenNodes = (
-          nodeList: FsNodeTreeResponse[]
-        ): FsNodeTreeResponse[] => {
-          const flattened: FsNodeTreeResponse[] = [];
-          const traverse = (nodes: FsNodeTreeResponse[]) => {
-            nodes.forEach((node) => {
-              flattened.push(node);
-              if (node.children) traverse(node.children);
-            });
-          };
-          traverse(nodeList);
-          return flattened;
-        };
+  const deleteNodeMutation = useMutation({
+    mutationFn: async ({
+      nodeId,
+      cascadeDelete,
+    }: {
+      nodeId: string;
+      cascadeDelete: boolean;
+    }) => {
+      const token = requireAccessToken(accessToken);
+      const response = await deleteFsNode(nodeId, token, false, cascadeDelete);
+      if (response.success) {
+        return response.data;
+      }
+      throw new Error(response.error || "Failed to delete");
+    },
+    onSuccess: (deletedNode, variables) => {
+      toast.success("Item deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["project-tree", projectId] });
 
-        const allNodes = flattenNodes(nodes);
-        const siblings = allNodes.filter((n) => n.parent_id === newParentId);
-        const newSortOrder =
-          siblings.length > 0
-            ? Math.max(...siblings.map((s) => s.sort_order || 0)) + 1
-            : 1;
-
-        const response = await moveFsNode(
-          nodeId,
-          newParentId,
-          newSortOrder,
-          session.access_token
-        );
-
-        if (response.success) {
-          toast.success("Item moved successfully");
-          window.location.reload();
-          return true;
-        } else {
-          toast.error(response.error || "Failed to move");
-          return false;
-        }
-      } catch (error) {
-        console.error("Error moving node:", error);
-        toast.error("Failed to move");
-        return false;
-      } finally {
-        setMoving(false);
+      // If deleting currently selected node, navigate away
+      if (selectedNodeId === variables.nodeId) {
+        router.push(`/workspace/${projectId}`);
       }
     },
-    [session, nodes]
-  );
-
-  const deleteNode = useCallback(
-    async (nodeId: string): Promise<boolean> => {
-      if (!session?.access_token) {
-        toast.error("No session available");
-        return false;
-      }
-
-      try {
-        const nodeToDelete = findNodeById(nodes, nodeId);
-        if (!nodeToDelete) {
-          toast.error("Node not found");
-          return false;
-        }
-
-        let confirmMessage: string;
-        let cascadeDelete = false;
-
-        if (nodeToDelete.node_type === "folder") {
-          const countChildren = (node: FsNodeTreeResponse): number => {
-            let count = 0;
-            if (node.children) {
-              count += node.children.length;
-              node.children.forEach((child) => {
-                count += countChildren(child);
-              });
-            }
-            return count;
-          };
-
-          const childCount = countChildren(nodeToDelete);
-
-          if (childCount > 0) {
-            confirmMessage = `Are you sure you want to delete the folder "${nodeToDelete.name}" and all ${childCount} items inside it?\n\nThis action cannot be undone.`;
-            cascadeDelete = true;
-          } else {
-            confirmMessage = `Are you sure you want to delete the empty folder "${nodeToDelete.name}"?`;
-          }
-        } else {
-          confirmMessage = `Are you sure you want to delete the file "${nodeToDelete.name}"?`;
-        }
-
-        if (!confirm(confirmMessage)) return false;
-
-        const response = await deleteFsNode(
-          nodeId,
-          session.access_token,
-          false,
-          cascadeDelete
-        );
-
-        if (response.success) {
-          toast.success(response.data?.message || "Item deleted successfully");
-
-          // If deleting currently selected node, navigate away
-          if (selectedNodeId === nodeId) {
-            router.push(`/workspace/${projectId}`);
-          } else {
-            window.location.reload();
-          }
-
-          return true;
-        } else {
-          toast.error(response.error || "Failed to delete item");
-          return false;
-        }
-      } catch (error) {
-        console.error("Error deleting node:", error);
-        toast.error("Failed to delete item");
-        return false;
-      }
+    onError: (error: any) => {
+      console.error("Error deleting node:", error);
+      toast.error("Failed to delete item");
     },
-    [session, nodes, selectedNodeId, projectId, router]
-  );
+  });
 
   return {
-    creating,
-    renaming,
-    moving,
-    createNode,
-    renameNode,
-    moveNode,
-    deleteNode,
+    createNodeMutation,
+    renameNodeMutation,
+    moveNodeMutation,
+    deleteNodeMutation,
+    nodes,
+    isLoading,
+    isFetching
   };
 };
-
-// Helper function
-function findNodeById(
-  nodes: FsNodeTreeResponse[],
-  nodeId: string
-): FsNodeTreeResponse | null {
-  for (const node of nodes) {
-    if (node.id === nodeId) return node;
-    if (node.children) {
-      const found = findNodeById(node.children, nodeId);
-      if (found) return found;
-    }
-  }
-  return null;
-}

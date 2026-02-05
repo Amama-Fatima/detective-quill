@@ -39,6 +39,20 @@ export class FsNodesController {
     return { success: true, data };
   }
 
+  @Get("project/:projectId/workspace")
+  async getEditorWorkspaceData(
+    @Param("projectId") projectId: string,
+    @Request() req,
+  ): Promise<ApiResponse<any>> {
+    const nodeId = req.query.nodeId as string | undefined;
+    const data = await this.fsNodesService.getEditorWorkspaceData(
+      projectId,
+      req.user.id,
+      nodeId,
+    );
+    return { success: true, data };
+  }
+
   // todo: forbidden is not thrown in the service any where, add it there jab time milay
   @Get("project/:projectId/tree")
   async getProjectTree(

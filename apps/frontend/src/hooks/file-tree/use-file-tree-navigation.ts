@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
 import { toast } from "sonner";
+import { findNodeById } from "@/lib/utils/file-tree-utils";
 
 interface UseFileTreeNavigationProps {
   projectId: string;
@@ -40,18 +41,3 @@ export const useFileTreeNavigation = ({
     handleSearchSelect,
   };
 };
-
-// Helper function
-function findNodeById(
-  nodes: FsNodeTreeResponse[],
-  nodeId: string
-): FsNodeTreeResponse | null {
-  for (const node of nodes) {
-    if (node.id === nodeId) return node;
-    if (node.children) {
-      const found = findNodeById(node.children, nodeId);
-      if (found) return found;
-    }
-  }
-  return null;
-}
