@@ -14,6 +14,7 @@ import ProjectsDisplay from "./projects-display";
 type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
 interface ProjectsPageClientProps {
+  user: User;
   initialProjects: Project[];
   invitedProjects?: Project[];
 }
@@ -100,7 +101,6 @@ export default function UserProjectsPage({
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs
           value={filter}
@@ -109,7 +109,6 @@ export default function UserProjectsPage({
             updateTabUrl(value as FilterOption);
           }}
         >
-          {/* Controls Section */}
           <div className="noir-text flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
             <TabsList className="bg-card/50 border border-border">
               <TabsTrigger value="all" className="font-serif cursor-pointer">
