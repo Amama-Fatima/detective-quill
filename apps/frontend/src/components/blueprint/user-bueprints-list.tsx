@@ -1,10 +1,13 @@
+"use client";
+
 import { Blueprint } from "@detective-quill/shared-types/api";
 import Link from "next/dist/client/link";
-import React from "react";
+import React, { useState } from "react";
 import { Tag, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { getBlueprintTypeColor } from "@/lib/utils/blueprint-utils";
 import { DeleteBlueprintButton } from "./btns/delete-blueprint-btn";
+import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 
 interface UserBlueprintsListProps {
   blueprints: Blueprint[];
@@ -14,11 +17,21 @@ interface UserBlueprintsListProps {
 }
 
 export const UserBlueprintsList = ({
-  blueprints,
+  blueprints: initialBlueprints,
   projectId,
   isOwner,
   isActive,
 }: UserBlueprintsListProps) => {
+  const [blueprints, setBlueprints] = useState<Blueprint[]>(initialBlueprints);
+
+  const { deleteMutation } = useBlueprints();
+  const loading = deleteMutation.isPending;
+
+  const onDelete = async (blueprintId: string) => {
+    await deleteMutation.mutateAsync(blueprintId);
+    setBlueprints((prev) => prev.filter((bp) => bp.id !== blueprintId));
+  };
+
   if (blueprints.length === 0) {
     return (
       <div className="text-center py-16 border-2 border-muted bg-gradient-to-br from-card/70 to-chart-5/30">
@@ -62,7 +75,11 @@ export const UserBlueprintsList = ({
                       </CardTitle>
                     </Link>
                     {isOwner && isActive && (
-                      <DeleteBlueprintButton blueprintId={blueprint.id} />
+                      <DeleteBlueprintButton
+                        blueprintId={blueprint.id}
+                        onDelete={onDelete}
+                        loading={loading}
+                      />
                     )}{" "}
                   </div>
                 </div>
@@ -71,7 +88,7 @@ export const UserBlueprintsList = ({
             <CardContent>
               <div
                 className={`${getBlueprintTypeColor(
-                  blueprint.type
+                  blueprint.type,
                 )} flex justify-items-center align-middle gap-2 items-center`}
               >
                 <>

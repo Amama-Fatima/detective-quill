@@ -17,14 +17,14 @@ import {
 import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { SignInFormValues, signInSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
-import ConfirmationMessages from "../instructions/confirmation-messages";
+import ConfirmationMessages from "../msgs-instructions/confirmation-messages";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const searchParams = useSearchParams();
   const redirectTo = searchParams?.get("redirectTo") ?? "/";
 
@@ -38,7 +38,6 @@ export function SignInForm() {
 
   const onSubmit = async (values: SignInFormValues) => {
     setIsLoading(true);
-    setError("");
 
     try {
       const { data, error } =
@@ -47,14 +46,14 @@ export function SignInForm() {
           password: values.password,
         });
 
-      if (error) {
-        throw error;
+      if (error || !data.session) {
+        toast.error("Failed to sign in. Please check your credentials.");
+        return;
       }
       // Redirect manually after successful sign-in
       window.location.assign(`${window.location.origin}${redirectTo}`);
-      console.log("data sign in is ", data);
     } catch (error) {
-      setError("Invalid email or password");
+      toast.error("Invalid email or password");
     } finally {
       setIsLoading(false);
     }
@@ -65,12 +64,6 @@ export function SignInForm() {
       <ConfirmationMessages />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {error && (
-            <Alert variant="destructive" className="text-sm">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
           <FormField
             control={form.control}
             name="email"

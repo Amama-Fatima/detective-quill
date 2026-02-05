@@ -39,7 +39,7 @@ export async function createComment(
   data: CreateCommentDto,
   accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
-  return makeAuthenticatedRequest<CommentResponse>(`${data.project_id}/comments`, accessToken, {
+  return makeAuthenticatedRequest<CommentResponse>(`/${data.project_id}/comments`, accessToken, {
     method: "POST",
     body: JSON.stringify(data),
   });

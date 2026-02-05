@@ -1,132 +1,106 @@
-import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import {
   Project,
   CreateProjectDto,
   UpdateProjectDto,
 } from "@detective-quill/shared-types";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 import {
   createProject,
   deleteProject,
   updateProject,
+  changeProjectStatus,
 } from "@/lib/backend-calls/projects";
-import { toast } from "sonner";
+import { requireAccessToken } from "@/lib/utils/utils";
 
-export function useProjects(initialProjects?: Project[]) {
+export function useProjects() {
   const { session } = useAuth();
-  const [projects, setProjects] = useState<Project[]>(initialProjects || []);
-  const [loading] = useState(!initialProjects);
-  const [creating, setCreating] = useState(false);
+  const accessToken = session?.access_token || "";
 
-  // const fetchProjects = async () => {
-  //   if (!session?.access_token) return;
-
-  //   try {
-  //     setLoading(true);
-  //     const response = await getProjects(session.access_token);
-
-  //     if (response.success && response.data) {
-  //       setProjects(response.data);
-  //     } else {
-  //       toast.error(response.error || "Failed to fetch projects");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching projects:", error);
-  //     toast.error("Failed to fetch projects");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const createNewProject = async (data: CreateProjectDto) => {
-    if (!session?.access_token) return false;
-
-    try {
-      setCreating(true);
-      const response = await createProject(data, session.access_token);
-
+  const createMutation = useMutation({
+    mutationFn: async (data: CreateProjectDto) => {
+      const token = requireAccessToken(accessToken);
+      const response = await createProject(data, token);
+      return response;
+    },
+    onSuccess: (response) => {
       if (response.success && response.data) {
         toast.success("Project created successfully");
-        setProjects((prev) => [response.data!, ...prev]);
-        return true;
-      } else {
-        toast.error(response.error || "Failed to create project");
-        return false;
+        // setProjects((prev) => [...prev, response.data!]);
       }
-    } catch (error) {
-      console.error("Error creating project:", error);
+    },
+    onError: () => {
       toast.error("Failed to create project");
-      return false;
-    } finally {
-      setCreating(false);
-    }
-  };
+    },
+  });
 
-  const updateExistingProject = async (
-    projectId: string,
-    data: UpdateProjectDto,
-  ) => {
-    if (!session?.access_token) return false;
-
-    try {
+  const updateMutation = useMutation({
+    mutationFn: async (data: {
+      projectId: string;
+      updateData: UpdateProjectDto;
+    }) => {
+      const token = requireAccessToken(accessToken);
       const response = await updateProject(
-        projectId,
-        data,
-        session.access_token,
+        data.projectId,
+        data.updateData,
+        token,
       );
-
+      return response;
+    },
+    onSuccess: (response) => {
       if (response.success && response.data) {
         toast.success("Project updated successfully");
-        setProjects((prev) =>
-          prev.map((p) => (p.id === projectId ? response.data! : p)),
-        );
-        return true;
-      } else {
-        toast.error(response.error || "Failed to update project");
-        return false;
       }
-    } catch (error) {
-      console.error("Error updating project:", error);
+    },
+    onError: () => {
       toast.error("Failed to update project");
-      return false;
-    }
-  };
+    },
+  });
 
-  const deleteExistingProject = async (projectId: string) => {
-    if (!session?.access_token) return false;
-
-    try {
-      const response = await deleteProject(projectId, session.access_token);
-
+  const deleteMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const token = requireAccessToken(accessToken);
+      const response = await deleteProject(projectId, token);
+      return response;
+    },
+    onSuccess: (response, projectId) => {
       if (response.success) {
         toast.success("Project deleted successfully");
-        setProjects((prev) => prev.filter((p) => p.id !== projectId));
-        return true;
-      } else {
-        toast.error(response.error || "Failed to delete project");
-        return false;
       }
-    } catch (error) {
-      console.error("Error deleting project:", error);
+    },
+    onError: () => {
       toast.error("Failed to delete project");
-      return false;
-    }
-  };
+    },
+  });
 
-  // Only fetch if we don't have initial projects and session exists
-  // useEffect(() => {
-  //   if (!initialProjects && session) {
-  //     fetchProjects();
-  //   }
-  // }, [session, initialProjects]);
+  const changeStatusMutation = useMutation({
+    mutationFn: async (data: {
+      projectId: string;
+      status: Project["status"];
+    }) => {
+      const token = requireAccessToken(accessToken);
+      const response = await changeProjectStatus(
+        data.projectId,
+        data.status,
+        token,
+      );
+      return response;
+    },
+    onSuccess: (response) => {
+      if (response.success && response.data) {
+        toast.success("Project status changed successfully");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to change project status");
+    },
+  });
 
   return {
-    projects,
-    loading,
-    creating,
-    // fetchProjects,
-    createProject: createNewProject,
-    updateProject: updateExistingProject,
-    deleteProject: deleteExistingProject,
+    createMutation,
+    updateMutation,
+    deleteMutation,
+    changeStatusMutation,
   };
 }

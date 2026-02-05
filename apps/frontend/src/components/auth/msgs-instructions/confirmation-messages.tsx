@@ -10,11 +10,10 @@ const ConfirmationMessages = () => {
   const [confirmationStatus, setConfirmationStatus] = useState<
     "success" | "error" | "server_error" | "password_updated" | null
   >(null);
+  const error = searchParams.get("error");
+  const message = searchParams.get("message");
 
   useEffect(() => {
-    const error = searchParams.get("error");
-    const message = searchParams.get("message");
-
     if (error === "confirmation_failed") {
       setConfirmationStatus("error");
     } else if (error === "server_error") {
@@ -34,7 +33,6 @@ const ConfirmationMessages = () => {
 
   return (
     <div className="space-y-4">
-      {/* Confirmation Status Messages */}
       {confirmationStatus === "success" && (
         <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/50">
           <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />

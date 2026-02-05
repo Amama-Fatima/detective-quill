@@ -13,12 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { inviteProjectMembers } from "@/lib/backend-calls/members";
-import { EmailSendingApiRequestDto } from "@detective-quill/shared-types";
-import { useAuth } from "@/context/auth-context";
-import { toast } from "sonner";
+import { useMembers } from "@/hooks/use-members";
 import { validateEmails } from "@/lib/utils/invitation-utils";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
+import { toast } from "sonner";
 
 interface InviteMembersDialogProps {
   inviteDialogOpen: boolean;
@@ -32,11 +30,6 @@ const InviteMembersDialog = ({
   projectId,
 }: InviteMembersDialogProps) => {
   const [emails, setEmails] = useState<string[]>([""]);
-  const [loading, setLoading] = useState(false);
-
-  const { user, session } = useAuth();
-  const username = user?.user_metadata.full_name || "Someone";
-  const accessToken = session?.access_token || "";
 
   const handleAddEmailField = () => setEmails([...emails, ""]);
 
@@ -45,40 +38,28 @@ const InviteMembersDialog = ({
     updated[index] = value;
     setEmails(updated);
   };
-  const { setNotAllowedEmails, notAllowedEmails } = useBetaReaderEmailsStore();
+  const { sendInvitationsMutation } = useMembers(projectId);
+  const loading = sendInvitationsMutation.isPending;
+  const { notAllowedEmails, setNotAllowedEmails } = useBetaReaderEmailsStore();
 
   const handleSendInvitations = async () => {
-    try {
-      setLoading(true);
-      const { validEmails, invalidEmails } = validateEmails(
-        emails,
-        notAllowedEmails
+    const { validEmails, invalidEmails } = validateEmails(
+      emails,
+      notAllowedEmails,
+    );
+    if (invalidEmails.length > 0) {
+      toast.error(
+        `Emails already invited: ${invalidEmails.join(
+          ", ",
+        )}. Enter valid emails and try again.`,
       );
-      if (invalidEmails.length > 0) {
-        toast.error(
-          `Emails already invited: ${invalidEmails.join(
-            ", "
-          )}. Enter valid emails and try again.`
-        );
-        return;
-      }
-      const requestData: EmailSendingApiRequestDto = {
-        projectId,
-        emails: validEmails,
-        inviterName: username,
-      };
-      await inviteProjectMembers(requestData, accessToken);
-      const updatedNotAllowedEmails = [...notAllowedEmails, ...validEmails];
-      setNotAllowedEmails(updatedNotAllowedEmails);
-      setInviteDialogOpen(false);
-      setEmails([""]);
-      toast.success("Invitation emails sent successfully");
-    } catch (error) {
-      console.error("Error sending invitations:", error);
-      toast.error("Failed to send invitation emails");
-    } finally {
-      setLoading(false);
+      return;
     }
+    await sendInvitationsMutation.mutateAsync(validEmails);
+    const updatedNotAllowedEmails = [...notAllowedEmails, ...validEmails];
+    setNotAllowedEmails(updatedNotAllowedEmails);
+    setInviteDialogOpen(false);
+    setEmails([""]);
   };
 
   return (

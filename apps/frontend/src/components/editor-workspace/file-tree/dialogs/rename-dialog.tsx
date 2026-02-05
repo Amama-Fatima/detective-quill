@@ -13,13 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, FileText, Folder } from "lucide-react";
-import { FsNode } from "@detective-quill/shared-types";
 
 interface RenameDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (newName: string) => Promise<void>;
-  node: FsNode | null;
+  initialName: string;
+  nodeType: "file" | "folder";
   loading?: boolean;
 }
 
@@ -27,21 +27,22 @@ const RenameDialog = ({
   open,
   onOpenChange,
   onSubmit,
-  node,
+  initialName,
+  nodeType,
   loading = false,
 }: RenameDialogProps) => {
   const [name, setName] = useState("");
 
   // Set initial name when dialog opens
   useEffect(() => {
-    if (open && node) {
-      setName(node.name);
+    if (open && initialName) {
+      setName(initialName);
     }
-  }, [open, node]);
+  }, [open, initialName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim() && name.trim() !== node?.name) {
+    if (name.trim() && name.trim() !== initialName) {
       await onSubmit(name.trim());
       handleClose();
     }
@@ -62,9 +63,9 @@ const RenameDialog = ({
     }
   };
 
-  if (!node) return null;
+  if (!initialName) return null;
 
-  const isFile = node.node_type === "file";
+  const isFile = nodeType === "file";
   const icon = isFile ? FileText : Folder;
 
   return (
@@ -76,7 +77,7 @@ const RenameDialog = ({
             <DialogTitle>Rename {isFile ? "File" : "Folder"}</DialogTitle>
           </div>
           <DialogDescription>
-            Enter a new name for "{node.name}"
+            Enter a new name for "{initialName}"
           </DialogDescription>
         </DialogHeader>
 
@@ -112,7 +113,7 @@ const RenameDialog = ({
             </Button>
             <Button
               type="submit"
-              disabled={!name.trim() || name.trim() === node.name || loading}
+              disabled={!name.trim() || name.trim() === initialName || loading}
               className="gap-2 cursor-pointer"
             >
               {loading ? (

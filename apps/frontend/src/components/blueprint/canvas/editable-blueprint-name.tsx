@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useBlueprints } from "@/hooks/use-blueprints";
+import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 
 interface EditableBlueprintNameProps {
   initialName: string;
@@ -20,14 +20,15 @@ export default function EditableBlueprintName({
 }: EditableBlueprintNameProps) {
   const [name, setName] = useState(initialName || "Untitled Project");
   const [isEditing, setIsEditing] = useState(false);
-  const { update, loading } = useBlueprints();
+  const { updateMutation } = useBlueprints();
+  const loading = updateMutation.isPending;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
 
   const onSave = async (newName: string) => {
-    await update(blueprintId, newName);
+    await updateMutation.mutateAsync({ blueprintId, newName });
     document.title = `${newName} Blueprint`;
   };
 

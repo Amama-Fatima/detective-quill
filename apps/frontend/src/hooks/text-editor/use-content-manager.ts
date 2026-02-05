@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
+import { useFileOperations } from "./use-file-operations";
 
 interface UseContentManagerProps {
   initialContent?: string;
-  autoSaveDelay?: number;
-  onSave?: (content: string) => Promise<boolean>;
+  saveFileMutation: ReturnType<typeof useFileOperations>["saveFileMutation"];
 }
 
 export const useContentManager = ({
   initialContent = "",
-  autoSaveDelay = 2000,
-  onSave,
+  saveFileMutation,
 }: UseContentManagerProps) => {
   const [content, setContent] = useState(initialContent);
   const [originalContent, setOriginalContent] = useState(initialContent);
   const [isDirty, setIsDirty] = useState(false);
+  const isSaving = saveFileMutation.isPending;
 
   // Update content and track changes
   const updateContent = useCallback((newContent: string) => {
@@ -36,31 +36,21 @@ export const useContentManager = ({
 
   // Manual save function
   const saveContent = useCallback(async () => {
-    if (!isDirty || !onSave) return false;
+    if (!isDirty) return false;
 
-    const success = await onSave(content);
+    const success = await saveFileMutation.mutateAsync(content);
     if (success) {
       setOriginalContent(content);
       setIsDirty(false);
     }
     return success;
-  }, [content, isDirty, onSave]);
-
-  // Auto-save functionality
-  useEffect(() => {
-    if (!isDirty || !onSave) return;
-
-    const autoSaveTimer = setTimeout(() => {
-      saveContent();
-    }, autoSaveDelay);
-
-    return () => clearTimeout(autoSaveTimer);
-  }, [content, isDirty, autoSaveDelay, saveContent, onSave]);
+  }, [content, isDirty]);
 
   return {
     content,
     isDirty,
     updateContent,
     saveContent,
+    isSaving,
   };
 };

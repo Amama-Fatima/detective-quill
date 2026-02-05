@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare } from "lucide-react";
-import { CreateCommentDto, CommentResponse } from "@detective-quill/shared-types";
+import { useComments } from "@/hooks/use-comments";
 
 interface NewCommentDialogProps {
   open: boolean;
@@ -33,12 +33,11 @@ interface NewCommentDialogProps {
     } | null>
   >;
   setShowNewCommentDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  addComment: (data: CreateCommentDto) => Promise<CommentResponse | null>;
   projectId: string;
   nodeId: string;
 }
 
-export default function NewCommentDialog ({
+export default function NewCommentDialog({
   open,
   onOpenChange,
   selectedText,
@@ -46,15 +45,19 @@ export default function NewCommentDialog ({
   setSelectedTextForComment,
   setSelectionData,
   setShowNewCommentDialog,
-  addComment,
   projectId,
   nodeId,
 }: NewCommentDialogProps) {
   const [content, setContent] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addCommentMutation } = useComments({
+    fsNodeId: nodeId,
+    includeResolved: true,
+    projectId: projectId,
+  });
+  const submitting = addCommentMutation.isPending;
 
   const handleAddComment = async (commentContent: string) => {
-    const result = await addComment({
+    const result = await addCommentMutation.mutateAsync({
       fs_node_id: nodeId,
       project_id: projectId,
       block_id: selectionData ? selectionData.blockId : "default-block",
@@ -76,18 +79,10 @@ export default function NewCommentDialog ({
 
   const onSubmit = async () => {
     if (!content.trim()) return;
-
-    setIsSubmitting(true);
-    try {
-      const result = await handleAddComment(content);
-      if (result) {
-        setContent("");
-        onOpenChange(false);
-      }
-    } catch (error) {
-      console.error("Failed to create comment:", error);
-    } finally {
-      setIsSubmitting(false);
+    const result = await handleAddComment(content);
+    if (result) {
+      setContent("");
+      onOpenChange(false);
     }
   };
 
@@ -126,16 +121,16 @@ export default function NewCommentDialog ({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
+            disabled={submitting}
           >
             Cancel
           </Button>
           <Button
             onClick={onSubmit}
-            disabled={!content.trim() || isSubmitting}
+            disabled={!content.trim() || submitting}
             className="cursor-pointer disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "Adding..." : "Add Comment"}
+            {submitting ? "Adding..." : "Add Comment"}
           </Button>
         </DialogFooter>
       </DialogContent>

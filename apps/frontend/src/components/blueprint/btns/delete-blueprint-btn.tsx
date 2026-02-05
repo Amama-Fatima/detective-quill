@@ -12,22 +12,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useBlueprints } from "@/hooks/use-blueprints";
 
 interface DeleteBlueprintButtonProps {
   blueprintId: string;
+  onDelete: (blueprintId: string) => Promise<void>;
+  loading: boolean;
 }
 
 export const DeleteBlueprintButton = ({
   blueprintId,
+  onDelete,
+  loading,
 }: DeleteBlueprintButtonProps) => {
-  const { delete: deleteBlueprint, loading } = useBlueprints();
   const [openDialogId, setOpenDialogId] = useState<string | null>(null);
-
-  const onDelete = async (blueprintId: string) => {
-    await deleteBlueprint(blueprintId);
+  const handleDelete = async (blueprintId: string) => {
+    await onDelete(blueprintId);
     setOpenDialogId(null);
   };
+
   return (
     <div>
       <Dialog
@@ -59,7 +61,7 @@ export const DeleteBlueprintButton = ({
             </Button>
             <Button
               variant="destructive"
-              onClick={() => onDelete(blueprintId)}
+              onClick={() => handleDelete(blueprintId)}
               className="cursor-pointer"
               disabled={loading}
             >

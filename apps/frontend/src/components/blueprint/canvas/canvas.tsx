@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { BlueprintType, BlueprintCard } from "@detective-quill/shared-types";
 import CanvasCardNode from "./canvas-card-node";
 import EditableBlueprintName from "./editable-blueprint-name";
-import { useBlueprintNodes } from "@/hooks/use-blueprint-nodes";
-import { useBlueprintCards } from "@/hooks/use-blueprint-cards";
+import { useBlueprintNodes } from "@/hooks/blueprints/use-blueprint-nodes";
+import { useBlueprintCards } from "@/hooks/blueprints/use-blueprint-cards";
 
 interface CanvasProps {
   blueprintName: string;

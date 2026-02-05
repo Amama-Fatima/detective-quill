@@ -18,8 +18,8 @@ import {
 import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { ResetPasswordFormValues, resetPasswordSchema } from "@/lib/schema";
-import { getPasswordStrength } from "@/lib/utils/utils";
-import ResetFormStates from "../reset-password-states";
+import { getPasswordStrength } from "@/lib/utils/auth-utils";
+import ResetFormStates from "../msgs-instructions/reset-password-states";
 
 export function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);

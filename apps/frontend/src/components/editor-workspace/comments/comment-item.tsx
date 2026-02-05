@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { CommentResponse } from "@detective-quill/shared-types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,26 +12,28 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { formatDate } from "@/lib/utils/comments-utils";
+import { useComments } from "@/hooks/use-comments";
 
 interface CommentItemProps {
   comment: CommentResponse;
-  removeComment: (commentId: string) => Promise<boolean>;
-  editComment: (
-    commentId: string,
-    data: { content: string },
-  ) => Promise<CommentResponse | null>;
-  toggleResolve: (commentId: string) => Promise<CommentResponse | null>;
+  fsNodeId: string;
+  projectId: string;
 }
 
 export default function CommentItem({
   comment,
-  removeComment,
-  editComment,
-  toggleResolve,
+  fsNodeId,
+  projectId,
 }: CommentItemProps) {
   const [content, setContent] = useState(comment.content);
   const [isEditing, setIsEditing] = useState(false);
   const [isResolved, setIsResolved] = useState(comment.is_resolved);
+  const { editCommentMutation, removeCommentMutation, toggleResolveMutation } =
+    useComments({
+      fsNodeId: fsNodeId,
+      includeResolved: true,
+      projectId: projectId,
+    });
 
   // Extract selected text from comment
   const selectedText = comment.selected_text || null;
@@ -46,7 +48,8 @@ export default function CommentItem({
 
   const handleSaveEdit = async (commentId: string) => {
     if (content.trim()) {
-      const edited = await editComment(commentId, { content });
+      const data = { content: content.trim() };
+      const edited = await editCommentMutation.mutateAsync({ commentId, data });
       if (!edited) return;
       setContent(content);
       setIsEditing(false);
@@ -54,12 +57,12 @@ export default function CommentItem({
   };
 
   const handleDelete = async (commentId: string) => {
-    const deleted = await removeComment(commentId);
+    const deleted = await removeCommentMutation.mutateAsync(commentId);
     if (!deleted) return;
   };
 
   const handleResolve = async (commentId: string) => {
-    const updated = await toggleResolve(commentId);
+    const updated = await toggleResolveMutation.mutateAsync(commentId);
     if (!updated) return;
     setIsResolved(true);
   };
