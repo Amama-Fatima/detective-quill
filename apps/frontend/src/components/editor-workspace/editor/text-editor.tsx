@@ -93,9 +93,6 @@ const TextEditor = ({
   const internalEditorRef = useRef<BlockNoteEditorRef>(null);
   const effectiveEditorRef = editorRef || internalEditorRef;
 
-  // const { handleKeyDown } = useKeyboardShortcuts({
-  //   onSave: handleSave,
-  // });
   // todo: is this necessary?
   // Keep internal state in sync
   useEffect(() => setInternal(content), [content]);
@@ -109,7 +106,6 @@ const TextEditor = ({
     <TooltipProvider delayDuration={200}>
       <div
         className={getContainerClass(focusMode)}
-        // onKeyDown={handleKeyDown}
       >
         {/* Header - Always visible but styled differently in focus modes */}
         <div className={getHeaderClass(focusMode)}>

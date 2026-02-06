@@ -91,7 +91,6 @@ const FileTree = ({
     nodes,
   });
 
-  // Event handlers
   const handleCreateNode = async (
     name: string,
     nodeType: "file" | "folder",
@@ -230,10 +229,6 @@ const FileTree = ({
                 element={element}
                 selectedNodeId={selectedNodeId}
                 onNodeSelect={navigateToNode}
-                onCreateFile={(folderId) => openCreateDialog("file", folderId)}
-                onCreateFolder={(folderId) =>
-                  openCreateDialog("folder", folderId)
-                }
                 onRenameNode={openRenameDialog}
                 onMoveNode={openMoveDialog}
                 onDeleteNode={openDeleteDialog}

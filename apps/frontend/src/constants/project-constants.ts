@@ -1,4 +1,4 @@
-import { Fingerprint, Map, FileText, BarChart3 } from "lucide-react";
+import { Map, FileText, BarChart3 } from "lucide-react";
 
 export const NAV_ITEMS = [
   {
@@ -30,18 +30,6 @@ export const NAV_ITEMS = [
     description: "Visual story analysis",
   },
 ];
-
-// Get current path to determine active tab
-const getCurrentTab = () => {
-  if (typeof window !== "undefined") {
-    const path = window.location.pathname;
-    if (path.includes("/blueprint")) return "blueprint";
-    if (path.includes("/text-editor")) return "text-editor";
-    if (path.includes("/visualization")) return "visualization";
-    return "main";
-  }
-  return "main";
-};
 
 export const tab_message = [
   {
