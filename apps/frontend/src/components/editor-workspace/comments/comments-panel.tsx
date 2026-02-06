@@ -1,36 +1,25 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, CheckCircle2 } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import CommentItem from "@/components/editor-workspace/comments/comment-item";
-import {
-  CommentResponse,
-  CommentStats,
-  UpdateCommentDto,
-} from "@detective-quill/shared-types";
+import { useComments } from "@/hooks/use-comments";
+import { useParams } from "next/navigation";
 
-interface CommentsPanelProps {
-  comments: CommentResponse[];
-  isLoading: boolean;
-  stats: CommentStats | null;
-  removeComment: (commentId: string) => Promise<boolean>;
-  editComment: (
-    commentId: string,
-    data: UpdateCommentDto,
-  ) => Promise<CommentResponse | null>;
-  toggleResolve: (commentId: string) => Promise<CommentResponse | null>;
-}
-
-export default function CommentsPanel({
-  comments,
-  isLoading,
-  stats,
-  removeComment,
-  editComment,
-  toggleResolve,
-}: CommentsPanelProps) {
+export default function CommentsPanel({}) {
+  const params = useParams();
+  const projectId = params.projectId as string;
+  const fsNodeId = params.nodeId as string;
+  console.log("CommentsPanel projectId:", projectId);
+  console.log("CommentsPanel fsNodeId:", fsNodeId);
+  console.log("params:", params)
+  const { comments, stats, isLoading } = useComments({
+    fsNodeId: fsNodeId,
+    includeResolved: true,
+    projectId: projectId,
+  });
   const [resolvedComments, unresolvedComments] = React.useMemo(() => {
     const resolved: typeof comments = [];
     const unresolved: typeof comments = [];
@@ -73,10 +62,9 @@ export default function CommentsPanel({
                     {unresolvedComments.map((comment) => (
                       <CommentItem
                         key={comment.id}
+                        fsNodeId={fsNodeId}
+                        projectId={projectId}
                         comment={comment}
-                        removeComment={removeComment}
-                        editComment={editComment}
-                        toggleResolve={toggleResolve}
                       />
                     ))}
                   </div>
@@ -93,9 +81,8 @@ export default function CommentsPanel({
                       <CommentItem
                         key={comment.id}
                         comment={comment}
-                        removeComment={removeComment}
-                        editComment={editComment}
-                        toggleResolve={toggleResolve}
+                        fsNodeId={fsNodeId}
+                        projectId={projectId}
                       />
                     ))}
                   </div>

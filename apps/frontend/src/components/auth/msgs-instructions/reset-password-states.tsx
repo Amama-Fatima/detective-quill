@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
@@ -46,16 +45,14 @@ export default function ResetFormStates() {
     return <ResetPasswordLoading />;
   }
 
-  // Invalid session - show error
   if (isValidSession === false) {
     return <ResetPasswordInvalid />;
   }
 
-  // Show success message
   if (success) {
     return <ResetPasswordSuccess />;
   }
-};
+}
 
 function ResetPasswordLoading() {
   return (
@@ -86,13 +83,19 @@ export function ResetPasswordInvalid() {
       </div>
 
       <div className="space-y-3">
-        <Button asChild className="w-full">
-          <Link href="/auth/forgot-password">Request new reset link</Link>
-        </Button>
+        <Link
+          href="/auth/forgot-password"
+          className="w-full border-primary p-4 rounded-md border text-center font-medium hover:bg-primary/5"
+        >
+          Request new reset link
+        </Link>
 
-        <Button variant="outline" asChild className="w-full">
-          <Link href="/auth/sign-in">Back to sign in</Link>
-        </Button>
+        <Link
+          href="/auth/sign-in"
+          className="w-full border-primary p-4 rounded-md border text-center font-medium hover:bg-primary/5"
+        >
+          Back to sign in
+        </Link>
       </div>
     </div>
   );
@@ -115,9 +118,12 @@ export function ResetPasswordSuccess() {
         </p>
       </div>
 
-      <Button asChild className="w-full">
-        <Link href="/auth/sign-in">Continue to sign in</Link>
-      </Button>
+      <Link
+        href="/auth/sign-in"
+        className="w-full border-primary p-4 rounded-md border text-center font-medium hover:bg-primary/5"
+      >
+        Continue to sign in
+      </Link>
     </div>
   );
 }

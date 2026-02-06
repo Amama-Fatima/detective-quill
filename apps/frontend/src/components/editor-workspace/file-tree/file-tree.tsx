@@ -20,9 +20,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils/utils";
 import { Tree } from "../../magicui/file-tree";
-import CreateNodeDialog from "./create-node-dialog";
-import RenameDialog from "./rename-dialog";
-import MoveDialog from "./move-dialog";
+import CreateNodeDialog from "./dialogs/create-node-dialog";
+import RenameDialog from "./dialogs/rename-dialog";
+import MoveDialog from "./dialogs/move-dialog";
+import ConfirmDeleteNodeDialog from "./dialogs/confirm-delete-node-dialog";
 import SearchInput from "./search-input";
 import { useFileTreeNavigation } from "@/hooks/file-tree/use-file-tree-navigation";
 import { useFileTreeState } from "@/hooks/file-tree/use-file-tree-state";
@@ -31,23 +32,15 @@ import TreeItem from "./tree-item";
 import { findNodeById } from "@/lib/utils/file-tree-utils";
 
 interface FileTreeProps {
-  nodes: FsNodeTreeResponse[];
-  onNodesChange: (nodes: FsNodeTreeResponse[]) => void;
+  initialNodes: FsNodeTreeResponse[];
   projectId: string;
-  projectName: string;
-  session: any;
-  loading: boolean;
   isOwner: boolean;
   isActive: boolean;
 }
 
 const FileTree = ({
-  nodes,
-  onNodesChange,
+  initialNodes,
   projectId,
-  projectName,
-  session,
-  loading,
   isOwner,
   isActive,
 }: FileTreeProps) => {
@@ -55,10 +48,25 @@ const FileTree = ({
   const selectedNodeId = params.nodeId as string;
 
   const {
+    nodes,
+    isLoading,
+    isFetching,
+    createNodeMutation,
+    renameNodeMutation,
+    moveNodeMutation,
+    deleteNodeMutation,
+  } = useFileTreeOperations({
+    projectId,
+    initialNodes,
+    selectedNodeId,
+  });
+
+  const {
     treeElements,
     folderNodes,
     createDialogOpen,
     renameDialogOpen,
+    deleteDialogOpen,
     moveDialogOpen,
     selectedFolder,
     selectedNode,
@@ -73,27 +81,14 @@ const FileTree = ({
     openCreateDialog,
     openRenameDialog,
     openMoveDialog,
+    openDeleteDialog,
+    setDeleteDialogOpen,
     closeDialogs,
   } = useFileTreeState({ nodes });
 
   const { navigateToNode, handleSearchSelect } = useFileTreeNavigation({
     projectId,
     nodes,
-  });
-
-  const {
-    creating,
-    renaming,
-    moving,
-    createNode,
-    renameNode,
-    moveNode,
-    deleteNode,
-  } = useFileTreeOperations({
-    projectId,
-    session,
-    nodes,
-    selectedNodeId,
   });
 
   // Event handlers
@@ -103,38 +98,40 @@ const FileTree = ({
     parentId?: string,
     description?: string,
   ) => {
-    const success = await createNode(
+    await createNodeMutation.mutateAsync({
       name,
       nodeType,
-      parentId || selectedFolder || undefined,
+      parentId,
       description,
-    );
-    if (success) {
-      closeDialogs();
-    }
+    });
+    closeDialogs();
   };
 
   const handleRenameNode = async (newName: string) => {
     if (!selectedNode) return;
-    const success = await renameNode(selectedNode.id, newName);
-    if (success) {
-      closeDialogs();
-    }
+    await renameNodeMutation.mutateAsync({
+      nodeId: selectedNode.id,
+      newName,
+    });
+    closeDialogs();
   };
 
   const handleMoveNode = async (newParentId: string | null) => {
     if (!selectedNode) return;
-    const success = await moveNode(selectedNode.id, newParentId);
-    if (success) {
-      closeDialogs();
-    }
+    await moveNodeMutation.mutateAsync({
+      nodeId: selectedNode.id,
+      newParentId,
+    });
+    closeDialogs();
   };
 
   const handleDeleteNode = async (nodeId: string) => {
-    await deleteNode(nodeId);
+    if (!selectedNode) return;
+    await deleteNodeMutation.mutateAsync({ nodeId, cascadeDelete: true });
+    closeDialogs();
   };
 
-  if (loading) {
+  if (isLoading || isFetching) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -147,7 +144,6 @@ const FileTree = ({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Action Buttons */}
       <div className="p-3 border-b bg-card/20">
         <div className="flex gap-2 mb-3">
           <DropdownMenu>
@@ -203,7 +199,6 @@ const FileTree = ({
         )}
       </div>
 
-      {/* File Tree */}
       <div className="flex-1 overflow-hidden">
         {treeElements.length === 0 ? (
           <div className="text-center text-muted-foreground py-8 px-4">
@@ -241,7 +236,7 @@ const FileTree = ({
                 }
                 onRenameNode={openRenameDialog}
                 onMoveNode={openMoveDialog}
-                onDeleteNode={handleDeleteNode}
+                onDeleteNode={openDeleteDialog}
                 nodes={nodes}
                 hoveredFolder={hoveredFolder}
                 setHoveredFolder={setHoveredFolder}
@@ -253,13 +248,12 @@ const FileTree = ({
         )}
       </div>
 
-      {/* Dialogs */}
       {isActive && isOwner && (
         <CreateNodeDialog
           open={createDialogOpen}
           onOpenChange={setCreateDialogOpen}
           onSubmit={handleCreateNode}
-          creating={creating}
+          creating={createNodeMutation.isPending}
           nodeType={createType}
           folderName={
             selectedFolder
@@ -275,8 +269,9 @@ const FileTree = ({
           open={renameDialogOpen}
           onOpenChange={setRenameDialogOpen}
           onSubmit={handleRenameNode}
-          node={selectedNode}
-          loading={renaming}
+          initialName={selectedNode ? selectedNode.name : ""}
+          nodeType={selectedNode ? selectedNode.node_type : "file"}
+          loading={renameNodeMutation.isPending}
         />
       )}
 
@@ -287,7 +282,18 @@ const FileTree = ({
           onSubmit={handleMoveNode}
           node={selectedNode}
           availableFolders={folderNodes}
-          loading={moving}
+          loading={moveNodeMutation.isPending}
+        />
+      )}
+
+      {isOwner && isActive && selectedNode && (
+        <ConfirmDeleteNodeDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onSubmit={() => handleDeleteNode(selectedNode.id)}
+          loading={deleteNodeMutation.isPending}
+          node={selectedNode}
+          nodes={nodes}
         />
       )}
     </div>

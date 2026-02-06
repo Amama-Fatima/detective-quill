@@ -10,6 +10,7 @@ export const useFileTreeState = ({ nodes }: UseFileTreeStateProps) => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<FsNode | null>(null);
   const [createType, setCreateType] = useState<"file" | "folder">("file");
@@ -71,12 +72,18 @@ export const useFileTreeState = ({ nodes }: UseFileTreeStateProps) => {
     setMoveDialogOpen(true);
   };
 
+  const openDeleteDialog = (node: FsNode) => {
+    setSelectedNode(node);
+    setDeleteDialogOpen(true);
+  };
+
   const closeDialogs = () => {
     setCreateDialogOpen(false);
     setRenameDialogOpen(false);
     setMoveDialogOpen(false);
     setSelectedFolder(null);
     setSelectedNode(null);
+    setDeleteDialogOpen(false);
   };
 
   return {
@@ -84,6 +91,7 @@ export const useFileTreeState = ({ nodes }: UseFileTreeStateProps) => {
     createDialogOpen,
     renameDialogOpen,
     moveDialogOpen,
+    deleteDialogOpen,
     selectedFolder,
     selectedNode,
     createType,
@@ -101,11 +109,13 @@ export const useFileTreeState = ({ nodes }: UseFileTreeStateProps) => {
     setCreateType,
     setSearchExpanded,
     setHoveredFolder,
+    setDeleteDialogOpen,
 
     // Actions
     openCreateDialog,
     openRenameDialog,
     openMoveDialog,
+    openDeleteDialog,
     closeDialogs,
   };
 };

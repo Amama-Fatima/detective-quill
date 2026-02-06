@@ -19,12 +19,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn, findNodeById } from "@/lib/utils/utils";
-import {
-  File,
-  Folder as TreeFolder,
-} from "../../magicui/file-tree";
-
+import { cn } from "@/lib/utils/utils";
+import { File, Folder as TreeFolder } from "../../magicui/file-tree";
+import { findNodeById } from "@/lib/utils/file-tree-utils";
 
 const TreeItem = ({
   element,
@@ -48,7 +45,7 @@ const TreeItem = ({
   onCreateFolder: (folderId: string) => void;
   onRenameNode: (node: FsNode) => void;
   onMoveNode: (node: FsNode) => void;
-  onDeleteNode: (nodeId: string) => void;
+  onDeleteNode: (node: FsNode) => void;
   nodes: FsNodeTreeResponse[];
   hoveredFolder: string | null;
   setHoveredFolder: (id: string | null) => void;
@@ -91,11 +88,10 @@ const TreeItem = ({
             />
           ))}
 
-          {/* Folder Creation Actions */}
           <div
             className={cn(
               "ml-6 mt-1 transition-opacity duration-200",
-              isHovered ? "opacity-100" : "opacity-0"
+              isHovered ? "opacity-100" : "opacity-0",
             )}
           >
             <div className="flex gap-1">
@@ -127,7 +123,7 @@ const TreeItem = ({
         <div
           className={cn(
             "absolute top-1 right-2 transition-opacity duration-200",
-            isHovered ? "opacity-100" : "opacity-0"
+            isHovered ? "opacity-100" : "opacity-0",
           )}
         >
           <DropdownMenu>
@@ -164,7 +160,7 @@ const TreeItem = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive cursor-pointer"
-                onClick={() => onDeleteNode(element.id)}
+                onClick={() => onDeleteNode(node as FsNode)}
                 disabled={!isOwner || !isActive}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -184,7 +180,7 @@ const TreeItem = ({
         handleSelect={onNodeSelect}
         className={cn(
           "px-2 py-1 group flex items-center justify-between",
-          isSelected && "bg-primary/10 text-primary"
+          isSelected && "bg-primary/10 text-primary",
         )}
         fileIcon={<FileIcon className="h-4 w-4" />}
         asChild
@@ -238,7 +234,7 @@ const TreeItem = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive cursor-pointer"
-                onClick={() => onDeleteNode(element.id)}
+                onClick={() => onDeleteNode(node as FsNode)}
                 disabled={!isOwner || !isActive}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -250,6 +246,6 @@ const TreeItem = ({
       </File>
     );
   }
-}
+};
 
 export default TreeItem;

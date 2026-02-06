@@ -7,17 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Briefcase } from "lucide-react";
-import { CreateProjectDto, Project } from "@detective-quill/shared-types";
+import { Project } from "@detective-quill/shared-types";
 import CreateProjectDialog from "@/components/projects/create-project-dialog";
-import { useProjects } from "@/hooks/use-projects";
-import ProjectsDisplay from "./project-display";
+import ProjectsDisplay from "./projects-display";
 
 type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
 interface ProjectsPageClientProps {
+  user: User;
   initialProjects: Project[];
   invitedProjects?: Project[];
 }
+
 export default function UserProjectsPage({
   initialProjects,
   invitedProjects = [],
@@ -25,7 +26,7 @@ export default function UserProjectsPage({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { projects, creating, createProject } = useProjects([
+  const [projects, setProjects] = useState<Project[]>([
     ...initialProjects,
     ...invitedProjects,
   ]);
@@ -45,7 +46,7 @@ export default function UserProjectsPage({
   const [filter, setFilter] = useState<FilterOption>("all");
   const [isClient, setIsClient] = useState(false);
 
-  // Only run client-side to avoid hydration issues
+  // Only run client-side to avoid hydration issues todo: is this necessary?
   useEffect(() => {
     setIsClient(true);
     const initialFilter = (searchParams.get("tab") as FilterOption) || "all";
@@ -58,10 +59,6 @@ export default function UserProjectsPage({
       setFilter(initialFilter);
     }
   }, [searchParams]);
-
-  const handleCreateProject = async (data: CreateProjectDto) => {
-    return await createProject(data);
-  };
 
   const updateTabUrl = (tab: FilterOption) => {
     if (tab == "all") {
@@ -104,7 +101,6 @@ export default function UserProjectsPage({
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs
           value={filter}
@@ -113,7 +109,6 @@ export default function UserProjectsPage({
             updateTabUrl(value as FilterOption);
           }}
         >
-          {/* Controls Section */}
           <div className="noir-text flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
             <TabsList className="bg-card/50 border border-border">
               <TabsTrigger value="all" className="font-serif cursor-pointer">
@@ -178,8 +173,7 @@ export default function UserProjectsPage({
       <CreateProjectDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
-        onCreate={handleCreateProject}
-        creating={creating}
+        setProjects={setProjects}
       />
     </div>
   );

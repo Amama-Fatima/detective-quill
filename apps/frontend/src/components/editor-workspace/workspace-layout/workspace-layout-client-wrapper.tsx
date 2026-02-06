@@ -4,13 +4,12 @@ import React, { useState } from "react";
 import { useFocusModeStore } from "@/stores/use-focus-mode-store";
 import WorkspaceSidebar from "@/components/editor-workspace/workspace-layout/workspace-sidebar";
 import WorkspaceHeaderBar from "@/components/editor-workspace/workspace-layout/workspace-header-bar";
-import { countNodes } from "@/lib/utils/utils";
+import { countNodes } from "@/lib/utils/file-tree-utils";
 import {
   FsNodeTreeResponse,
   FsNode,
   Project,
 } from "@detective-quill/shared-types";
-import { useAuth } from "@/context/auth-context";
 
 interface WorkspaceLayoutClientWrapperProps {
   children: React.ReactNode;
@@ -35,7 +34,6 @@ export default function WorkspaceLayoutClientWrapper({
 }: WorkspaceLayoutClientWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [nodes, setNodes] = useState<FsNodeTreeResponse[]>(initialNodes);
-  const { session } = useAuth();
 
   const focusMode = useFocusModeStore((state) => state.focusMode);
 
@@ -43,10 +41,7 @@ export default function WorkspaceLayoutClientWrapper({
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleNodesChange = (updatedNodes: FsNodeTreeResponse[]) => {
-    setNodes(updatedNodes);
-  };
-
+  // todo: these will not be in sync when file ops are performed
   // Computed values
   const { files: filesCount, folders: foldersCount } = React.useMemo(() => {
     return countNodes(nodes);
@@ -60,13 +55,8 @@ export default function WorkspaceLayoutClientWrapper({
       {showSidebar && (
         <WorkspaceSidebar
           projectName={project.title}
-          filesCount={filesCount}
-          foldersCount={foldersCount}
           nodes={nodes}
-          onNodesChange={handleNodesChange}
           projectId={projectId}
-          session={session}
-          loading={false}
           isOwner={isOwner}
           isActive={isActive}
         />

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Table,
@@ -14,11 +16,9 @@ import { useState } from "react";
 import RemoveMemberDialog from "./remove-member-dialog";
 import { Badge } from "@/components/ui/badge";
 import { ProjectMember } from "@detective-quill/shared-types";
-import { removeProjectMember } from "@/lib/backend-calls/members";
-import { toast } from "sonner";
-import { useAuth } from "@/context/auth-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
+import { useMembers } from "@/hooks/use-members";
 
 const MembersTable = ({
   isOwner,
@@ -35,14 +35,12 @@ const MembersTable = ({
 }) => {
   const [members, setMembers] = useState<ProjectMember[]>(initialMembers);
   const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(
-    null
+    null,
   );
   const { setNotAllowedEmails, notAllowedEmails } = useBetaReaderEmailsStore();
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-
-  const { session } = useAuth();
-  const accessToken = session?.access_token;
+  const { removeMemberMutation } = useMembers(projectId);
+  const deleting = removeMemberMutation.isPending;
 
   const handleRemoveMember = (member: ProjectMember) => {
     setMemberToRemove(member);
@@ -51,28 +49,15 @@ const MembersTable = ({
 
   const confirmRemoveMember = async () => {
     if (memberToRemove) {
-      try {
-        setDeleting(true);
-        await removeProjectMember(
-          accessToken!,
-          projectId,
-          memberToRemove.user_id
-        );
-        setMembers(members.filter((m) => m.user_id !== memberToRemove.user_id));
-        setRemoveDialogOpen(false);
-        setMemberToRemove(null);
+      await removeMemberMutation.mutateAsync(memberToRemove.user_id);
+      setMembers(members.filter((m) => m.user_id !== memberToRemove.user_id));
+      setRemoveDialogOpen(false);
+      setMemberToRemove(null);
 
-        const updatedNotAllowedEmails = notAllowedEmails.filter(
-          (email) => email !== memberToRemove.email
-        );
-        setNotAllowedEmails(updatedNotAllowedEmails);
-        toast.success("Member removed successfully");
-      } catch (error) {
-        console.error("Error removing member:", error);
-        toast.error("Failed to remove member. Please try again.");
-      } finally {
-        setDeleting(false);
-      }
+      const updatedNotAllowedEmails = notAllowedEmails.filter(
+        (email) => email !== memberToRemove.email,
+      );
+      setNotAllowedEmails(updatedNotAllowedEmails);
     }
   };
 
@@ -126,7 +111,7 @@ const MembersTable = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map((member, index) => (
+                  {members.map((member) => (
                     <TableRow
                       key={member.user_id}
                       className="hover:bg-card transition-colors"
