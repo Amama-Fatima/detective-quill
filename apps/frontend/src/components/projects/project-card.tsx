@@ -33,9 +33,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   }, []);
 
   return (
-    <div ref={cardRef}>
+    <div ref={cardRef} className="h-full">
       {isVisible ? (
-        <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border hover:-translate-y-2 bg-card shadow-lg">
+        <Card className="h-full flex flex-col group hover:shadow-xl transition-all duration-300 cursor-pointer border-border hover:-translate-y-2 bg-card shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">

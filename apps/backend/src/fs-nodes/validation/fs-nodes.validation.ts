@@ -86,7 +86,7 @@ export class UpdateNodeMetadataDto implements IUpdateNodeMetadataDto {
 
   @IsUUID()
   @IsOptional()
-  parent_id?: string;
+  parent_id: string | null;
 
   @IsNumber()
   @IsOptional()

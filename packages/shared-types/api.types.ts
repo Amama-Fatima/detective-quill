@@ -87,7 +87,7 @@ export interface CreateFsNodeDto {
 export interface UpdateNodeMetadataDto {
   name?: string;
   description?: string;
-  parent_id?: string;
+  parent_id: string | null;
   sort_order?: number;
 }
 
@@ -104,7 +104,7 @@ export interface FsNodeTreeResponse {
   content?: string;
   word_count: number;
   path: string;
-  sort_order: number;
+  sort_order: number | null;
   created_at: string;
   updated_at: string;
 }

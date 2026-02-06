@@ -100,7 +100,7 @@ export async function updateFileContent(
 
 export async function updateNodeMetadata(
   nodeId: string,
-  data: UpdateNodeMetadataDto,
+  data: Omit<UpdateNodeMetadataDto, "parent_id">,
   accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
   return makeAuthenticatedRequest<FsNode>(
@@ -137,7 +137,7 @@ export async function deleteFsNode(
 export async function moveFsNode(
   nodeId: string,
   parentId: string | null,
-  sortOrder: number,
+  sort_order: number,
   accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
   return makeAuthenticatedRequest<FsNode>(
@@ -145,7 +145,10 @@ export async function moveFsNode(
     accessToken,
     {
       method: "PATCH",
-      body: JSON.stringify({ parent_id: parentId, sort_order: sortOrder }),
+      body: JSON.stringify({
+        parent_id: parentId,
+        sort_order: sort_order,
+      }),
     },
   );
 }

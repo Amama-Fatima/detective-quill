@@ -126,7 +126,7 @@ export class FsNodesService {
     };
   }
 
-  // ✅ Use the project_file_tree view instead of manual tree building
+  // Use the project_file_tree view instead of manual tree building
   async getProjectTree(
     projectId: string,
     userId: string,
@@ -136,7 +136,7 @@ export class FsNodesService {
     // Verify project ownership
     await this.projectsService.findProjectById(projectId, userId);
 
-    // ✅ Using the project_file_tree view
+    // Using the project_file_tree view
     const { data: nodes, error } = await supabase
       .from("project_file_tree")
       .select("*")
@@ -153,14 +153,14 @@ export class FsNodesService {
     return this.buildTreeFromView(nodes || []);
   }
 
-  // ✅ OPTIMIZED: Use get_node_children function for getting children
+  // OPTIMIZED: Use get_node_children function for getting children
   async getNodeChildren(nodeId: string, userId: string): Promise<FsNode[]> {
     const supabase = this.supabaseService.client;
 
     // Verify node exists and user owns it
     await this.getNode(nodeId, userId);
 
-    // ✅ Use the get_node_children stored function
+    // Use the get_node_children stored function
     const { data: children, error } = await supabase.rpc("get_node_children", {
       node_uuid: nodeId,
     });
@@ -232,7 +232,6 @@ export class FsNodesService {
     userId: string,
   ): Promise<FsNode> {
     const supabase = this.supabaseService.client;
-
     const existingNode = await this.getNode(nodeId, userId);
 
     if (
@@ -261,11 +260,22 @@ export class FsNodesService {
         }
       }
     }
+    const cleanUpdate = Object.fromEntries(
+      Object.entries(updateMetadataDto).filter(([_, v]) => v !== undefined),
+    );
+
+    // If client explicitly wants to move to root
+    if (
+      "parent_id" in updateMetadataDto &&
+      updateMetadataDto.parent_id === null
+    ) {
+      cleanUpdate.parent_id = null;
+    }
 
     // Update metadata (triggers will handle path/depth/global_sequence)
     const { data, error } = await supabase
       .from("fs_nodes")
-      .update(updateMetadataDto)
+      .update(cleanUpdate)
       .eq("id", nodeId)
       .select()
       .single();
@@ -339,7 +349,7 @@ export class FsNodesService {
     return this.updateNodeMetadata(
       nodeId,
       {
-        parent_id: newParentId === null ? undefined : newParentId,
+        parent_id: newParentId === null ? null : newParentId,
         sort_order: newSortOrder,
       },
       userId,
@@ -360,7 +370,7 @@ export class FsNodesService {
     // Verify project ownership
     await this.projectsService.findProjectById(projectId, userId);
 
-    // ✅ Using the project_file_tree view for efficient stats
+    // Using the project_file_tree view for efficient stats
     const { data: stats, error } = await supabase
       .from("project_file_tree")
       .select("node_type, total_word_count, parent_id")
@@ -391,7 +401,7 @@ export class FsNodesService {
     };
   }
 
-  // ✅ simpler tree building using view data
+  // simpler tree building using view data
   private buildTreeFromView(nodes: any[]): FsNodeTreeResponse[] {
     const nodeMap = new Map<string, FsNodeTreeResponse>();
     const rootNodes: FsNodeTreeResponse[] = [];
@@ -405,7 +415,7 @@ export class FsNodesService {
         parent_id: node.parent_id,
         content: node.content,
         word_count: node.word_count,
-        path: node.path, // ✅ Already calculated by DB
+        path: node.path, // Already calculated by DB
         sort_order: node.sort_order,
         created_at: node.created_at,
         updated_at: node.updated_at,
@@ -439,95 +449,41 @@ export class FsNodesService {
       .filter((word) => word.length > 0).length;
   }
 
-  private async handleSceneUpdate(
-    nodeId: string,
-    nodeData: FsNode,
-    content: string,
-    userId: string,
-    supabase: any,
-  ): Promise<void> {
-    // Clear existing timeout if any
-    const existingTimeout = this.sceneTimeouts.get(nodeId);
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-    }
+  // private async getParentInfo(
+  //   nodeData: FsNode,
+  //   supabase: any,
+  // ): Promise<{
+  //   chapter_name?: string;
+  //   chapter_sort_order?: number;
+  // }> {
+  //   try {
+  //     let chapterName: string | undefined;
+  //     let chapterSortOrder: number | undefined;
 
-    // Set new timeout for 10 minutes
-    const timeout = setTimeout(
-      async () => {
-        try {
-          const parentInfo = await this.getParentInfo(nodeData, supabase);
+  //     // Get chapter info if this scene has a parent folder
+  //     if (nodeData.parent_id) {
+  //       const { data: chapter } = await supabase
+  //         .from("fs_nodes")
+  //         .select("name, sort_order, node_type")
+  //         .eq("id", nodeData.parent_id)
+  //         .single();
 
-          // Queue the embedding job with timeline info
-          this.queueService.sendEmbeddingJob({
-            fs_node_id: nodeId,
-            content: content,
-            project_id: nodeData.project_id,
-            user_id: userId,
-            scene_name: nodeData.name,
-            chapter_name: parentInfo.chapter_name,
-            chapter_sort_order: parentInfo.chapter_sort_order || 0,
-            scene_sort_order: nodeData.sort_order || 1,
-            global_sequence: nodeData.global_sequence || 1,
-            timeline_path: nodeData.path,
-          });
+  //       if (chapter?.node_type === "folder") {
+  //         chapterName = chapter.name;
+  //         chapterSortOrder = chapter.sort_order;
+  //       }
+  //     }
 
-          // Remove from tracking
-          this.sceneTimeouts.delete(nodeId);
-
-          // console.log(
-          //   `Queued embedding job for ${nodeData.path}: ${nodeData.name}`
-          // );
-        } catch (error) {
-          console.error(`Failed to queue embedding job for ${nodeId}:`, error);
-        }
-      },
-      10 * 60 * 1000,
-    ); // 10 minutes = 600,000 ms
-
-    // Store the timeout
-    this.sceneTimeouts.set(nodeId, timeout);
-
-    console.log(
-      `⏰ Scene update tracked: ${nodeData.name} (embedding job in 10 min if no more updates)`,
-    );
-  }
-
-  private async getParentInfo(
-    nodeData: FsNode,
-    supabase: any,
-  ): Promise<{
-    chapter_name?: string;
-    chapter_sort_order?: number;
-  }> {
-    try {
-      let chapterName: string | undefined;
-      let chapterSortOrder: number | undefined;
-
-      // Get chapter info if this scene has a parent folder
-      if (nodeData.parent_id) {
-        const { data: chapter } = await supabase
-          .from("fs_nodes")
-          .select("name, sort_order, node_type")
-          .eq("id", nodeData.parent_id)
-          .single();
-
-        if (chapter?.node_type === "folder") {
-          chapterName = chapter.name;
-          chapterSortOrder = chapter.sort_order;
-        }
-      }
-
-      return {
-        chapter_name: chapterName,
-        chapter_sort_order: chapterSortOrder,
-      };
-    } catch (error) {
-      console.error("Error getting description path:", error);
-      return {
-        chapter_name: undefined,
-        chapter_sort_order: undefined,
-      };
-    }
-  }
+  //     return {
+  //       chapter_name: chapterName,
+  //       chapter_sort_order: chapterSortOrder,
+  //     };
+  //   } catch (error) {
+  //     console.error("Error getting description path:", error);
+  //     return {
+  //       chapter_name: undefined,
+  //       chapter_sort_order: undefined,
+  //     };
+  //   }
+  // }
 }
