@@ -73,16 +73,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             Select a file from the sidebar to start editing, or create a new
             file to begin writing.
           </p>
-
-          <div className="flex justify-center">
-            <Button
-              className="gap-2 cursor-pointer"
-              disabled={!isOwner || !isActive}
-            >
-              <Plus className="h-4 w-4" />
-              Create a file
-            </Button>
-          </div>
         </div>
       </div>
     </div>
