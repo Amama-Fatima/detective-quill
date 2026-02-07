@@ -14,8 +14,6 @@ export async function getProjectBlueprints(
     return { blueprints: [], error: error.message };
   }
 
-  console.log("Fetched blueprints data:", data);
-
   return { blueprints: data || [], error: null };
 }
 
@@ -50,7 +48,6 @@ export async function getBlueprintTitle(
     .eq("project_id", projectId)
     .single();
 
-  console.log(error);
   if (error) {
     return { title: null, error: error.message };
   }

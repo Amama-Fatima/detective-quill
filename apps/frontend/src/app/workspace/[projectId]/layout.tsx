@@ -35,12 +35,10 @@ const WorkspaceLayout = async ({
   params,
   children,
 }: ProjectWorkspacePageProps) => {
-  console.log("LAYOUT");
 
   const { projectId } = await params;
 
   const user = await getUserFromCookie();
-  console.log("user in workspace layout:", user);
 
   if (!user || !user.sub) {
     redirect("/auth/sign-in");

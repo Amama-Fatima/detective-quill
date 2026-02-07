@@ -185,7 +185,7 @@ export const useFileTreeOperations = ({
 
       // If deleting currently selected node, navigate away
       if (selectedNodeId === variables.nodeId) {
-        router.push(`/workspace/${projectId}`);
+        router.push(`/workspace/${projectId}/text-editor`);
       }
     },
     onError: (error: any) => {

@@ -25,7 +25,6 @@ async function makeAuthenticatedRequest<T>(
   });
 
   if (!response.ok) {
-    console.log("API request failed:", response);
     throw new Error(
       `API request failed: ${response.status} ${response.statusText}`,
     );

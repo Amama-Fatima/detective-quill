@@ -57,7 +57,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(() => {
     if (typeof window !== "undefined") {
       const cookieSession = getSessionFromCookie();
-      console.log("✅ Auth initialized from cookie (no API call)");
       return cookieSession;
     }
     return null;
@@ -100,7 +99,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const {
       data: { subscription },
     } = supabaseBrowserClient.auth.onAuthStateChange((_event, session) => {
-      console.log("🔄 Auth state changed:", _event);
       setSession(session);
     });
 

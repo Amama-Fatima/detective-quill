@@ -24,14 +24,6 @@ export const getUserFromCookie = cache(
     console.time("getUserFromCookie-cached");
     const cookieStore = await cookies();
 
-    console.log(
-      "Auth cookie chunks:",
-      cookieStore
-        .getAll()
-        .filter((c) => c.name.startsWith(COOKIE_PREFIX))
-        .map((c) => ({ name: c.name, size: c.value.length })),
-    );
-
     const tokenChunks = cookieStore
       .getAll()
       .filter((c) => c.name.startsWith(COOKIE_PREFIX))
@@ -65,7 +57,6 @@ export const getUserFromCookie = cache(
         return null;
       }
 
-      console.log("Decoded JWT:", decoded);
       console.timeEnd("getUserFromCookie-cached");
       return decoded;
     } catch (err) {

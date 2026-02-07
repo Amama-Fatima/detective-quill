@@ -37,7 +37,6 @@ export async function createBlueprintCard(
   cardData: CreateBlueprintCardDto[],
   projectId: string,
 ): Promise<ApiResponse<BlueprintCard[]>> {
-  console.log("Creating blueprint card:");
   const response = await makeAuthenticatedRequest<BlueprintCard[]>(
     `/${projectId}/blueprints/${blueprintId}/blueprint-cards`,
     accessToken,
@@ -46,8 +45,6 @@ export async function createBlueprintCard(
       body: JSON.stringify(cardData),
     },
   );
-
-  console.log("Create response:", response);
 
   if (!response.success) {
     throw new Error(`Failed to create blueprint card: ${response.error}`);
@@ -63,7 +60,6 @@ export async function updateBlueprintCard(
   cardData: UpdateBlueprintCardDto,
   projectId: string,
 ): Promise<ApiResponse<BlueprintCard>> {
-  console.log("Updating blueprint card:");
   const response = await makeAuthenticatedRequest<BlueprintCard>(
     `/${projectId}/blueprints/${blueprintId}/blueprint-cards/${cardId}`,
     accessToken,
@@ -72,8 +68,6 @@ export async function updateBlueprintCard(
       body: JSON.stringify(cardData),
     },
   );
-
-  console.log("Update response:", response);
 
   if (!response.success) {
     throw new Error(`Failed to update blueprint card: ${response.error}`);

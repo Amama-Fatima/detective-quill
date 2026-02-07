@@ -85,7 +85,6 @@ export class CommentsService {
     const { data, error } = await query;
 
     if (error) {
-      console.log("Error fetching comments:", error);
       throw new BadRequestException(
         `Failed to fetch comments: ${error.message}`,
       );

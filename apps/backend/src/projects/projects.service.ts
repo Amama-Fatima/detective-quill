@@ -260,7 +260,6 @@ export class ProjectsService {
   }
 
   async fetchProjectTitle(projectId: string): Promise<string> {
-    console.log("Fetching project title for projectId:", projectId);
     const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("projects")

@@ -44,8 +44,6 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     return notFound();
   }
 
-  // console.log("Project data:", data, isMember);
-
   let { members, error: membersError } = await getProjectMembers(
     projectId,
     supabase,

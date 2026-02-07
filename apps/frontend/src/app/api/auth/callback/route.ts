@@ -25,9 +25,6 @@ export async function GET(request: Request) {
             },
           });
 
-          console.log(
-            `Set pen name "${emailUsername}" for user ${data.user.id}`
-          );
         } catch (updateError) {
           console.error("Error setting pen name:", updateError);
           // Don't fail the auth flow if pen name update fails
