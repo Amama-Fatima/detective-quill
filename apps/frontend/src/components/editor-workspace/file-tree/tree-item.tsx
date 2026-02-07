@@ -3,8 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { FsNodeTreeResponse, FsNode } from "@detective-quill/shared-types";
 import {
-  FileText,
-  FolderPlus,
   MoreHorizontal,
   File as FileIcon,
   Edit,
@@ -27,8 +25,6 @@ const TreeItem = ({
   element,
   selectedNodeId,
   onNodeSelect,
-  onCreateFile,
-  onCreateFolder,
   onRenameNode,
   onMoveNode,
   onDeleteNode,
@@ -41,8 +37,6 @@ const TreeItem = ({
   element: TreeViewElement;
   selectedNodeId: string;
   onNodeSelect: (nodeId: string) => void;
-  onCreateFile: (folderId: string) => void;
-  onCreateFolder: (folderId: string) => void;
   onRenameNode: (node: FsNode) => void;
   onMoveNode: (node: FsNode) => void;
   onDeleteNode: (node: FsNode) => void;
@@ -75,8 +69,6 @@ const TreeItem = ({
               element={child}
               selectedNodeId={selectedNodeId}
               onNodeSelect={onNodeSelect}
-              onCreateFile={onCreateFile}
-              onCreateFolder={onCreateFolder}
               onRenameNode={onRenameNode}
               onMoveNode={onMoveNode}
               onDeleteNode={onDeleteNode}
@@ -87,36 +79,6 @@ const TreeItem = ({
               isActive={isActive}
             />
           ))}
-
-          <div
-            className={cn(
-              "ml-6 mt-1 transition-opacity duration-200",
-              isHovered ? "opacity-100" : "opacity-0",
-            )}
-          >
-            <div className="flex gap-1">
-              <Button
-                size="sm"
-                disabled={!isOwner || !isActive}
-                variant="ghost"
-                className="h-6 text-xs cursor-pointer"
-                onClick={() => onCreateFile(element.id)}
-              >
-                <FileText className="h-3 w-3 mr-1" />
-                File
-              </Button>
-              <Button
-                disabled={!isOwner || !isActive}
-                size="sm"
-                variant="ghost"
-                className="h-6 text-xs cursor-pointer"
-                onClick={() => onCreateFolder(element.id)}
-              >
-                <FolderPlus className="h-3 w-3 mr-1" />
-                Folder
-              </Button>
-            </div>
-          </div>
         </TreeFolder>
 
         {/* Context Menu */}
@@ -136,6 +98,7 @@ const TreeItem = ({
                   e.stopPropagation();
                   e.preventDefault();
                 }}
+                disabled={!isOwner || !isActive}
               >
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
@@ -155,7 +118,7 @@ const TreeItem = ({
                 disabled={!isOwner || !isActive}
               >
                 <FolderX className="h-4 w-4 mr-2" />
-                Move to...
+                Move
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -229,7 +192,7 @@ const TreeItem = ({
                 disabled={!isOwner || !isActive}
               >
                 <FolderX className="h-4 w-4 mr-2" />
-                Move to...
+                Move
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

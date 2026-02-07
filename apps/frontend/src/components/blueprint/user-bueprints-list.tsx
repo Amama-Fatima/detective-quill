@@ -1,13 +1,10 @@
 "use client";
 
 import { Blueprint } from "@detective-quill/shared-types/api";
-import Link from "next/dist/client/link";
 import React, { useState } from "react";
-import { Tag, FileText } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { getBlueprintTypeColor } from "@/lib/utils/blueprint-utils";
-import { DeleteBlueprintButton } from "./btns/delete-blueprint-btn";
+import { FileText } from "lucide-react";
 import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
+import BlueprintCard from "./blueprint-card";
 
 interface UserBlueprintsListProps {
   blueprints: Blueprint[];
@@ -55,51 +52,17 @@ export const UserBlueprintsList = ({
 
   return (
     <div className="space-y-6">
-      {/* Blueprints Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {blueprints.map((blueprint) => (
-          <Card
+          <BlueprintCard
             key={blueprint.id}
-            className="group hover:shadow-lg transition-all duration-200 relative"
-          >
-            <CardHeader className="pb-1">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex justify-between items-center ">
-                    <Link
-                      href={`/workspace/${projectId}/blueprint/${blueprint.id}?type=${blueprint.type}`}
-                      className="block w-full"
-                    >
-                      <CardTitle className="text-lg font-semibold transition-colors line-clamp-1">
-                        {blueprint.title}
-                      </CardTitle>
-                    </Link>
-                    {isOwner && isActive && (
-                      <DeleteBlueprintButton
-                        blueprintId={blueprint.id}
-                        onDelete={onDelete}
-                        loading={loading}
-                      />
-                    )}{" "}
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div
-                className={`${getBlueprintTypeColor(
-                  blueprint.type,
-                )} flex justify-items-center align-middle gap-2 items-center`}
-              >
-                <>
-                  <Tag />
-                  <p className="case-file text-lg font-medium">
-                    {blueprint.type}
-                  </p>
-                </>
-              </div>
-            </CardContent>
-          </Card>
+            blueprint={blueprint}
+            projectId={projectId}
+            isOwner={isOwner}
+            isActive={isActive}
+            onDelete={onDelete}
+            loading={loading}
+          />
         ))}
       </div>
     </div>
