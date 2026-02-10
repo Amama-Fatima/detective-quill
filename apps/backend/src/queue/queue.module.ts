@@ -9,8 +9,10 @@ import { QueueService } from "./queue.service";
         name: "RABBITMQ_SERVICE",
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
-          queue: "my_queue",
+          urls: [
+            process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
+          ],
+          queue: "scene_analysis_queue",
           queueOptions: {
             durable: true,
           },

@@ -17,7 +17,7 @@ class Relationship(BaseModel):
     confidence: float = 0.9
 
 
-class PiplineMetadata(BaseModel):
+class PipelineMetadata(BaseModel):
     num_entities: int
     num_relationships: int
     num_raw_entities: int
@@ -25,7 +25,7 @@ class PiplineMetadata(BaseModel):
 class PipelineResult(BaseModel):
     entities: List[Entity] = Field(default_factory=list)
     relationships: List[Relationship] = Field(default_factory=list)
-    metadata: PiplineMetadata
+    metadata: PipelineMetadata
 
 
 class SceneAnalysisRequest(BaseModel):
