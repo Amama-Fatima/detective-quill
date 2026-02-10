@@ -4,15 +4,14 @@ import { Transport } from "@nestjs/microservices";
 import * as dotenv from "dotenv";
 import * as path from "path";
 
-// load backend .env before creating the microservice
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice(WorkerModule, {
     transport: Transport.RMQ,
     options: {
-      urls: ["amqp://guest:guest@localhost:5672"],
-      queue: "my_queue",
+      urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
+      queues: ["scene_analysis_results_queue", "invite_email_job"],
       queueOptions: { durable: true },
     },
   });
