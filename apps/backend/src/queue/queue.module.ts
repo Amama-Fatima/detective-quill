@@ -12,7 +12,7 @@ import { QueueService } from "./queue.service";
           urls: [
             process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
           ],
-          queue: "my_queue",
+          queue: "scene_analysis_queue",
           queueOptions: {
             durable: true,
           },
