@@ -24,11 +24,9 @@ image = (
         "pydantic==2.5.0",
         "pydantic-settings==2.1.0",
     ])
-    .run_commands(
-        "python -m spacy download en_core_web_sm"
-    )
-    # Mount your pipeline source code into the image
-    # This copies apps/knowledge-graph/src/ → /root/src/ inside the container
+    .pip_install([
+        "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl"
+    ])
     .add_local_dir("src", remote_path="/root/src")
 )
 
