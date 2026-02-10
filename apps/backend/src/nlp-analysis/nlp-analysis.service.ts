@@ -10,10 +10,41 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { QueueService } from "../queue/queue.service";
+
+export interface Entity {
+  name: string;
+  type: string;
+  mentions: string[];
+  attributes: Record<string, any>;
+}
+
+export interface Relationship {
+  source: string;
+  target: string;
+  relation_type: string;
+  description: string;
+  confidence: number;
+}
+
+export interface PipelineMetadata {
+  num_entities: number;
+  num_relationships: number;
+  num_raw_entities: number;
+}
+
+export interface PipelineResult {
+  entities: Entity[];
+  relationships: Relationship[];
+  metadata: PipelineMetadata;
+}
 
 @Injectable()
 export class NlpAnalysisService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private queueService: QueueService,
+  ) {}
 
   async submitJob(
     dto: SubmitAnalysisDto,
@@ -25,7 +56,7 @@ export class NlpAnalysisService {
       .from("nlp_analysis_jobs")
       .insert({
         user_id: userId,
-        scenet_text: dto.scene_text,
+        scene_text: dto.scene_text,
         status: "QUEUED",
         progress: 0,
       })
@@ -40,12 +71,14 @@ export class NlpAnalysisService {
 
     const job_id = data.job_id;
 
-    // todo: publish to rabbit mq
-    //    await this.publishToRabbitMQ({
-    //      job_id: jobId,
-    //      scene_text: dto.sceneText,
-    //      user_id: userId,
-    //    });
+    // Publish to RabbitMQ (Python worker will consume this)
+    this.queueService.sendSceneAnalysisJob({
+      job_id,
+      scene_text: dto.scene_text,
+      user_id: userId,
+    });
+
+    console.log(`Scene analysis job queued: ${job_id}`);
 
     return {
       job_id,
@@ -55,7 +88,7 @@ export class NlpAnalysisService {
     };
   }
 
-  async getJobStatus(jobId, userId: string): Promise<JobStatusDto> {
+  async getJobStatus(jobId: string, userId: string): Promise<JobStatusDto> {
     const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("nlp_analysis_jobs")
@@ -127,8 +160,8 @@ export class NlpAnalysisService {
       );
     }
 
-    // 2. TODO: Fetch from Neo4j (dummy placeholder)
-    const graph = await this.fetchFromNeo4j(jobId);
+    // 2. Fetch entities and relationships from Supabase
+    const graph = await this.fetchKnowledgeGraph(jobId);
 
     return {
       job_id: jobId,
@@ -142,42 +175,143 @@ export class NlpAnalysisService {
     };
   }
 
-  private async fetchFromNeo4j(jobId: string): Promise<{
+  /**
+   * Called by the worker consumer when Python completes processing
+   *
+   * Saves the analysis result to Supabase
+   */
+  async saveAnalysisResult(
+    jobId: string,
+    result: PipelineResult,
+  ): Promise<void> {
+    const supabase = this.supabaseService.client;
+
+    // 1. Update job status to COMPLETED
+    const { error: jobError } = await supabase
+      .from("nlp_analysis_jobs")
+      .update({
+        status: "COMPLETED",
+        progress: 100,
+        current_stage: "finished",
+        completed_at: new Date().toISOString(),
+        entity_count: result.metadata.num_entities,
+        relationship_count: result.metadata.num_relationships,
+      })
+      .eq("job_id", jobId);
+
+    if (jobError) {
+      console.error(`Failed to update job status for ${jobId}:`, jobError);
+      throw new Error(`Failed to update job: ${jobError.message}`);
+    }
+
+    // 2. Save entities
+    const entities = result.entities.map((entity) => ({
+      job_id: jobId,
+      name: entity.name,
+      type: entity.type,
+      mentions: entity.mentions,
+      attributes: entity.attributes,
+    }));
+
+    if (entities.length > 0) {
+      const { error: entitiesError } = await supabase
+        .from("nlp_entities")
+        .insert(entities);
+
+      if (entitiesError) {
+        console.error(`Failed to save entities for ${jobId}:`, entitiesError);
+        throw new Error(`Failed to save entities: ${entitiesError.message}`);
+      }
+    }
+
+    // 3. Save relationships
+    const relationships = result.relationships.map((rel) => ({
+      job_id: jobId,
+      source: rel.source,
+      target: rel.target,
+      relation_type: rel.relation_type,
+      description: rel.description,
+      confidence: rel.confidence,
+    }));
+
+    if (relationships.length > 0) {
+      const { error: relError } = await supabase
+        .from("nlp_relationships")
+        .insert(relationships);
+
+      if (relError) {
+        console.error(`Failed to save relationships for ${jobId}:`, relError);
+        throw new Error(`Failed to save relationships: ${relError.message}`);
+      }
+    }
+
+    console.log(`✓ Saved analysis result for job ${jobId}`);
+    console.log(`  - Entities: ${result.metadata.num_entities}`);
+    console.log(`  - Relationships: ${result.metadata.num_relationships}`);
+  }
+
+  /**
+   * Called by the worker consumer when Python reports an error
+   *
+   * Marks the job as failed in Supabase
+   */
+  async markJobAsFailed(jobId: string, error: string): Promise<void> {
+    const supabase = this.supabaseService.client;
+
+    const { error: updateError } = await supabase
+      .from("nlp_analysis_jobs")
+      .update({
+        status: "FAILED",
+        progress: 0,
+        current_stage: "failed",
+        completed_at: new Date().toISOString(),
+        error_message: error,
+      })
+      .eq("job_id", jobId);
+
+    if (updateError) {
+      console.error(`Failed to mark job ${jobId} as failed:`, updateError);
+    }
+
+    console.error(`✗ Marked job ${jobId} as failed: ${error}`);
+  }
+
+  /**
+   * Fetch knowledge graph from Supabase
+   *
+   * Used by getResults() to return the saved entities and relationships
+   */
+  private async fetchKnowledgeGraph(jobId: string): Promise<{
     entities: any[];
     relationships: any[];
   }> {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const supabase = this.supabaseService.client;
 
-    console.log("Fetching from Neo4j for job:", jobId);
+    // Fetch entities
+    const { data: entities, error: entitiesError } = await supabase
+      .from("nlp_entities")
+      .select("*")
+      .eq("job_id", jobId);
+
+    if (entitiesError) {
+      console.error(`Failed to fetch entities for ${jobId}:`, entitiesError);
+      return { entities: [], relationships: [] };
+    }
+
+    // Fetch relationships
+    const { data: relationships, error: relError } = await supabase
+      .from("nlp_relationships")
+      .select("*")
+      .eq("job_id", jobId);
+
+    if (relError) {
+      console.error(`Failed to fetch relationships for ${jobId}:`, relError);
+      return { entities: entities || [], relationships: [] };
+    }
 
     return {
-      entities: [
-        {
-          id: "entity-1",
-          name: "Detective Marcus Chen",
-          type: "PERSON",
-          role: "detective",
-          description: "Lead investigator on the case",
-          attributes: { occupation: "Detective" },
-        },
-        {
-          id: "entity-2",
-          name: "Sarah Williams",
-          type: "PERSON",
-          role: "victim",
-          description: "Victim found at crime scene",
-          attributes: { status: "deceased" },
-        },
-      ],
-      relationships: [
-        {
-          source: "entity-1",
-          target: "entity-2",
-          type: "INVESTIGATES",
-          evidence: "Detective Chen examined the victim",
-          confidence: 0.95,
-        },
-      ],
+      entities: entities || [],
+      relationships: relationships || [],
     };
   }
 }

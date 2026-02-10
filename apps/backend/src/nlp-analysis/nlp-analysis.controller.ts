@@ -1,3 +1,4 @@
+// src/modules/nlp-analysis/nlp-analysis.controller.ts
 import {
   Controller,
   Get,
@@ -7,15 +8,20 @@ import {
   UseGuards,
   Request,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
 import { NlpAnalysisService } from "./nlp-analysis.service";
+import { AuthGuard } from "../auth/auth.guard";
 import {
   AnalysisResponseDto,
-  AnalysisResultDto,
   JobStatusDto,
-  SubmitAnalysisDto,
+  AnalysisResultDto,
 } from "./dto/nlp-analysis.dto";
-import { ApiResponse } from "@detective-quill/shared-types";
+import { SubmitAnalysisDto } from "./dto/nlp-analysis.dto";
+
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+}
 
 @Controller("nlp-analysis")
 @UseGuards(AuthGuard)
