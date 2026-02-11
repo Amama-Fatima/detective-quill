@@ -1,6 +1,6 @@
 import { Controller } from "@nestjs/common";
 import { EventPattern, Payload } from "@nestjs/microservices";
-import { NlpAnalysisService } from "src/nlp-analysis/nlp-analysis.service";
+import { WorkerNlpAnalysisService } from "src/nlp-analysis/worker-nlp-analysis.service";
 
 export interface Entity {
   name: string;
@@ -38,7 +38,7 @@ export interface SceneAnalysisResponse {
 
 @Controller()
 export class NlpAnalysisConsumer {
-  constructor(private nlpAnalysisService: NlpAnalysisService) {}
+  constructor(private nlpAnalysisService: WorkerNlpAnalysisService) {}
 
   /**
    * Handles results from the Python knowledge-graph worker
