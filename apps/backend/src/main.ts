@@ -19,26 +19,22 @@ import * as bodyParser from "body-parser";
 async function bootstrap() {
   try {
     const app = await NestFactory.create(AppModule);
-    console.log("Checking router.stack --------------------------");
-    console.log(app.getHttpAdapter().getInstance()._router?.stack);
-    const adapter = app.getHttpAdapter();
-    console.log("Adapter constructor:", adapter.constructor.name);
+
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
 
     app.enableCors({
-      origin: "http://localhost:3000",
+      origin: process.env.FRONTEND_URL || "http://localhost:3000",
       credentials: true,
     });
 
-    // Global validation: transforms payloads into DTO instances and strips unknown props
     app.useGlobalPipes(
       new ValidationPipe({
-        transform: true, // plain -> class instances (enables class-transformer)
-        whitelist: true, // remove properties not in the DTO
-        forbidNonWhitelisted: false, // set true to throw on unknown props
-        transformOptions: { enableImplicitConversion: true }, // optional
-      })
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: false,
+        transformOptions: { enableImplicitConversion: true },
+      }),
     );
 
     const port = process.env.PORT || 3001;
@@ -46,6 +42,7 @@ async function bootstrap() {
     console.log(`🚀 Backend server running on http://localhost:${port}`);
   } catch (error) {
     console.error("Error during bootstrap:", error);
+    process.exit(1); // ← this makes Render show the actual error in logs
   }
 }
 bootstrap();
