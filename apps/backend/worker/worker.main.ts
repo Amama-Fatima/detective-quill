@@ -15,6 +15,7 @@ async function bootstrap() {
       urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
       queue: "scene_analysis_results_queue",
       queueOptions: { durable: true },
+      noAck: false,
     },
   });
 

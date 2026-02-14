@@ -1,5 +1,10 @@
 import { Controller } from "@nestjs/common";
-import { Ctx, EventPattern, Payload, RmqContext } from "@nestjs/microservices";
+import {
+  Ctx,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from "@nestjs/microservices";
 import { WorkerNlpAnalysisService } from "src/nlp-analysis/worker-nlp-analysis.service";
 
 export interface Entity {
@@ -40,12 +45,8 @@ export interface SceneAnalysisResponse {
 export class NlpAnalysisConsumer {
   constructor(private nlpAnalysisService: WorkerNlpAnalysisService) {}
 
-  /**
-   * Handles results from the Python knowledge-graph worker
-   *
-   * This receives messages from the 'scene_analysis_results_queue'
-   */
-  @EventPattern("scene_analysis_results_queue") // ← Try matching the queue name
+  // Listen to ALL messages from the queue using wildcard
+  @MessagePattern("*")
   async handleSceneAnalysisResult(
     @Payload() data: any,
     @Ctx() context: RmqContext,
@@ -57,9 +58,12 @@ export class NlpAnalysisConsumer {
 
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
+    const content = originalMsg.content.toString();
 
     try {
-      const { job_id, status, result, error } = data;
+      // Parse the raw content since Modal sends plain JSON
+      const parsed = JSON.parse(content);
+      const { job_id, status, result, error } = parsed;
 
       console.log(`Received result for job ${job_id}: ${status}`);
 
@@ -80,7 +84,7 @@ export class NlpAnalysisConsumer {
       channel.ack(originalMsg);
     } catch (err) {
       console.error(`Error processing message:`, err);
-      channel.nack(originalMsg, false, false); // ← Don't requeue to avoid infinite loop
+      channel.nack(originalMsg, false, false);
     }
   }
 }
