@@ -1,5 +1,5 @@
 import { Controller } from "@nestjs/common";
-import { EventPattern, Payload } from "@nestjs/microservices";
+import { Ctx, EventPattern, Payload, RmqContext } from "@nestjs/microservices";
 import { WorkerNlpAnalysisService } from "src/nlp-analysis/worker-nlp-analysis.service";
 
 export interface Entity {
@@ -45,34 +45,42 @@ export class NlpAnalysisConsumer {
    *
    * This receives messages from the 'scene_analysis_results_queue'
    */
-  @EventPattern("*")
-  async handleSceneAnalysisResult(@Payload() data: SceneAnalysisResponse) {
-    const { job_id, status, result, error } = data;
+  @EventPattern("scene_analysis_results_queue") // ← Try matching the queue name
+  async handleSceneAnalysisResult(
+    @Payload() data: any,
+    @Ctx() context: RmqContext,
+  ) {
+    console.log("=== RAW MESSAGE RECEIVED ===");
+    console.log("Type:", typeof data);
+    console.log("Data:", JSON.stringify(data, null, 2));
+    console.log("===========================");
 
-    console.log(`Received result for job ${job_id}: ${status}`);
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
 
-    if (status === "completed" && result) {
-      // Success - save the knowledge graph to database
-      try {
+    try {
+      const { job_id, status, result, error } = data;
+
+      console.log(`Received result for job ${job_id}: ${status}`);
+
+      if (status === "completed" && result) {
         await this.nlpAnalysisService.saveAnalysisResult(job_id, result);
 
         console.log(`✓ Saved knowledge graph for job ${job_id}`);
         console.log(`  - Entities: ${result.metadata.num_entities}`);
         console.log(`  - Relationships: ${result.metadata.num_relationships}`);
-      } catch (err) {
-        console.error(`Error saving result for job ${job_id}:`, err);
+      } else {
+        console.error(`✗ Job ${job_id} failed: ${error}`);
         await this.nlpAnalysisService.markJobAsFailed(
           job_id,
-          `Failed to save result: ${err.message}`,
+          error || "Unknown error",
         );
       }
-    } else {
-      // Failure - mark job as failed
-      console.error(`✗ Job ${job_id} failed: ${error}`);
-      await this.nlpAnalysisService.markJobAsFailed(
-        job_id,
-        error || "Unknown error",
-      );
+
+      channel.ack(originalMsg);
+    } catch (err) {
+      console.error(`Error processing message:`, err);
+      channel.nack(originalMsg, false, false); // ← Don't requeue to avoid infinite loop
     }
   }
 }
