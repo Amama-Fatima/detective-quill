@@ -45,7 +45,7 @@ export class NlpAnalysisConsumer {
    *
    * This receives messages from the 'scene_analysis_results_queue'
    */
-  @EventPattern("scene_analysis_results_queue")
+  @EventPattern("*")
   async handleSceneAnalysisResult(@Payload() data: SceneAnalysisResponse) {
     const { job_id, status, result, error } = data;
 
