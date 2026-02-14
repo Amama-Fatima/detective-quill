@@ -13,7 +13,7 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
-      queues: ["scene_analysis_results_queue", "invite_email_job"],
+      queue: "scene_analysis_results_queue",
       queueOptions: { durable: true },
     },
   });
