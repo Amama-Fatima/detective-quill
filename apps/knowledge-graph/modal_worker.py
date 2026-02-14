@@ -47,7 +47,7 @@ secrets = [
     gpu="T4",
     secrets=secrets,
     container_idle_timeout=300,
-    timeout=1200,
+    timeout=1800,
 )
 class KnowledgeGraphWorker:
 
@@ -124,20 +124,12 @@ class KnowledgeGraphWorker:
     image=image,
     secrets=secrets,
     schedule=modal.Period(seconds=60),
-    timeout=1200,
+    timeout=1800,
 )
 def poll_queue():
-    """
-    Runs every 60 seconds.
-    Pulls ONE job from CloudAMQP.
-    Hands it to KnowledgeGraphWorker.
-    Publishes result back to results queue.
-    """
     import pika
     import json
-    import sys
-
-    sys.path.insert(0, "/root")  # same as worker — src/ is at /root/src/
+    import os
 
     from src.utils.logger import setup_logger
     logger = setup_logger(__name__)
@@ -181,12 +173,20 @@ def poll_queue():
         connection.close()
         return
 
+    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+    connection.close()
+
     worker = KnowledgeGraphWorker()
     output = worker.process_job.remote(
         job_id=job_id,
         scene_text=scene_text,
         user_id=user_id
     )
+
+    logger.info("Reconnecting to CloudAMQP to publish result...")
+    connection = pika.BlockingConnection(params)
+    channel = connection.channel()
+    channel.queue_declare(queue="scene_analysis_results_queue", durable=True)
 
     channel.basic_publish(
         exchange="",
@@ -199,6 +199,5 @@ def poll_queue():
     )
 
     logger.info(f"Published result for job {job_id} to results queue")
-    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
     connection.close()
-    logger.info(f"Done. Job {job_id} status: {output['status']}")
+    logger.info(f"Done. Job {job_id} status: {output['status']}")    

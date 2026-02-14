@@ -38,7 +38,7 @@ class SpacyEntityExtractor:
         return raw_entities
     
     def convert_to_entities(self, raw_entities: List[RawEntity]) -> List[Entity]:
-        
+    
         entity_groups = defaultdict(list)
 
         for raw_ent in raw_entities:
@@ -46,11 +46,13 @@ class SpacyEntityExtractor:
             entity_groups[key].append(raw_ent)
 
         entities = []
-        for(name, entity_type), mentions in entity_groups.items():
+        for (name, entity_type), mentions in entity_groups.items():
+            mention_texts = [m.text for m in mentions]
+            
             entity = Entity(
                 name=name,
                 type=entity_type,
-                mentions=list(set(mentions)),
+                mentions=list(set(mention_texts)),  
                 attributes={}
             )
             entities.append(entity)
@@ -65,7 +67,7 @@ def extract_entities_layer1(scene_text: str) -> List[Entity]:
     logger.info("=" * 60)
 
     extractor = SpacyEntityExtractor()
-    raw_entities = extractor.extract_raw_entities(scene_text)
+    raw_entities = extractor.extract_entities(scene_text)
     logger.info(f"Found {len(raw_entities)} raw entities")
 
     entities = extractor.convert_to_entities(raw_entities)
