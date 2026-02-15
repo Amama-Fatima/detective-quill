@@ -8,14 +8,12 @@ import express from "express";
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 async function bootstrap() {
-  // Create microservice for RabbitMQ
   const app = await NestFactory.createMicroservice(WorkerModule, {
     transport: Transport.RMQ,
     options: {
       urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
-      queue: "scene_analysis_results_queue",
+      queue: "invite_email_job",
       queueOptions: { durable: true },
-      noAck: false,
     },
   });
 
