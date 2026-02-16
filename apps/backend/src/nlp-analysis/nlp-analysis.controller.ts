@@ -24,11 +24,11 @@ interface ApiResponse<T> {
 }
 
 @Controller("nlp-analysis")
-@UseGuards(AuthGuard)
 export class NlpAnalysisController {
   constructor(private readonly nlpAnalysisService: NlpAnalysisService) {}
 
   @Post("submit")
+  @UseGuards(AuthGuard)
   async submitAnalysis(
     @Body() submitAnalysisDto: SubmitAnalysisDto,
     @Request() req,
@@ -53,6 +53,7 @@ export class NlpAnalysisController {
   }
 
   @Get("status/:jobId")
+  @UseGuards(AuthGuard)
   async getStatus(
     @Param("jobId") jobId: string,
     @Request() req,
@@ -62,6 +63,7 @@ export class NlpAnalysisController {
   }
 
   @Get("results/:jobId")
+  @UseGuards(AuthGuard)
   async getResults(
     @Param("jobId") jobId: string,
     @Request() req,
@@ -71,6 +73,7 @@ export class NlpAnalysisController {
   }
 
   @Get("history")
+  @UseGuards(AuthGuard)
   async getUserHistory(@Request() req): Promise<ApiResponse<JobStatusDto[]>> {
     const data = await this.nlpAnalysisService.getUserHistory(req.user.id);
     return { success: true, data };
