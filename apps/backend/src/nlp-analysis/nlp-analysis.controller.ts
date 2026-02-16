@@ -40,6 +40,18 @@ export class NlpAnalysisController {
     return { success: true, data };
   }
 
+  @Post("submit-test")
+  async submitTestAnalysis(
+    @Body() submitAnalysisDto: SubmitAnalysisDto,
+  ): Promise<ApiResponse<AnalysisResponseDto>> {
+    const testUserId = "84a08a1c-ed1e-4a42-9fed-9736b63c4ad7";
+    const data = await this.nlpAnalysisService.submitJob(
+      submitAnalysisDto,
+      testUserId,
+    );
+    return { success: true, data };
+  }
+
   @Get("status/:jobId")
   async getStatus(
     @Param("jobId") jobId: string,
