@@ -11,9 +11,10 @@ import { BlueprintCardsModule } from "./blueprint_cards/blueprint_cards.module";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { CommentsModule } from "./comments/comments.module";
 import { MembersModule } from "./members/members.module";
-import { InvitationsModule } from './invitations/invitations.module';
+import { InvitationsModule } from "./invitations/invitations.module";
 import { EmailModule } from "./email/email.module";
 import { QueueModule } from "./queue/queue.module";
+import { NlpAnalysisModule } from "./nlp-analysis/nlp-analysis.module";
 @Module({
   controllers: [AppController],
   providers: [AppService, ProjectsService],
@@ -45,6 +46,7 @@ import { QueueModule } from "./queue/queue.module";
     InvitationsModule,
     EmailModule,
     QueueModule,
+    NlpAnalysisModule,
   ],
 })
 export class AppModule {}
