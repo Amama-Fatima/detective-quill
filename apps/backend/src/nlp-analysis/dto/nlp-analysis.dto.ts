@@ -18,10 +18,6 @@ export class SubmitAnalysisDto {
   })
   scene_text: string;
 
-  @IsString()
-  @IsNotEmpty()
-  user_id: string;
-
   @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
