@@ -158,10 +158,17 @@ def poll_queue():
         return
 
     try:
-        message = json.loads(body.decode("utf-8"))
+        raw_message = json.loads(body.decode("utf-8"))
+        
+        if "pattern" in raw_message and "data" in raw_message:
+            message = raw_message["data"]
+        else:
+            message = raw_message
+        
         job_id = message["job_id"]
         scene_text = message["scene_text"]
         user_id = message.get("user_id", "")
+
         logger.info(f"Picked up job {job_id} from queue")
 
     except (json.JSONDecodeError, KeyError) as e:
@@ -200,4 +207,4 @@ def poll_queue():
 
     logger.info(f"Published result for job {job_id} to results queue")
     connection.close()
-    logger.info(f"Done. Job {job_id} status: {output['status']}")    
+    logger.info(f"Done. Job {job_id} status: {output['status']}")        
