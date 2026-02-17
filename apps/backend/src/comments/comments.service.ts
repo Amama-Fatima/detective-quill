@@ -11,7 +11,6 @@ import {
   CommentResponse,
   CommentWithRelations,
   CommentStats,
-  DeleteResponse,
 } from "@detective-quill/shared-types";
 
 // todo: add verfication checks in proper middlewares
@@ -133,7 +132,7 @@ export class CommentsService {
     return data;
   }
 
-  async deleteComment(commentId: string): Promise<DeleteResponse> {
+  async deleteComment(commentId: string): Promise<void> {
     const supabase = this.supabaseService.client;
 
     const { error } = await supabase
@@ -147,7 +146,7 @@ export class CommentsService {
       );
     }
 
-    return { message: "Comment deleted successfully" };
+    return;
   }
 
   async getCommentStats(fsNodeId: string): Promise<CommentStats> {

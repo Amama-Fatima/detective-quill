@@ -30,6 +30,7 @@ import { useFileTreeState } from "@/hooks/file-tree/use-file-tree-state";
 import { useFileTreeOperations } from "@/hooks/file-tree/use-file-tree-operations";
 import TreeItem from "./tree-item";
 import { findNodeById } from "@/lib/utils/file-tree-utils";
+import CreateCommitDialog from "./dialogs/create-commit-dialog";
 
 interface FileTreeProps {
   initialNodes: FsNodeTreeResponse[];
@@ -145,6 +146,11 @@ const FileTree = ({
     <div className="flex flex-col h-full">
       <div className="p-3 border-b bg-card/20">
         <div className="flex gap-2 mb-3">
+
+      {/* <div>
+        <CreateCommitDialog projectId={projectId} />
+      </div> */}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

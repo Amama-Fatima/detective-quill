@@ -7,6 +7,14 @@ export type BlueprintCard =
 export type BlueprintType = Database["public"]["Enums"]["blueprint_type"];
 export type FsNode = Database["public"]["Tables"]["fs_nodes"]["Row"];
 export type Invitation = Database["public"]["Tables"]["invitations"]["Row"];
+export type Comment = Database["public"]["Tables"]["comments"]["Row"];
+export type Branch = Database["public"]["Tables"]["branches"]["Row"];
+export type Commit = Database["public"]["Tables"]["commits"]["Row"];
+export type CommitSnapshot =
+  Database["public"]["Tables"]["commit_snapshots"]["Row"];
+export type Member = Database["public"]["Tables"]["projects_members"]["Row"];
+
+// todo: consider using pick and omit to create types instead of creating new ones
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -47,10 +55,6 @@ export interface ProjectStats {
 export interface ProjectListResponse {
   projects: Project[];
   total: number;
-}
-
-export interface DeleteResponse {
-  message: string;
 }
 
 // File system node types
@@ -155,6 +159,8 @@ export interface UpdateBlueprintCardDto {
   title?: string | null;
 }
 
+// todo: comment and comment
+//  response should be used in right places, check their usage
 export interface CommentResponse {
   id: string;
   fs_node_id: string;
@@ -233,3 +239,29 @@ export interface EmailSendingJobData {
   inviterName: string;
   projectTitle: string;
 }
+
+export type CreateBranchDto = Pick<
+  Branch,
+  "name" | "is_default" | "parent_commit_id"
+>;
+
+export type UpdateBranchDto = Partial<
+  Pick<Branch, "name" | "is_default" | "head_commit_id">
+>;
+
+export type CreateCommitDto = Pick<Commit, "message" | "branch_id">;
+
+export type CreateSnapshotDto = Pick<
+  CommitSnapshot,
+  | "commit_id"
+  | "fs_node_id"
+  | "name"
+  | "node_type"
+  | "parent_id"
+  | "path"
+  | "content"
+  | "word_count"
+  | "file_extension"
+  | "sort_order"
+  | "depth"
+>;

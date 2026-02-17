@@ -102,6 +102,13 @@ export default function CreateProjectDialog({
                 disabled={creating}
               />
             </div>
+
+            <div className="">
+              <p>
+                Note: When creating a new project, a default branch by the name
+                of "main" will be created automatically.
+              </p>
+            </div>
           </div>
 
           <DialogFooter>

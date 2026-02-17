@@ -9,7 +9,6 @@ import { ProjectsService } from "../projects/projects.service";
 import { QueueService } from "src/queue/queue.service";
 import {
   FsNodeTreeResponse,
-  DeleteResponse,
   type FsNode,
   UpdateFileContentDto,
   UpdateNodeMetadataDto,
@@ -289,7 +288,7 @@ export class FsNodesService {
     return data;
   }
 
-  async deleteNode(nodeId: string, userId: string): Promise<DeleteResponse> {
+  async deleteNode(nodeId: string, userId: string): Promise<void> {
     // todo: try to remove the use of delete response, shift to general api response
     const supabase = this.supabaseService.client;
 
@@ -332,12 +331,7 @@ export class FsNodesService {
       throw new Error(`Failed to delete node: ${error.message}`);
     }
 
-    return {
-      message:
-        node.node_type === "folder"
-          ? "Folder and all contents permanently deleted"
-          : "File permanently deleted",
-    };
+    return;
   }
 
   async moveNode(
@@ -399,6 +393,20 @@ export class FsNodesService {
       totalWordCount,
       rootNodes,
     };
+  }
+
+  async getProjectNodes(projectId: string): Promise<FsNode[]> {
+    const supabase = this.supabaseService.client;
+    const { data: nodes, error } = await supabase
+      .from("fs_nodes")
+      .select("*")
+      .eq("project_id", projectId);
+
+    if (error) {
+      throw new Error(`Failed to fetch project files: ${error.message}`);
+    }
+
+    return nodes || [];
   }
 
   // simpler tree building using view data

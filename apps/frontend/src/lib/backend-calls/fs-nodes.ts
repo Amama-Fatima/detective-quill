@@ -2,7 +2,6 @@ import {
   FsNode,
   FsNodeTreeResponse,
   CreateFsNodeDto,
-  DeleteResponse,
   ApiResponse,
   UpdateFileContentDto,
   UpdateNodeMetadataDto,
@@ -118,14 +117,14 @@ export async function deleteFsNode(
   accessToken: string,
   hardDelete: boolean = false,
   cascadeDelete: boolean = false,
-): Promise<ApiResponse<DeleteResponse>> {
+): Promise<ApiResponse<void>> {
   const queryParams = new URLSearchParams();
   if (hardDelete) queryParams.append("hard", "true");
   if (cascadeDelete) queryParams.append("cascade", "true");
 
   const query = queryParams.toString() ? `?${queryParams.toString()}` : "";
 
-  return makeAuthenticatedRequest<DeleteResponse>(
+  return makeAuthenticatedRequest<void>(
     `/fs-nodes/${nodeId}${query}`,
     accessToken,
     {

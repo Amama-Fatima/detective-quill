@@ -24,7 +24,6 @@ import { AuthGuard } from "../auth/auth.guard";
 import {
   CommentResponse,
   CommentStats,
-  DeleteResponse,
   ApiResponse,
 } from "@detective-quill/shared-types";
 
@@ -178,7 +177,7 @@ export class CommentsController {
     @Param("projectId") projectId: string,
     @Param("id") id: string,
     @Request() req,
-  ): Promise<ApiResponse<DeleteResponse>> {
+  ): Promise<ApiResponse<void>> {
       const { hasAccess, role } = await this.membersService.verifyProjectAccess(
         projectId,
         req.user.id,
@@ -200,8 +199,8 @@ export class CommentsController {
         );
       }
 
-      const data = await this.commentsService.deleteComment(id);
-      return { success: true, data };
+      await this.commentsService.deleteComment(id);
+      return { success: true, message: "Comment deleted successfully" };
   
   }
 

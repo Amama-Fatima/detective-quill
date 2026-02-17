@@ -13,6 +13,7 @@ import {
   Minimize,
   Focus,
   MessageSquare,
+  GitCommitHorizontal,
 } from "lucide-react";
 import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {
@@ -74,6 +75,7 @@ const TextEditor = ({
     nodeId,
   });
   const isDeleting = deleteFileMutation.isPending;
+  const [isCommitting, setIsCommitting] = useState(false);
 
   const router = useRouter();
 
@@ -104,9 +106,7 @@ const TextEditor = ({
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div
-        className={getContainerClass(focusMode)}
-      >
+      <div className={getContainerClass(focusMode)}>
         {/* Header - Always visible but styled differently in focus modes */}
         <div className={getHeaderClass(focusMode)}>
           <div className="flex min-w-0 items-center gap-3">

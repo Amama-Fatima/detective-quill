@@ -9,7 +9,6 @@ import {
   UpdateProjectDto,
   Project,
   ProjectStats,
-  DeleteResponse,
 } from "@detective-quill/shared-types";
 
 // todo: add transactions where needed
@@ -107,7 +106,7 @@ export class ProjectsService {
   async deleteProject(
     projectId: string,
     userId: string,
-  ): Promise<DeleteResponse> {
+  ): Promise<void> {
     const supabase = this.supabaseService.client;
 
     await this.verifyProjectOwnership(projectId, userId);
@@ -129,7 +128,7 @@ export class ProjectsService {
       throw new Error(`Failed to delete project: ${error.message}`);
     }
 
-    return { message: "Project permanently deleted" };
+    return;
   }
 
   async restoreProject(projectId: string, userId: string): Promise<Project> {
