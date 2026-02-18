@@ -33,11 +33,8 @@ export default async function WorkspaceLayout({
 
   const isOwner = author_id === userId;
   try {
-    const { project, nodes, currentNode } = await getEditorWorkspaceData(
-      supabase,
-      projectId,
-      nodeId,
-    );
+    const { project, nodes, currentNode, activeBranchId } =
+      await getEditorWorkspaceData(supabase, projectId, nodeId);
 
     return (
       <WorkspaceLayoutClientWrapper
@@ -48,6 +45,7 @@ export default async function WorkspaceLayout({
         nodeId={nodeId}
         isActive={isActive}
         isOwner={isOwner}
+        activeBranchId={activeBranchId}
       >
         {children}
       </WorkspaceLayoutClientWrapper>

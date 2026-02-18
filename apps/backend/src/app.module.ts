@@ -14,6 +14,8 @@ import { MembersModule } from "./members/members.module";
 import { InvitationsModule } from './invitations/invitations.module';
 import { EmailModule } from "./email/email.module";
 import { QueueModule } from "./queue/queue.module";
+import { CommitsModule } from "./commits/commits.module";
+
 @Module({
   controllers: [AppController],
   providers: [AppService, ProjectsService],
@@ -45,6 +47,7 @@ import { QueueModule } from "./queue/queue.module";
     InvitationsModule,
     EmailModule,
     QueueModule,
+    CommitsModule,
   ],
 })
 export class AppModule {}

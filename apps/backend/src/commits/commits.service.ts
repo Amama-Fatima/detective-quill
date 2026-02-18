@@ -65,19 +65,36 @@ export class CommitsService {
     return data;
   }
 
-  async getCommitsByBranch(branchId: string) {
+  async getCommitsByBranch(
+    branchId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ data: any[]; total: number }> {
     const supabase = this.supabaseService.client;
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    const { count, error: countError } = await supabase
+      .from("commits")
+      .select("*", { count: "exact", head: true })
+      .eq("branch_id", branchId);
+
+    if (countError) {
+      throw new Error(`Failed to count commits: ${countError.message}`);
+    }
+
     const { data, error } = await supabase
       .from("commits")
       .select("*")
       .eq("branch_id", branchId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(from, to);
 
     if (error) {
       throw new Error(`Failed to fetch commits: ${error.message}`);
     }
 
-    return data;
+    return { data: data || [], total: count ?? 0 };
   }
 
   async getCommitsByProject(projectId: string) {

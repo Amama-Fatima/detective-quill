@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
 import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
+import { useWorkspaceContext } from "@/context/workspace-context";
 import type { BlockNoteEditorRef } from "./block-note-editor";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
@@ -47,7 +48,6 @@ export type TextEditorProps = {
   onToggleComments?: () => void;
   commentCount?: number;
   editorRef?: React.RefObject<BlockNoteEditorRef | null>;
-  disabledCondition?: boolean;
   projectId: string;
   nodeId: string;
 };
@@ -59,10 +59,11 @@ const TextEditor = ({
   onToggleComments = () => {},
   commentCount = 0,
   editorRef,
-  disabledCondition = false,
   projectId,
   nodeId,
 }: TextEditorProps) => {
+  const { isActive, isOwner } = useWorkspaceContext();
+  const disabledCondition = !isActive || !isOwner;
   const {
     focusMode,
     isFullscreen,
@@ -75,7 +76,6 @@ const TextEditor = ({
     nodeId,
   });
   const isDeleting = deleteFileMutation.isPending;
-  const [isCommitting, setIsCommitting] = useState(false);
 
   const router = useRouter();
 
@@ -247,7 +247,6 @@ const TextEditor = ({
             ref={effectiveEditorRef}
             initialContent={internal}
             onChange={handleContentChange}
-            disabledCondition={disabledCondition}
           />
         </div>
 

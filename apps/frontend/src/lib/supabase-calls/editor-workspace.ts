@@ -15,14 +15,17 @@ async function getEditorWorkspaceData(
   project: Project;
   nodes: FsNodeTreeResponse[];
   currentNode: FsNode | null;
+  activeBranchId: string | null;
 }> {
   try {
     // Fetch all data in parallel
-    const [projectResult, nodesResult, nodeResult] = await Promise.allSettled([
-      fetchProject(supabase, projectId),
-      fetchProjectTree(supabase, projectId),
-      nodeId ? fetchNode(supabase, nodeId) : Promise.resolve(null),
-    ]);
+    const [projectResult, nodesResult, nodeResult, activeBranchResult] =
+      await Promise.allSettled([
+        fetchProject(supabase, projectId),
+        fetchProjectTree(supabase, projectId),
+        nodeId ? fetchNode(supabase, nodeId) : Promise.resolve(null),
+        fetchActiveBranchId(supabase, projectId),
+      ]);
 
     // Handle project result
     if (projectResult.status === "rejected") {
@@ -39,11 +42,16 @@ async function getEditorWorkspaceData(
     // Handle node result (optional)
     const currentNode =
       nodeResult.status === "fulfilled" ? nodeResult.value : null;
+    const activeBranchId =
+      activeBranchResult.status === "fulfilled"
+        ? activeBranchResult.value
+        : null;
 
     return {
       project: projectResult.value,
       nodes: nodesResult.value,
       currentNode,
+      activeBranchId,
     };
   } catch (error) {
     console.error("Error fetching workspace data:", error);
@@ -84,6 +92,25 @@ async function fetchProjectTree(
   }
 
   return buildTreeFromView(nodes || []);
+}
+
+async function fetchActiveBranchId(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  projectId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("branches")
+    .select("id, is_active, project_id")
+    .eq("project_id", projectId)
+    .eq("is_active", true)
+    .single();
+
+  if (error || !data) {
+    // If no active branch is found or there's an error, return null.
+    return null;
+  }
+
+  return data.id;
 }
 
 async function fetchNode(

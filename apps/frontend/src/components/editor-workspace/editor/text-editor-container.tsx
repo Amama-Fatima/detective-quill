@@ -6,21 +6,15 @@ import CommentsPanel from "@/components/editor-workspace/comments/comments-panel
 import NewCommentDialog from "@/components/editor-workspace/comments/new-comment-dialog";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useComments } from "@/hooks/use-comments";
+import { useWorkspaceContext } from "@/context/workspace-context";
 import { FileNotFoundState } from "./loading-states";
 import { Button } from "@/components/ui/button";
 import { MessageSquarePlus } from "lucide-react";
 import type { BlockNoteEditorRef } from "./block-note-editor";
 import { useParams } from "next/navigation";
 
-interface TextEditorContainerProps {
-  isActive: boolean;
-  isOwner: boolean;
-}
-
-export default function TextEditorContainer({
-  isActive,
-  isOwner,
-}: TextEditorContainerProps) {
+export default function TextEditorContainer() {
+  const { isActive } = useWorkspaceContext();
   const params = useParams();
   const nodeId = params.nodeId as string;
   const projectId = params.projectId as string;
@@ -82,7 +76,6 @@ export default function TextEditorContainer({
           onToggleComments={() => setShowComments(!showComments)}
           commentCount={stats?.unresolved || 0}
           editorRef={editorRef}
-          disabledCondition={!isActive || !isOwner}
           projectId={projectId}
           nodeId={nodeData?.id || ""}
         />

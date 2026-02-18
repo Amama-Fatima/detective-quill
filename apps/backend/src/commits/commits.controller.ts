@@ -5,6 +5,7 @@ import {
   Post,
   Body,
   Param,
+  Query,
   UseGuards,
   Request,
 } from "@nestjs/common";
@@ -23,6 +24,7 @@ export class CommitsController {
     @Request() req: any,
   ) {
     const userId = req.user.sub;
+    console.log("projectId:", projectId);
     return await this.commitsService.createCommit(
       createCommitDto,
       projectId,
@@ -36,8 +38,18 @@ export class CommitsController {
   }
 
   @Get("branch/:branchId")
-  async getCommitsByBranch(@Param("branchId") branchId: string) {
-    return await this.commitsService.getCommitsByBranch(branchId);
+  async getCommitsByBranch(
+    @Param("branchId") branchId: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+  ) {
+    const pageNum = Math.max(1, parseInt(page || "1", 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit || "10", 10) || 10));
+    return await this.commitsService.getCommitsByBranch(
+      branchId,
+      pageNum,
+      limitNum,
+    );
   }
 
   @Get(":commitId")

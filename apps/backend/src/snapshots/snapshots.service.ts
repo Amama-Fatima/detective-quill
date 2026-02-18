@@ -71,6 +71,7 @@ export class SnapshotsService {
       original_created_at: node.created_at,
       original_updated_at: node.updated_at,
       depth: node.depth!,
+      project_id: projectId,
     }));
 
     return await this.createSnapshots(snapshots);

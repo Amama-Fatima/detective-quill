@@ -108,4 +108,22 @@ export class BranchesService {
 
     return branch?.head_commit_id || null;
   }
+
+  async getActiveBranchByProject(projectId: string) {
+    const supabase = this.supabaseService.client;
+    const { data, error } = await supabase
+      .from("branches")
+      .select("*")
+      .eq("project_id", projectId)
+      .eq("is_active", true)
+      .single();
+
+    if (error || !data) {
+      throw new NotFoundException(
+        `Active branch for project ${projectId} not found`,
+      );
+    }
+
+    return data;
+  }
 }

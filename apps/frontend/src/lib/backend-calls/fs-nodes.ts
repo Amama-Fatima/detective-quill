@@ -6,6 +6,7 @@ import {
   UpdateFileContentDto,
   UpdateNodeMetadataDto,
   Project,
+  EditorWorkspaceResponse,
 } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -47,22 +48,15 @@ export async function getEditorWorkspaceData(
   projectId: string,
   accessToken: string,
   nodeId?: string,
-): Promise<
-  ApiResponse<{
-    project: Project;
-    nodes: FsNodeTreeResponse[];
-    currentNode: FsNode | null;
-  }>
-> {
+): Promise<ApiResponse<EditorWorkspaceResponse>> {
   const endpoint = nodeId
     ? `/fs-nodes/project/${projectId}/workspace?nodeId=${nodeId}`
     : `/fs-nodes/project/${projectId}/workspace`;
 
-  return makeAuthenticatedRequest<{
-    project: Project;
-    nodes: FsNodeTreeResponse[];
-    currentNode: FsNode | null;
-  }>(endpoint, accessToken);
+  return makeAuthenticatedRequest<EditorWorkspaceResponse>(
+    endpoint,
+    accessToken,
+  );
 }
 
 export async function getProjectTree(

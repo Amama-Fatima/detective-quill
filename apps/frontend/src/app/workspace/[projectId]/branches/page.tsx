@@ -1,12 +1,11 @@
 import React from "react";
 import { createSupabaseServerClient } from "@/supabase/server-client";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 
-import { notFound } from "next/navigation";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import { getBranchesOfProject } from "@/lib/supabase-calls/branches";
-import BranchesDropdown from "@/components/editor-workspace/branches/branches-dropdown";
+import BranchesDropdown from "@/components/branches/branches-dropdown";
 
 interface BranchesPageProps {
   params: {
@@ -32,14 +31,17 @@ const BranchesPage = async ({ params }: BranchesPageProps) => {
   );
 
   const { branches, error } = await getBranchesOfProject(projectId, supabase);
-
   if (!branches || error) {
     notFound();
   }
+  const activeBranch = branches.find((branch) => branch.is_active);
 
   return (
     <div>
-      <BranchesDropdown branches={branches} />
+      <BranchesDropdown
+        branches={branches}
+        activeBranchId={activeBranch?.id ?? null}
+      />
     </div>
   );
 };

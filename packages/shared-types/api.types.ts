@@ -113,6 +113,13 @@ export interface FsNodeTreeResponse {
   updated_at: string;
 }
 
+export interface EditorWorkspaceResponse {
+  project: Project;
+  nodes: FsNodeTreeResponse[];
+  currentNode: FsNode | null;
+  activeBranchId: string | null;
+}
+
 export interface CreateBlueprintDto {
   title: string;
   project_id: string;
@@ -250,6 +257,11 @@ export type UpdateBranchDto = Partial<
 >;
 
 export type CreateCommitDto = Pick<Commit, "message" | "branch_id">;
+
+export interface CommitsPaginatedResponse {
+  data: Commit[];
+  total: number;
+}
 
 export type CreateSnapshotDto = Pick<
   CommitSnapshot,

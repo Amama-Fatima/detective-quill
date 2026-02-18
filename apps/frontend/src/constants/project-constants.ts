@@ -1,4 +1,4 @@
-import { Map, FileText, BarChart3 } from "lucide-react";
+import { Map, FileText, BarChart3, History } from "lucide-react";
 
 export const NAV_ITEMS = [
   {
@@ -26,8 +26,8 @@ export const NAV_ITEMS = [
     id: "version-control",
     label: "Case History",
     href: `/workspace/123/version-control`,
-    icon: BarChart3,
-    description: "Visual story analysis",
+    icon: History,
+    description: "Commit history & version control",
   },
 ];
 

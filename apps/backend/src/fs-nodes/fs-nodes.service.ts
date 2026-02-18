@@ -1,4 +1,3 @@
-// todo: try to make util functions (like setting the timeout etc and move them to a utils file maybe, i dunno)
 import {
   Injectable,
   NotFoundException,
@@ -7,6 +6,7 @@ import {
 import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "../projects/projects.service";
 import { QueueService } from "src/queue/queue.service";
+import { BranchesService } from "../branches/branches.service";
 import {
   FsNodeTreeResponse,
   type FsNode,
@@ -25,6 +25,7 @@ export class FsNodesService {
     private supabaseService: SupabaseService,
     private projectsService: ProjectsService,
     private queueService: QueueService,
+    private branchesService: BranchesService,
   ) {}
 
   async createNode(
@@ -108,20 +109,25 @@ export class FsNodesService {
     project: any;
     nodes: FsNodeTreeResponse[];
     currentNode: FsNode | null;
+    activeBranchId: string | null;
   }> {
     // Fetch all data in parallel
-    const [project, nodes, currentNode] = await Promise.all([
+    const [project, nodes, currentNode, activeBranch] = await Promise.all([
       this.projectsService.findProjectById(projectId, userId),
       this.getProjectTree(projectId, userId),
       nodeId
         ? this.getNode(nodeId, userId).catch(() => null)
         : Promise.resolve(null),
+      this.branchesService
+        .getActiveBranchByProject(projectId)
+        .catch(() => null),
     ]);
 
     return {
       project,
       nodes,
       currentNode,
+      activeBranchId: activeBranch?.id ?? null,
     };
   }
 

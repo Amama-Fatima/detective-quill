@@ -2,6 +2,7 @@ import {
   Commit,
   ApiResponse,
   CreateCommitDto,
+  CommitsPaginatedResponse,
 } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -30,13 +31,39 @@ async function makeAuthenticatedRequest<T>(
   return response.json();
 }
 
+const COMMITS_PAGE_SIZE = 10;
+
 export async function getCommitsByBranch(
   projectId: string,
   branchId: string,
   accessToken: string,
 ): Promise<ApiResponse<Commit[]>> {
-  return makeAuthenticatedRequest<Commit[]>(
-    `/${projectId}/branch/${branchId}/commits`,
+  const response = await getCommitsByBranchPaginated(
+    projectId,
+    branchId,
+    1,
+    COMMITS_PAGE_SIZE,
+    accessToken,
+  );
+  if (!response.success || !response.data) {
+    return response as ApiResponse<Commit[]>;
+  }
+  return {
+    success: true,
+    data: response.data.data,
+  };
+}
+
+export async function getCommitsByBranchPaginated(
+  projectId: string,
+  branchId: string,
+  page: number,
+  limit: number,
+  accessToken: string,
+): Promise<ApiResponse<CommitsPaginatedResponse>> {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  return makeAuthenticatedRequest<CommitsPaginatedResponse>(
+    `/${projectId}/commits/branch/${branchId}?${params}`,
     accessToken,
   );
 }

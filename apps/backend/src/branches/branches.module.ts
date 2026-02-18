@@ -9,6 +9,7 @@ import { ProjectsModule } from "../projects/projects.module";
   imports: [SupabaseModule, ProjectsModule],
   controllers: [BranchesController],
   providers: [BranchesService],
+  exports: [BranchesService],
 })
 export class BranchesModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

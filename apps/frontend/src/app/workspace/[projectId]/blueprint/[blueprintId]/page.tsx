@@ -9,6 +9,7 @@ import ErrorMsg from "@/components/error-msg";
 import { Metadata } from "next";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import { getUserFromCookie } from "@/lib/utils/get-user";
+import { Loader2 } from "lucide-react";
 
 export async function generateMetadata({}: {}): Promise<Metadata> {
   return {
@@ -86,8 +87,8 @@ export default async function CreateBlueprintPage({
 
 function CreateBlueprintPageSkeleton() {
   return (
-    <div>
-      <h1>Loading Blueprint...</h1>
+    <div className="flex items-center justify-center h-full">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
     </div>
   );
 }
