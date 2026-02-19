@@ -41,7 +41,7 @@ export default function CommitsPaginatedList({
       <ul className="space-y-4">
         {paginatedCommits.map((commit) => (
           <li key={commit.id}>
-            <CommitCard commit={commit} />
+            <CommitCard commit={commit} projectId={projectId} />
           </li>
         ))}
       </ul>

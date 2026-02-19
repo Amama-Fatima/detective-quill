@@ -1,6 +1,8 @@
 // lib/server/workspace-data.ts
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import {
+  buildTreeFromFlat,
+  Database,
   FsNodeTreeResponse,
   FsNode,
   Project,
@@ -135,43 +137,64 @@ async function fetchNode(
   return node;
 }
 
-// todo: add type as FsNodeTreeResponse if that is accurate
-function buildTreeFromView(nodes: any[]): FsNodeTreeResponse[] {
-  const nodeMap = new Map<string, FsNodeTreeResponse>();
-  const rootNodes: FsNodeTreeResponse[] = [];
+type ProjectFileTreeRow =
+  Database["public"]["Views"]["project_file_tree"]["Row"];
 
-  nodes.forEach((node) => {
-    nodeMap.set(node.id, {
+type WorkspaceTreeNode = FsNodeTreeResponse & {
+  depth: number | null;
+  children: WorkspaceTreeNode[];
+};
+
+function buildTreeFromView(nodes: ProjectFileTreeRow[]): FsNodeTreeResponse[] {
+  const normalizedNodes: WorkspaceTreeNode[] = nodes
+    .filter(
+      (
+        node,
+      ): node is ProjectFileTreeRow & {
+        id: string;
+        name: string;
+        node_type: "folder" | "file";
+        path: string;
+        created_at: string;
+        updated_at: string;
+      } =>
+        !!node.id &&
+        !!node.name &&
+        !!node.node_type &&
+        !!node.path &&
+        !!node.created_at &&
+        !!node.updated_at,
+    )
+    .map((node) => ({
       id: node.id,
       name: node.name,
       node_type: node.node_type,
       parent_id: node.parent_id,
-      content: node.content,
-      word_count: node.word_count,
-      path: node.path, // ✅ Already calculated by DB
+      content: node.content ?? undefined,
+      word_count: node.word_count ?? 0,
+      path: node.path,
       sort_order: node.sort_order,
+      depth: node.depth,
       created_at: node.created_at,
       updated_at: node.updated_at,
       children: [],
-    });
+    }));
+
+  const tree = buildTreeFromFlat(normalizedNodes, {
+    getId: (node) => node.id,
+    getParentId: (node) => node.parent_id,
+    getDepth: (node) => node.depth,
+    getSortOrder: (node) => node.sort_order,
+    getTieBreaker: (node) => node.name,
   });
 
-  nodes.forEach((node) => {
-    const treeNode = nodeMap.get(node.id);
-    if (!treeNode) return;
+  const stripDepth = (treeNodes: WorkspaceTreeNode[]): FsNodeTreeResponse[] =>
+    treeNodes.map(({ depth: _depth, ...node }) => ({
+      ...node,
+      children: stripDepth(node.children),
+    }));
 
-    if (node.parent_id) {
-      const parent = nodeMap.get(node.parent_id);
-      if (parent) {
-        parent.children = parent.children || [];
-        parent.children.push(treeNode);
-      }
-    } else {
-      rootNodes.push(treeNode);
-    }
-  });
-
-  return rootNodes;
+  return stripDepth(tree);
 }
 
 async function fetchProjectTitle(

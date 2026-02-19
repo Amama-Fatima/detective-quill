@@ -7,16 +7,14 @@ import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "../projects/projects.service";
 import { QueueService } from "src/queue/queue.service";
 import { BranchesService } from "../branches/branches.service";
-import {
+import type {
+  Database,
   FsNodeTreeResponse,
-  type FsNode,
+  FsNode,
   UpdateFileContentDto,
   UpdateNodeMetadataDto,
 } from "@detective-quill/shared-types";
-import {
-  CreateFsNodeDto,
-  UpdateFsNodeDto,
-} from "./validation/fs-nodes.validation";
+import { CreateFsNodeDto } from "./validation/fs-nodes.validation";
 
 @Injectable()
 export class FsNodesService {
@@ -416,44 +414,105 @@ export class FsNodesService {
   }
 
   // simpler tree building using view data
-  private buildTreeFromView(nodes: any[]): FsNodeTreeResponse[] {
-    const nodeMap = new Map<string, FsNodeTreeResponse>();
-    const rootNodes: FsNodeTreeResponse[] = [];
+  private buildTreeFromView(
+    nodes: Database["public"]["Views"]["project_file_tree"]["Row"][],
+  ): FsNodeTreeResponse[] {
+    type WorkspaceTreeNode = FsNodeTreeResponse & {
+      depth: number | null;
+      children: WorkspaceTreeNode[];
+    };
 
-    // Create map of all nodes (they already have correct path/depth from view)
-    nodes.forEach((node) => {
-      nodeMap.set(node.id, {
+    const normalizedNodes: WorkspaceTreeNode[] = nodes
+      .filter(
+        (
+          node,
+        ): node is Database["public"]["Views"]["project_file_tree"]["Row"] & {
+          id: string;
+          name: string;
+          node_type: "folder" | "file";
+          path: string;
+          created_at: string;
+          updated_at: string;
+        } =>
+          !!node.id &&
+          !!node.name &&
+          !!node.node_type &&
+          !!node.path &&
+          !!node.created_at &&
+          !!node.updated_at,
+      )
+      .map((node) => ({
         id: node.id,
         name: node.name,
         node_type: node.node_type,
         parent_id: node.parent_id,
-        content: node.content,
-        word_count: node.word_count,
-        path: node.path, // Already calculated by DB
+        content: node.content ?? undefined,
+        word_count: node.word_count ?? 0,
+        path: node.path,
         sort_order: node.sort_order,
+        depth: node.depth,
         created_at: node.created_at,
         updated_at: node.updated_at,
+        children: [],
+      }));
+
+    const compareNodes = (a: WorkspaceTreeNode, b: WorkspaceTreeNode) => {
+      const depthA = a.depth ?? 0;
+      const depthB = b.depth ?? 0;
+      if (depthA !== depthB) return depthA - depthB;
+
+      const sortOrderA = a.sort_order ?? 0;
+      const sortOrderB = b.sort_order ?? 0;
+      if (sortOrderA !== sortOrderB) return sortOrderA - sortOrderB;
+
+      return a.name.localeCompare(b.name);
+    };
+
+    const sortedNodes = [...normalizedNodes].sort(compareNodes);
+    const nodeMap = new Map<string, WorkspaceTreeNode>();
+    const rootNodes: WorkspaceTreeNode[] = [];
+
+    sortedNodes.forEach((node) => {
+      nodeMap.set(node.id, {
+        ...node,
         children: [],
       });
     });
 
-    // Build hierarchy (nodes are already sorted by depth and sort_order)
-    nodes.forEach((node) => {
+    sortedNodes.forEach((node) => {
       const treeNode = nodeMap.get(node.id);
       if (!treeNode) return;
 
       if (node.parent_id) {
         const parent = nodeMap.get(node.parent_id);
         if (parent) {
-          parent.children = parent.children || [];
           parent.children.push(treeNode);
+        } else {
+          rootNodes.push(treeNode);
         }
       } else {
         rootNodes.push(treeNode);
       }
     });
 
-    return rootNodes;
+    const sortTree = (treeNodes: WorkspaceTreeNode[]) => {
+      treeNodes.sort(compareNodes);
+      treeNodes.forEach((node) => {
+        if (node.children.length > 0) {
+          sortTree(node.children);
+        }
+      });
+    };
+
+    sortTree(rootNodes);
+
+    const stripDepth = (treeNodes: WorkspaceTreeNode[]): FsNodeTreeResponse[] =>
+      treeNodes.map(({ depth: _depth, ...node }) => ({
+        ...node,
+        children: stripDepth(node.children),
+      }));
+
+    return stripDepth(rootNodes);
   }
 
   private countWords(text: string): number {

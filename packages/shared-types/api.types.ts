@@ -104,6 +104,7 @@ export interface FsNodeTreeResponse {
   name: string;
   node_type: "folder" | "file";
   parent_id: string | null;
+  depth?: number | null;
   children?: FsNodeTreeResponse[];
   content?: string;
   word_count: number;

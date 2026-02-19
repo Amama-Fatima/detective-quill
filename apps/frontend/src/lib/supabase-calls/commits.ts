@@ -27,3 +27,23 @@ export async function getBranchCommits(
 
   return { commits: data || [], error: null };
 }
+
+export async function getCommitById(
+  commitId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<{
+  commit: Commit | null;
+  error: string | null;
+}> {
+  const { data, error } = await supabase
+    .from("commits")
+    .select("*")
+    .eq("id", commitId)
+    .single();
+
+  if (error || !data) {
+    return { commit: null, error: error?.message || "Commit not found" };
+  }
+
+  return { commit: data, error: null };
+}
