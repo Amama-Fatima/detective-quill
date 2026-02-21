@@ -264,6 +264,13 @@ export interface CommitsPaginatedResponse {
   total: number;
 }
 
+export interface RevertCommitResponse {
+  branchId: string;
+  headCommitId: string;
+  deletedCommitsCount: number;
+  deletedSnapshotsCount: number;
+}
+
 export type CreateSnapshotDto = Pick<
   CommitSnapshot,
   | "commit_id"

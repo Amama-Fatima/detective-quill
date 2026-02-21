@@ -3,15 +3,10 @@ import {
   ApiResponse,
   Commit,
 } from "@detective-quill/shared-types";
-import {
-  createCommit,
-  getCommitsByBranch,
-  getCommitsByBranchPaginated,
-} from "@/lib/backend-calls/commits";
+import { createCommit } from "@/lib/backend-calls/commits";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
 import {
-  useQuery,
   useMutation,
   useQueryClient,
   UseMutationResult,
@@ -25,11 +20,11 @@ export interface UseCommitsOptions {
 }
 
 interface UseCommitsResult {
-  commits: Commit[] | undefined;
-  total: number;
-  totalPages: number;
-  page: number;
-  isLoading: boolean;
+  // commits: Commit[] | undefined;
+  // total: number;
+  // totalPages: number;
+  // page: number;
+  // isLoading: boolean;
   createCommitMutation: UseMutationResult<
     ApiResponse<Commit>,
     Error,
@@ -49,45 +44,45 @@ export function useCommits(
   const limit = options?.limit ?? DEFAULT_PAGE_SIZE;
   const isPaginated = options !== undefined && options.page !== undefined;
 
-  const { data, isLoading } = useQuery({
-    queryKey: [
-      "commits",
-      projectId,
-      branchId,
-      isPaginated ? page : "all",
-      limit,
-    ],
-    queryFn: async () => {
-      if (!branchId) return undefined;
-      if (!accessToken) {
-        throw new Error("Not authenticated");
-      }
-      if (isPaginated) {
-        const response = await getCommitsByBranchPaginated(
-          projectId,
-          branchId,
-          page,
-          limit,
-          accessToken,
-        );
+  // const { data, isLoading } = useQuery({
+  //   queryKey: [
+  //     "commits",
+  //     projectId,
+  //     branchId,
+  //     isPaginated ? page : "all",
+  //     limit,
+  //   ],
+  //   queryFn: async () => {
+  //     if (!branchId) return undefined;
+  //     if (!accessToken) {
+  //       throw new Error("Not authenticated");
+  //     }
+  //     if (isPaginated) {
+  //       const response = await getCommitsByBranchPaginated(
+  //         projectId,
+  //         branchId,
+  //         page,
+  //         limit,
+  //         accessToken,
+  //       );
 
-        if (!response.success || !response.data) {
-          throw new Error(response.error || "Failed to fetch commits");
-        }
-        return response.data;
-      }
-      const response = await getCommitsByBranch(
-        projectId,
-        branchId,
-        accessToken,
-      );
-      if (!response.success || !response.data) {
-        throw new Error(response.error || "Failed to fetch commits");
-      }
-      return { data: response.data, total: response.data.length };
-    },
-    enabled: !!branchId && !!accessToken,
-  });
+  //       if (!response.success || !response.data) {
+  //         throw new Error(response.error || "Failed to fetch commits");
+  //       }
+  //       return response.data;
+  //     }
+  //     const response = await getCommitsByBranch(
+  //       projectId,
+  //       branchId,
+  //       accessToken,
+  //     );
+  //     if (!response.success || !response.data) {
+  //       throw new Error(response.error || "Failed to fetch commits");
+  //     }
+  //     return { data: response.data, total: response.data.length };
+  //   },
+  //   enabled: !!branchId && !!accessToken,
+  // });
 
   const createCommitMutation = useMutation({
     mutationFn: async (payload: CreateCommitDto) => {
@@ -109,16 +104,16 @@ export function useCommits(
     },
   });
 
-  const commits = data?.data;
-  const total = data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  // const commits = data?.data;
+  // const total = data?.total ?? 0;
+  // const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return {
-    commits,
-    total,
-    totalPages,
-    page,
-    isLoading,
+    // commits,
+    // total,
+    // totalPages,
+    // page,
+    // isLoading,
     createCommitMutation,
   };
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { CreateCommitDto } from "./dto/commits.dto";
 import { BranchesService } from "src/branches/branches.service";
@@ -110,6 +114,111 @@ export class CommitsService {
     }
 
     return data;
+  }
+
+  private async getCommitForRevert(commitId: string, projectId: string) {
+    const supabase = this.supabaseService.client;
+    const { data, error } = await supabase
+      .from("commits")
+      .select("id, branch_id, parent_commit_id, project_id")
+      .eq("id", commitId)
+      .eq("project_id", projectId)
+      .single();
+
+    if (error || !data) {
+      throw new NotFoundException(
+        `Commit with ID ${commitId} not found for project ${projectId}`,
+      );
+    }
+
+    return data;
+  }
+
+  private async deleteCommitsByIds(commitIds: string[]) {
+    if (commitIds.length === 0) {
+      return { success: true, deletedCommits: 0 };
+    }
+
+    const supabase = this.supabaseService.client;
+    const { error } = await supabase
+      .from("commits")
+      .delete()
+      .in("id", commitIds);
+
+    if (error) {
+      throw new Error(`Failed to delete commits: ${error.message}`);
+    }
+
+    return { success: true, deletedCommits: commitIds.length };
+  }
+
+  private async getDescendantCommitsUntilTarget(
+    headCommitId: string,
+    targetCommitId: string,
+    projectId: string,
+  ): Promise<string[]> {
+    const commitsToDelete: string[] = [];
+    let currentCommitId: string | null = headCommitId;
+
+    while (currentCommitId && currentCommitId !== targetCommitId) {
+      const currentCommit = await this.getCommitForRevert(
+        currentCommitId,
+        projectId,
+      );
+
+      commitsToDelete.push(currentCommit.id);
+      currentCommitId = currentCommit.parent_commit_id;
+    }
+
+    if (currentCommitId !== targetCommitId) {
+      throw new BadRequestException(
+        "Cannot revert: target commit is not an ancestor of the current branch head",
+      );
+    }
+
+    return commitsToDelete;
+  }
+
+  async revertToCommit(commitId: string, projectId: string) {
+    const targetCommit = await this.getCommitForRevert(commitId, projectId);
+    const headCommitId = await this.branchesService.getHeadCommitId(
+      targetCommit.branch_id,
+    );
+
+    if (!headCommitId) {
+      throw new NotFoundException(
+        `Head commit not found for branch ${targetCommit.branch_id}`,
+      );
+    }
+
+    if (headCommitId === commitId) {
+      return {
+        branchId: targetCommit.branch_id,
+        headCommitId: commitId,
+        deletedCommitsCount: 0,
+        deletedSnapshotsCount: 0,
+      };
+    }
+
+    const commitIdsToDelete = await this.getDescendantCommitsUntilTarget(
+      headCommitId,
+      commitId,
+      projectId,
+    );
+
+    await this.branchesService.updateBranch(targetCommit.branch_id, {
+      head_commit_id: commitId,
+    });
+
+    await this.snapshotsService.deleteSnapshotsByCommitIds(commitIdsToDelete);
+    await this.deleteCommitsByIds(commitIdsToDelete);
+
+    return {
+      branchId: targetCommit.branch_id,
+      headCommitId: commitId,
+      deletedCommitsCount: commitIdsToDelete.length,
+      deletedSnapshotsCount: commitIdsToDelete.length,
+    };
   }
 
   // todo: implement restoreFromCommit

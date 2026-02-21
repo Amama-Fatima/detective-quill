@@ -5,10 +5,22 @@ import { Commit } from "@detective-quill/shared-types";
 import { SnapshotTreeNode } from "@/lib/utils/snapshot-tree-utils";
 import SnapshotFileTree from "@/components/commit-snapshot/snapshot-file-tree";
 import SnapshotTextViewer from "@/components/commit-snapshot/snapshot-text-viewer";
-import { ArrowLeft, GitCommit, Calendar } from "lucide-react";
+import { ArrowLeft, GitCommit, Calendar, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useRevertCommit } from "@/hooks/use-revert-commit";
 
 interface CommitSnapshotViewerProps {
   commit: Commit;
@@ -22,10 +34,22 @@ export default function CommitSnapshotViewer({
   projectId,
 }: CommitSnapshotViewerProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isRevertDialogOpen, setIsRevertDialogOpen] = useState(false);
   const router = useRouter();
+  const revertCommitMutation = useRevertCommit({
+    projectId,
+    commitId: commit.id,
+  });
 
   const date = commit.created_at ? new Date(commit.created_at) : null;
   const timeAgo = date ? formatDistanceToNow(date, { addSuffix: true }) : null;
+
+  const handleRevertConfirm = async () => {
+    await revertCommitMutation.mutateAsync();
+    setIsRevertDialogOpen(false);
+    router.push(`/workspace/${projectId}/version-control`);
+    router.refresh();
+  };
 
   return (
     <div className="flex h-screen w-full bg-background">
@@ -61,6 +85,50 @@ export default function CommitSnapshotViewer({
           <div className="mt-2 px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-xs text-amber-700 dark:text-amber-400">
             Read-only snapshot
           </div>
+
+          <AlertDialog
+            open={isRevertDialogOpen}
+            onOpenChange={setIsRevertDialogOpen}
+          >
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="mt-3 w-full gap-2 cursor-pointer"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Revert to this commit
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Revert branch to this commit?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will move the branch head to this commit and permanently
+                  delete all commits and snapshots created after it.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  disabled={revertCommitMutation.isPending}
+                  className="cursor-pointer"
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  className="cursor-pointer"
+                  onClick={handleRevertConfirm}
+                  disabled={revertCommitMutation.isPending}
+                >
+                  {revertCommitMutation.isPending
+                    ? "Reverting..."
+                    : "Yes, revert"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         {/* File tree */}

@@ -52,6 +52,24 @@ export class SnapshotsService {
     return { success: true };
   }
 
+  async deleteSnapshotsByCommitIds(commitIds: string[]) {
+    if (commitIds.length === 0) {
+      return { success: true, deletedCommitIds: 0 };
+    }
+
+    const supabase = this.supabaseService.client;
+    const { error } = await supabase
+      .from("commit_snapshots")
+      .delete()
+      .in("commit_id", commitIds);
+
+    if (error) {
+      throw new Error(`Failed to delete snapshots: ${error.message}`);
+    }
+
+    return { success: true, deletedCommitIds: commitIds.length };
+  }
+
   // Helper method to create snapshots from fs_nodes
   async createSnapshotsFromNodes(commitId: string, projectId: string) {
     const nodes = await this.fsNodesService.getProjectNodes(projectId);
