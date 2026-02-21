@@ -11,11 +11,13 @@ const PAGE_SIZE = 10;
 interface CommitsPaginatedListProps {
   initialCommits: Commit[];
   projectId: string;
+  branchId?: string;
 }
 
 export default function CommitsPaginatedList({
   initialCommits,
   projectId,
+  branchId,
 }: CommitsPaginatedListProps) {
   const [page, setPage] = useState(1);
 
@@ -41,7 +43,11 @@ export default function CommitsPaginatedList({
       <ul className="space-y-4">
         {paginatedCommits.map((commit) => (
           <li key={commit.id}>
-            <CommitCard commit={commit} projectId={projectId} />
+            <CommitCard
+              commit={commit}
+              projectId={projectId}
+              branchId={branchId}
+            />
           </li>
         ))}
       </ul>

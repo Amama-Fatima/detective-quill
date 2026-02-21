@@ -5,28 +5,33 @@ import { getCommitById } from "@/lib/supabase-calls/commits";
 import { buildSnapshotTree } from "@/lib/utils/snapshot-tree-utils";
 import CommitSnapshotViewer from "@/components/commit-snapshot/commit-snapshot-viewer";
 
-interface CommitViewPageProps {
+interface BranchCommitViewPageProps {
   params: Promise<{
     projectId: string;
+    branchId: string;
     commitId: string;
   }>;
 }
 
-export default async function CommitViewPage({ params }: CommitViewPageProps) {
-  const { projectId, commitId } = await params;
+export default async function BranchCommitViewPage({
+  params,
+}: BranchCommitViewPageProps) {
+  const { projectId, branchId, commitId } = await params;
   const supabase = await createSupabaseServerClient();
 
-  // Fetch commit details
   const { commit, error: commitError } = await getCommitById(
     commitId,
     supabase,
   );
 
   if (commitError || !commit) {
-    redirect(`/workspace/${projectId}/version-control`);
+    redirect(`/workspace/${projectId}/version-control/${branchId}`);
   }
 
-  // Fetch snapshots for this commit
+  if (commit.project_id !== projectId || commit.branch_id !== branchId) {
+    redirect(`/workspace/${projectId}/version-control/${branchId}`);
+  }
+
   const { snapshots, error: snapshotsError } = await getSnapshotsByCommit(
     commitId,
     supabase,
@@ -43,7 +48,6 @@ export default async function CommitViewPage({ params }: CommitViewPageProps) {
     );
   }
 
-  // Build tree structure from snapshots
   const snapshotTree = buildSnapshotTree(snapshots);
 
   return (
@@ -51,6 +55,7 @@ export default async function CommitViewPage({ params }: CommitViewPageProps) {
       commit={commit}
       snapshots={snapshotTree}
       projectId={projectId}
+      branchId={branchId}
     />
   );
 }

@@ -10,15 +10,25 @@ import Link from "next/link";
 interface CommitCardProps {
   commit: Commit;
   projectId: string;
+  branchId?: string;
 }
 
-export default function CommitCard({ commit, projectId }: CommitCardProps) {
+export default function CommitCard({
+  commit,
+  projectId,
+  branchId,
+}: CommitCardProps) {
   const date = commit.created_at ? new Date(commit.created_at) : null;
   const timeAgo = date ? formatDistanceToNow(date, { addSuffix: true }) : null;
   const formattedDate = date ? formatDate(date, "PPPpp") : "Unknown date";
+  const commitBranchId = branchId ?? commit.branch_id;
+
+  const commitHref = commitBranchId
+    ? `/workspace/${projectId}/version-control/${commitBranchId}/${commit.id}`
+    : `/workspace/${projectId}/commits/${commit.id}`;
 
   return (
-    <Link href={`/workspace/${projectId}/commits/${commit.id}`}>
+    <Link href={commitHref}>
       <Card className="overflow-hidden border-border/80 bg-card/50 hover:bg-card/80 transition-all shadow-sm cursor-pointer hover:shadow-md hover:border-primary/50">
         <CardHeader className="pb-2">
           <div className="flex items-start gap-3">

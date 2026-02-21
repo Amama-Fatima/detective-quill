@@ -26,12 +26,14 @@ interface CommitSnapshotViewerProps {
   commit: Commit;
   snapshots: SnapshotTreeNode[];
   projectId: string;
+  branchId?: string;
 }
 
 export default function CommitSnapshotViewer({
   commit,
   snapshots,
   projectId,
+  branchId,
 }: CommitSnapshotViewerProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isRevertDialogOpen, setIsRevertDialogOpen] = useState(false);
@@ -43,11 +45,15 @@ export default function CommitSnapshotViewer({
 
   const date = commit.created_at ? new Date(commit.created_at) : null;
   const timeAgo = date ? formatDistanceToNow(date, { addSuffix: true }) : null;
+  const commitBranchId = branchId ?? commit.branch_id;
+  const historyPath = commitBranchId
+    ? `/workspace/${projectId}/version-control/${commitBranchId}`
+    : `/workspace/${projectId}/version-control`;
 
   const handleRevertConfirm = async () => {
     await revertCommitMutation.mutateAsync();
     setIsRevertDialogOpen(false);
-    router.push(`/workspace/${projectId}/version-control`);
+    router.push(historyPath);
     router.refresh();
   };
 
@@ -60,9 +66,7 @@ export default function CommitSnapshotViewer({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() =>
-              router.push(`/workspace/${projectId}/version-control`)
-            }
+            onClick={() => router.push(historyPath)}
             className="mb-3 gap-2 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
