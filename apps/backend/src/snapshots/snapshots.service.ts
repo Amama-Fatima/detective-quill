@@ -70,6 +70,17 @@ export class SnapshotsService {
     return { success: true, deletedCommitIds: commitIds.length };
   }
 
+  async restoreProjectNodesFromCommitSnapshot(
+    commitId: string,
+    projectId: string,
+  ) {
+    const snapshots = await this.getSnapshotsByCommit(commitId);
+    return await this.fsNodesService.replaceProjectNodesFromSnapshots(
+      projectId,
+      snapshots,
+    );
+  }
+
   // Helper method to create snapshots from fs_nodes
   async createSnapshotsFromNodes(commitId: string, projectId: string) {
     const nodes = await this.fsNodesService.getProjectNodes(projectId);

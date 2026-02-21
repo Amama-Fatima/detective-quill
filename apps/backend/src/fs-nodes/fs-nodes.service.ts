@@ -9,6 +9,7 @@ import { QueueService } from "src/queue/queue.service";
 import { BranchesService } from "../branches/branches.service";
 import type {
   Database,
+  CommitSnapshot,
   FsNodeTreeResponse,
   FsNode,
   UpdateFileContentDto,
@@ -411,6 +412,96 @@ export class FsNodesService {
     }
 
     return nodes || [];
+  }
+
+  async replaceProjectNodesFromSnapshots(
+    projectId: string,
+    snapshots: CommitSnapshot[],
+  ) {
+    const supabase = this.supabaseService.client;
+
+    const snapshotsForProject = snapshots.filter(
+      (snapshot) => snapshot.project_id === projectId,
+    );
+
+    const currentNodes = await this.getProjectNodes(projectId);
+
+    const nodesToRestore = snapshotsForProject
+      .filter(
+        (
+          snapshot,
+        ): snapshot is CommitSnapshot & {
+          fs_node_id: string;
+          node_type: Database["public"]["Enums"]["node_type"];
+          path: string;
+        } => !!snapshot.fs_node_id && !!snapshot.node_type && !!snapshot.path,
+      )
+      .slice()
+      .sort((left, right) => (left.depth ?? 0) - (right.depth ?? 0))
+      .map((snapshot) => ({
+        id: snapshot.fs_node_id,
+        project_id: projectId,
+        name: snapshot.name,
+        node_type: snapshot.node_type,
+        parent_id: snapshot.parent_id,
+        path: snapshot.path,
+        content: snapshot.content,
+        word_count: snapshot.word_count ?? 0,
+        file_extension: snapshot.file_extension ?? "",
+        sort_order: snapshot.sort_order,
+        depth: snapshot.depth,
+        created_at: snapshot.original_created_at ?? undefined,
+        updated_at: snapshot.original_updated_at ?? undefined,
+      }));
+
+    const targetNodeIds = new Set(nodesToRestore.map((node) => node.id));
+    const nodesToDelete = currentNodes
+      .filter((node) => !targetNodeIds.has(node.id))
+      .sort((left, right) => (right.depth ?? 0) - (left.depth ?? 0));
+
+    for (const node of nodesToRestore) {
+      const { error: upsertError } = await supabase
+        .from("fs_nodes")
+        .upsert(node, { onConflict: "id" });
+
+      if (upsertError) {
+        throw new Error(
+          `Failed to restore working tree for project ${projectId}: ${upsertError.message}`,
+        );
+      }
+    }
+
+    if (nodesToDelete.length > 0) {
+      const nodesToDeleteIds = nodesToDelete.map((node) => node.id);
+
+      const { error: unlinkSnapshotsError } = await supabase
+        .from("commit_snapshots")
+        .update({ fs_node_id: null })
+        .eq("project_id", projectId)
+        .in("fs_node_id", nodesToDeleteIds);
+
+      if (unlinkSnapshotsError) {
+        throw new Error(
+          `Failed to detach snapshots for reverted tree: ${unlinkSnapshotsError.message}`,
+        );
+      }
+
+      for (const node of nodesToDelete) {
+        const { error: deleteError } = await supabase
+          .from("fs_nodes")
+          .delete()
+          .eq("id", node.id)
+          .eq("project_id", projectId);
+
+        if (deleteError) {
+          throw new Error(
+            `Failed to delete node during revert: ${deleteError.message}`,
+          );
+        }
+      }
+    }
+
+    return { success: true, restoredNodes: nodesToRestore.length };
   }
 
   // simpler tree building using view data

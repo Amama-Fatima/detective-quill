@@ -206,6 +206,11 @@ export class CommitsService {
       projectId,
     );
 
+    await this.snapshotsService.restoreProjectNodesFromCommitSnapshot(
+      commitId,
+      projectId,
+    );
+
     await this.branchesService.updateBranch(targetCommit.branch_id, {
       head_commit_id: commitId,
     });
