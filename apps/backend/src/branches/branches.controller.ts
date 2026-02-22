@@ -7,44 +7,86 @@ import {
   Put,
   UseGuards,
   Param,
+  Request,
 } from "@nestjs/common";
 import { BranchesService } from "./branches.service";
 import { AuthGuard } from "src/auth/auth.guard";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branches.dto";
+import { ProjectsService } from "src/projects/projects.service";
+import { ApiResponse, Branch } from "@detective-quill/shared-types";
 
 @Controller(":projectId/branches")
 @UseGuards(AuthGuard)
 export class BranchesController {
-  constructor(private readonly branchesService: BranchesService) {}
+  constructor(
+    private readonly branchesService: BranchesService,
+    private readonly projectsService: ProjectsService,
+  ) {}
 
   @Post()
   async createBranch(
     @Param("projectId") projectId: string,
     @Body() createBranchDto: CreateBranchDto,
-  ) {
-    return await this.branchesService.createBranch(createBranchDto, projectId);
+    @Request() req: any,
+  ): Promise<ApiResponse<Branch>> {
+    await this.projectsService.verifyProjectOwnership(projectId, req.user.id);
+
+    const data = await this.branchesService.createBranch(
+      createBranchDto,
+      projectId,
+    );
+    return {
+      success: true,
+      data,
+      message: "Branch created successfully",
+    };
   }
 
-  @Get()
-  async getBranchesByProject(@Param("projectId") projectId: string) {
-    return await this.branchesService.getBranchesByProject(projectId);
-  }
+  // @Get()
+  // async getBranchesByProject(@Param("projectId") projectId: string) {
+  //   return await this.branchesService.getBranchesByProject(projectId);
+  // }
 
-  @Get(":branchId")
-  async getBranchById(@Param("branchId") branchId: string) {
-    return await this.branchesService.getBranchById(branchId);
-  }
+  // @Get(":branchId")
+  // async getBranchById(@Param("branchId") branchId: string) {
+  //   return await this.branchesService.getBranchById(branchId);
+  // }
 
   @Put(":branchId")
   async updateBranch(
+    @Param("projectId") projectId: string,
+
     @Param("branchId") branchId: string,
     @Body() updateBranchDto: UpdateBranchDto,
-  ) {
-    return await this.branchesService.updateBranch(branchId, updateBranchDto);
+    @Request() req: any,
+  ): Promise<ApiResponse<Branch>> {
+    console.log("Updating branch with ID:", branchId, "Data:", updateBranchDto);
+    console.log("User ID from request:", req);
+    await this.projectsService.verifyProjectOwnership(projectId, req.user.id);
+
+    const data = await this.branchesService.updateBranch(
+      branchId,
+      updateBranchDto,
+    );
+
+    return {
+      success: true,
+      data,
+      message: "Branch updated successfully",
+    };
   }
 
   @Delete(":branchId")
-  async deleteBranch(@Param("branchId") branchId: string) {
-    return await this.branchesService.deleteBranch(branchId);
+  async deleteBranch(
+    @Param("projectId") projectId: string,
+    @Param("branchId") branchId: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<null>> {
+    await this.projectsService.verifyProjectOwnership(projectId, req.user.id);
+    await this.branchesService.deleteBranch(branchId);
+    return {
+      success: true,
+      message: "Branch deleted successfully",
+    };
   }
 }

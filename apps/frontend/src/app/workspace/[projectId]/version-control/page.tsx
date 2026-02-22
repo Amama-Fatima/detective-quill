@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import { getBranchesOfProject } from "@/lib/supabase-calls/branches";
 import { History, GitBranch } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface VersionControlPageProps {
   params: Promise<{
@@ -18,18 +19,25 @@ export default async function VersionControlPage({
 
   return (
     <div className="min-h-[60vh] px-6 py-8 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="rounded-lg bg-primary/10 p-3">
-          <History className="h-8 w-8 text-primary" />
+      <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-primary/10 p-3">
+            <History className="h-8 w-8 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Case History
+            </h1>
+            <p className="text-muted-foreground text-sm mt-0.5">
+              Select a branch to view its commits
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Case History
-          </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Select a branch to view its commits
-          </p>
-        </div>
+        <Button asChild className="cursor-pointer">
+          <Link href={`/workspace/${projectId}/version-control/new-branch`}>
+            Create Branch
+          </Link>
+        </Button>
       </div>
 
       {!projectId ? (

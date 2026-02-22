@@ -38,9 +38,14 @@ type UpdateBranchFormValues = z.infer<typeof updateBranchSchema>;
 interface UpdateBranchFormProps {
   projectId: string;
   branch: Branch;
+  onBranchUpdated?: (updatedBranch: Branch) => void;
 }
 
-const UpdateBranchForm = ({ projectId, branch }: UpdateBranchFormProps) => {
+const UpdateBranchForm = ({
+  projectId,
+  branch,
+  onBranchUpdated,
+}: UpdateBranchFormProps) => {
   const [open, setOpen] = useState(false);
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
@@ -69,9 +74,14 @@ const UpdateBranchForm = ({ projectId, branch }: UpdateBranchFormProps) => {
       };
       return await updateBranch(projectId, branch.id, dto, accessToken);
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast.success("Branch updated successfully");
       queryClient.invalidateQueries({ queryKey: ["branches", projectId] });
+
+      if (response?.data) {
+        onBranchUpdated?.(response.data);
+      }
+
       setOpen(false);
     },
     onError: (error: Error) => {
@@ -158,10 +168,11 @@ const UpdateBranchForm = ({ projectId, branch }: UpdateBranchFormProps) => {
                   });
                 }}
                 disabled={isPending}
+                className="cursor-pointer"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="cursor-pointer">
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Update Branch
               </Button>

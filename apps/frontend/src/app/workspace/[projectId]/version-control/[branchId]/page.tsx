@@ -2,9 +2,10 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import CommitsPaginatedList from "@/components/commits/commits-paginated-list";
 import { getBranchCommits } from "@/lib/supabase-calls/commits";
 import { getBranchesOfProject } from "@/lib/supabase-calls/branches";
-import { History, GitBranch } from "lucide-react";
+import { GitBranch } from "lucide-react";
 import type { Commit } from "@detective-quill/shared-types";
 import { notFound } from "next/navigation";
+import BranchCommitsHeader from "@/components/branches/branch-commits-header";
 
 interface BranchCommitsPageProps {
   params: Promise<{
@@ -39,19 +40,7 @@ export default async function BranchCommitsPage({
 
   return (
     <div className="min-h-[60vh] px-6 py-8 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="rounded-lg bg-primary/10 p-3">
-          <History className="h-8 w-8 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Case History
-          </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Commits for branch: {branch.name}
-          </p>
-        </div>
-      </div>
+      <BranchCommitsHeader projectId={projectId} branch={branch} />
 
       {commitsError ? (
         <p className="text-muted-foreground text-center py-12">

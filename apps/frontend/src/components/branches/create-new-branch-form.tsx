@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,13 +36,14 @@ import { createBranchSchema, type CreateBranchFormValues } from "@/lib/schema";
 interface CreateBranchBtnProps {
   projectId: string;
   parentCommitId: string; // The current HEAD commit of the branch we're branching from
+  initialOpen?: boolean;
+  showTrigger?: boolean;
 }
 
-const CreateBranchBtn = ({
+const CreateNewBranchForm = ({
   projectId,
   parentCommitId,
 }: CreateBranchBtnProps) => {
-  const [open, setOpen] = useState(false);
   const { session } = useAuth();
   const accessToken = session?.access_token || "";
   const queryClient = useQueryClient();
@@ -68,7 +69,6 @@ const CreateBranchBtn = ({
     onSuccess: (data) => {
       toast.success(`Branch created successfully`);
       queryClient.invalidateQueries({ queryKey: ["branches", projectId] });
-      setOpen(false);
       form.reset();
     },
     onError: (error: Error) => {
@@ -81,22 +81,18 @@ const CreateBranchBtn = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">
-          <GitBranch className="w-4 h-4 mr-2" />
-          Create Branch
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Create New Branch</DialogTitle>
-          <DialogDescription>
-            Create a new branch to explore alternate storylines or plot
-            directions without affecting your main manuscript.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="sm:max-w-[500px]">
+      <div>
+        <h1 className="text-2xl font-semibold text-noir tracking-tight">
+          Create New Branch{" "}
+        </h1>
+        <p className="text-muted-foreground text-[1rem] mt-2">
+          Create a new branch to explore alternate storylines or plot directions
+          without affecting your main manuscript.
+        </p>
+      </div>
 
+      <div className="mt-8">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -112,14 +108,13 @@ const CreateBranchBtn = ({
                       disabled={isPending}
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-[1rem]">
                     Choose a descriptive name for your alternate plotline
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="description"
@@ -133,7 +128,7 @@ const CreateBranchBtn = ({
                       disabled={isPending}
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-[1rem]">
                     Optionally add a description to help you remember the
                     purpose of this branch.
                   </FormDescription>
@@ -141,7 +136,6 @@ const CreateBranchBtn = ({
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="is_default"
@@ -156,7 +150,7 @@ const CreateBranchBtn = ({
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Set as default branch</FormLabel>
-                    <FormDescription>
+                    <FormDescription className="text-[1rem]">
                       Make this the primary branch for your project. You can
                       only have one default branch at a time.
                     </FormDescription>
@@ -164,29 +158,32 @@ const CreateBranchBtn = ({
                 </FormItem>
               )}
             />
-
             <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setOpen(false);
                   form.reset();
                 }}
                 disabled={isPending}
+                className="cursor-pointer"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="cursor-pointer"
+              >
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Branch
+                {isPending ? "Creating..." : "Create Branch"}
               </Button>
             </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
-export default CreateBranchBtn;
+export default CreateNewBranchForm;

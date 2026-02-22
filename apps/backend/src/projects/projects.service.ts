@@ -103,10 +103,7 @@ export class ProjectsService {
     return data;
   }
 
-  async deleteProject(
-    projectId: string,
-    userId: string,
-  ): Promise<void> {
+  async deleteProject(projectId: string, userId: string): Promise<void> {
     const supabase = this.supabaseService.client;
 
     await this.verifyProjectOwnership(projectId, userId);
@@ -250,6 +247,8 @@ export class ProjectsService {
     if (error || !data) {
       throw new NotFoundException("Project not found");
     }
+
+    console.log("Project author ID:", data.author_id, "User ID:", userId);
 
     if (data.author_id !== userId) {
       throw new ForbiddenException(
