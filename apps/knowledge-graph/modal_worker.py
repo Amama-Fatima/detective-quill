@@ -13,21 +13,22 @@ app = modal.App("detective-quill-knowledge-graph")
 # ─────────────────────────────────────────────
 
 image = (
-    modal.Image.debian_slim(python_version="3.11")
+    modal.Image.debian_slim(python_version="3.10")
     .pip_install([
         "torch==2.1.0",
         "transformers==4.36.0",
         "accelerate==0.25.0",
         "bitsandbytes>=0.43.0",
-         "scipy",       
+        "scipy",
         "sentencepiece",
-        "spacy==3.7.2",
+        "numpy<2.0",
         "pika==1.3.2",
-        "pydantic==2.5.0",
-        "pydantic-settings==2.1.0",
+        "spacy==3.5.4",
+        "pydantic==1.10.13"
     ])
     .pip_install([
-        "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl"
+        "https://github.com/explosion/spacy-models/releases/download/"
+        "en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl"
     ])
     .add_local_dir("src", remote_path="/root/src")
 )
@@ -100,7 +101,7 @@ class KnowledgeGraphWorker:
             return {
                 "job_id": job_id,
                 "status": "completed",
-                "result": result.model_dump(),
+                "result": result.dict(),
                 "error": None,
                 "processing_time": f"{elapsed:.2f}s"
             }
