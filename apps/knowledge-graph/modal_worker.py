@@ -24,12 +24,14 @@ image = (
         "numpy<2.0",
         "pika==1.3.2",
         "spacy==3.5.4",
-        "pydantic==1.10.13"
+        "pydantic==1.10.13",
     ])
     .pip_install([
         "https://github.com/explosion/spacy-models/releases/download/"
         "en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl"
     ])
+    .pip_install(["coreferee==1.4.1"])                      # 1. install coreferee
+    .run_commands("python -m coreferee install en")          # 2. download its English model
     .add_local_dir("src", remote_path="/root/src")
 )
 
@@ -70,6 +72,7 @@ class KnowledgeGraphWorker:
         import spacy
         self.logger.info("Loading spaCy model...")
         self.nlp = spacy.load("en_core_web_sm")
+        self.nlp.add_pipe("coreferee")
         self.logger.info("spaCy loaded")
 
         self.logger.info("Loading OpenHermes LLM - this takes a few minutes...")
