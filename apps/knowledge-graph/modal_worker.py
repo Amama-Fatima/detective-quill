@@ -18,6 +18,8 @@ image = (
         "torch==2.1.0",
         "transformers==4.36.0",
         "accelerate==0.25.0",
+        "bitsandbytes>=0.43.0",
+         "scipy",       
         "sentencepiece",
         "spacy==3.7.2",
         "pika==1.3.2",
@@ -46,7 +48,7 @@ secrets = [
     image=image,
     gpu="T4",
     secrets=secrets,
-    container_idle_timeout=300,
+    scaledown_window=300,
     timeout=1800,
 )
 class KnowledgeGraphWorker:
@@ -75,7 +77,7 @@ class KnowledgeGraphWorker:
         self.logger.info("LLM loaded and ready")
 
         from src.pipeline.orchestrator import NarrativeAnalysisPipeline
-        self.pipeline = NarrativeAnalysisPipeline()
+        self.pipeline = NarrativeAnalysisPipeline(nlp=self.nlp)
         self.logger.info("Pipeline ready")
 
     @modal.method()

@@ -1,4 +1,5 @@
 from typing import List
+import spacy
 from src.models.schemas import Entity, Relationship, PipelineResult, PipelineMetadata
 from src.pipeline.layer1_spacy import extract_entities_layer1
 from src.pipeline.layer2_postprocess import postprocess_entities_layer2
@@ -13,8 +14,11 @@ logger = setup_logger(__name__)
 class NarrativeAnalysisPipeline:
 
     
-    def __init__(self):
-        pass
+    def __init__(self, nlp=None):
+        if nlp is not None:
+            self.nlp = nlp
+        else:
+            self.nlp = spacy.load("en_core_web_sm")
     
     def process_scene(self, scene_text: str, verbose: bool = True) -> PipelineResult:
         
@@ -53,7 +57,7 @@ class NarrativeAnalysisPipeline:
         if verbose:
             logger.info("\n[4/4] Extracting relationships with LLM...")
         
-        relationships = extract_relationships_layer4(enriched_entities, scene_text)
+        relationships = extract_relationships_layer4(enriched_entities, scene_text, nlp=self.nlp)
         
         if verbose:
             logger.info(f"Found {len(relationships)} relationships")
