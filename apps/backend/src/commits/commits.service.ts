@@ -45,7 +45,11 @@ export class CommitsService {
       throw new Error(`Failed to create commit: ${commitError.message}`);
     }
 
-    await this.snapshotsService.createSnapshotsFromNodes(commit.id, projectId);
+    await this.snapshotsService.createSnapshotsFromNodes(
+      commit.id,
+      projectId,
+      createCommitDto.branch_id,
+    );
 
     await this.branchesService.updateBranch(createCommitDto.branch_id, {
       head_commit_id: commit.id,
@@ -209,6 +213,7 @@ export class CommitsService {
     await this.snapshotsService.restoreProjectNodesFromCommitSnapshot(
       commitId,
       projectId,
+      targetCommit.branch_id,
     );
 
     await this.branchesService.updateBranch(targetCommit.branch_id, {

@@ -11,5 +11,5 @@ import { SnapshotsModule } from "src/snapshots/snapshots.module";
   controllers: [CommitsController],
   providers: [CommitsService],
   exports: [CommitsService],
-    })
+})
 export class CommitsModule {}

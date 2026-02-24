@@ -1,16 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -22,32 +13,21 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GitBranch, Loader2 } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createBranch } from "@/lib/backend-calls/branches";
-import { toast } from "sonner";
-import { useAuth } from "@/context/auth-context";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { CreateBranchDto } from "@detective-quill/shared-types";
 import { createBranchSchema, type CreateBranchFormValues } from "@/lib/schema";
+import { useBranch } from "@/hooks/use-branch";
 
-interface CreateBranchBtnProps {
+interface CreateBranchFormProps {
   projectId: string;
   parentCommitId: string; // The current HEAD commit of the branch we're branching from
-  initialOpen?: boolean;
-  showTrigger?: boolean;
 }
 
 const CreateNewBranchForm = ({
   projectId,
   parentCommitId,
-}: CreateBranchBtnProps) => {
-  const { session } = useAuth();
-  const accessToken = session?.access_token || "";
-  const queryClient = useQueryClient();
-
+}: CreateBranchFormProps) => {
   const form = useForm<CreateBranchFormValues>({
     resolver: zodResolver(createBranchSchema),
     defaultValues: {
@@ -57,28 +37,33 @@ const CreateNewBranchForm = ({
     },
   });
 
-  const { mutate: createBranchMutate, isPending } = useMutation({
-    mutationFn: async (values: CreateBranchFormValues) => {
-      const dto: CreateBranchDto = {
-        name: values.name,
-        is_default: values.is_default,
-        parent_commit_id: parentCommitId,
-      };
-      return await createBranch(projectId, dto, accessToken);
-    },
-    onSuccess: (data) => {
-      toast.success(`Branch created successfully`);
-      queryClient.invalidateQueries({ queryKey: ["branches", projectId] });
-      form.reset();
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to create branch: ${error.message}`);
-    },
-  });
+  const { createBranchMutation } = useBranch({ projectId });
+
+  const isPending = createBranchMutation.isPending;
 
   const onSubmit = (values: CreateBranchFormValues) => {
-    createBranchMutate(values);
+    createBranchMutation.mutate({ values, parentCommitId });
+    form.reset();
   };
+
+  // const { mutate: createBranchMutate, isPending } = useMutation({
+  //   mutationFn: async (values: CreateBranchFormValues) => {
+  //     const dto: CreateBranchDto = {
+  //       name: values.name,
+  //       is_default: values.is_default,
+  //       parent_commit_id: parentCommitId,
+  //     };
+  //     return await createBranch(projectId, dto, accessToken);
+  //   },
+  //   onSuccess: (data) => {
+  //     toast.success(`Branch created successfully`);
+  //     queryClient.invalidateQueries({ queryKey: ["branches", projectId] });
+  //     form.reset();
+  //   },
+  //   onError: (error: Error) => {
+  //     toast.error(`Failed to create branch: ${error.message}`);
+  //   },
+  // });
 
   return (
     <div className="sm:max-w-[500px]">
@@ -158,27 +143,25 @@ const CreateNewBranchForm = ({
                 </FormItem>
               )}
             />
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  form.reset();
-                }}
-                disabled={isPending}
-                className="cursor-pointer"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="cursor-pointer"
-              >
-                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isPending ? "Creating..." : "Create Branch"}
-              </Button>
-            </DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                form.reset();
+              }}
+              disabled={isPending}
+              className="cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="cursor-pointer"
+            >
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isPending ? "Creating..." : "Create Branch"}
+            </Button>
           </form>
         </Form>
       </div>

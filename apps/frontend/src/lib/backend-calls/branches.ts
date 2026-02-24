@@ -1,4 +1,9 @@
-import { Branch, ApiResponse, CreateBranchDto, UpdateBranchDto } from "@detective-quill/shared-types";
+import {
+  Branch,
+  ApiResponse,
+  CreateBranchDto,
+  UpdateBranchDto,
+} from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -69,4 +74,17 @@ export async function deleteBranch(
       method: "DELETE",
     },
   );
+}
+
+export async function switchActiveBranch(
+  projectId: string,
+  branchId: string,
+  accessToken: string,
+): Promise<ApiResponse<{ branch: Branch; headCommitId: string | null }>> {
+  return makeAuthenticatedRequest<{
+    branch: Branch;
+    headCommitId: string | null;
+  }>(`/${projectId}/branches/${branchId}/switch`, accessToken, {
+    method: "POST",
+  });
 }

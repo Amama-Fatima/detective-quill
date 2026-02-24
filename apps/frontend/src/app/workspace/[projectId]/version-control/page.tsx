@@ -2,7 +2,7 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import { getBranchesOfProject } from "@/lib/supabase-calls/branches";
 import { History, GitBranch } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import BranchList from "@/components/branches/branch-list";
 
 interface VersionControlPageProps {
   params: Promise<{
@@ -33,11 +33,9 @@ export default async function VersionControlPage({
             </p>
           </div>
         </div>
-        <Button asChild className="cursor-pointer">
-          <Link href={`/workspace/${projectId}/version-control/new-branch`}>
-            Create Branch
+          <Link href={`/workspace/${projectId}/version-control/new-branch`} className="bg-primary text-secondary rounded-md text-[1rem] py-2 px-3 hover:-translate-y-0.5  duration-300">
+            Create New Branch
           </Link>
-        </Button>
       </div>
 
       {!projectId ? (
@@ -56,38 +54,7 @@ export default async function VersionControlPage({
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {branches.map((branch) => (
-            <Link
-              key={branch.id}
-              href={`/workspace/${projectId}/version-control/${branch.id}`}
-              className="block rounded-lg border border-border bg-card/50 p-4 transition-colors hover:bg-card/80"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground truncate">
-                    {branch.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Branch ID: {branch.id}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {branch.is_default && (
-                    <span className="text-[10px] px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
-                      Default
-                    </span>
-                  )}
-                  {branch.is_active && (
-                    <span className="text-[10px] px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">
-                      Active
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <BranchList projectId={projectId} branches={branches} />
       )}
     </div>
   );

@@ -20,20 +20,28 @@ async function getEditorWorkspaceData(
   activeBranchId: string | null;
 }> {
   try {
-    // Fetch all data in parallel
-    const [projectResult, nodesResult, nodeResult, activeBranchResult] =
-      await Promise.allSettled([
-        fetchProject(supabase, projectId),
-        fetchProjectTree(supabase, projectId),
-        nodeId ? fetchNode(supabase, nodeId) : Promise.resolve(null),
-        fetchActiveBranchId(supabase, projectId),
-      ]);
+    const [projectResult, activeBranchResult] = await Promise.allSettled([
+      fetchProject(supabase, projectId),
+      fetchActiveBranchId(supabase, projectId),
+    ]);
 
     // Handle project result
     if (projectResult.status === "rejected") {
       console.error("Failed to fetch project:", projectResult.reason);
       notFound();
     }
+
+    const activeBranchId =
+      activeBranchResult.status === "fulfilled"
+        ? activeBranchResult.value
+        : null;
+
+    const [nodesResult, nodeResult] = await Promise.allSettled([
+      fetchProjectTree(supabase, projectId, activeBranchId),
+      nodeId && activeBranchId
+        ? fetchNode(supabase, nodeId, projectId, activeBranchId)
+        : Promise.resolve(null),
+    ]);
 
     // Handle nodes result
     if (nodesResult.status === "rejected") {
@@ -44,11 +52,6 @@ async function getEditorWorkspaceData(
     // Handle node result (optional)
     const currentNode =
       nodeResult.status === "fulfilled" ? nodeResult.value : null;
-    const activeBranchId =
-      activeBranchResult.status === "fulfilled"
-        ? activeBranchResult.value
-        : null;
-
     return {
       project: projectResult.value,
       nodes: nodesResult.value,
@@ -81,11 +84,17 @@ async function fetchProject(
 async function fetchProjectTree(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   projectId: string,
+  branchId: string | null,
 ): Promise<FsNodeTreeResponse[]> {
+  if (!branchId) {
+    return [];
+  }
+
   const { data: nodes, error } = await supabase
     .from("project_file_tree")
     .select("*")
     .eq("project_id", projectId)
+    .eq("branch_id", branchId)
     .order("depth", { ascending: true })
     .order("sort_order", { ascending: true });
 
@@ -118,6 +127,8 @@ async function fetchActiveBranchId(
 async function fetchNode(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   nodeId: string,
+  projectId: string,
+  branchId: string,
 ): Promise<FsNode> {
   const { data: node, error } = await supabase
     .from("fs_nodes")
@@ -128,6 +139,8 @@ async function fetchNode(
     `,
     )
     .eq("id", nodeId)
+    .eq("project_id", projectId)
+    .eq("branch_id", branchId)
     .single();
 
   if (error || !node) {
@@ -169,6 +182,7 @@ function buildTreeFromView(nodes: ProjectFileTreeRow[]): FsNodeTreeResponse[] {
       id: node.id,
       name: node.name,
       node_type: node.node_type,
+      branch_id: node.branch_id,
       parent_id: node.parent_id,
       content: node.content ?? undefined,
       word_count: node.word_count ?? 0,

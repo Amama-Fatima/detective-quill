@@ -61,7 +61,7 @@ export class BranchesController {
     @Request() req: any,
   ): Promise<ApiResponse<Branch>> {
     console.log("Updating branch with ID:", branchId, "Data:", updateBranchDto);
-    console.log("User ID from request:", req);
+    console.log("User ID from request:", req.user.id);
     await this.projectsService.verifyProjectOwnership(projectId, req.user.id);
 
     const data = await this.branchesService.updateBranch(
@@ -87,6 +87,31 @@ export class BranchesController {
     return {
       success: true,
       message: "Branch deleted successfully",
+    };
+  }
+
+  @Post(":branchId/switch")
+  async switchActiveBranch(
+    @Param("projectId") projectId: string,
+    @Param("branchId") branchId: string,
+    @Request() req: any,
+  ): Promise<
+    ApiResponse<{
+      branch: Branch;
+      headCommitId: string | null;
+    }>
+  > {
+    const userId = req.user.id;
+    const data = await this.branchesService.switchActiveBranch(
+      projectId,
+      branchId,
+      userId,
+    );
+
+    return {
+      success: true,
+      data,
+      message: "Active branch switched successfully",
     };
   }
 }

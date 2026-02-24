@@ -5,10 +5,16 @@ import {
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branches.dto";
+import { ProjectsService } from "src/projects/projects.service";
+import { SnapshotsService } from "src/snapshots/snapshots.service";
 
 @Injectable()
 export class BranchesService {
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly projectsService: ProjectsService,
+    private readonly snapshotsService: SnapshotsService,
+  ) {}
 
   async createBranch(createBranchDto: CreateBranchDto, projectId: string) {
     const supabase = this.supabaseService.client;
@@ -125,5 +131,65 @@ export class BranchesService {
     }
 
     return data;
+  }
+
+  async setActiveBranch(projectId: string, branchId: string) {
+    const supabase = this.supabaseService.client;
+
+    const { error: deactivateError } = await supabase
+      .from("branches")
+      .update({ is_active: false })
+      .eq("project_id", projectId);
+
+    if (deactivateError) {
+      throw new Error(
+        `Failed to deactivate existing active branch: ${deactivateError.message}`,
+      );
+    }
+
+    const { data, error } = await supabase
+      .from("branches")
+      .update({ is_active: true })
+      .eq("id", branchId)
+      .eq("project_id", projectId)
+      .select("*")
+      .single();
+
+    if (error || !data) {
+      throw new NotFoundException(`Branch with ID ${branchId} not found`);
+    }
+
+    return data;
+  }
+
+  async switchActiveBranch(
+    projectId: string,
+    branchId: string,
+    userId: string,
+  ) {
+    await this.projectsService.verifyProjectOwnership(projectId, userId);
+
+    const targetBranch = await this.getBranchById(branchId);
+
+    if (targetBranch.project_id !== projectId) {
+      throw new BadRequestException(
+        `Branch ${branchId} does not belong to project ${projectId}`,
+      );
+    }
+
+    if (targetBranch.head_commit_id) {
+      await this.snapshotsService.restoreProjectNodesFromCommitSnapshot(
+        targetBranch.head_commit_id,
+        projectId,
+        targetBranch.id,
+      );
+    }
+
+    const activeBranch = await this.setActiveBranch(projectId, branchId);
+
+    return {
+      branch: activeBranch,
+      headCommitId: targetBranch.head_commit_id,
+    };
   }
 }

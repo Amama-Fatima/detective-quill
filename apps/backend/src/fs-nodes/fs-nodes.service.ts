@@ -2,11 +2,11 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "../projects/projects.service";
 import { QueueService } from "src/queue/queue.service";
-import { BranchesService } from "../branches/branches.service";
 import type {
   Database,
   CommitSnapshot,
@@ -24,7 +24,6 @@ export class FsNodesService {
     private supabaseService: SupabaseService,
     private projectsService: ProjectsService,
     private queueService: QueueService,
-    private branchesService: BranchesService,
   ) {}
 
   async createNode(
@@ -39,11 +38,15 @@ export class FsNodesService {
       userId,
     );
 
+    const activeBranchId = await this.getActiveBranchId(
+      createNodeDto.project_id,
+    );
+
     // If parent_id is provided, verify it exists and belongs to the same project
     if (createNodeDto.parent_id) {
       const { data: parent, error: parentError } = await supabase
         .from("fs_nodes")
-        .select("project_id, node_type")
+        .select("project_id, node_type, branch_id")
         .eq("id", createNodeDto.parent_id)
         .single();
 
@@ -54,6 +57,12 @@ export class FsNodesService {
       if (parent.project_id !== createNodeDto.project_id) {
         throw new BadRequestException(
           "Parent node belongs to different project",
+        );
+      }
+
+      if (parent.branch_id !== activeBranchId) {
+        throw new BadRequestException(
+          "Parent node belongs to a different branch",
         );
       }
 
@@ -68,6 +77,7 @@ export class FsNodesService {
         .from("fs_nodes")
         .select("sort_order")
         .eq("project_id", createNodeDto.project_id)
+        .eq("branch_id", activeBranchId)
         .eq("parent_id", createNodeDto.parent_id || null)
         .order("sort_order", { ascending: false })
         .limit(1);
@@ -85,6 +95,7 @@ export class FsNodesService {
       .from("fs_nodes")
       .insert({
         ...createNodeDto,
+        branch_id: activeBranchId,
         word_count: createNodeDto.content
           ? this.countWords(createNodeDto.content)
           : 0,
@@ -110,23 +121,25 @@ export class FsNodesService {
     currentNode: FsNode | null;
     activeBranchId: string | null;
   }> {
-    // Fetch all data in parallel
-    const [project, nodes, currentNode, activeBranch] = await Promise.all([
+    const [project, activeBranchId] = await Promise.all([
       this.projectsService.findProjectById(projectId, userId),
-      this.getProjectTree(projectId, userId),
+      this.getActiveBranchId(projectId),
+    ]);
+
+    const [nodes, currentNode] = await Promise.all([
+      this.getProjectTree(projectId, userId, activeBranchId),
       nodeId
-        ? this.getNode(nodeId, userId).catch(() => null)
+        ? this.getNode(nodeId, userId, projectId, activeBranchId).catch(
+            () => null,
+          )
         : Promise.resolve(null),
-      this.branchesService
-        .getActiveBranchByProject(projectId)
-        .catch(() => null),
     ]);
 
     return {
       project,
       nodes,
       currentNode,
-      activeBranchId: activeBranch?.id ?? null,
+      activeBranchId,
     };
   }
 
@@ -134,17 +147,21 @@ export class FsNodesService {
   async getProjectTree(
     projectId: string,
     userId: string,
+    branchId?: string,
   ): Promise<FsNodeTreeResponse[]> {
     const supabase = this.supabaseService.client;
 
     // Verify project ownership
     await this.projectsService.findProjectById(projectId, userId);
+    const resolvedBranchId =
+      branchId ?? (await this.getActiveBranchId(projectId));
 
     // Using the project_file_tree view
     const { data: nodes, error } = await supabase
       .from("project_file_tree")
       .select("*")
       .eq("project_id", projectId)
+      .eq("branch_id", resolvedBranchId)
       .order("depth", { ascending: true })
       .order("sort_order", { ascending: true });
 
@@ -162,12 +179,17 @@ export class FsNodesService {
     const supabase = this.supabaseService.client;
 
     // Verify node exists and user owns it
-    await this.getNode(nodeId, userId);
+    const node = await this.getNode(nodeId, userId);
+    const activeBranchId = await this.getActiveBranchId(node.project_id);
 
-    // Use the get_node_children stored function
-    const { data: children, error } = await supabase.rpc("get_node_children", {
-      node_uuid: nodeId,
-    });
+    // Fetch direct children in the active branch only
+    const { data: children, error } = await supabase
+      .from("fs_nodes")
+      .select("*")
+      .eq("project_id", node.project_id)
+      .eq("branch_id", activeBranchId)
+      .eq("parent_id", nodeId)
+      .order("sort_order", { ascending: true });
 
     if (error) {
       throw new Error(`Failed to fetch node children: ${error.message}`);
@@ -176,7 +198,12 @@ export class FsNodesService {
     return children || [];
   }
 
-  async getNode(nodeId: string, userId: string): Promise<FsNode> {
+  async getNode(
+    nodeId: string,
+    userId: string,
+    projectId?: string,
+    branchId?: string,
+  ): Promise<FsNode> {
     const supabase = this.supabaseService.client;
 
     const { data: node, error } = await supabase
@@ -193,6 +220,17 @@ export class FsNodesService {
 
     if (error || !node) {
       throw new NotFoundException("Node not found");
+    }
+
+    const scopedProjectId = projectId ?? node.project_id;
+    if (node.project_id !== scopedProjectId) {
+      throw new NotFoundException("Node not found");
+    }
+
+    const activeBranchId =
+      branchId ?? (await this.getActiveBranchId(scopedProjectId));
+    if (node.branch_id !== activeBranchId) {
+      throw new ForbiddenException("Node does not belong to the active branch");
     }
 
     return node;
@@ -218,6 +256,7 @@ export class FsNodesService {
         word_count: this.countWords(updateContentDta.content),
       })
       .eq("id", nodeId)
+      .eq("branch_id", existingNode.branch_id)
       .select()
       .single();
 
@@ -245,7 +284,7 @@ export class FsNodesService {
       if (updateMetadataDto.parent_id) {
         const { data: parent, error: parentError } = await supabase
           .from("fs_nodes")
-          .select("project_id, node_type")
+          .select("project_id, node_type, branch_id")
           .eq("id", updateMetadataDto.parent_id)
           .single();
 
@@ -257,6 +296,10 @@ export class FsNodesService {
           throw new BadRequestException(
             "Cannot move node to different project",
           );
+        }
+
+        if (parent.branch_id !== existingNode.branch_id) {
+          throw new BadRequestException("Cannot move node to different branch");
         }
 
         if (parent.node_type !== "folder") {
@@ -281,6 +324,7 @@ export class FsNodesService {
       .from("fs_nodes")
       .update(cleanUpdate)
       .eq("id", nodeId)
+      .eq("branch_id", existingNode.branch_id)
       .select()
       .single();
 
@@ -299,14 +343,22 @@ export class FsNodesService {
 
     // Verify node exists and user owns it
     const node = await this.getNode(nodeId, userId);
+    const activeBranchId = await this.getActiveBranchId(node.project_id);
+
+    if (node.branch_id !== activeBranchId) {
+      throw new ForbiddenException("Node does not belong to the active branch");
+    }
 
     // If it's a folder, check for children and handle cascade
     if (node.node_type === "folder") {
-      // Get all children recursively using the database function
-      const { data: allChildren, error: childrenError } = await supabase.rpc(
-        "get_node_children",
-        { node_uuid: nodeId },
-      );
+      // Fetch descendants within the active branch by path prefix
+      const pathPrefix = `${node.path}/%`;
+      const { data: allChildren, error: childrenError } = await supabase
+        .from("fs_nodes")
+        .select("id, depth")
+        .eq("project_id", node.project_id)
+        .eq("branch_id", activeBranchId)
+        .like("path", pathPrefix);
 
       if (childrenError) {
         throw new Error(
@@ -318,19 +370,29 @@ export class FsNodesService {
 
       // If children exist, delete all children first (in reverse order to handle nested folders)
       if (children.length > 0) {
-        // Sort by depth descending to delete deepest items first
-        const sortedChildren = children.sort(
-          (a, b) => (b.depth || 0) - (a.depth || 0),
-        );
+        const childIds = children.map((child) => child.id);
+        const { error: hideChildrenError } = await supabase
+          .from("fs_nodes")
+          .update({ branch_id: null })
+          .eq("project_id", node.project_id)
+          .eq("branch_id", activeBranchId)
+          .in("id", childIds);
 
-        for (const child of sortedChildren) {
-          await supabase.from("fs_nodes").delete().eq("id", child.id);
+        if (hideChildrenError) {
+          throw new Error(
+            `Failed to remove folder contents: ${hideChildrenError.message}`,
+          );
         }
       }
     }
 
-    // Delete the main node
-    const { error } = await supabase.from("fs_nodes").delete().eq("id", nodeId);
+    // Hide the main node from the active branch workspace
+    const { error } = await supabase
+      .from("fs_nodes")
+      .update({ branch_id: null })
+      .eq("id", nodeId)
+      .eq("project_id", node.project_id)
+      .eq("branch_id", activeBranchId);
 
     if (error) {
       throw new Error(`Failed to delete node: ${error.message}`);
@@ -368,12 +430,14 @@ export class FsNodesService {
 
     // Verify project ownership
     await this.projectsService.findProjectById(projectId, userId);
+    const activeBranchId = await this.getActiveBranchId(projectId);
 
     // Using the project_file_tree view for efficient stats
     const { data: stats, error } = await supabase
       .from("project_file_tree")
       .select("node_type, total_word_count, parent_id")
-      .eq("project_id", projectId);
+      .eq("project_id", projectId)
+      .eq("branch_id", activeBranchId);
 
     if (error) {
       throw new Error(`Failed to get project stats: ${error.message}`);
@@ -400,12 +464,18 @@ export class FsNodesService {
     };
   }
 
-  async getProjectNodes(projectId: string): Promise<FsNode[]> {
+  async getProjectNodes(
+    projectId: string,
+    branchId?: string,
+  ): Promise<FsNode[]> {
     const supabase = this.supabaseService.client;
+    const resolvedBranchId =
+      branchId ?? (await this.getActiveBranchId(projectId));
     const { data: nodes, error } = await supabase
       .from("fs_nodes")
       .select("*")
-      .eq("project_id", projectId);
+      .eq("project_id", projectId)
+      .eq("branch_id", resolvedBranchId);
 
     if (error) {
       throw new Error(`Failed to fetch project files: ${error.message}`);
@@ -417,14 +487,20 @@ export class FsNodesService {
   async replaceProjectNodesFromSnapshots(
     projectId: string,
     snapshots: CommitSnapshot[],
+    branchId?: string,
   ) {
     const supabase = this.supabaseService.client;
+    const resolvedBranchId =
+      branchId ?? (await this.getActiveBranchId(projectId));
 
     const snapshotsForProject = snapshots.filter(
       (snapshot) => snapshot.project_id === projectId,
     );
 
-    const currentNodes = await this.getProjectNodes(projectId);
+    const currentNodes = await this.getProjectNodes(
+      projectId,
+      resolvedBranchId,
+    );
 
     const nodesToRestore = snapshotsForProject
       .filter(
@@ -441,6 +517,7 @@ export class FsNodesService {
       .map((snapshot) => ({
         id: snapshot.fs_node_id,
         project_id: projectId,
+        branch_id: resolvedBranchId,
         name: snapshot.name,
         node_type: snapshot.node_type,
         parent_id: snapshot.parent_id,
@@ -455,7 +532,7 @@ export class FsNodesService {
       }));
 
     const targetNodeIds = new Set(nodesToRestore.map((node) => node.id));
-    const nodesToDelete = currentNodes
+    const nodesToHide = currentNodes
       .filter((node) => !targetNodeIds.has(node.id))
       .sort((left, right) => (right.depth ?? 0) - (left.depth ?? 0));
 
@@ -471,33 +548,20 @@ export class FsNodesService {
       }
     }
 
-    if (nodesToDelete.length > 0) {
-      const nodesToDeleteIds = nodesToDelete.map((node) => node.id);
+    if (nodesToHide.length > 0) {
+      const nodesToHideIds = nodesToHide.map((node) => node.id);
 
-      const { error: unlinkSnapshotsError } = await supabase
-        .from("commit_snapshots")
-        .update({ fs_node_id: null })
+      const { error: hideError } = await supabase
+        .from("fs_nodes")
+        .update({ branch_id: null })
         .eq("project_id", projectId)
-        .in("fs_node_id", nodesToDeleteIds);
+        .eq("branch_id", resolvedBranchId)
+        .in("id", nodesToHideIds);
 
-      if (unlinkSnapshotsError) {
+      if (hideError) {
         throw new Error(
-          `Failed to detach snapshots for reverted tree: ${unlinkSnapshotsError.message}`,
+          `Failed to update workspace nodes for branch checkout: ${hideError.message}`,
         );
-      }
-
-      for (const node of nodesToDelete) {
-        const { error: deleteError } = await supabase
-          .from("fs_nodes")
-          .delete()
-          .eq("id", node.id)
-          .eq("project_id", projectId);
-
-        if (deleteError) {
-          throw new Error(
-            `Failed to delete node during revert: ${deleteError.message}`,
-          );
-        }
       }
     }
 
@@ -537,6 +601,7 @@ export class FsNodesService {
         name: node.name,
         node_type: node.node_type,
         parent_id: node.parent_id,
+        branch_id: node.branch_id,
         content: node.content ?? undefined,
         word_count: node.word_count ?? 0,
         path: node.path,
@@ -611,6 +676,25 @@ export class FsNodesService {
       .trim()
       .split(/\s+/)
       .filter((word) => word.length > 0).length;
+  }
+
+  private async getActiveBranchId(projectId: string): Promise<string> {
+    const supabase = this.supabaseService.client;
+
+    const { data, error } = await supabase
+      .from("branches")
+      .select("id")
+      .eq("project_id", projectId)
+      .eq("is_active", true)
+      .single();
+
+    if (error || !data?.id) {
+      throw new NotFoundException(
+        `Active branch for project ${projectId} not found`,
+      );
+    }
+
+    return data.id;
   }
 
   // private async getParentInfo(

@@ -27,6 +27,7 @@ interface CommitSnapshotViewerProps {
   snapshots: SnapshotTreeNode[];
   projectId: string;
   branchId?: string;
+  activeBranchId?: string | null;
 }
 
 export default function CommitSnapshotViewer({
@@ -34,6 +35,7 @@ export default function CommitSnapshotViewer({
   snapshots,
   projectId,
   branchId,
+  activeBranchId,
 }: CommitSnapshotViewerProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isRevertDialogOpen, setIsRevertDialogOpen] = useState(false);
@@ -49,6 +51,8 @@ export default function CommitSnapshotViewer({
   const historyPath = commitBranchId
     ? `/workspace/${projectId}/version-control/${commitBranchId}`
     : `/workspace/${projectId}/version-control`;
+  const isActiveBranch =
+    !!activeBranchId && !!commitBranchId && activeBranchId === commitBranchId;
 
   const handleRevertConfirm = async () => {
     await revertCommitMutation.mutateAsync();
@@ -86,7 +90,7 @@ export default function CommitSnapshotViewer({
               </div>
             </div>
           </div>
-          <div className="mt-2 px-2 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-xs text-amber-700 dark:text-amber-400">
+          <div className="mt-2 px-2 py-1 border border-primary rounded text-[1rem] font-medium text-primary">
             Read-only snapshot
           </div>
 
@@ -99,11 +103,17 @@ export default function CommitSnapshotViewer({
                 variant="destructive"
                 size="sm"
                 className="mt-3 w-full gap-2 cursor-pointer"
+                disabled={!isActiveBranch}
               >
                 <RotateCcw className="h-4 w-4" />
                 Revert to this commit
               </Button>
             </AlertDialogTrigger>
+            {!isActiveBranch && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Switch to this branch to revert its history.
+              </p>
+            )}
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>

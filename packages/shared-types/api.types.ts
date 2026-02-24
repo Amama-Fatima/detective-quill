@@ -103,6 +103,7 @@ export interface FsNodeTreeResponse {
   id: string;
   name: string;
   node_type: "folder" | "file";
+  branch_id: string | null;
   parent_id: string | null;
   depth?: number | null;
   children?: FsNodeTreeResponse[];
@@ -113,6 +114,8 @@ export interface FsNodeTreeResponse {
   created_at: string;
   updated_at: string;
 }
+
+export type FsNodeResponse = FsNodeTreeResponse;
 
 export interface EditorWorkspaceResponse {
   project: Project;

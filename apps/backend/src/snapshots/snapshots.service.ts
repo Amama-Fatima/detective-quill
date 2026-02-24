@@ -73,17 +73,30 @@ export class SnapshotsService {
   async restoreProjectNodesFromCommitSnapshot(
     commitId: string,
     projectId: string,
+    branchId?: string,
   ) {
     const snapshots = await this.getSnapshotsByCommit(commitId);
+    const resolvedBranchId =
+      branchId ?? (await this.getCommitBranchId(commitId));
     return await this.fsNodesService.replaceProjectNodesFromSnapshots(
       projectId,
       snapshots,
+      resolvedBranchId,
     );
   }
 
   // Helper method to create snapshots from fs_nodes
-  async createSnapshotsFromNodes(commitId: string, projectId: string) {
-    const nodes = await this.fsNodesService.getProjectNodes(projectId);
+  async createSnapshotsFromNodes(
+    commitId: string,
+    projectId: string,
+    branchId?: string,
+  ) {
+    const resolvedBranchId =
+      branchId ?? (await this.getCommitBranchId(commitId));
+    const nodes = await this.fsNodesService.getProjectNodes(
+      projectId,
+      resolvedBranchId,
+    );
 
     // Map nodes to snapshot DTOs
     const snapshots: CreateSnapshotDto[] = nodes.map((node) => ({
@@ -104,5 +117,20 @@ export class SnapshotsService {
     }));
 
     return await this.createSnapshots(snapshots);
+  }
+
+  private async getCommitBranchId(commitId: string): Promise<string> {
+    const supabase = this.supabaseService.client;
+    const { data, error } = await supabase
+      .from("commits")
+      .select("branch_id")
+      .eq("id", commitId)
+      .single();
+
+    if (error || !data?.branch_id) {
+      throw new NotFoundException(`Branch not found for commit ${commitId}`);
+    }
+
+    return data.branch_id;
   }
 }

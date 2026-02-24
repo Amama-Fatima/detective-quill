@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { getSnapshotsByCommit } from "@/lib/supabase-calls/snapshots";
 import { getCommitById } from "@/lib/supabase-calls/commits";
+import { getActiveBranchId } from "@/lib/supabase-calls/branches";
 import { buildSnapshotTree } from "@/lib/utils/snapshot-tree-utils";
 import CommitSnapshotViewer from "@/components/commit-snapshot/commit-snapshot-viewer";
 
@@ -49,6 +50,7 @@ export default async function BranchCommitViewPage({
   }
 
   const snapshotTree = buildSnapshotTree(snapshots);
+  const activeBranchId = await getActiveBranchId(projectId, supabase);
 
   return (
     <CommitSnapshotViewer
@@ -56,6 +58,7 @@ export default async function BranchCommitViewPage({
       snapshots={snapshotTree}
       projectId={projectId}
       branchId={branchId}
+      activeBranchId={activeBranchId}
     />
   );
 }
