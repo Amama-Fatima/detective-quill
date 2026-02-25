@@ -15,11 +15,19 @@ export interface EmbeddingJobData {
   global_sequence?: number;
   timeline_path?: string;
 }
+
+export interface SceneAnalysisJobData {
+  job_id: string;
+  scene_text: string;
+  user_id: string;
+  project_id?: string;
+}
+
 // todo: where will errors that are thrown here be catched?
 @Injectable()
 export class QueueService {
   constructor(
-    @Inject("RABBITMQ_SERVICE") private readonly rabbitClient: ClientProxy
+    @Inject("RABBITMQ_SERVICE") private readonly rabbitClient: ClientProxy,
   ) {}
 
   sendEmbeddingJob(jobData: EmbeddingJobData) {
@@ -46,6 +54,20 @@ export class QueueService {
       });
     } catch (error) {
       console.error("Failed to queue invite emails job:", error);
+      throw error;
+    }
+  }
+
+  sendSceneAnalysisJob(jobData: SceneAnalysisJobData) {
+    try {
+      this.rabbitClient.emit("scene_analysis_queue", {
+        ...jobData,
+        timestamp: new Date().toISOString(),
+      });
+
+      console.log(`Scene analysis job queued: ${jobData.job_id}`);
+    } catch (error) {
+      console.error("Failed to queue scene analysis job:", error);
       throw error;
     }
   }

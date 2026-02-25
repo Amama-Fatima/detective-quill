@@ -17,3 +17,6 @@ apps/frontend/.env
 apps/backend/.env
 
 .venv/
+
+apps/knowledge-graph/venv/
+apps/knowledge-graph/__pycache__/
