@@ -1,7 +1,6 @@
-import {  User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 
-export const getDisplayName = (user: User) => {
-  console.log("User object in getDisplayName:", user);
+export const getDisplayName = (user: User | null) => {
   const meta = user?.user_metadata;
   if (meta?.full_name) return meta.full_name;
   if (meta?.name) return meta.name;

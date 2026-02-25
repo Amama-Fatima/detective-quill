@@ -14,30 +14,32 @@ import { getDisplayName, getInitials } from "@/lib/utils/profile-utils";
 
 const UserProfile = () => {
   const { user } = useAuth();
-  const displayName = getDisplayName(user!);
+  const displayName = getDisplayName(user);
   const initials = getInitials(displayName);
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4 md:p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Your account details</CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center gap-4">
-          <Avatar className="size-12">
-            <AvatarImage src={user?.user_metadata?.avatar_url || undefined} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
+    <Card className="overflow-hidden border-border/70 shadow-md">
+      <CardHeader>
+        <CardTitle>Profile</CardTitle>
+        <CardDescription>Your account details</CardDescription>
+      </CardHeader>
 
-          <div className="space-y-1">
-            <p className="text-base font-semibold">{displayName}</p>
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
-          </div>
-        </CardContent>
-      </Card>
+      <CardContent className="flex flex-col items-center gap-4 text-center">
+        <Avatar className="size-24 border border-border/60 shadow-sm">
+          <AvatarImage src={user?.user_metadata?.avatar_url || undefined} />
+          <AvatarFallback className="text-lg font-semibold">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
 
-    </section>
+        <div className="space-y-1">
+          <p className="text-lg font-semibold leading-tight">{displayName}</p>
+          <p className="text-sm text-muted-foreground break-all">
+            {user?.email}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
