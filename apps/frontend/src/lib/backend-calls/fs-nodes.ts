@@ -2,11 +2,11 @@ import {
   FsNode,
   FsNodeTreeResponse,
   CreateFsNodeDto,
-  DeleteResponse,
   ApiResponse,
   UpdateFileContentDto,
   UpdateNodeMetadataDto,
   Project,
+  EditorWorkspaceResponse,
 } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -48,22 +48,15 @@ export async function getEditorWorkspaceData(
   projectId: string,
   accessToken: string,
   nodeId?: string,
-): Promise<
-  ApiResponse<{
-    project: Project;
-    nodes: FsNodeTreeResponse[];
-    currentNode: FsNode | null;
-  }>
-> {
+): Promise<ApiResponse<EditorWorkspaceResponse>> {
   const endpoint = nodeId
     ? `/fs-nodes/project/${projectId}/workspace?nodeId=${nodeId}`
     : `/fs-nodes/project/${projectId}/workspace`;
 
-  return makeAuthenticatedRequest<{
-    project: Project;
-    nodes: FsNodeTreeResponse[];
-    currentNode: FsNode | null;
-  }>(endpoint, accessToken);
+  return makeAuthenticatedRequest<EditorWorkspaceResponse>(
+    endpoint,
+    accessToken,
+  );
 }
 
 export async function getProjectTree(
@@ -100,7 +93,7 @@ export async function updateFileContent(
 
 export async function updateNodeMetadata(
   nodeId: string,
-  data: UpdateNodeMetadataDto,
+  data: Omit<UpdateNodeMetadataDto, "parent_id">,
   accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
   return makeAuthenticatedRequest<FsNode>(
@@ -118,14 +111,14 @@ export async function deleteFsNode(
   accessToken: string,
   hardDelete: boolean = false,
   cascadeDelete: boolean = false,
-): Promise<ApiResponse<DeleteResponse>> {
+): Promise<ApiResponse<void>> {
   const queryParams = new URLSearchParams();
   if (hardDelete) queryParams.append("hard", "true");
   if (cascadeDelete) queryParams.append("cascade", "true");
 
   const query = queryParams.toString() ? `?${queryParams.toString()}` : "";
 
-  return makeAuthenticatedRequest<DeleteResponse>(
+  return makeAuthenticatedRequest<void>(
     `/fs-nodes/${nodeId}${query}`,
     accessToken,
     {
@@ -137,7 +130,7 @@ export async function deleteFsNode(
 export async function moveFsNode(
   nodeId: string,
   parentId: string | null,
-  sortOrder: number,
+  sort_order: number,
   accessToken: string,
 ): Promise<ApiResponse<FsNode>> {
   return makeAuthenticatedRequest<FsNode>(
@@ -145,7 +138,10 @@ export async function moveFsNode(
     accessToken,
     {
       method: "PATCH",
-      body: JSON.stringify({ parent_id: parentId, sort_order: sortOrder }),
+      body: JSON.stringify({
+        parent_id: parentId,
+        sort_order: sort_order,
+      }),
     },
   );
 }

@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils/utils";
 import { File, Folder as TreeFolder } from "../../magicui/file-tree";
 import { findNodeById } from "@/lib/utils/file-tree-utils";
+import { useWorkspaceContext } from "@/context/workspace-context";
 
 const TreeItem = ({
   element,
@@ -31,8 +32,6 @@ const TreeItem = ({
   nodes,
   hoveredFolder,
   setHoveredFolder,
-  isOwner,
-  isActive,
 }: {
   element: TreeViewElement;
   selectedNodeId: string;
@@ -43,9 +42,8 @@ const TreeItem = ({
   nodes: FsNodeTreeResponse[];
   hoveredFolder: string | null;
   setHoveredFolder: (id: string | null) => void;
-  isOwner: boolean;
-  isActive: boolean;
 }) => {
+  const { isOwner, isActive } = useWorkspaceContext();
   const node = findNodeById(nodes, element.id);
   const isSelected = selectedNodeId === element.id;
   const isHovered = hoveredFolder === element.id;
@@ -75,8 +73,6 @@ const TreeItem = ({
               nodes={nodes}
               hoveredFolder={hoveredFolder}
               setHoveredFolder={setHoveredFolder}
-              isOwner={isOwner}
-              isActive={isActive}
             />
           ))}
         </TreeFolder>

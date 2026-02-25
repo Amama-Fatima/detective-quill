@@ -8,16 +8,12 @@ interface WorkspaceSidebarProps {
   projectName: string;
   nodes: FsNodeTreeResponse[];
   projectId: string;
-  isOwner: boolean;
-  isActive: boolean;
 }
 
 export default function WorkspaceSidebar({
   projectName,
   nodes,
   projectId,
-  isOwner,
-  isActive,
 }: WorkspaceSidebarProps) {
   return (
     <aside
@@ -35,12 +31,7 @@ export default function WorkspaceSidebar({
           </div>
         </div>
       </div>
-      <FileTree
-        initialNodes={nodes}
-        projectId={projectId}
-        isOwner={isOwner}
-        isActive={isActive}
-      />
+      <FileTree initialNodes={nodes} projectId={projectId} />
     </aside>
   );
 }

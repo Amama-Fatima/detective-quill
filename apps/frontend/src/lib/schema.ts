@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { de } from "zod/v4/locales";
 
 export const signInSchema = z.object({
   email: z
@@ -62,3 +63,38 @@ export const resetPasswordSchema = z
   });
 
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
+export const createBranchSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Branch name is required")
+    .max(50, "Branch name must be less than 50 characters")
+    .regex(
+      /^[a-zA-Z0-9-_\/]+$/,
+      "Branch name can only contain letters, numbers, hyphens, underscores, and slashes",
+    ),
+  is_default: z.boolean(),
+  description: z
+    .string()
+    .max(255, "Description must be less than 255 characters")
+    .optional(),
+});
+
+export type CreateBranchFormValues = z.infer<typeof createBranchSchema>;
+
+export const updateBranchSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Branch name is required")
+    .max(50, "Branch name must be less than 50 characters")
+    .regex(
+      /^[a-zA-Z0-9-_\/]+$/,
+      "Branch name can only contain letters, numbers, hyphens, underscores, and slashes",
+    )
+    .optional(),
+  is_default: z.boolean().optional(),
+  description: z
+    .string()
+    .max(255, "Description must be less than 255 characters")
+    .optional(),
+});

@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "src/projects/projects.service";
@@ -130,8 +131,8 @@ export class MembersService {
       .eq("user_id", userId)
       .single();
 
-    if (!member) {
-      return { hasAccess: false, role: null };
+    if (!member || error) {
+      throw new ForbiddenException("You do not have access to this project");
     }
 
     return { hasAccess: true, role: "member" };

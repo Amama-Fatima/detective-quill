@@ -6,6 +6,10 @@ import WorkspaceSidebar from "@/components/editor-workspace/workspace-layout/wor
 import WorkspaceHeaderBar from "@/components/editor-workspace/workspace-layout/workspace-header-bar";
 import { countNodes } from "@/lib/utils/file-tree-utils";
 import {
+  WorkspaceContextProvider,
+  useWorkspaceContext,
+} from "@/context/workspace-context";
+import {
   FsNodeTreeResponse,
   FsNode,
   Project,
@@ -20,6 +24,7 @@ interface WorkspaceLayoutClientWrapperProps {
   nodeId?: string;
   isActive: boolean;
   isOwner: boolean;
+  activeBranchId: string | null;
 }
 
 export default function WorkspaceLayoutClientWrapper({
@@ -31,9 +36,9 @@ export default function WorkspaceLayoutClientWrapper({
   nodeId,
   isActive,
   isOwner,
+  activeBranchId,
 }: WorkspaceLayoutClientWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [nodes, setNodes] = useState<FsNodeTreeResponse[]>(initialNodes);
 
   const focusMode = useFocusModeStore((state) => state.focusMode);
 
@@ -41,40 +46,39 @@ export default function WorkspaceLayoutClientWrapper({
     setSidebarOpen(!sidebarOpen);
   };
 
-  // todo: these will not be in sync when file ops are performed
-  // Computed values
-  const { files: filesCount, folders: foldersCount } = React.useMemo(() => {
-    return countNodes(nodes);
-  }, [nodes]);
-
   const showSidebar = sidebarOpen && focusMode === "NORMAL";
   const showHeader = focusMode === "NORMAL";
 
   return (
-    <div className="flex h-screen w-full bg-background">
-      {showSidebar && (
-        <WorkspaceSidebar
-          projectName={project.title}
-          nodes={nodes}
-          projectId={projectId}
-          isOwner={isOwner}
-          isActive={isActive}
-        />
-      )}
-
-      <main className="flex-1 flex flex-col min-w-0">
-        {showHeader && (
-          <WorkspaceHeaderBar
-            sidebarOpen={sidebarOpen}
-            onSidebarToggle={handleSidebarToggle}
+    <WorkspaceContextProvider
+      projectId={projectId}
+      activeBranchId={activeBranchId}
+      isOwner={isOwner}
+      isActive={isActive}
+    >
+      <div className="flex h-screen w-full bg-background">
+        {showSidebar && (
+          <WorkspaceSidebar
             projectName={project.title}
-            nodeId={nodeId}
-            currentNodePath={currentNode?.path ?? undefined}
+            nodes={initialNodes}
+            projectId={projectId}
           />
         )}
 
-        <div className="flex-1">{children}</div>
-      </main>
-    </div>
+        <main className="flex-1 flex flex-col min-w-0">
+          {showHeader && (
+            <WorkspaceHeaderBar
+              sidebarOpen={sidebarOpen}
+              onSidebarToggle={handleSidebarToggle}
+              projectName={project.title}
+              nodeId={nodeId}
+              currentNodePath={currentNode?.path ?? undefined}
+            />
+          )}
+
+          <div className="flex-1">{children}</div>
+        </main>
+      </div>
+    </WorkspaceContextProvider>
   );
 }

@@ -19,7 +19,6 @@ import { AuthGuard } from "../auth/auth.guard";
 import {
   FsNode,
   FsNodeTreeResponse,
-  DeleteResponse,
   ApiResponse,
 } from "@detective-quill/shared-types";
 
@@ -129,9 +128,9 @@ export class FsNodesController {
   async remove(
     @Param("id") id: string,
     @Request() req,
-  ): Promise<ApiResponse<DeleteResponse>> {
-    const data = await this.fsNodesService.deleteNode(id, req.user.id);
-    return { success: true, data };
+  ): Promise<ApiResponse<void>> {
+    await this.fsNodesService.deleteNode(id, req.user.id);
+    return { success: true, message: "Node deleted successfully" };
   }
 
   @Patch(":id/move")

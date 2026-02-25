@@ -3,7 +3,6 @@ import {
   CreateProjectDto,
   UpdateProjectDto,
   ProjectStats,
-  DeleteResponse,
   ApiResponse,
 } from "@detective-quill/shared-types";
 
@@ -86,8 +85,8 @@ export async function updateProject(
 export async function deleteProject(
   projectId: string,
   accessToken: string
-): Promise<ApiResponse<DeleteResponse>> {
-  const response = await makeAuthenticatedRequest<DeleteResponse>(
+): Promise<ApiResponse<void>> {
+  const response = await makeAuthenticatedRequest<void>(
     `/projects/${projectId}`,
     accessToken,
     {

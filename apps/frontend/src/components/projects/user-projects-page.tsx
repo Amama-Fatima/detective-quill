@@ -111,28 +111,25 @@ export default function UserProjectsPage({
         >
           <div className="noir-text flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
             <TabsList className="bg-card/50 border border-border">
-              <TabsTrigger value="all" className="font-serif cursor-pointer">
+              <TabsTrigger value="all" className="case-file cursor-pointer">
                 All Cases
               </TabsTrigger>
-              <TabsTrigger value="active" className="font-serif cursor-pointer">
+              <TabsTrigger value="active" className="case-file cursor-pointer">
                 Active
               </TabsTrigger>
               <TabsTrigger
                 value="completed"
-                className="font-serif cursor-pointer"
+                className="case-file cursor-pointer"
               >
                 Completed
               </TabsTrigger>
               <TabsTrigger
                 value="archived"
-                className="font-serif cursor-pointer"
+                className="case-file cursor-pointer"
               >
                 Archived
               </TabsTrigger>
-              <TabsTrigger
-                value="invited"
-                className="font-serif cursor-pointer"
-              >
+              <TabsTrigger value="invited" className="case-file cursor-pointer">
                 Invited
               </TabsTrigger>
             </TabsList>

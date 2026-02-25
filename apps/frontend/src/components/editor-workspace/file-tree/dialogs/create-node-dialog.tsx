@@ -56,7 +56,6 @@ const CreateNodeDialog = ({
 
   const handleSubmit = async () => {
     if (name.trim()) {
-      console.log("selected folder sending as parent id is ", selectedFolder);
       await onSubmit(
         name.trim(),
         nodeType,

@@ -25,7 +25,7 @@ const PasswordResetInstruction = ({
       </div>
 
       <div className="space-y-2">
-        <h3 className="noir-text text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="mystery-title text-xl font-semibold text-gray-900 dark:text-gray-100">
           Check your email
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">

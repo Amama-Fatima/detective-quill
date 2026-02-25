@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
@@ -30,20 +31,17 @@ import { useFileTreeState } from "@/hooks/file-tree/use-file-tree-state";
 import { useFileTreeOperations } from "@/hooks/file-tree/use-file-tree-operations";
 import TreeItem from "./tree-item";
 import { findNodeById } from "@/lib/utils/file-tree-utils";
+import CreateCommitDialog from "./dialogs/create-commit-dialog";
+import { useWorkspaceContext } from "@/context/workspace-context";
 
 interface FileTreeProps {
   initialNodes: FsNodeTreeResponse[];
   projectId: string;
-  isOwner: boolean;
-  isActive: boolean;
 }
 
-const FileTree = ({
-  initialNodes,
-  projectId,
-  isOwner,
-  isActive,
-}: FileTreeProps) => {
+const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
+  const { activeBranchId, isOwner, isActive } = useWorkspaceContext();
+  const [commitDialogOpen, setCommitDialogOpen] = useState(false);
   const params = useParams();
   const selectedNodeId = params.nodeId as string;
 
@@ -177,6 +175,16 @@ const FileTree = ({
           </DropdownMenu>
 
           <Button
+            size="sm"
+            variant="outline"
+            className="cursor-pointer"
+            disabled={!isOwner || !isActive || !activeBranchId}
+            onClick={() => setCommitDialogOpen(true)}
+          >
+            Commit changes
+          </Button>
+
+          <Button
             variant="outline"
             size="sm"
             onClick={() => setSearchExpanded(!searchExpanded)}
@@ -235,8 +243,6 @@ const FileTree = ({
                 nodes={nodes}
                 hoveredFolder={hoveredFolder}
                 setHoveredFolder={setHoveredFolder}
-                isOwner={isOwner}
-                isActive={isActive}
               />
             ))}
           </Tree>
@@ -244,19 +250,30 @@ const FileTree = ({
       </div>
 
       {isActive && isOwner && (
-        <CreateNodeDialog
-          open={createDialogOpen}
-          onOpenChange={setCreateDialogOpen}
-          onSubmit={handleCreateNode}
-          creating={createNodeMutation.isPending}
-          nodeType={createType}
-          folderName={
-            selectedFolder
-              ? findNodeById(nodes, selectedFolder)?.name
-              : undefined
-          }
-          availableFolders={folderNodes}
-        />
+        <>
+          {activeBranchId && (
+            <CreateCommitDialog
+              projectId={projectId}
+              branchId={activeBranchId}
+              open={commitDialogOpen}
+              onOpenChange={setCommitDialogOpen}
+            />
+          )}
+
+          <CreateNodeDialog
+            open={createDialogOpen}
+            onOpenChange={setCreateDialogOpen}
+            onSubmit={handleCreateNode}
+            creating={createNodeMutation.isPending}
+            nodeType={createType}
+            folderName={
+              selectedFolder
+                ? findNodeById(nodes, selectedFolder)?.name
+                : undefined
+            }
+            availableFolders={folderNodes}
+          />
+        </>
       )}
 
       {isOwner && isActive && (

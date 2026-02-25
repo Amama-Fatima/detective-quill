@@ -7,11 +7,11 @@ import { BlockNoteView } from "@blocknote/shadcn";
 import "@blocknote/shadcn/style.css";
 import { NOTION_STYLES } from "@/constants/editor";
 import type { BlockNoteEditor as BlockNoteEditorType } from "@blocknote/core";
+import { useWorkspaceContext } from "@/context/workspace-context";
 
 interface BlockNoteEditorProps {
   initialContent?: string;
   onChange?: (content: string) => void;
-  disabledCondition: boolean;
 }
 
 export interface BlockNoteEditorRef {
@@ -24,13 +24,17 @@ export interface BlockNoteEditorRef {
   highlightText: (
     blockId: string,
     startOffset: number,
-    endOffset: number
+    endOffset: number,
   ) => void;
   editor: BlockNoteEditorType | null;
 }
 
 const BlockNoteEditor = forwardRef<BlockNoteEditorRef, BlockNoteEditorProps>(
-  ({ initialContent = "", onChange, disabledCondition }, ref) => {
+  ({ initialContent = "", onChange }, ref) => {
+
+
+    const { isActive, isOwner } = useWorkspaceContext();
+    const disabledCondition = !isActive || !isOwner;
     const editor = useCreateBlockNote({
       initialContent: initialContent ? JSON.parse(initialContent) : undefined,
     });
@@ -75,7 +79,7 @@ const BlockNoteEditor = forwardRef<BlockNoteEditorRef, BlockNoteEditorProps>(
       highlightText: (
         blockId: string,
         startOffset: number,
-        endOffset: number
+        endOffset: number,
       ) => {
         try {
           // Find the block and scroll to it
@@ -89,7 +93,7 @@ const BlockNoteEditor = forwardRef<BlockNoteEditorRef, BlockNoteEditorProps>(
             // Add a visual highlight (temporary background color)
             // This is a simplified version - you might want to implement a more sophisticated highlighting
             const blockElement = document.querySelector(
-              `[data-id="${blockId}"]`
+              `[data-id="${blockId}"]`,
             );
             if (blockElement) {
               blockElement.classList.add("highlight-comment");
@@ -158,7 +162,7 @@ const BlockNoteEditor = forwardRef<BlockNoteEditorRef, BlockNoteEditorProps>(
         </div>
       </>
     );
-  }
+  },
 );
 
 BlockNoteEditor.displayName = "BlockNoteEditor";

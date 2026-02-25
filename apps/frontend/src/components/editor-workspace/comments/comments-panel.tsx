@@ -12,9 +12,7 @@ export default function CommentsPanel({}) {
   const params = useParams();
   const projectId = params.projectId as string;
   const fsNodeId = params.nodeId as string;
-  console.log("CommentsPanel projectId:", projectId);
-  console.log("CommentsPanel fsNodeId:", fsNodeId);
-  console.log("params:", params)
+
   const { comments, stats, isLoading } = useComments({
     fsNodeId: fsNodeId,
     includeResolved: true,

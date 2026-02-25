@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Clock } from "lucide-react";
+import { Clock, GitBranch } from "lucide-react";
 import { NAV_ITEMS } from "@/constants/project-constants";
 import ChangeStateDropDown from "./change-state-dropdown";
 import InviteMembersDialog from "./members/invite-memebers-dialog";
@@ -10,16 +10,20 @@ import {
   Project,
   ProjectMember,
   Invitation,
+  Branch,
 } from "@detective-quill/shared-types";
 import MembersTable from "./members/members-table";
 import PendingInvitations from "./members/pending-invitations";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
+import BranchesDropdown from "@/components/branches/branches-dropdown";
 
 interface WorkspaceMainBodyProps {
   project: Project;
   userId: string;
   members: ProjectMember[] | [];
   invitations: Invitation[] | [];
+  branches: Branch[];
+  activeBranch: Branch | null;
 }
 
 export default function WorkspaceMainBody({
@@ -27,6 +31,8 @@ export default function WorkspaceMainBody({
   userId,
   members,
   invitations,
+  branches,
+  activeBranch,
 }: WorkspaceMainBodyProps) {
   const navItems = NAV_ITEMS.map((item) => ({
     ...item,
@@ -69,12 +75,14 @@ export default function WorkspaceMainBody({
 
   const isActive = project.status === "active";
 
+  const currentBranchLabel = activeBranch?.name ?? "No active branch";
+
   return (
     <div className="min-h-[80vh] px-10 py-6">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h4 className="font-bold text-xl">Description</h4>
-          <p className="text-[1.1rem] w-[100%] noir-text mb-2">
+      <div className="flex flex-col gap-6 mb-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="max-w-2xl">
+          <h4 className="font-bold text-xl mb-2">Description</h4>
+          <p className="text-[1.05rem] w-full noir-text mb-2 leading-relaxed">
             {project.description ??
               "This section provides an overview and notes for the ongoing project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."}
           </p>
@@ -87,21 +95,41 @@ export default function WorkspaceMainBody({
           </p>
         </div>
 
-        {isOwner && (
-          <div className="flex items-center gap-4">
-            <ChangeStateDropDown
-              projectId={project.id}
-              status={project.status}
-            />
-            {isActive && (
-              <InviteMembersDialog
-                inviteDialogOpen={inviteDialogOpen}
-                setInviteDialogOpen={setInviteDialogOpen}
+        <div className="flex flex-col items-end gap-4">
+          {isOwner && (
+            <div className="flex items-center gap-3">
+              <ChangeStateDropDown
                 projectId={project.id}
+                status={project.status}
               />
-            )}
+              {isActive && (
+                <InviteMembersDialog
+                  inviteDialogOpen={inviteDialogOpen}
+                  setInviteDialogOpen={setInviteDialogOpen}
+                  projectId={project.id}
+                />
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-col items-end gap-2">
+            <span className="text-[0.7rem] uppercase tracking-[0.12em] text-muted-foreground">
+              Current branch
+            </span>
+            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground shadow-sm">
+                <GitBranch className="h-3.5 w-3.5" />
+                <span className="truncate max-w-[14rem]">
+                  {currentBranchLabel}
+                </span>
+              </div>
+              <BranchesDropdown
+                branches={branches}
+                activeBranchId={activeBranch?.id ?? null}
+              />
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       <nav className="flex flex-wrap gap-4 mb-8 justify-center">
@@ -116,9 +144,11 @@ export default function WorkspaceMainBody({
               }
             >
               <Icon className="h-5 w-5" />
-              <div className="flex flex-col">
+              <div className="flex flex-col text-left">
                 <span className="font-medium text-sm">{item.label}</span>
-                <span className="text-xs">{item.description}</span>
+                <span className="text-xs text-muted-foreground">
+                  {item.description}
+                </span>
               </div>
             </Link>
           );

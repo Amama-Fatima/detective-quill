@@ -112,3 +112,58 @@ export const countNodes = (
 
   return { files, folders };
 };
+
+// /**
+//  * Validate depth consistency in tree structure
+//  * Ensures child depth = parent depth + 1
+//  */
+// export const validateTreeDepth = (
+//   nodes: FsNodeTreeResponse[],
+//   parentDepth: number = -1,
+// ): { valid: boolean; errors: string[] } => {
+//   const errors: string[] = [];
+
+//   nodes.forEach((node) => {
+//     const expectedDepth = parentDepth + 1;
+//     const actualDepth = node.depth ?? expectedDepth;
+
+//     if (actualDepth !== expectedDepth) {
+//       errors.push(
+//         `Node "${node.name}" (${node.id}): expected depth ${expectedDepth}, got ${actualDepth}`,
+//       );
+//     }
+
+//     if (node.children && node.children.length > 0) {
+//       const childValidation = validateTreeDepth(node.children, actualDepth);
+//       errors.push(...childValidation.errors);
+//     }
+//   });
+
+//   return {
+//     valid: errors.length === 0,
+//     errors,
+//   };
+// };
+
+// /**
+//  * Get the depth of a node in the tree
+//  * Traverses tree to calculate actual depth (root = 0)
+//  */
+// export const getNodeDepth = (
+//   nodes: FsNodeTreeResponse[],
+//   nodeId: string,
+//   currentDepth: number = 0,
+// ): number | null => {
+//   for (const node of nodes) {
+//     if (node.id === nodeId) {
+//       return currentDepth;
+//     }
+//     if (node.children) {
+//       const foundDepth = getNodeDepth(node.children, nodeId, currentDepth + 1);
+//       if (foundDepth !== null) {
+//         return foundDepth;
+//       }
+//     }
+//   }
+//   return null;
+// };

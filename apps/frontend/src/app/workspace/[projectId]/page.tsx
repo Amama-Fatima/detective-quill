@@ -1,6 +1,6 @@
 import WorkspaceMainBody from "@/components/project-page/project-workspace-main";
 import { createSupabaseServerClient } from "@/supabase/server-client";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import React from "react";
 import {
   getProjectMembers,
@@ -8,8 +8,9 @@ import {
 } from "@/lib/supabase-calls/members";
 import ErrorMsg from "@/components/error-msg";
 import { getProjectInvitations } from "@/lib/supabase-calls/invitations";
-import { notFound } from "next/navigation";
 import { getUserFromCookie } from "@/lib/utils/get-user";
+import { getBranchesOfProject } from "@/lib/supabase-calls/branches";
+import { Branch } from "@detective-quill/shared-types";
 
 interface ProjectWorkspacePageProps {
   params: Promise<{
@@ -44,8 +45,6 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     return notFound();
   }
 
-  // console.log("Project data:", data, isMember);
-
   let { members, error: membersError } = await getProjectMembers(
     projectId,
     supabase,
@@ -66,6 +65,18 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
     invitations = [];
   }
 
+  let { branches, error: branchesError } = await getBranchesOfProject(
+    projectId,
+    supabase,
+  );
+
+  if (branchesError) {
+    console.error("Error fetching branches:", branchesError);
+    branches = [];
+  }
+
+  const activeBranch = branches?.find((branch: Branch) => branch.is_active);
+
   return (
     <div>
       <WorkspaceMainBody
@@ -73,6 +84,8 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
         userId={user.sub}
         members={members || []}
         invitations={invitations || []}
+        branches={branches || []}
+        activeBranch={activeBranch ?? null}
       />
     </div>
   );

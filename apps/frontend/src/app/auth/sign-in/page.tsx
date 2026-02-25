@@ -14,7 +14,7 @@ export default function SignInPage() {
           {/* Left Column - Form */}
           <div className="flex-1 space-y-6">
             <div className="space-y-2">
-              <h2 className="noir-text text-2xl font-semibold">
+              <h2 className="myster-title text-2xl font-semibold">
                 Welcome back
               </h2>
               <p className="noir-text text-muted-foreground">
@@ -42,7 +42,7 @@ export default function SignInPage() {
               <h2 className="text-xl font-medium">
                 Or continue with
               </h2>
-              <p className="noir-text text-muted-foreground">
+              <p className="myster-title text-muted-foreground">
                 Choose your preferred sign-in method
               </p>
             </div>

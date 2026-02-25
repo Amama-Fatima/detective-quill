@@ -13,6 +13,7 @@ import {
   Minimize,
   Focus,
   MessageSquare,
+  GitCommitHorizontal,
 } from "lucide-react";
 import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
 import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
+import { useWorkspaceContext } from "@/context/workspace-context";
 import type { BlockNoteEditorRef } from "./block-note-editor";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
@@ -46,7 +48,6 @@ export type TextEditorProps = {
   onToggleComments?: () => void;
   commentCount?: number;
   editorRef?: React.RefObject<BlockNoteEditorRef | null>;
-  disabledCondition?: boolean;
   projectId: string;
   nodeId: string;
 };
@@ -58,10 +59,11 @@ const TextEditor = ({
   onToggleComments = () => {},
   commentCount = 0,
   editorRef,
-  disabledCondition = false,
   projectId,
   nodeId,
 }: TextEditorProps) => {
+  const { isActive, isOwner } = useWorkspaceContext();
+  const disabledCondition = !isActive || !isOwner;
   const {
     focusMode,
     isFullscreen,
@@ -104,9 +106,7 @@ const TextEditor = ({
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div
-        className={getContainerClass(focusMode)}
-      >
+      <div className={getContainerClass(focusMode)}>
         {/* Header - Always visible but styled differently in focus modes */}
         <div className={getHeaderClass(focusMode)}>
           <div className="flex min-w-0 items-center gap-3">
@@ -247,7 +247,6 @@ const TextEditor = ({
             ref={effectiveEditorRef}
             initialContent={internal}
             onChange={handleContentChange}
-            disabledCondition={disabledCondition}
           />
         </div>
 

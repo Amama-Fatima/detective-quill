@@ -41,7 +41,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <FileText className="h-12 w-12 text-muted-foreground" />
           </div>
           <div className="space-y-2">
-            <h2 className="noir-text text-xl font-semibold">
+            <h2 className="myster-title text-xl font-semibold">
               Project not found
             </h2>
             <p className="noir-text text-sm text-muted-foreground">
@@ -62,7 +62,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </div>
 
         <div className="space-y-2">
-          <h2 className="noir-text text-2xl font-bold">{project.title}</h2>
+          <h2 className="mystery-title text-2xl font-bold">{project.title}</h2>
           {project.description && (
             <p className="noir-text-muted-foreground">{project.description}</p>
           )}

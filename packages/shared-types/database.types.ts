@@ -90,6 +90,61 @@ export type Database = {
           },
         ]
       }
+      branches: {
+        Row: {
+          created_at: string
+          head_commit_id: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          parent_commit_id: string | null
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          head_commit_id?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          parent_commit_id?: string | null
+          project_id?: string
+        }
+        Update: {
+          created_at?: string
+          head_commit_id?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          parent_commit_id?: string | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branches_head_commit_id_fkey"
+            columns: ["head_commit_id"]
+            isOneToOne: false
+            referencedRelation: "commits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branches_parent_commit_id_fkey"
+            columns: ["parent_commit_id"]
+            isOneToOne: false
+            referencedRelation: "commits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branches_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author_id: string
@@ -161,8 +216,151 @@ export type Database = {
           },
         ]
       }
+      commit_snapshots: {
+        Row: {
+          commit_id: string | null
+          content: string | null
+          created_at: string
+          depth: number | null
+          file_extension: string | null
+          fs_node_id: string | null
+          id: string
+          name: string
+          node_type: Database["public"]["Enums"]["node_type"] | null
+          original_created_at: string | null
+          original_updated_at: string | null
+          parent_id: string | null
+          path: string | null
+          project_id: string
+          sort_order: number | null
+          word_count: number | null
+        }
+        Insert: {
+          commit_id?: string | null
+          content?: string | null
+          created_at?: string
+          depth?: number | null
+          file_extension?: string | null
+          fs_node_id?: string | null
+          id?: string
+          name: string
+          node_type?: Database["public"]["Enums"]["node_type"] | null
+          original_created_at?: string | null
+          original_updated_at?: string | null
+          parent_id?: string | null
+          path?: string | null
+          project_id: string
+          sort_order?: number | null
+          word_count?: number | null
+        }
+        Update: {
+          commit_id?: string | null
+          content?: string | null
+          created_at?: string
+          depth?: number | null
+          file_extension?: string | null
+          fs_node_id?: string | null
+          id?: string
+          name?: string
+          node_type?: Database["public"]["Enums"]["node_type"] | null
+          original_created_at?: string | null
+          original_updated_at?: string | null
+          parent_id?: string | null
+          path?: string | null
+          project_id?: string
+          sort_order?: number | null
+          word_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_versions_commit_id_fkey"
+            columns: ["commit_id"]
+            isOneToOne: false
+            referencedRelation: "commits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_versions_fs_node_id_fkey"
+            columns: ["fs_node_id"]
+            isOneToOne: false
+            referencedRelation: "fs_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_versions_fs_node_id_fkey"
+            columns: ["fs_node_id"]
+            isOneToOne: false
+            referencedRelation: "project_file_tree"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_versions_fs_node_id_fkey"
+            columns: ["fs_node_id"]
+            isOneToOne: false
+            referencedRelation: "project_root_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_versions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commits: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          id: string
+          message: string
+          parent_commit_id: string | null
+          project_id: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          parent_commit_id?: string | null
+          project_id?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          parent_commit_id?: string | null
+          project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commits_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commits_parent_commit_id_fkey"
+            columns: ["parent_commit_id"]
+            isOneToOne: false
+            referencedRelation: "commits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fs_nodes: {
         Row: {
+          branch_id: string | null
           content: string | null
           created_at: string
           depth: number | null
@@ -170,6 +368,7 @@ export type Database = {
           file_extension: string
           global_sequence: number | null
           id: string
+          last_committed_at: string | null
           name: string
           node_type: Database["public"]["Enums"]["node_type"]
           parent_id: string | null
@@ -180,6 +379,7 @@ export type Database = {
           word_count: number
         }
         Insert: {
+          branch_id?: string | null
           content?: string | null
           created_at?: string
           depth?: number | null
@@ -187,6 +387,7 @@ export type Database = {
           file_extension?: string
           global_sequence?: number | null
           id?: string
+          last_committed_at?: string | null
           name: string
           node_type?: Database["public"]["Enums"]["node_type"]
           parent_id?: string | null
@@ -197,6 +398,7 @@ export type Database = {
           word_count?: number
         }
         Update: {
+          branch_id?: string | null
           content?: string | null
           created_at?: string
           depth?: number | null
@@ -204,6 +406,7 @@ export type Database = {
           file_extension?: string
           global_sequence?: number | null
           id?: string
+          last_committed_at?: string | null
           name?: string
           node_type?: Database["public"]["Enums"]["node_type"]
           parent_id?: string | null
@@ -214,6 +417,13 @@ export type Database = {
           word_count?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fs_nodes_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fs_nodes_parent_id_fkey"
             columns: ["parent_id"]
@@ -270,6 +480,150 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      nlp_analysis_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          current_stage: string | null
+          entity_count: number | null
+          error_message: string | null
+          job_id: string
+          neo4j_graph_id: string | null
+          processing_time: string | null
+          progress: number | null
+          relationship_count: number | null
+          result_data: Json | null
+          scene_text: string
+          started_at: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_stage?: string | null
+          entity_count?: number | null
+          error_message?: string | null
+          job_id?: string
+          neo4j_graph_id?: string | null
+          processing_time?: string | null
+          progress?: number | null
+          relationship_count?: number | null
+          result_data?: Json | null
+          scene_text: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_stage?: string | null
+          entity_count?: number | null
+          error_message?: string | null
+          job_id?: string
+          neo4j_graph_id?: string | null
+          processing_time?: string | null
+          progress?: number | null
+          relationship_count?: number | null
+          result_data?: Json | null
+          scene_text?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nlp_analysis_jobs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      nlp_entities: {
+        Row: {
+          attributes: Json | null
+          created_at: string | null
+          id: string
+          job_id: string
+          mentions: string[] | null
+          name: string
+          type: string
+        }
+        Insert: {
+          attributes?: Json | null
+          created_at?: string | null
+          id?: string
+          job_id: string
+          mentions?: string[] | null
+          name: string
+          type: string
+        }
+        Update: {
+          attributes?: Json | null
+          created_at?: string | null
+          id?: string
+          job_id?: string
+          mentions?: string[] | null
+          name?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nlp_entities_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "nlp_analysis_jobs"
+            referencedColumns: ["job_id"]
+          },
+        ]
+      }
+      nlp_relationships: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          job_id: string
+          relation_type: string
+          source: string
+          target: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          job_id: string
+          relation_type: string
+          source: string
+          target: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          job_id?: string
+          relation_type?: string
+          source?: string
+          target?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nlp_relationships_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "nlp_analysis_jobs"
+            referencedColumns: ["job_id"]
           },
         ]
       }
@@ -379,6 +733,7 @@ export type Database = {
     Views: {
       project_file_tree: {
         Row: {
+          branch_id: string | null
           content: string | null
           created_at: string | null
           depth: number | null
@@ -398,6 +753,13 @@ export type Database = {
           word_count: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fs_nodes_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fs_nodes_parent_id_fkey"
             columns: ["parent_id"]
@@ -430,6 +792,7 @@ export type Database = {
       }
       project_root_nodes: {
         Row: {
+          branch_id: string | null
           content: string | null
           created_at: string | null
           depth: number | null
@@ -448,6 +811,13 @@ export type Database = {
           word_count: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fs_nodes_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fs_nodes_parent_id_fkey"
             columns: ["parent_id"]
@@ -490,10 +860,14 @@ export type Database = {
           depth: number
           id: string
           name: string
-          node_type: string
+          node_type: Database["public"]["Enums"]["node_type"]
           path: string
           sort_order: number
         }[]
+      }
+      recalculate_global_sequences: {
+        Args: { target_project_id: string }
+        Returns: undefined
       }
     }
     Enums: {

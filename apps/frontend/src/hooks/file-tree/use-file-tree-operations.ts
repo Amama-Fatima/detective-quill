@@ -104,7 +104,7 @@ export const useFileTreeOperations = ({
       newName: string;
     }) => {
       const token = requireAccessToken(accessToken);
-      const updateData: UpdateNodeMetadataDto = {
+      const updateData: Omit<UpdateNodeMetadataDto, "parent_id"> = {
         name: newName,
       };
       const response = await updateNodeMetadata(nodeId, updateData, token);
@@ -156,6 +156,7 @@ export const useFileTreeOperations = ({
     onSuccess: () => {
       toast.success("Item moved successfully");
       queryClient.invalidateQueries({ queryKey: ["project-tree", projectId] });
+      router.push(`/workspace/${projectId}/text-editor`);
     },
     onError: (error: any) => {
       console.error("Error moving node:", error);
@@ -184,7 +185,7 @@ export const useFileTreeOperations = ({
 
       // If deleting currently selected node, navigate away
       if (selectedNodeId === variables.nodeId) {
-        router.push(`/workspace/${projectId}`);
+        router.push(`/workspace/${projectId}/text-editor`);
       }
     },
     onError: (error: any) => {

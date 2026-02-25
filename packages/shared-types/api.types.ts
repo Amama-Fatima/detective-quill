@@ -7,6 +7,14 @@ export type BlueprintCard =
 export type BlueprintType = Database["public"]["Enums"]["blueprint_type"];
 export type FsNode = Database["public"]["Tables"]["fs_nodes"]["Row"];
 export type Invitation = Database["public"]["Tables"]["invitations"]["Row"];
+export type Comment = Database["public"]["Tables"]["comments"]["Row"];
+export type Branch = Database["public"]["Tables"]["branches"]["Row"];
+export type Commit = Database["public"]["Tables"]["commits"]["Row"];
+export type CommitSnapshot =
+  Database["public"]["Tables"]["commit_snapshots"]["Row"];
+export type Member = Database["public"]["Tables"]["projects_members"]["Row"];
+
+// todo: consider using pick and omit to create types instead of creating new ones
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -49,10 +57,6 @@ export interface ProjectListResponse {
   total: number;
 }
 
-export interface DeleteResponse {
-  message: string;
-}
-
 // File system node types
 
 export interface CreateFsNodeDto {
@@ -87,7 +91,7 @@ export interface CreateFsNodeDto {
 export interface UpdateNodeMetadataDto {
   name?: string;
   description?: string;
-  parent_id?: string;
+  parent_id: string | null;
   sort_order?: number;
 }
 
@@ -99,14 +103,25 @@ export interface FsNodeTreeResponse {
   id: string;
   name: string;
   node_type: "folder" | "file";
+  branch_id: string | null;
   parent_id: string | null;
+  depth?: number | null;
   children?: FsNodeTreeResponse[];
   content?: string;
   word_count: number;
   path: string;
-  sort_order: number;
+  sort_order: number | null;
   created_at: string;
   updated_at: string;
+}
+
+export type FsNodeResponse = FsNodeTreeResponse;
+
+export interface EditorWorkspaceResponse {
+  project: Project;
+  nodes: FsNodeTreeResponse[];
+  currentNode: FsNode | null;
+  activeBranchId: string | null;
 }
 
 export interface CreateBlueprintDto {
@@ -155,6 +170,8 @@ export interface UpdateBlueprintCardDto {
   title?: string | null;
 }
 
+// todo: comment and comment
+//  response should be used in right places, check their usage
 export interface CommentResponse {
   id: string;
   fs_node_id: string;
@@ -233,3 +250,41 @@ export interface EmailSendingJobData {
   inviterName: string;
   projectTitle: string;
 }
+
+export type CreateBranchDto = Pick<
+  Branch,
+  "name" | "is_default" | "parent_commit_id"
+>;
+
+export type UpdateBranchDto = Partial<
+  Pick<Branch, "name" | "is_default" | "head_commit_id">
+>;
+
+export type CreateCommitDto = Pick<Commit, "message" | "branch_id">;
+
+export interface CommitsPaginatedResponse {
+  data: Commit[];
+  total: number;
+}
+
+export interface RevertCommitResponse {
+  branchId: string;
+  headCommitId: string;
+  deletedCommitsCount: number;
+  deletedSnapshotsCount: number;
+}
+
+export type CreateSnapshotDto = Pick<
+  CommitSnapshot,
+  | "commit_id"
+  | "fs_node_id"
+  | "name"
+  | "node_type"
+  | "parent_id"
+  | "path"
+  | "content"
+  | "word_count"
+  | "file_extension"
+  | "sort_order"
+  | "depth"
+>;
