@@ -32,3 +32,20 @@ export async function getActiveBranchId(
 
   return data.id;
 }
+
+export async function getHeadCommitId(
+  branchId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<{ head_commit_id: string; id: string } | null> {
+  const { data, error } = await supabase
+    .from("branches")
+    .select("id, head_commit_id")
+    .eq("id", branchId)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data;
+}

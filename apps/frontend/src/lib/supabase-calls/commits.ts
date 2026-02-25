@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import type { Commit } from "@detective-quill/shared-types";
+import { getHeadCommitId } from "./branches";
 
-// get commits for a branch
 export async function getBranchCommits(
   branchId: string,
   projectId: string,
@@ -13,19 +13,52 @@ export async function getBranchCommits(
   >[];
   error: string | null;
 }> {
-  const { data, error } = await supabase
+  const branchWithHead = await getHeadCommitId(branchId, supabase);
 
+  if (!branchWithHead) {
+    return { commits: [], error: null };
+  }
+
+  const { data, error } = await supabase
     .from("commits")
-    .select("branch_id, id, message, created_at, project_id")
-    .eq("branch_id", branchId)
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: false });
+    .select("branch_id, id, message, created_at, project_id, parent_commit_id")
+    .eq("project_id", projectId);
 
   if (error) {
     return { commits: [], error: error.message };
   }
 
-  return { commits: data || [], error: null };
+  const commitsById = new Map(
+    (data || []).map((commit) => [commit.id, commit]),
+  );
+
+  const commits: Pick<
+    Commit,
+    "branch_id" | "id" | "message" | "created_at" | "project_id"
+  >[] = [];
+  const visited = new Set<string>();
+  let currentCommitId: string | null = branchWithHead.head_commit_id;
+
+  while (currentCommitId && !visited.has(currentCommitId)) {
+    visited.add(currentCommitId);
+    const commit = commitsById.get(currentCommitId);
+
+    if (!commit) {
+      break;
+    }
+
+    commits.push({
+      id: commit.id,
+      branch_id: commit.branch_id,
+      message: commit.message,
+      created_at: commit.created_at,
+      project_id: commit.project_id,
+    });
+
+    currentCommitId = commit.parent_commit_id;
+  }
+
+  return { commits, error: null };
 }
 
 export async function getCommitById(
