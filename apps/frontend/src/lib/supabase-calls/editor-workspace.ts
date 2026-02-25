@@ -1,4 +1,3 @@
-// lib/server/workspace-data.ts
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import {
   buildTreeFromFlat,

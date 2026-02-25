@@ -13,6 +13,9 @@ export type Commit = Database["public"]["Tables"]["commits"]["Row"];
 export type CommitSnapshot =
   Database["public"]["Tables"]["commit_snapshots"]["Row"];
 export type Member = Database["public"]["Tables"]["projects_members"]["Row"];
+export type Contribution =
+  Database["public"]["Tables"]["user_contributions"]["Row"];
+export type ContributionType = Database["public"]["Enums"]["contribution_type"];
 
 // todo: consider using pick and omit to create types instead of creating new ones
 
@@ -272,6 +275,23 @@ export interface RevertCommitResponse {
   headCommitId: string;
   deletedCommitsCount: number;
   deletedSnapshotsCount: number;
+}
+
+export interface CreateContributionRequestDto {
+  contribution_type: ContributionType;
+  reference_id?: string;
+  contribution_date?: string;
+}
+
+export interface MonthlyContributionDay {
+  date: string;
+  total_score: number;
+}
+
+export interface MonthlyContributionsResponse {
+  year: number;
+  month: number;
+  days: MonthlyContributionDay[];
 }
 
 export type CreateSnapshotDto = Pick<
