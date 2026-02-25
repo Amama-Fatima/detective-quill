@@ -98,7 +98,7 @@ export const useContributions = (): UseContributionsResult => {
 
   return {
     getMonthlyContributionsMutation,
-    logSaveContributionMutation,
+    logSaveContributionMutation, // these log mutations are not being used from the frontend, so i think we can remove them later as well if no need arises
     logCommitContributionMutation,
   };
 };
