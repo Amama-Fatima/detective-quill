@@ -1,4 +1,4 @@
-import WorkspaceLayout from "@/components/workspace-layout/workspace-layout";
+import TextEditorLayout from "@/components/text-editor-layout/text-editor-layout";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { Metadata } from "next";
 
@@ -33,8 +33,8 @@ export default async function Layout({
   const { projectId, nodeId } = await params;
 
   return (
-    <WorkspaceLayout projectId={projectId} nodeId={nodeId}>
+    <TextEditorLayout projectId={projectId} nodeId={nodeId}>
       {children}
-    </WorkspaceLayout>
+    </TextEditorLayout>
   );
 }

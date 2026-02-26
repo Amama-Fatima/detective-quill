@@ -2,20 +2,16 @@
 
 import React, { useState } from "react";
 import { useFocusModeStore } from "@/stores/use-focus-mode-store";
-import WorkspaceSidebar from "@/components/workspace-layout/workspace-sidebar";
-import WorkspaceHeaderBar from "@/components/workspace-layout/workspace-header-bar";
-import { countNodes } from "@/lib/utils/file-tree-utils";
-import {
-  WorkspaceContextProvider,
-  useWorkspaceContext,
-} from "@/context/workspace-context";
+import TextEditorSidebar from "@/components/text-editor-layout/text-editor-sidebar";
+import TextEditorHeaderBar from "@/components/text-editor-layout/text-editor-header-bar";
+import { WorkspaceContextProvider } from "@/context/workspace-context";
 import {
   FsNodeTreeResponse,
   FsNode,
   Project,
 } from "@detective-quill/shared-types";
 
-interface WorkspaceLayoutClientWrapperProps {
+interface TextEditorLayoutWrapperProps {
   children: React.ReactNode;
   project: Project;
   initialNodes: FsNodeTreeResponse[];
@@ -27,7 +23,7 @@ interface WorkspaceLayoutClientWrapperProps {
   activeBranchId: string | null;
 }
 
-export default function WorkspaceLayoutClientWrapper({
+export default function TextEditorLayoutWrapper({
   children,
   project,
   initialNodes,
@@ -37,7 +33,7 @@ export default function WorkspaceLayoutClientWrapper({
   isActive,
   isOwner,
   activeBranchId,
-}: WorkspaceLayoutClientWrapperProps) {
+}: TextEditorLayoutWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const focusMode = useFocusModeStore((state) => state.focusMode);
@@ -58,7 +54,7 @@ export default function WorkspaceLayoutClientWrapper({
     >
       <div className="flex h-screen w-full bg-background">
         {showSidebar && (
-          <WorkspaceSidebar
+          <TextEditorSidebar
             projectName={project.title}
             nodes={initialNodes}
             projectId={projectId}
@@ -67,7 +63,7 @@ export default function WorkspaceLayoutClientWrapper({
 
         <main className="flex-1 flex flex-col min-w-0">
           {showHeader && (
-            <WorkspaceHeaderBar
+            <TextEditorHeaderBar
               sidebarOpen={sidebarOpen}
               onSidebarToggle={handleSidebarToggle}
               projectName={project.title}

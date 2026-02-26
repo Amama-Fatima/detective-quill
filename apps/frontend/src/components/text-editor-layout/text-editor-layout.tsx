@@ -1,23 +1,23 @@
 import React from "react";
-import WorkspaceError from "./workspace-error";
+import TextEditor from "./text-editor-error";
 import { getEditorWorkspaceData } from "@/lib/supabase-calls/editor-workspace";
-import WorkspaceLayoutClientWrapper from "./workspace-layout-client-wrapper";
+import TextEditorLayoutWrapper from "./text-editor-layout-wrapper";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 
-interface WorkspaceLayoutProps {
+interface TextEditorLayoutProps {
   children: React.ReactNode;
   projectId: string;
   nodeId?: string;
 }
 
-export default async function WorkspaceLayout({
+export default async function TextEditorLayout({
   children,
   projectId,
   nodeId,
-}: WorkspaceLayoutProps) {
+}: TextEditorLayoutProps) {
   const supabase = await createSupabaseServerClient();
   const user = await getUserFromCookie();
 
@@ -37,7 +37,7 @@ export default async function WorkspaceLayout({
       await getEditorWorkspaceData(supabase, projectId, nodeId);
 
     return (
-      <WorkspaceLayoutClientWrapper
+      <TextEditorLayoutWrapper
         project={project}
         initialNodes={nodes}
         currentNode={currentNode}
@@ -48,12 +48,12 @@ export default async function WorkspaceLayout({
         activeBranchId={activeBranchId}
       >
         {children}
-      </WorkspaceLayoutClientWrapper>
+      </TextEditorLayoutWrapper>
     );
   } catch (error) {
     console.error("Workspace layout error:", error);
     return (
-      <WorkspaceError
+      <TextEditor
         error={error instanceof Error ? error.message : "Unknown error"}
       />
     );

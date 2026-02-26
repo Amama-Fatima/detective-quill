@@ -4,17 +4,17 @@ import FileTree from "../file-tree/file-tree";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
 import { FolderTree } from "lucide-react";
 
-interface WorkspaceSidebarProps {
+interface TextEditorSidebarProps {
   projectName: string;
   nodes: FsNodeTreeResponse[];
   projectId: string;
 }
 
-export default function WorkspaceSidebar({
+export default function TextEditorSidebar({
   projectName,
   nodes,
   projectId,
-}: WorkspaceSidebarProps) {
+}: TextEditorSidebarProps) {
   return (
     <aside
       className={cn(

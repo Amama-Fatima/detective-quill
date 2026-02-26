@@ -1,10 +1,10 @@
 import React from "react";
 
-interface WorkspaceErrorProps {
+interface TextEditorErrorProps {
   error: string;
 }
 
-const WorkspaceError: React.FC<WorkspaceErrorProps> = ({ error }) => {
+const TextEditorError: React.FC<TextEditorErrorProps> = ({ error }) => {
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="text-center">
@@ -15,4 +15,4 @@ const WorkspaceError: React.FC<WorkspaceErrorProps> = ({ error }) => {
   );
 };
 
-export default WorkspaceError;
+export default TextEditorError;

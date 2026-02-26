@@ -2,7 +2,7 @@ import React from "react";
 import Breadcrumbs from "./bread-crumbs";
 import { Button } from "@/components/ui/button";
 
-interface WorkspaceHeaderBarProps {
+interface TextEditorHeaderBarProps {
   sidebarOpen: boolean;
   onSidebarToggle: () => void;
   projectName: string;
@@ -12,13 +12,13 @@ interface WorkspaceHeaderBarProps {
 
 // todo: everytime the toggle is changed, and the side bar is opened again, the file tree is refetched, we should try to avoid this
 
-export default function WorkspaceHeaderBar({
+export default function TextEditorHeaderBar({
   sidebarOpen,
   onSidebarToggle,
   projectName,
   nodeId,
   currentNodePath,
-}: WorkspaceHeaderBarProps) {
+}: TextEditorHeaderBarProps) {
   return (
     <div className="flex items-center justify-between border-b px-4 py-2 bg-card/30">
       <div className="flex items-center gap-2">

@@ -3,7 +3,6 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/auth-context";
 import { Inter, Crimson_Text, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/header";
 import TanstackProvider from "@/lib/providers/tanstack-provider";
 
 const crimsonText = Crimson_Text({
@@ -42,7 +41,6 @@ export default function RootLayout({
       >
         <TanstackProvider>
           <AuthProvider>
-            <Header />
             {children}
             <Toaster richColors position="top-right" />
           </AuthProvider>
