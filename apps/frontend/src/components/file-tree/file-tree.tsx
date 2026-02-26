@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils/utils";
-import { Tree } from "../../magicui/file-tree";
+import { Tree } from "../magicui/file-tree";
 import CreateNodeDialog from "./dialogs/create-node-dialog";
 import RenameDialog from "./dialogs/rename-dialog";
 import MoveDialog from "./dialogs/move-dialog";

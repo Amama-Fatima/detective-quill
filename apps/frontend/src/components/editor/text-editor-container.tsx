@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import TextEditor from "@/components/editor-workspace/editor/text-editor";
-import CommentsPanel from "@/components/editor-workspace/comments/comments-panel";
-import NewCommentDialog from "@/components/editor-workspace/comments/new-comment-dialog";
+import TextEditor from "@/components/editor/text-editor";
+import CommentsPanel from "@/components/comments/comments-panel";
+import NewCommentDialog from "@/components/comments/new-comment-dialog";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useComments } from "@/hooks/use-comments";
 import { useWorkspaceContext } from "@/context/workspace-context";

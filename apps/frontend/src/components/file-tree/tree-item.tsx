@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils/utils";
-import { File, Folder as TreeFolder } from "../../magicui/file-tree";
+import { File, Folder as TreeFolder } from "../magicui/file-tree";
 import { findNodeById } from "@/lib/utils/file-tree-utils";
 import { useWorkspaceContext } from "@/context/workspace-context";
 

@@ -4,7 +4,7 @@ import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, CheckCircle2 } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import CommentItem from "@/components/editor-workspace/comments/comment-item";
+import CommentItem from "@/components/comments/comment-item";
 import { useComments } from "@/hooks/use-comments";
 import { useParams } from "next/navigation";
 

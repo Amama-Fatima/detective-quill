@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useFocusModeStore } from "@/stores/use-focus-mode-store";
-import WorkspaceSidebar from "@/components/editor-workspace/workspace-layout/workspace-sidebar";
-import WorkspaceHeaderBar from "@/components/editor-workspace/workspace-layout/workspace-header-bar";
+import WorkspaceSidebar from "@/components/workspace-layout/workspace-sidebar";
+import WorkspaceHeaderBar from "@/components/workspace-layout/workspace-header-bar";
 import { countNodes } from "@/lib/utils/file-tree-utils";
 import {
   WorkspaceContextProvider,

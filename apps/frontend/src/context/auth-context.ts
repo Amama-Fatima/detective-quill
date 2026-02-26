@@ -53,15 +53,8 @@ function getSessionFromCookie(): Session | null {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  // Initialize from cookie immediately - NO network call!
-  const [session, setSession] = useState<Session | null>(() => {
-    if (typeof window !== "undefined") {
-      const cookieSession = getSessionFromCookie();
-      return cookieSession;
-    }
-    return null;
-  });
-  const [loading, setLoading] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const refreshSession = async () => {
     try {
@@ -95,11 +88,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
+    const cookieSession = getSessionFromCookie();
+    setSession(cookieSession);
+    setLoading(false);
+
     // Only listen for auth changes - NO initial API call
     const {
       data: { subscription },
     } = supabaseBrowserClient.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
