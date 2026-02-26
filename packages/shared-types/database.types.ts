@@ -729,6 +729,44 @@ export type Database = {
           },
         ]
       }
+      user_contributions: {
+        Row: {
+          contribution_date: string
+          contribution_type: Database["public"]["Enums"]["contribution_type"]
+          created_at: string | null
+          id: string
+          reference_id: string | null
+          score: number
+          user_id: string
+        }
+        Insert: {
+          contribution_date?: string
+          contribution_type: Database["public"]["Enums"]["contribution_type"]
+          created_at?: string | null
+          id?: string
+          reference_id?: string | null
+          score?: number
+          user_id: string
+        }
+        Update: {
+          contribution_date?: string
+          contribution_type?: Database["public"]["Enums"]["contribution_type"]
+          created_at?: string | null
+          id?: string
+          reference_id?: string | null
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_contributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
       project_file_tree: {
@@ -865,6 +903,13 @@ export type Database = {
           sort_order: number
         }[]
       }
+      get_user_contributions_monthly: {
+        Args: { p_month: number; p_user_id: string; p_year: number }
+        Returns: {
+          date: string
+          total_score: number
+        }[]
+      }
       recalculate_global_sequences: {
         Args: { target_project_id: string }
         Returns: undefined
@@ -873,6 +918,7 @@ export type Database = {
     Enums: {
       blueprint_type: "character" | "timeline" | "location" | "item"
       blueprint_types: "character" | "timeline" | "location" | "item"
+      contribution_type: "commit" | "save"
       invitation_status: "pending" | "rejected"
       node_type: "folder" | "file"
       project_status: "active" | "archived" | "completed"
@@ -1006,6 +1052,7 @@ export const Constants = {
     Enums: {
       blueprint_type: ["character", "timeline", "location", "item"],
       blueprint_types: ["character", "timeline", "location", "item"],
+      contribution_type: ["commit", "save"],
       invitation_status: ["pending", "rejected"],
       node_type: ["folder", "file"],
       project_status: ["active", "archived", "completed"],

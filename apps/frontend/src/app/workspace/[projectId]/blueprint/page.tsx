@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
 import CreateBlueprintBtns from "@/components/blueprint/btns/create-blueprint-btns";
@@ -62,46 +61,27 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
   const isOwner = author_id === userId;
 
   return (
-    <Suspense fallback={<BlueprintLandingSkeleton />}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="mystery-title text-3xl font-bold">Blueprints</h2>
-              <p className="noir-text mt-2">
-                Manage and organize your reusable design components and
-                templates
-              </p>
-            </div>
-            {isOwner && isActive && (
-              <CreateBlueprintBtns projectId={projectId} />
-            )}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Page Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="mystery-title text-3xl font-bold">Blueprints</h2>
+            <p className="noir-text mt-2">
+              Manage and organize your reusable design components and templates
+            </p>
           </div>
-        </div>
-
-        {/* Blueprints List */}
-        <UserBlueprintsList
-          blueprints={blueprints}
-          projectId={projectId}
-          isOwner={isOwner}
-          isActive={isActive}
-        />
-      </div>
-    </Suspense>
-  );
-}
-
-function BlueprintLandingSkeleton() {
-  return (
-    <div className="flex h-full items-center justify-center">
-      <div className="text-center space-y-4">
-        <div className="h-12 w-12 bg-muted rounded-full mx-auto animate-pulse" />
-        <div className="space-y-2">
-          <div className="h-6 w-48 bg-muted rounded mx-auto animate-pulse" />
-          <div className="h-4 w-64 bg-muted rounded mx-auto animate-pulse" />
+          {isOwner && isActive && <CreateBlueprintBtns projectId={projectId} />}
         </div>
       </div>
+
+      {/* Blueprints List */}
+      <UserBlueprintsList
+        blueprints={blueprints}
+        projectId={projectId}
+        isOwner={isOwner}
+        isActive={isActive}
+      />
     </div>
   );
 }

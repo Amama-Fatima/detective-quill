@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Canvas from "@/components/blueprint/canvas/canvas";
 import { BlueprintType } from "@detective-quill/shared-types";
 import { getProjectBlueprintById } from "@/lib/supabase-calls/blueprint";
@@ -9,7 +8,6 @@ import ErrorMsg from "@/components/error-msg";
 import { Metadata } from "next";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import { getUserFromCookie } from "@/lib/utils/get-user";
-import { Loader2 } from "lucide-react";
 
 export async function generateMetadata({}: {}): Promise<Metadata> {
   return {
@@ -69,26 +67,16 @@ export default async function CreateBlueprintPage({
   const isOwner = author_id === userId;
 
   return (
-    <Suspense fallback={<CreateBlueprintPageSkeleton />}>
-      <div>
-        <Canvas
-          blueprintId={blueprintId}
-          type={type}
-          blueprintName={blueprint?.title || "Untitled Blueprint"}
-          prevBlueprintCards={blueprint_cards}
-          isOwner={isOwner}
-          isActive={isActive}
-          projectId={String(blueprint.project_id)}
-        />
-      </div>
-    </Suspense>
-  );
-}
-
-function CreateBlueprintPageSkeleton() {
-  return (
-    <div className="flex items-center justify-center h-full">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+    <div>
+      <Canvas
+        blueprintId={blueprintId}
+        type={type}
+        blueprintName={blueprint?.title || "Untitled Blueprint"}
+        prevBlueprintCards={blueprint_cards}
+        isOwner={isOwner}
+        isActive={isActive}
+        projectId={String(blueprint.project_id)}
+      />
     </div>
   );
 }

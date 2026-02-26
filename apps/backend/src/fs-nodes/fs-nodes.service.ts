@@ -3,10 +3,12 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Logger,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "../projects/projects.service";
 import { QueueService } from "src/queue/queue.service";
+import { ContributionsService } from "src/contributions/contributions.service";
 import type {
   Database,
   CommitSnapshot,
@@ -20,10 +22,13 @@ import { CreateFsNodeDto } from "./validation/fs-nodes.validation";
 @Injectable()
 export class FsNodesService {
   private sceneTimeouts = new Map<string, NodeJS.Timeout>();
+  private readonly logger = new Logger(FsNodesService.name);
+
   constructor(
     private supabaseService: SupabaseService,
     private projectsService: ProjectsService,
     private queueService: QueueService,
+    private contributionsService: ContributionsService,
   ) {}
 
   async createNode(
@@ -263,6 +268,18 @@ export class FsNodesService {
     if (error) {
       throw new BadRequestException(
         `Failed to update file content: ${error.message}`,
+      );
+    }
+
+    try {
+      await this.contributionsService.logSaveContribution(userId, nodeId);
+    } catch (contributionError) {
+      const message =
+        contributionError instanceof Error
+          ? contributionError.message
+          : "Unknown contribution error";
+      this.logger.warn(
+        `Failed to log save contribution for node ${nodeId}: ${message}`,
       );
     }
 

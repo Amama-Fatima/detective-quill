@@ -1,19 +1,24 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { CreateCommitDto } from "./dto/commits.dto";
 import { BranchesService } from "src/branches/branches.service";
 import { SnapshotsService } from "src/snapshots/snapshots.service";
+import { ContributionsService } from "src/contributions/contributions.service";
 
 @Injectable()
 export class CommitsService {
+  private readonly logger = new Logger(CommitsService.name);
+
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly branchesService: BranchesService,
     private readonly snapshotsService: SnapshotsService,
+    private readonly contributionsService: ContributionsService,
   ) {}
 
   async createCommit(
@@ -54,6 +59,16 @@ export class CommitsService {
     await this.branchesService.updateBranch(createCommitDto.branch_id, {
       head_commit_id: commit.id,
     });
+
+    try {
+      await this.contributionsService.logCommitContribution(userId, commit.id);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown contribution error";
+      this.logger.warn(
+        `Failed to log commit contribution for commit ${commit.id}: ${message}`,
+      );
+    }
 
     return commit;
   }

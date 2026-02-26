@@ -16,6 +16,7 @@ import { EmailModule } from "./email/email.module";
 import { QueueModule } from "./queue/queue.module";
 import { NlpAnalysisModule } from "./nlp-analysis/nlp-analysis.module";
 import { CommitsModule } from "./commits/commits.module";
+import { ContributionsModule } from "./contributions/contributions.module";
 
 @Module({
   controllers: [AppController],
@@ -49,6 +50,7 @@ import { CommitsModule } from "./commits/commits.module";
     EmailModule,
     QueueModule,
     CommitsModule,
+    ContributionsModule,
     NlpAnalysisModule,
   ],
 })
