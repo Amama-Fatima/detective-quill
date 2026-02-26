@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Clock, GitBranch } from "lucide-react";
-import { NAV_ITEMS } from "@/constants/project-constants";
 import ChangeStateDropDown from "./change-state-dropdown";
 import InviteMembersDialog from "./members/invite-memebers-dialog";
 import {
@@ -15,7 +13,6 @@ import {
 import MembersTable from "./members/members-table";
 import PendingInvitations from "./members/pending-invitations";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
-import BranchesDropdown from "@/components/branches/branches-dropdown";
 
 interface WorkspaceMainBodyProps {
   project: Project;
@@ -34,11 +31,6 @@ export default function WorkspaceMainBody({
   branches,
   activeBranch,
 }: WorkspaceMainBodyProps) {
-  const navItems = NAV_ITEMS.map((item) => ({
-    ...item,
-    href: item.href.replace("123", project.id),
-  }));
-
   const isOwner = userId === project.author_id;
 
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -123,37 +115,11 @@ export default function WorkspaceMainBody({
                   {currentBranchLabel}
                 </span>
               </div>
-              <BranchesDropdown
-                branches={branches}
-                activeBranchId={activeBranch?.id ?? null}
-              />
+            
             </div>
           </div>
         </div>
       </div>
-
-      <nav className="flex flex-wrap gap-4 mb-8 justify-center">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={
-                "flex noir-text items-center gap-3 px-6 py-2 rounded-md border transition-colors bg-card hover:bg-secondary-foreground hover:text-secondary"
-              }
-            >
-              <Icon className="h-5 w-5" />
-              <div className="flex flex-col text-left">
-                <span className="font-medium text-sm">{item.label}</span>
-                <span className="text-xs text-muted-foreground">
-                  {item.description}
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </nav>
 
       <MembersTable
         isOwner={isOwner}

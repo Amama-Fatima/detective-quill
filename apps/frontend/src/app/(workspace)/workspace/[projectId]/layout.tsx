@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import type { Metadata } from "next";
 import { getUserFromCookie } from "@/lib/utils/get-user";
+import WorkspaceHeader from "@/components/workspace-layout/workspace-header";
 
 interface ProjectWorkspacePageProps {
   params: Promise<{
@@ -35,7 +36,6 @@ const WorkspaceLayout = async ({
   params,
   children,
 }: ProjectWorkspacePageProps) => {
-
   const { projectId } = await params;
 
   const user = await getUserFromCookie();
@@ -53,7 +53,7 @@ const WorkspaceLayout = async ({
   return (
     <div>
       <div className="bg-gradient-to-r from-background to-card border-b border-border">
-        <h1 className="mystery-title text-center text-4xl mb-2">{title}</h1>
+        <WorkspaceHeader projectId={projectId} projectTitle={title} />
       </div>
       {children}
     </div>
