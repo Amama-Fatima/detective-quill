@@ -1,6 +1,7 @@
 import React from "react";
 import Breadcrumbs from "./bread-crumbs";
 import { Button } from "@/components/ui/button";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 interface TextEditorHeaderBarProps {
   sidebarOpen: boolean;
@@ -16,28 +17,33 @@ export default function TextEditorHeaderBar({
   sidebarOpen,
   onSidebarToggle,
   projectName,
-  nodeId,
   currentNodePath,
 }: TextEditorHeaderBarProps) {
   return (
-    <div className="flex items-center justify-between border-b px-4 py-2 bg-card/30">
-      <div className="flex items-center gap-2">
+    <div className="mx-3 mb-2 mt-3 flex items-center justify-between rounded-2xl border border-border/70 bg-card/70 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <div className="flex min-w-0 items-center gap-3">
         <Button
           variant="ghost"
           onClick={onSidebarToggle}
-          className="p-2 hover:bg-muted rounded-md transition-colors cursor-pointer"
+          size="icon"
+          className="h-9 w-9 rounded-lg transition-colors hover:bg-muted cursor-pointer"
           title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
         >
-          {sidebarOpen ? "←" : "→"}
+          {sidebarOpen ? (
+            <PanelLeftClose className="h-4 w-4" />
+          ) : (
+            <PanelLeftOpen className="h-4 w-4" />
+          )}
         </Button>
 
-        {/* {nodeLoading ? (
-          <div className="h-4 bg-muted rounded w-48 animate-pulse" />
-        ) : nodeId && currentNodePath ? (
-          <Breadcrumbs projectName={projectName} filePath={currentNodePath} />
-        ) : (
+        {/* <div className="min-w-0 truncate">
           <Breadcrumbs projectName={projectName} />
-        )} */}
+          {currentNodePath ? (
+            <div className="mt-0.5 truncate text-xs text-muted-foreground">
+              {currentNodePath}
+            </div>
+          ) : null}
+        </div> */}
       </div>
     </div>
   );

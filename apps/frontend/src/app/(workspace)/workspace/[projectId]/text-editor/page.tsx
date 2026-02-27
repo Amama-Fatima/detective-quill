@@ -1,10 +1,9 @@
 // todo: you get error cz of using button and redirect on server side i think, so fix this
-import { Button } from "@/components/ui/button";
+
 import { fetchProject } from "@/lib/supabase-calls/editor-workspace";
 import { createSupabaseServerClient } from "@/supabase/server-client";
-import { FileText, FolderOpen, Plus } from "lucide-react";
+import { FileText, FolderOpen } from "lucide-react";
 import { redirect } from "next/navigation";
-import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 
 interface ProjectPageProps {
@@ -23,12 +22,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     redirect("/auth/sign-in");
   }
 
-  const { isActive, author_id } = await getProjectStatusAndAuthor(
-    projectId,
-    supabase,
-  );
-  const userId = user.sub;
-  const isOwner = author_id === userId;
+
   let project;
 
   try {

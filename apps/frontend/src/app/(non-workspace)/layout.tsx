@@ -4,7 +4,7 @@ const NonWorkspaceLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen">
       <Header />
-      {children}
+      <main className="mt-17">{children}</main>
     </div>
   );
 };

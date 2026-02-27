@@ -31,9 +31,6 @@ export default function BranchList({
               <p className="font-medium text-foreground truncate text-[22px]">
                 {branch.name}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Branch ID: {branch.id}
-              </p>
             </Link>
 
             <div className="flex items-center gap-2">

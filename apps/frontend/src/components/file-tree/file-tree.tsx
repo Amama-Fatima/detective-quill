@@ -176,7 +176,6 @@ const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
 
           <Button
             size="sm"
-            variant="outline"
             className="cursor-pointer"
             disabled={!isOwner || !isActive || !activeBranchId}
             onClick={() => setCommitDialogOpen(true)}
@@ -189,11 +188,11 @@ const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
             size="sm"
             onClick={() => setSearchExpanded(!searchExpanded)}
             className={cn(
-              "transition-colors",
-              searchExpanded && "bg-primary/10 text-primary cursor-pointer",
+              "transition-colors text-primary cursor-pointer border border-primary",
+              searchExpanded && "bg-primary/10 ",
             )}
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4 w-4 text-primary" />
           </Button>
         </div>
 

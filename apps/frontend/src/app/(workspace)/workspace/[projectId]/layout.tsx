@@ -52,7 +52,7 @@ const WorkspaceLayout = async ({
 
   return (
     <div>
-      <div className="bg-gradient-to-r from-background to-card border-b border-border">
+      <div className="sticky top-0 z-50">
         <WorkspaceHeader projectId={projectId} projectTitle={title} />
       </div>
       {children}

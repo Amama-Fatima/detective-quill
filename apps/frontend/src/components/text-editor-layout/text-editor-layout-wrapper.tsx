@@ -52,7 +52,7 @@ export default function TextEditorLayoutWrapper({
       isOwner={isOwner}
       isActive={isActive}
     >
-      <div className="flex h-screen w-full bg-background">
+      <div className="flex h-screen w-full">
         {showSidebar && (
           <TextEditorSidebar
             projectName={project.title}

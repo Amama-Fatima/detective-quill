@@ -105,18 +105,23 @@ const TextEditor = ({
   };
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <div className="my-2">
       <div className={getContainerClass(focusMode)}>
         {/* Header - Always visible but styled differently in focus modes */}
-        <div className={getHeaderClass(focusMode)}>
+        <div
+          className={
+            getHeaderClass(focusMode) +
+            " bg-primary text-foreground rounded-tl-3xl rounded-tr-3xl"
+          }
+        >
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex items-center gap-2">
-              <Edit3 className="h-4 w-4 text-muted-foreground" />
-              <span className="truncate text-sm font-medium">{fileName}</span>
+              <Edit3 className="h-4 w-4 text-background" />
+              <span className="truncate text-lg font-medium text-background">{fileName}</span>
               {isDirty && (
                 <div className="flex items-center gap-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-                  <span className="text-xs text-muted-foreground">Unsaved</span>
+                  <span className="text-xs text-background">Unsaved</span>
                 </div>
               )}
             </div>
@@ -133,10 +138,10 @@ const TextEditor = ({
                   className={cn(
                     "transition-colors cursor-pointer",
                     focusMode === "APP" &&
-                      "bg-primary/10 text-primary cursor-pointer",
+                      "bg-primary/10 text-background cursor-pointer",
                   )}
                 >
-                  <Focus className="h-4 w-4" />
+                  <Focus className="h-4 w-4 text-background" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -155,13 +160,13 @@ const TextEditor = ({
                   className={cn(
                     "transition-colors cursor-pointer",
                     focusMode === "BROWSER" &&
-                      "bg-primary/10 text-primary cursor-pointer",
+                      "bg-primary/10 text-background cursor-pointer",
                   )}
                 >
                   {isFullscreen ? (
-                    <Minimize className="h-4 w-4" />
+                    <Minimize className="h-4 w-4 text-background" />
                   ) : (
-                    <Maximize className="h-4 w-4" />
+                    <Maximize className="h-4 w-4 text-background" />
                   )}
                 </Button>
               </TooltipTrigger>
@@ -182,10 +187,10 @@ const TextEditor = ({
                   onClick={onToggleComments}
                   className={cn(
                     "relative transition-colors cursor-pointer",
-                    showComments && "bg-primary/10 text-primary",
+                    showComments && "bg-primary/10 text-background",
                   )}
                 >
-                  <MessageSquare className="h-4 w-4" />
+                  <MessageSquare className="h-4 w-4 text-background" />
                   {commentCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
                       {commentCount > 9 ? "9+" : commentCount}
@@ -208,16 +213,16 @@ const TextEditor = ({
                   onClick={saveContent}
                   disabled={isSaving || !isDirty}
                   className={cn(
-                    "gap-2 cursor-pointer",
+                    "gap-2 cursor-pointer text-background border border-background hover:bg-background hover:text-primary",
                     isSaving && "animate-pulse cursor-disabled",
                   )}
                 >
                   {isSaving ? (
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   ) : isDirty ? (
-                    <Save className="h-3 w-3" />
+                    <Save className="h-3 w-3 text-background hover:text-primary" />
                   ) : (
-                    <Check className="h-3 w-3" />
+                    <Check className="h-3 w-3 text-background hover:text-primary" />
                   )}
                   {isSaving ? "Saving..." : isDirty ? "Save" : "Saved"}
                 </Button>
@@ -257,7 +262,7 @@ const TextEditor = ({
           </div>
         )}
       </div>
-    </TooltipProvider>
+    </div>
   );
 };
 

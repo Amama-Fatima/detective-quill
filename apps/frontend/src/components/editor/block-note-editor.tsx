@@ -31,8 +31,6 @@ export interface BlockNoteEditorRef {
 
 const BlockNoteEditor = forwardRef<BlockNoteEditorRef, BlockNoteEditorProps>(
   ({ initialContent = "", onChange }, ref) => {
-
-
     const { isActive, isOwner } = useWorkspaceContext();
     const disabledCondition = !isActive || !isOwner;
     const editor = useCreateBlockNote({
@@ -134,6 +132,13 @@ const BlockNoteEditor = forwardRef<BlockNoteEditorRef, BlockNoteEditorProps>(
             transition: background-color 0.3s ease;
             animation: pulse 0.5s ease-in-out;
           }
+
+          .blocknote-surface,
+          .blocknote-surface .bn-container,
+          .blocknote-surface .bn-editor,
+          .blocknote-surface .ProseMirror {
+            background-color: var(--background) !important;
+          }
           
           @keyframes pulse {
             0%, 100% { background-color: rgba(255, 215, 0, 0.3); }
@@ -142,12 +147,10 @@ const BlockNoteEditor = forwardRef<BlockNoteEditorRef, BlockNoteEditorProps>(
         `}</style>
         <div
           onKeyDown={handleKeyDown}
+          className="blocknote-surface h-full w-full overflow-hidden rounded-b-2xl border border-border/70 bg-background mt-0 shadow-sm"
           style={{
-            width: "100%",
-            height: "100%",
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden",
           }}
         >
           <BlockNoteView
@@ -157,6 +160,7 @@ const BlockNoteEditor = forwardRef<BlockNoteEditorRef, BlockNoteEditorProps>(
               flex: 1,
               height: "100%",
               overflow: "hidden",
+              backgroundColor: "var(--background)",
             }}
           />
         </div>

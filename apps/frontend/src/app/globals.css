@@ -8,6 +8,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter); /* UI elements */
   --font-serif: var(--font-crimson); /* Main content */
+  --font-playfair-display: var(--font-playfair-display);
   --font-mono: var(--font-geist-mono); /* Code */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -48,63 +49,48 @@
 :root {
   --radius: 0.625rem;
 
-  /* === MAIN SURFACE COLORS (beige / light brown) === */
-  --foreground: oklch(0.22 0.01 30); /* Licorice text */
+  /* === LANDING PAGE MATCHED PALETTE === */
+  --background: oklch(95.5% 0.011 78);
+  --card: oklch(98% 0.007 82);
+  --drag-card: oklch(96.5% 0.01 78);
+  --popover: oklch(98.5% 0.006 82);
 
-  --background: oklch(82.273% 0.0265 84.576); /* deep beige */
-  --card: oklch(75.366% 0.04502 87.964); /* card slightly darker */
-  --drag-card: oklch(78.823% 0.02677 84.576); /* card slightly darker */
-  --popover: oklch(0.87 0.03 85); /* matching background */
+  --foreground: oklch(25.909% 0.02826 248.996);
+  --card-foreground: oklch(26% 0.02 245);
+  --popover-foreground: oklch(24% 0.022 245);
 
-  --card-foreground: oklch(27.68% 0.00557 91.585);
+  --primary: oklch(24% 0.022 245);
+  --primary-foreground: oklch(96% 0.01 80);
 
-  --popover-foreground: oklch(0.22 0.01 30);
+  --secondary: oklch(90% 0.016 78);
+  --secondary-foreground: oklch(28% 0.02 245);
 
-  /* === BUTTONS / PRIMARY ELEMENTS (dark) === */
-  --primary: oklch(0.22 0.01 30); /* Licorice (dark brown-black) */
-  --primary-foreground: oklch(0.98 0.01 95); /* Light beige text */
+  --muted: oklch(92% 0.012 80);
+  --muted-foreground: oklch(50% 0.018 240);
 
-  /* === SECONDARY (slightly darker beige panels) === */
-  --secondary: oklch(0.88 0.03 90); /* khaki-ish */
-  --secondary-foreground: oklch(0.22 0.01 30);
+  --accent: oklch(88% 0.022 245);
+  --accent-foreground: oklch(24% 0.022 245);
 
-  /* === MUTED TEXT (soft clay) === */
-  --muted: oklch(0.9 0.02 90);
-  --muted-foreground: oklch(0.4 0.02 50);
+  --destructive: oklch(52% 0.17 24);
 
-  /* === ACCENTS (brass gold for subtle highlights) === */
-  --accent: oklch(0.75 0.12 80);
-  --accent-foreground: oklch(0.22 0.01 30);
+  --border: oklch(50.885% 0.0695 244.682);
+  --input: oklch(97% 0.008 80);
+  --ring: oklch(24% 0.022 245);
 
-  /* === ERROR COLOR === */
-  --destructive: oklch(0.58 0.2 30);
+  --chart-1: oklch(24% 0.022 245);
+  --chart-2: oklch(55% 0.045 245);
+  --chart-3: oklch(68% 0.1 78);
+  --chart-4: oklch(62% 0.08 155);
+  --chart-5: oklch(60% 0.07 30);
 
-  /* === INPUTS & BORDERS (dark outlines) === */
-  --border: oklch(0.3 0.02 40); /* deep brown border */
-  --input: oklch(0.93 0.02 85); /* light beige input bg */
-  --ring: oklch(0.22 0.01 30); /* dark focus ring */
-
-  /* === CHART COLORS (natural + warm) === */
-  --chart-1: oklch(0.65 0.06 55); /* warm cocoa */
-  --chart-2: oklch(0.82 0.07 95); /* sand */
-  --chart-3: oklch(0.75 0.12 80); /* brass */
-  --chart-4: oklch(0.55 0.04 40); /* muted brown */
-  --chart-5: oklch(71.571% 0.03253 99.052); /* bistre */
-
-  /* === SIDEBAR (slightly darker beige for structure) === */
-  --sidebar: oklch(0.92 0.03 90);
-  --sidebar-foreground: oklch(0.22 0.01 30);
-
-  /* Sidebar buttons */
-  --sidebar-primary: oklch(0.22 0.01 30); /* dark */
-  --sidebar-primary-foreground: oklch(0.98 0.01 95);
-
-  /* Sidebar hover / accents */
-  --sidebar-accent: oklch(0.75 0.12 80); /* brass */
-  --sidebar-accent-foreground: oklch(0.22 0.01 30);
-
-  --sidebar-border: oklch(0.3 0.02 40);
-  --sidebar-ring: oklch(0.22 0.01 30);
+  --sidebar: oklch(91% 0.016 78);
+  --sidebar-foreground: oklch(24% 0.022 245);
+  --sidebar-primary: oklch(24% 0.022 245);
+  --sidebar-primary-foreground: oklch(96% 0.01 80);
+  --sidebar-accent: oklch(86% 0.02 245);
+  --sidebar-accent-foreground: oklch(24% 0.022 245);
+  --sidebar-border: oklch(80% 0.018 245);
+  --sidebar-ring: oklch(24% 0.022 245);
 }
 
 @layer base {
@@ -144,6 +130,10 @@
 
 /* Custom typography classes for crime fiction theme */
 @layer components {
+  .font-playfair-display {
+    font-family: var(--font-playfair-display), Georgia, serif;
+  }
+
   .mystery-title {
     @apply font-serif text-4xl font-bold tracking-tight;
     font-variant: small-caps;

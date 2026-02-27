@@ -41,11 +41,19 @@ export default function TextEditorContainer() {
   });
 
   if (isLoading) {
-    return <div>Loading file...</div>;
+    return (
+      <div className="mx-3 mt-3 flex h-[calc(100vh-9rem)] items-center justify-center rounded-3xl border bg-card/70 text-sm text-muted-foreground shadow-sm">
+        Loading file...
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error loading file: {error.message}</div>;
+    return (
+      <div className="mx-3 mt-3 flex h-[calc(100vh-9rem)] items-center justify-center rounded-3xl border border-destructive/30 bg-destructive/10 px-6 text-sm text-destructive shadow-sm">
+        Error loading file: {error.message}
+      </div>
+    );
   }
 
   if (!nodeData) {
@@ -67,7 +75,7 @@ export default function TextEditorContainer() {
 
   // todo: bring the action buttons outside the text editor and into this container
   return (
-    <div className="flex h-screen w-full">
+    <div className="mx-3 my-3 flex gap-3 ">
       <div className={showComments ? "flex-1" : "w-full"}>
         <TextEditor
           fileName={nodeData?.name || ""}
@@ -82,8 +90,8 @@ export default function TextEditorContainer() {
       </div>
 
       {showComments && (
-        <div className="w-80 flex flex-col h-screen">
-          <div className="p-2 border-b flex-shrink-0">
+        <div className="flex h-full w-80 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-sm">
+          <div className="shrink-0 border-b border-border/70 p-3">
             <Button
               onClick={handleOpenNewCommentDialog}
               disabled={!isActive}
@@ -94,7 +102,7 @@ export default function TextEditorContainer() {
               New Comment
             </Button>
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden bg-background/40">
             <CommentsPanel />
           </div>
         </div>
