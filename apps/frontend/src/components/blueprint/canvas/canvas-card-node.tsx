@@ -4,6 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { NotepadTextDashed, Edit3, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DeleteIcon } from "@/components/icons/delete-icon";
+import { EditIcon } from "@/components/icons/edit-icon";
+import { BlueprintTitleIcon } from "@/components/icons/blueprint-title-icon";
 
 interface CanvasCardNodeProps {
   id?: string; // DB id or no id for new cards
@@ -48,7 +51,7 @@ export default function CanvasCardNode({
       <div className="flex items-center justify-between p-4 pb-2">
         <div className="flex items-center gap-2">
           <span className="text-lg">
-            <NotepadTextDashed />
+            <BlueprintTitleIcon className="!size-8" />
           </span>
           {/* title area */}
           {isEditing ? (
@@ -81,7 +84,7 @@ export default function CanvasCardNode({
               isEditing ? "opacity-100 bg-muted" : "hover:bg-gray-100"
             }`}
           >
-            <Edit3 className="w-3 h-3" />
+            <EditIcon className="!size-6" />
           </Button>
 
           <Button
@@ -91,7 +94,7 @@ export default function CanvasCardNode({
             className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 cursor-pointer hover:text-red-500"
             onClick={data.onDelete}
           >
-            <Trash className="w-3 h-3" />
+            <DeleteIcon />
           </Button>
         </div>
       </div>

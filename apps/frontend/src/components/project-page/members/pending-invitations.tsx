@@ -2,12 +2,15 @@
 
 import React, { useState } from "react";
 import { Button } from "../../ui/button";
-import { Trash, MailX, Mail, Clock3 } from "lucide-react";
 import { deleteInvitation } from "@/lib/backend-calls/invitations";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 import { Invitation } from "@detective-quill/shared-types";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import { MailIcon } from "@/components/icons/mail-icon";
+import { ClockIcon } from "@/components/icons/clock-icon";
+import { DeleteIcon } from "@/components/icons/delete-icon";
+import { NoMailIcon } from "@/components/icons/no-mail-icon";
 
 const PendingInvitations = ({ projectId }: { projectId: string }) => {
   const [deleting, setDeleting] = useState(false);
@@ -39,7 +42,7 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
   };
 
   return (
-    <div className="rounded-3xl border border-border/70 bg-card/85 p-5 shadow-sm md:p-6">
+    <div className="rounded-lg border border-border/70 bg-card/85 p-5 shadow-sm md:p-6">
       <div className="mb-5 flex items-center justify-between border-b border-border/70 pb-4">
         <h4 className="mystery-title text-xl font-bold">Pending Invitations</h4>
         <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
@@ -52,18 +55,18 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
           {invitations.map((invitation) => (
             <li
               key={invitation.invite_code}
-              className="flex items-center justify-between gap-4 rounded-xl border border-border/70 bg-background/70 px-4 py-3"
+              className="flex items-center justify-between gap-4 rounded-lg border border-border/70 bg-background/70 px-4 py-3"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <div className="rounded-full bg-primary/10 p-2 text-primary">
-                  <Mail className="h-4 w-4" />
+                  <MailIcon />
                 </div>
                 <div className="min-w-0">
                   <p className="truncate font-medium text-foreground">
                     {invitation.email}
                   </p>
                   <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock3 className="h-3 w-3" />
+                    <ClockIcon size={16} />
                     Awaiting response
                   </p>
                 </div>
@@ -75,14 +78,14 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
                 disabled={deleting}
                 onClick={() => handleDeleteInvitation(invitation)}
               >
-                <Trash className="h-4 w-4" />
+                <DeleteIcon />
               </Button>
             </li>
           ))}
         </ul>
       ) : (
         <div className="flex min-h-28 items-center justify-center gap-2 rounded-xl border border-dashed border-border/70 bg-background/60 text-muted-foreground">
-          <MailX className="h-4 w-4" />
+          <NoMailIcon />
           <span className="noir-text">No pending invitations.</span>
         </div>
       )}

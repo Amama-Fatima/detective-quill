@@ -49,3 +49,20 @@ export async function getHeadCommitId(
 
   return data;
 }
+
+export async function getNumberOfBranches(
+  projectId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<number> {
+  const { data, error } = await supabase
+    .from("branches")
+    .select("id", { count: "exact", head: true })
+    .eq("project_id", projectId);
+
+  if (error) {
+    console.error("Error counting branches:", error);
+    return 0;
+  }
+
+  return data?.length || 0;
+}

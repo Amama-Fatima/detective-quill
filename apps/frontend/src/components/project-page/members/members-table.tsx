@@ -63,7 +63,7 @@ const MembersTable = ({
 
   if (members.length === 0) {
     return (
-      <Card className="rounded-3xl border border-border/70 bg-gradient-to-br from-card to-background py-16 text-center shadow-sm">
+      <Card className="rounded-lg border border-border/70 bg-gradient-to-br from-card to-background py-16 text-center shadow-sm">
         <CardContent>
           <div className="flex flex-col items-center justify-center space-y-4">
             <div className="rounded-full border border-border/60 bg-primary/10 p-8 text-center">
@@ -83,21 +83,21 @@ const MembersTable = ({
   }
 
   return (
-    <div className="rounded-3xl border border-border/70 bg-card/85 p-5 shadow-sm md:p-6">
+    <div className="rounded-lg border border-border/70 bg-card/85 p-5 shadow-sm md:p-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 pb-4">
         <div className="flex items-center gap-3">
-          <h2 className="mystery-title text-2xl font-bold">Project Members</h2>
+          <h2 className="mystery-title text-2xl font-bold">Members</h2>
           <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
             {members.length}
           </span>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-background/70">
+      <div className="overflow-hidden rounded-lg border border-border/70 bg-background/70">
         {members.length > 0 && (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="p-2">
                 <TableRow className="bg-muted/40">
                   <TableHead className="text-base font-semibold">
                     Member
@@ -122,11 +122,18 @@ const MembersTable = ({
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10 border border-border/70">
                           <AvatarImage
-                            src={member.avatar_url ?? undefined}
+                            src={member.avatar_url?.trim() || undefined}
                             alt={member.full_name}
+                            referrerPolicy="no-referrer"
+                            crossOrigin="anonymous"
+                            className="object-cover"
                           />
                           <AvatarFallback className="bg-gradient-to-br from-chart-1 to-chart-3 text-white font-medium">
-                            {member.full_name
+                            {(
+                              member.full_name ??
+                              member.username ??
+                              member.email
+                            )
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}

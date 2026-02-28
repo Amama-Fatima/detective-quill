@@ -39,27 +39,34 @@ export default async function BranchCommitsPage({
   const commitsError = result.error;
 
   return (
-    <div className="min-h-[60vh] px-6 py-8 max-w-3xl mx-auto">
+    <div className=" min-h-screen overflow-hidden">
       <BranchCommitsHeader projectId={projectId} branch={branch} />
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,oklch(24%_0.022_245)_1px,transparent_1px),linear-gradient(to_bottom,oklch(24%_0.022_245)_1px,transparent_1px)] [background-size:28px_28px]" />
+        <div className="pointer-events-none absolute -right-20 top-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 bottom-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
 
-      {commitsError ? (
-        <p className="text-muted-foreground text-center py-12">
-          Error loading commits: {commitsError}
-        </p>
-      ) : commits.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center">
-          <GitBranch className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <p className="text-muted-foreground">
-            No commits found for this branch.
-          </p>
+        <div className="relative z-10 px-6 -mt-8 py-8 mx-auto max-w-3xl">
+          {commitsError ? (
+            <p className="text-muted-foreground text-center py-12">
+              Error loading commits: {commitsError}
+            </p>
+          ) : commits.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-border bg-muted/30 p-12 text-center">
+              <GitBranch className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">
+                No commits found for this branch.
+              </p>
+            </div>
+          ) : (
+            <CommitsPaginatedList
+              initialCommits={commits}
+              projectId={projectId}
+              branchId={branchId}
+            />
+          )}
         </div>
-      ) : (
-        <CommitsPaginatedList
-          initialCommits={commits}
-          projectId={projectId}
-          branchId={branchId}
-        />
-      )}
+      </div>
     </div>
   );
 }

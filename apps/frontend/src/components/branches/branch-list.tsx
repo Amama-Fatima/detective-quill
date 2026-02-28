@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { Branch } from "@detective-quill/shared-types";
 import { useBranch } from "@/hooks/use-branch";
+import { CornerOrnamentIcon } from "../icons/corner-ornament-icon";
 
 interface VersionControlBranchListProps {
   projectId: string;
@@ -21,8 +22,15 @@ export default function BranchList({
       {branches.map((branch) => (
         <div
           key={branch.id}
-          className="rounded-lg border border-border bg-card/50 p-4 transition-colors hover:bg-card/80"
+          className="relative max-w-xl rounded-lg border border-border bg-card p-4 transition-colors hover:bg-card/80"
         >
+          <div className="pointer-events-none absolute left-0 top-1 text-border/70">
+            <CornerOrnamentIcon className="h-11 w-11 translate-x-0.5 -translate-y-0.5" />
+          </div>
+          <div className="pointer-events-none absolute bottom-1 right-0 text-border/70">
+            <CornerOrnamentIcon className="h-11 w-11 -translate-x-0.5 translate-y-0.5 rotate-180" />
+          </div>
+
           <div className="flex items-center justify-between gap-4">
             <Link
               href={`/workspace/${projectId}/version-control/${branch.id}`}
@@ -45,7 +53,7 @@ export default function BranchList({
                 </span>
               ) : (
                 <Button
-                  variant="outline"
+                  
                   size="sm"
                   className="cursor-pointer"
                   disabled={switchBranchMutation.isPending}

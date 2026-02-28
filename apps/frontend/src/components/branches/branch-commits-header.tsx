@@ -17,25 +17,36 @@ export default function BranchCommitsHeader({
   const [branchName, setBranchName] = useState(branch.name);
 
   return (
-    <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
-      <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-primary/10 p-3">
-          <History className="h-8 w-8 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Case History
-          </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Commits for branch: {branchName}
-          </p>
+    <div className="mb-8 px-32 border-b border-border bg-muted/90 backdrop-blur-sm">
+      <div className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="rounded-xl border border-primary/20 bg-primary/10 p-4">
+              <History className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <h1 className="mystery-title mb-2 text-4xl">Case History</h1>
+              <p className="noir-text text-muted-foreground">
+                Commits for branch:
+                <span className="text-primary font-playfair-display text-lg">
+                  {" "}
+                  {branchName}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div className="shrink-0">
+            <UpdateBranchForm
+              projectId={projectId}
+              branch={branch}
+              onBranchUpdated={(updatedBranch) =>
+                setBranchName(updatedBranch.name)
+              }
+            />
+          </div>
         </div>
       </div>
-      <UpdateBranchForm
-        projectId={projectId}
-        branch={branch}
-        onBranchUpdated={(updatedBranch) => setBranchName(updatedBranch.name)}
-      />
     </div>
   );
 }

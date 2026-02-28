@@ -32,6 +32,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import type { Branch, UpdateBranchDto } from "@detective-quill/shared-types";
 import { updateBranchSchema } from "@/lib/schema";
+import { EditIcon } from "../icons/edit-icon";
 
 type UpdateBranchFormValues = z.infer<typeof updateBranchSchema>;
 
@@ -96,8 +97,8 @@ const UpdateBranchForm = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">
-          <Pencil className="w-4 h-4 mr-2" />
+        <Button className="cursor-pointer font-playfair-display text-[1rem] hover:-translate-y-0.5 duration-300">
+          <EditIcon className="w-6 h-6 mr-2" />
           Edit Branch
         </Button>
       </DialogTrigger>
@@ -172,7 +173,11 @@ const UpdateBranchForm = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="cursor-pointer">
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="cursor-pointer"
+              >
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Update Branch
               </Button>

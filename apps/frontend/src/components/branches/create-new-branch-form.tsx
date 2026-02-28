@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createBranchSchema, type CreateBranchFormValues } from "@/lib/schema";
 import { useBranch } from "@/hooks/use-branch";
+import { useRouter } from "next/navigation";
 
 interface CreateBranchFormProps {
   projectId: string;
@@ -28,6 +29,7 @@ const CreateNewBranchForm = ({
   projectId,
   parentCommitId,
 }: CreateBranchFormProps) => {
+  const router = useRouter();
   const form = useForm<CreateBranchFormValues>({
     resolver: zodResolver(createBranchSchema),
     defaultValues: {
@@ -44,6 +46,7 @@ const CreateNewBranchForm = ({
   const onSubmit = (values: CreateBranchFormValues) => {
     createBranchMutation.mutate({ values, parentCommitId });
     form.reset();
+    router.push(`/workspace/${projectId}/version-control`);
   };
 
   // const { mutate: createBranchMutate, isPending } = useMutation({
@@ -66,9 +69,9 @@ const CreateNewBranchForm = ({
   // });
 
   return (
-    <div className="sm:max-w-[500px]">
+    <div className="sm:max-w-[800px] shadow-lg bg-card p-6 rounded-lg">
       <div>
-        <h1 className="text-2xl font-semibold text-noir tracking-tight">
+        <h1 className="text-2xl font-semibold mystery-title tracking-tight">
           Create New Branch{" "}
         </h1>
         <p className="text-muted-foreground text-[1rem] mt-2">
@@ -85,12 +88,15 @@ const CreateNewBranchForm = ({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Branch Name</FormLabel>
+                  <FormLabel className="text-[18px] font-medium noir-text">
+                    Branch Name
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="alternate-ending"
                       {...field}
                       disabled={isPending}
+                      className="border"
                     />
                   </FormControl>
                   <FormDescription className="text-[1rem]">
@@ -105,12 +111,15 @@ const CreateNewBranchForm = ({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-[18px] font-medium noir-text">
+                    Description
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="A brief description of this branch"
                       {...field}
                       disabled={isPending}
+                      className="border"
                     />
                   </FormControl>
                   <FormDescription className="text-[1rem]">
@@ -131,10 +140,13 @@ const CreateNewBranchForm = ({
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       disabled={isPending}
+                      className="w-6 h-6"
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Set as default branch</FormLabel>
+                    <FormLabel className="text-[18px] font-medium noir-text">
+                      Set as default branch
+                    </FormLabel>
                     <FormDescription className="text-[1rem]">
                       Make this the primary branch for your project. You can
                       only have one default branch at a time.
@@ -157,7 +169,7 @@ const CreateNewBranchForm = ({
             <Button
               type="submit"
               disabled={isPending}
-              className="cursor-pointer"
+              className="cursor-pointer ml-4"
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isPending ? "Creating..." : "Create Branch"}

@@ -38,7 +38,7 @@ export default function ChangeStateDropDown({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="border-2 border-secondary-foreground bg-secondary text-secondary-foreground cursor-pointer hover:text-secondary hover:bg-secondary-foreground shadow-lg">
-            {loading ? "Loading..." : currentStatus.toUpperCase()}
+            {loading ? "Loading..." : "Change State"}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 bg-secondary" align="start">

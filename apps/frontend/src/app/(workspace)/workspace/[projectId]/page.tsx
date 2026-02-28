@@ -76,6 +76,7 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
   }
 
   const activeBranch = branches?.find((branch: Branch) => branch.is_active);
+  const numBranches = branches?.length || 0;
 
   return (
     <div>
@@ -84,7 +85,7 @@ const ProjectWorkspace = async ({ params }: ProjectWorkspacePageProps) => {
         userId={user.sub}
         members={members || []}
         invitations={invitations || []}
-        branches={branches || []}
+        numBranches={numBranches}
         activeBranch={activeBranch ?? null}
       />
     </div>

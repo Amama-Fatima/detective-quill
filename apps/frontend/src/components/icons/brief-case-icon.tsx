@@ -1,61 +1,63 @@
 export const BriefcaseIcon = () => (
   <svg
-    width="24"
-    height="24"
+    width="34"
+    height="34"
     viewBox="0 0 24 24"
     fill="none"
     className="text-primary"
   >
-    {/* Main briefcase body */}
+    {/* Briefcase body */}
     <rect
-      x="4"
+      x="3.5"
       y="8"
-      width="16"
-      height="10"
-      rx="2"
+      width="17"
+      height="11"
+      rx="2.5"
       fill="currentColor"
       fillOpacity="0.06"
       stroke="currentColor"
       strokeWidth="1.2"
     />
 
-    {/* Handle */}
-    <rect
-      x="9"
-      y="5"
-      width="6"
-      height="3"
-      rx="1"
-      fill="currentColor"
-      fillOpacity="0.08"
+    {/* Handle base (clear separation) */}
+    <path
+      d="M9 8V6.8C9 5.8 9.8 5 10.8 5H13.2C14.2 5 15 5.8 15 6.8V8"
       stroke="currentColor"
       strokeWidth="1.2"
+      strokeLinecap="round"
     />
 
-    {/* Divider line for flap */}
+    {/* Lid divider */}
     <line
-      x1="4"
-      y1="11"
-      x2="20"
-      y2="11"
+      x1="3.5"
+      y1="12"
+      x2="20.5"
+      y2="12"
       stroke="currentColor"
       strokeWidth="1"
       strokeOpacity="0.6"
     />
 
-    {/* Lock / clasp */}
+    {/* Center clasp */}
     <rect
-      x="11"
-      y="12.5"
-      width="2"
-      height="3"
-      rx="0.4"
+      x="10.7"
+      y="11"
+      width="2.6"
+      height="3.2"
+      rx="0.6"
       fill="currentColor"
       fillOpacity="0.25"
     />
 
-    {/* Optional subtle corner accents */}
-    <circle cx="5" cy="9" r="0.8" fill="currentColor" fillOpacity="0.3" />
-    <circle cx="19" cy="9" r="0.8" fill="currentColor" fillOpacity="0.3" />
+    {/* Subtle inner highlight (depth) */}
+    <line
+      x1="6"
+      y1="15.5"
+      x2="18"
+      y2="15.5"
+      stroke="currentColor"
+      strokeWidth="1"
+      strokeOpacity="0.25"
+    />
   </svg>
 );
