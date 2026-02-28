@@ -1,10 +1,10 @@
-export const DeleteIcon = ({ size = 36 }) => (
+export const DeleteIcon = ({ size = 36, className="!size-8" }) => (
   <svg
     width={size}
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    className="!size-8 shrink-0 text-primary"
+    className={`${className} shrink-0 text-primary`}
   >
     {/* Lid */}
     <path

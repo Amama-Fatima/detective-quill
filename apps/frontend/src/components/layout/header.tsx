@@ -28,12 +28,6 @@ export default async function Header() {
 
         {/* Navigation - Desktop */}
         <nav className="hidden items-center gap-9 md:flex">
-          <Link
-            href="/dashboard"
-            className="noir-text text-[1.1rem] text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
-          >
-            Dashboard
-          </Link>
           {loggedIn && (
             <Link
               href="/profile"
@@ -73,17 +67,12 @@ function MobileNav() {
     <div className="flex items-center space-x-4">
       <nav className="flex items-center space-x-4">
         <Link
-          href="/"
+          href="/profile"
           className="text-sm text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
         >
-          Home
+          Profile
         </Link>
-        <Link
-          href="/dashboard"
-          className="text-sm text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
-        >
-          Dashboard
-        </Link>
+
         <Link
           href="/cases"
           className="text-sm text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"

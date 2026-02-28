@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
 
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard"; // Default to dashboard instead of root
+  const next = searchParams.get("next") ?? "/cases"; // Default to cases instead of root
 
   if (code) {
     const supabase = await createSupabaseServerClient();
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         }
       }
 
-      // Success - redirect to the next URL or dashboard
+      // Success - redirect to the next URL or cases
       return NextResponse.redirect(`${origin}${next}`);
     } else {
       console.error("Error exchanging code for session:", error);

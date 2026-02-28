@@ -20,7 +20,7 @@ export default function TextEditorHeaderBar({
   currentNodePath,
 }: TextEditorHeaderBarProps) {
   return (
-    <div className="mx-3 mb-2 mt-3 flex items-center justify-between rounded-2xl border border-border/70 bg-card/70 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
+    <div className="bg-sidebar mx-3 mb-2 mt-3 flex items-center justify-between rounded-2xl border border-border/70 px-3 py-2 shadow-sm">
       <div className="flex min-w-0 items-center gap-3">
         <Button
           variant="ghost"

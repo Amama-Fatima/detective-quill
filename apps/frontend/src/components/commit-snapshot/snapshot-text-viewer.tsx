@@ -3,19 +3,24 @@
 import { useMemo } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
+import type { PartialBlock } from "@blocknote/core";
 import {
   SnapshotTreeNode,
   findSnapshotNode,
 } from "@/lib/utils/snapshot-tree-utils";
-import { FileText } from "lucide-react";
 import { NOTION_STYLES } from "@/constants/editor";
+import { CaseFileIcon } from "../icons/case-file-icon";
 
 interface SnapshotTextViewerProps {
   snapshots: SnapshotTreeNode[];
   selectedNodeId: string | null;
 }
 
-function parseBlockNoteContent(content: string | null): unknown[] | null {
+type BlockNoteInitialContent = PartialBlock[];
+
+function parseBlockNoteContent(
+  content: string | null,
+): BlockNoteInitialContent | null {
   if (!content) return null;
 
   const trimmedContent = content.trim();
@@ -27,13 +32,13 @@ function parseBlockNoteContent(content: string | null): unknown[] | null {
     const parsedContent = JSON.parse(trimmedContent) as unknown;
 
     if (Array.isArray(parsedContent)) {
-      return parsedContent;
+      return parsedContent as BlockNoteInitialContent;
     }
 
     if (parsedContent && typeof parsedContent === "object") {
       const objectContent = parsedContent as { blocks?: unknown };
       if (Array.isArray(objectContent.blocks)) {
-        return objectContent.blocks;
+        return objectContent.blocks as BlockNoteInitialContent;
       }
     }
 
@@ -69,7 +74,7 @@ export default function SnapshotTextViewer({
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-3">
           <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-            <FileText className="h-6 w-6 text-muted-foreground" />
+            <CaseFileIcon />
           </div>
           <p className="text-sm text-muted-foreground">
             Select a file to view its content
@@ -98,10 +103,10 @@ export default function SnapshotTextViewer({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full py-2 mx-2">
       <div className="border-b bg-card px-6 py-3">
         <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground" />
+          <CaseFileIcon />
           <h2 className="text-sm font-medium">{selectedNode.name}</h2>
         </div>
       </div>
@@ -126,7 +131,7 @@ export default function SnapshotTextViewer({
         ) : (
           <div className="p-6">
             {selectedNode.content ? (
-              <pre className="text-sm font-mono whitespace-pre-wrap break-words bg-muted/30 p-4 rounded-lg border">
+              <pre className="text-sm font-mono whitespace-pre-wrap break-words p-4 border">
                 {selectedNode.content}
               </pre>
             ) : (

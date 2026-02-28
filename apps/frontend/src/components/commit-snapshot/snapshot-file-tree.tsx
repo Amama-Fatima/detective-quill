@@ -7,9 +7,9 @@ import {
   ChevronDown,
   Folder,
   FolderOpen,
-  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
+import { CaseFileIcon } from "../icons/case-file-icon";
 
 interface SnapshotFileTreeProps {
   snapshots: SnapshotTreeNode[];
@@ -84,7 +84,7 @@ function TreeNodes({
   onNodeClick,
 }: TreeNodesProps) {
   return (
-    <div>
+    <div className="">
       {nodes.map((node) => (
         <div key={node.fs_node_id || node.id}>
           <button
@@ -106,15 +106,15 @@ function TreeNodes({
                   <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                 )}
                 {expandedFolders.has(node.fs_node_id || "") ? (
-                  <FolderOpen className="h-4 w-4 shrink-0 text-amber-500" />
+                  <FolderOpen className="h-4 w-4 shrink-0 text-muted-accent" />
                 ) : (
-                  <Folder className="h-4 w-4 shrink-0 text-amber-500" />
+                  <Folder className="h-4 w-4 shrink-0 text-muted-accent" />
                 )}
               </>
             ) : (
               <>
                 <div className="w-4" /> {/* Spacer for files */}
-                <FileText className="h-4 w-4 shrink-0 text-blue-500" />
+                <CaseFileIcon />
               </>
             )}
             <span className="truncate">{node.name}</span>

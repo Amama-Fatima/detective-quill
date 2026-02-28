@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { CommentResponse } from "@detective-quill/shared-types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Trash2, Edit2, X, CheckCircle2 } from "lucide-react";
+import { Check, X, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import {
   Tooltip,
@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/tooltip";
 import { formatDate } from "@/lib/utils/comments-utils";
 import { useComments } from "@/hooks/use-comments";
+import { EditIcon } from "../icons/edit-icon";
+import {DeleteIcon} from "../icons/delete-icon";
 
 interface CommentItemProps {
   comment: CommentResponse;
@@ -144,7 +146,7 @@ export default function CommentItem({
                       }}
                       className="h-7 px-2 cursor-pointer"
                     >
-                      <Edit2 className="h-3 w-3" />
+                      <EditIcon className="" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Edit comment</TooltipContent>
@@ -180,7 +182,7 @@ export default function CommentItem({
                   }}
                   className="h-7 px-2 text-destructive hover:text-destructive cursor-pointer"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <DeleteIcon  className="!size-6"/>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Delete comment</TooltipContent>

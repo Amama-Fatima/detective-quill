@@ -75,7 +75,7 @@ export default function TextEditorContainer() {
 
   // todo: bring the action buttons outside the text editor and into this container
   return (
-    <div className="mx-3 my-3 flex gap-3 ">
+    <div className="mx-3 flex gap-3 mb-6">
       <div className={showComments ? "flex-1" : "w-full"}>
         <TextEditor
           fileName={nodeData?.name || ""}
@@ -90,7 +90,7 @@ export default function TextEditorContainer() {
       </div>
 
       {showComments && (
-        <div className="flex h-full w-80 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-sm">
+        <div className="flex h-full w-80 flex-col overflow-hidden border border-border/70 bg-sidebar shadow-sm">
           <div className="shrink-0 border-b border-border/70 p-3">
             <Button
               onClick={handleOpenNewCommentDialog}
@@ -102,7 +102,7 @@ export default function TextEditorContainer() {
               New Comment
             </Button>
           </div>
-          <div className="flex-1 overflow-hidden bg-background/40">
+          <div className="flex-1 overflow-hidden bg-sidebar">
             <CommentsPanel />
           </div>
         </div>

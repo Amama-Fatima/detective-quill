@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { FsNodeTreeResponse, FsNode } from "@detective-quill/shared-types";
 import {
   MoreHorizontal,
-  File as FileIcon,
   Edit,
   FolderX,
   Trash2,
@@ -21,6 +20,9 @@ import { cn } from "@/lib/utils/utils";
 import { File, Folder as TreeFolder } from "../magicui/file-tree";
 import { findNodeById } from "@/lib/utils/file-tree-utils";
 import { useWorkspaceContext } from "@/context/workspace-context";
+import { CaseFileIcon } from "../icons/case-file-icon";
+import { DeleteIcon } from "../icons/delete-icon";
+import { EditIcon } from "../icons/edit-icon";
 
 const TreeItem = ({
   element,
@@ -113,7 +115,7 @@ const TreeItem = ({
                 className="cursor-pointer"
                 disabled={!isOwner || !isActive}
               >
-                <FolderX className="h-4 w-4 mr-2" />
+                <FolderX className="h-6 w-6 mr-2" />
                 Move
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -122,7 +124,7 @@ const TreeItem = ({
                 onClick={() => onDeleteNode(node as FsNode)}
                 disabled={!isOwner || !isActive}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <DeleteIcon className="h-4 w-4 mr-2" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -141,7 +143,7 @@ const TreeItem = ({
           "px-2 py-1 group flex items-center justify-between",
           isSelected && "bg-primary/10 text-primary",
         )}
-        fileIcon={<FileIcon className="h-4 w-4" />}
+        fileIcon={<CaseFileIcon />}
         asChild
       >
         <div
@@ -149,7 +151,7 @@ const TreeItem = ({
           className="flex items-center justify-between w-full cursor-pointer"
         >
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <FileIcon className="h-4 w-4" />
+            <CaseFileIcon />
             <span className="truncate">{element.name}</span>
             {node?.word_count && node.word_count > 0 && (
               <span className="text-xs text-muted-foreground">
@@ -179,7 +181,7 @@ const TreeItem = ({
                 className="cursor-pointer"
                 disabled={!isOwner || !isActive}
               >
-                <Edit className="h-4 w-4 mr-2" />
+                <EditIcon className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -196,7 +198,7 @@ const TreeItem = ({
                 onClick={() => onDeleteNode(node as FsNode)}
                 disabled={!isOwner || !isActive}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <DeleteIcon className="!size-5" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

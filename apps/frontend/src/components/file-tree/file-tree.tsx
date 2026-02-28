@@ -140,7 +140,7 @@ const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="p-3 border-b bg-card/20">
         <div className="flex gap-2 mb-3">
           <DropdownMenu>

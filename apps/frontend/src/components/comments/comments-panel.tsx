@@ -33,7 +33,7 @@ export default function CommentsPanel({}) {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col h-full border-l bg-background">
+      <div className="flex flex-col h-full bg-background">
         <div className="flex items-center gap-2 border-b px-4 py-3 flex-shrink-0">
           <MessageSquare className="h-4 w-4" />
           <h3 className="font-medium">Comments</h3>

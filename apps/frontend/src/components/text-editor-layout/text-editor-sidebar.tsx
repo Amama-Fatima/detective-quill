@@ -18,7 +18,7 @@ export default function TextEditorSidebar({
   return (
     <aside
       className={cn(
-        "m-3 flex h-[calc(100vh-9rem)] w-80 flex-col overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-b from-card/80 to-card/50 shadow-sm transition-all duration-300",
+        "m-3 flex   h-full w-80 flex-col overflow-hidden rounded-2xl border border-border/70 bg-sidebar shadow-sm transition-all duration-300",
       )}
     >
       <div className="border-b border-border/70 bg-background/50 px-4 py-3">

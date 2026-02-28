@@ -6,7 +6,7 @@ import { GitCommit, Calendar } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { formatDate } from "date-fns";
 import Link from "next/link";
-import { CornerOrnamentIcon } from "../icons/corner-ornament-icon";
+import { CalendarIcon } from "../icons/calendar-icon";
 
 interface CommitCardProps {
   commit: Commit;
@@ -47,7 +47,7 @@ export default function CommitCard({
               {commit.message || "No message"}
             </p>
             <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4 shrink-0" />
+              <CalendarIcon className="h-5 w-5" />
               <span title={formattedDate}>{timeAgo ?? formattedDate}</span>
             </div>
           </div>

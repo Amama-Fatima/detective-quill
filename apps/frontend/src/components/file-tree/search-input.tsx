@@ -3,9 +3,10 @@
 import { useState, useEffect, JSX } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X, FileText, Folder } from "lucide-react";
+import { Search, X, Folder } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
+import { CaseFileIcon } from "../icons/case-file-icon";
 
 interface SearchResult {
   id: string;
@@ -66,7 +67,7 @@ const SearchInput = ({
       .filter(
         (node) =>
           node.name.toLowerCase().includes(lowercaseQuery) ||
-          node.path.toLowerCase().includes(lowercaseQuery)
+          node.path.toLowerCase().includes(lowercaseQuery),
       )
       .sort((a, b) => {
         // Prioritize exact name matches
@@ -96,34 +97,6 @@ const SearchInput = ({
     setIsOpen(query.trim().length > 0 && newResults.length > 0);
   }, [query, nodes]);
 
-  // Handle keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isOpen || results.length === 0) return;
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < results.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
-        break;
-      case "Enter":
-        e.preventDefault();
-        if (selectedIndex >= 0 && selectedIndex < results.length) {
-          handleResultSelect(results[selectedIndex]);
-        }
-        break;
-      case "Escape":
-        e.preventDefault();
-        clearSearch();
-        break;
-    }
-  };
-
   const handleResultSelect = (result: SearchResult) => {
     onResultSelect(result.id);
     clearSearch();
@@ -145,7 +118,6 @@ const SearchInput = ({
           placeholder="Search files and folders..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
           className="pl-10 pr-10"
         />
         {query && (
@@ -169,14 +141,14 @@ const SearchInput = ({
               className={cn(
                 "flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors",
                 "hover:bg-accent hover:text-accent-foreground",
-                selectedIndex === index && "bg-accent text-accent-foreground"
+                selectedIndex === index && "bg-accent text-accent-foreground",
               )}
               onClick={() => handleResultSelect(result)}
             >
               {result.type === "file" ? (
-                <FileText className="h-4 w-4 text-blue-500" />
+                <CaseFileIcon />
               ) : (
-                <Folder className="h-4 w-4 text-amber-500" />
+                <Folder className="h-5 w-5 text-primary" />
               )}
 
               <div className="flex-1 min-w-0">
@@ -209,7 +181,7 @@ const SearchInput = ({
       )}
     </div>
   );
-}
+};
 
 // Helper function to highlight matching text
 function highlightMatch(text: string, query: string): JSX.Element {
@@ -225,7 +197,7 @@ function highlightMatch(text: string, query: string): JSX.Element {
   return (
     <span>
       {before}
-      <span className="bg-yellow-200 dark:bg-yellow-800 font-semibold">
+      <span className="bg-yellow-200 font-semibold">
         {match}
       </span>
       {after}

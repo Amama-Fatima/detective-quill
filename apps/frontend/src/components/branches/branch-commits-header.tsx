@@ -25,7 +25,7 @@ export default function BranchCommitsHeader({
               <History className="h-8 w-8 text-primary" />
             </div>
             <div>
-              <h1 className="mystery-title mb-2 text-4xl">Case History</h1>
+              <h1 className="mystery-title mb-2 text-4xl">Branch History</h1>
               <p className="noir-text text-muted-foreground">
                 Commits for branch:
                 <span className="text-primary font-playfair-display text-lg">

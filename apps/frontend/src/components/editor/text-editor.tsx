@@ -29,6 +29,7 @@ import type { BlockNoteEditorRef } from "./block-note-editor";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 // todo: look into this dynamic import performance impact
 // Dynamically import BlockNote editor with no SSR
@@ -36,7 +37,8 @@ const BlockNoteEditor = dynamic(() => import("./block-note-editor"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full min-h-screen items-center justify-center">
-      <div className="text-sm text-muted-foreground">Loading editor...</div>
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mr-3" />
+      Loading
     </div>
   ),
 });
@@ -105,19 +107,18 @@ const TextEditor = ({
   };
 
   return (
-    <div className="my-2">
+    <div className="">
       <div className={getContainerClass(focusMode)}>
         {/* Header - Always visible but styled differently in focus modes */}
         <div
-          className={
-            getHeaderClass(focusMode) +
-            " bg-primary text-foreground rounded-tl-3xl rounded-tr-3xl"
-          }
+          className={getHeaderClass(focusMode) + " bg-primary text-foreground"}
         >
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex items-center gap-2">
               <Edit3 className="h-4 w-4 text-background" />
-              <span className="truncate text-lg font-medium text-background">{fileName}</span>
+              <span className="truncate text-lg font-medium text-background">
+                {fileName}
+              </span>
               {isDirty && (
                 <div className="flex items-center gap-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
@@ -213,16 +214,16 @@ const TextEditor = ({
                   onClick={saveContent}
                   disabled={isSaving || !isDirty}
                   className={cn(
-                    "gap-2 cursor-pointer text-background border border-background hover:bg-background hover:text-primary",
+                    "gap-2 cursor-pointer text-background border border-background hover:bg-muted-foreground",
                     isSaving && "animate-pulse cursor-disabled",
                   )}
                 >
                   {isSaving ? (
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   ) : isDirty ? (
-                    <Save className="h-3 w-3 text-background hover:text-primary" />
+                    <Save className="h-3 w-3 text-background" />
                   ) : (
-                    <Check className="h-3 w-3 text-background hover:text-primary" />
+                    <Check className="h-3 w-3 text-background" />
                   )}
                   {isSaving ? "Saving..." : isDirty ? "Save" : "Saved"}
                 </Button>
@@ -231,18 +232,6 @@ const TextEditor = ({
                 {isDirty ? "Save changes (Cmd/Ctrl + S)" : "File is up to date"}
               </TooltipContent>
             </Tooltip>
-
-            {focusMode === "NORMAL" && (
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={disabledCondition || isDeleting}
-                onClick={handleDelete}
-                className="text-destructive hover:text-destructive cursor-pointer"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
           </div>
         </div>
 
