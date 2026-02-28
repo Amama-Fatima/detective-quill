@@ -18,11 +18,11 @@ const UserProfile = () => {
   const initials = getInitials(displayName);
 
   return (
-    <Card className="overflow-hidden border-border/70 shadow-md">
-      <CardHeader>
+    <Card className="overflow-hidden border shadow-md rounded-lg">
+      {/* <CardHeader>
         <CardTitle>Profile</CardTitle>
         <CardDescription>Your account details</CardDescription>
-      </CardHeader>
+      </CardHeader> */}
 
       <CardContent className="flex flex-col items-center gap-4 text-center">
         <Avatar className="size-24 border border-border/60 shadow-sm">
@@ -33,8 +33,8 @@ const UserProfile = () => {
         </Avatar>
 
         <div className="space-y-1">
-          <p className="text-lg font-semibold leading-tight">{displayName}</p>
-          <p className="text-sm text-muted-foreground break-all">
+          <p className="text-lg font-semibold leading-tight font-playfair-display italic text-primary">{displayName}</p>
+          <p className="text-md text-foreground  noir-text">
             {user?.email}
           </p>
         </div>

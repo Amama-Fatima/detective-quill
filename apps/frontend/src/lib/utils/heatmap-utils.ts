@@ -14,11 +14,14 @@ export const monthNames = [
 ];
 
 export const getCellFill = (count: number) => {
-  if (count <= 0) return "bg-muted";
-  if (count <= 2) return "bg-emerald-200 dark:bg-emerald-900";
-  if (count <= 5) return "bg-emerald-400 dark:bg-emerald-700";
-  if (count <= 10) return "bg-emerald-500 dark:bg-emerald-500";
-  return "bg-emerald-700 dark:bg-emerald-300";
+  if (count <= 0) return "bg-accent";
+  if (count <= 2) return "bg-blue-300";
+  if (count <= 5) return "bg-blue-400";
+  if (count <= 10) return "bg-blue-500";
+  if (count <= 25) return "bg-blue-600";
+  if (count <= 50) return "bg-blue-700";
+
+  return "bg-blue-950";
 };
 
 export const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

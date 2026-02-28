@@ -14,16 +14,18 @@ export default async function Header() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-[100] border-b border-secondary-foreground/40 bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-[68px] w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-12">
-        <div className="relative h-[56px] w-[180px] overflow-hidden">
-          <Image
-            src="/logo.png"
-            alt="Detective's Quill Logo"
-            fill
-            sizes="180px"
-            className="object-cover object-center"
-          />
+    <header className="fixed inset-x-0 top-0 z-100 border-b border-secondary-foreground/40 bg-background/70 backdrop-blur-md supports-backdrop-filter:bg-background/60">
+      <div className="mx-auto flex h-17 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-12">
+        <div className="relative h-14 w-45 overflow-hidden">
+          <Link href="/">
+            <Image
+              src="/logo.png"
+              alt="Detective's Quill Logo"
+              fill
+              sizes="180px"
+              className="object-cover object-center"
+            />
+          </Link>
         </div>
 
         {/* Navigation - Desktop */}

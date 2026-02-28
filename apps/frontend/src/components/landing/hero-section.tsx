@@ -129,7 +129,7 @@ export default function HeroSection() {
             ))}
           </div>
 
-          <span className="font-[Georgia,serif] text-[13px] text-muted-foreground">
+          <span className="font-[Georgia,serif] text-[13px] text-muted-foreground noir-text">
             Loved by <strong className="text-primary">2,400+</strong> crime
             fiction writers
           </span>
@@ -154,13 +154,13 @@ export default function HeroSection() {
               <div className="h-[2px] flex-1 rounded bg-accent">
                 <div className="h-full w-[68%] rounded bg-accent-foreground" />
               </div>
-              <span className="text-[11px] text-muted-foreground">68%</span>
+              <span className="text-[11px] text-muted-foreground noir-text">68%</span>
             </div>
           </div>
         </div>
 
         <div className="absolute top-[30px] right-[10px] z-[4] w-[160px] bg-card border border-border/50 rounded-[10px] px-[16px] py-[14px] shadow-l animate-[float1_4s_ease-in-out_infinite]">
-          <div className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground mb-[10px]">
+          <div className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground mb-[10px] mystery-title">
             Suspects
           </div>
 
@@ -173,7 +173,7 @@ export default function HeroSection() {
               key={name}
               className="flex justify-between items-center py-[5px] border-b border-border/20"
             >
-              <span className="text-[11px] font-semibold text-primary">
+              <span className="text-[11px] font-semibold text-primary noir-text">
                 {name}
               </span>
               <span
@@ -190,13 +190,13 @@ export default function HeroSection() {
         </div>
 
         <div className="absolute bottom-[60px] left-0 z-[4] w-[140px] bg-primary rounded-[10px] px-[18px] py-[14px] shadow-[0_8px_30px_oklch(24%_0.022_245/0.25)] animate-[float2_5s_ease-in-out_infinite]">
-          <div className="text-[10px] uppercase tracking-[0.1em] text-primary-foreground mb-[6px]">
+          <div className="text-[10px] uppercase tracking-[0.1em] text-primary-foreground mb-[6px] noir-text">
             Today&apos;s Words
           </div>
           <div className="font-playfair-display text-[32px] font-bold text-primary-foreground leading-none">
             1,842
           </div>
-          <div className="text-[11px] text-muted mt-[4px]">
+          <div className="text-[11px] text-muted mt-[4px] noir-text">
             ↑ 340 from yesterday
           </div>
         </div>
@@ -204,11 +204,11 @@ export default function HeroSection() {
         <div className="absolute top-[160px] left-[-20px] z-[4] bg-accent border rounded-lg px-[14px] py-[10px] shadow-[0_4px_16px_oklch(24%_0.022_245/0.08)] animate-[float3_6s_ease-in-out_infinite]">
           <div className="flex items-center gap-[8px]">
             <MagnifyIcon size={20} />
-            <span className="text-[14px] font-semibold text-primary">
+            <span className="text-[14px] font-semibold text-primary noir-text">
               Deep Search
             </span>
           </div>
-          <div className="text-[12px] text-muted-foreground mt-[4px]">
+          <div className="text-[12px] text-muted-foreground mt-[4px] noir-text">
             "poison + 1920s London"
           </div>
         </div>
