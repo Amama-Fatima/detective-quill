@@ -5,6 +5,11 @@ import React from "react";
 import type { Metadata } from "next";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 import WorkspaceHeader from "@/components/workspace-layout/workspace-header";
+import { createSupabaseServerClient } from "@/supabase/server-client";
+import { verifyMembership } from "@/lib/supabase-calls/members";
+import { WorkspaceContextProvider } from "@/context/workspace-context";
+import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
+import { fetchActiveBranchId } from "@/lib/supabase-calls/editor-workspace";
 
 interface ProjectWorkspacePageProps {
   params: Promise<{
@@ -31,7 +36,6 @@ export async function generateMetadata({
     description: `Workspace for project ${title}`,
   };
 }
-
 const WorkspaceLayout = async ({
   params,
   children,
@@ -44,19 +48,41 @@ const WorkspaceLayout = async ({
     redirect("/auth/sign-in");
   }
 
-  const { title, error } = await fetchProjectTitle(projectId);
+  const supabase = await createSupabaseServerClient();
+
+  // Running both in parallel
+  const [{ title, error }, isMember, { isActive, author_id }, activeBranchId] =
+    await Promise.all([
+      fetchProjectTitle(projectId),
+      verifyMembership(projectId, user.sub, supabase),
+      getProjectStatusAndAuthor(projectId, supabase),
+      fetchActiveBranchId(supabase, projectId),
+    ]);
 
   if (error || !title) {
     return <ErrorMsg message="Failed to load project data." />;
   }
 
+  if (!isMember) {
+    return <ErrorMsg message="You don't have access to this project." />;
+  }
+
+  const isOwner = author_id === user.sub;
+
   return (
-    <div>
-      <div className="sticky top-0 z-50">
-        <WorkspaceHeader projectId={projectId} projectTitle={title} />
+    <WorkspaceContextProvider
+      projectId={projectId}
+      activeBranchId={activeBranchId}
+      isOwner={isOwner}
+      isActive={isActive}
+    >
+      <div>
+        <div className="sticky top-0 z-50">
+          <WorkspaceHeader projectId={projectId} projectTitle={title} />
+        </div>
+        <main className="mt-17">{children}</main>
       </div>
-      <main className="mt-17">{children}</main>
-    </div>
+    </WorkspaceContextProvider>
   );
 };
 

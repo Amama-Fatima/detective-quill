@@ -6,6 +6,11 @@ import { getActiveBranchId } from "@/lib/supabase-calls/branches";
 import { buildSnapshotTree } from "@/lib/utils/snapshot-tree-utils";
 import CommitSnapshotViewer from "@/components/commit-snapshot/commit-snapshot-viewer";
 
+export const metadata = {
+  title: "Commit Snapshot",
+  description: "View the snapshot of a specific commit",
+};
+
 interface BranchCommitViewPageProps {
   params: Promise<{
     projectId: string;

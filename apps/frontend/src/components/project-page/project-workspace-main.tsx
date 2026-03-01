@@ -9,13 +9,38 @@ import {
   Invitation,
   Branch,
 } from "@detective-quill/shared-types";
-import MembersTable from "./members/members-table";
-import PendingInvitations from "./members/pending-invitations";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 import { ClockIcon } from "../icons/clock-icon";
 import { MailIcon } from "../icons/mail-icon";
 import { UsersIcon } from "../icons/users-icon";
 import { GitBranchIcon } from "../icons/git-branch-icon";
+import { Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const MembersTable = dynamic(() => import("./members/members-table"), {
+  loading: () => (
+    <>
+      <div className="flex items-center justify-center gap-2">
+        <Loader2 className="animate-spin h-6 w-6 text-primary mx-auto" />
+        <p className="noir-text text-primary text-[14px]">Loading...</p>
+      </div>
+    </>
+  ),
+});
+
+const PendingInvitations = dynamic(
+  () => import("./invitations/pending-invitations"),
+  {
+    loading: () => (
+      <>
+        <div className="flex items-center justify-center gap-2">
+          <Loader2 className="animate-spin h-6 w-6 text-primary mx-auto" />
+          <p className="noir-text text-primary text-[14px]">Loading...</p>
+        </div>
+      </>
+    ),
+  },
+);
 
 interface WorkspaceMainBodyProps {
   project: Project;
@@ -83,10 +108,10 @@ export default function WorkspaceMainBody({
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-3xl space-y-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground case-file">
                   Case Workspace
                 </span>
-                <span className="rounded-full border border-border/70 bg-secondary/70 px-3 py-1 text-xs font-medium text-secondary-foreground">
+                <span className="rounded-full border bg-foreground text-background px-3 py-1 text-xs font-medium case-file">
                   {statusLabel}
                 </span>
               </div>

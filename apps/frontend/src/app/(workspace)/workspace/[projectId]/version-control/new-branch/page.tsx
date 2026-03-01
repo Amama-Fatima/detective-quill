@@ -4,6 +4,11 @@ import { GitBranch } from "lucide-react";
 import CreateNewBranchForm from "@/components/branches/create-new-branch-form";
 import { GitBranchIcon } from "@/components/icons/mail-icon";
 
+export const metadata = {
+  title: "New Branch",
+  description: "Create a new branch in your manuscript",
+};
+
 interface NewBranchPageProps {
   params: Promise<{
     projectId: string;

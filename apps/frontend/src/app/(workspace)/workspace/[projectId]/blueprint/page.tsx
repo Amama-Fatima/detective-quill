@@ -3,12 +3,12 @@ import { redirect } from "next/navigation";
 import CreateBlueprintBtns from "@/components/blueprint/btns/create-blueprint-btns";
 import { getProjectBlueprints } from "@/lib/supabase-calls/blueprint";
 import { UserBlueprintsList } from "@/components/blueprint/user-bueprints-list";
-import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import ErrorMsg from "@/components/error-msg";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 import { BlueprintIcon } from "@/components/icons/blueprint-icon";
+import { useWorkspaceContext } from "@/context/workspace-context";
 
 interface BlueprintPageProps {
   params: {
@@ -45,21 +45,12 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
     redirect("/auth/sign-in");
   }
 
-  const userId = user.sub;
-
   const { blueprints, error } = await getProjectBlueprints(projectId, supabase);
 
   if (error) {
     return <ErrorMsg message="Failed to load blueprints" />;
   }
 
-  // todo: make this a context provider if used in multiple places
-  const { isActive, author_id } = await getProjectStatusAndAuthor(
-    projectId,
-    supabase,
-  );
-
-  const isOwner = author_id === userId;
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -82,9 +73,8 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
                 </p>
               </div>
             </div>
-            {isOwner && isActive && (
               <CreateBlueprintBtns projectId={projectId} />
-            )}
+            
           </div>
         </div>
       </div>
@@ -93,8 +83,7 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
         <UserBlueprintsList
           blueprints={blueprints}
           projectId={projectId}
-          isOwner={isOwner}
-          isActive={isActive}
+       
         />
       </div>
     </div>

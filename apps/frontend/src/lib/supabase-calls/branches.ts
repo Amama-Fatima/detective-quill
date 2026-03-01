@@ -66,3 +66,20 @@ export async function getNumberOfBranches(
 
   return data?.length || 0;
 }
+
+export async function getBranchById(
+  branchId: string,
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<{ branch: Branch | null; error: string | null }> {
+  const { data, error } = await supabase
+    .from("branches")
+    .select("*")
+    .eq("id", branchId)
+    .single();
+
+  if (error || !data) {
+    return { branch: null, error: error ? error.message : "Branch not found" };
+  }
+
+  return { branch: data, error: null };
+}

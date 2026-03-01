@@ -4,7 +4,6 @@ import { getEditorWorkspaceData } from "@/lib/supabase-calls/editor-workspace";
 import TextEditorLayoutWrapper from "./text-editor-layout-wrapper";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
-import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 
 interface TextEditorLayoutProps {
@@ -25,16 +24,12 @@ export default async function TextEditorLayout({
     redirect("/auth/sign-in");
   }
 
-  const userId = user.sub;
-  const { isActive, author_id } = await getProjectStatusAndAuthor(
-    projectId,
-    supabase,
-  );
-
-  const isOwner = author_id === userId;
   try {
-    const { project, nodes, currentNode, activeBranchId } =
-      await getEditorWorkspaceData(supabase, projectId, nodeId);
+    const { project, nodes, currentNode } = await getEditorWorkspaceData(
+      supabase,
+      projectId,
+      nodeId,
+    );
 
     return (
       <TextEditorLayoutWrapper
@@ -43,9 +38,6 @@ export default async function TextEditorLayout({
         currentNode={currentNode}
         projectId={projectId}
         nodeId={nodeId}
-        isActive={isActive}
-        isOwner={isOwner}
-        activeBranchId={activeBranchId}
       >
         {children}
       </TextEditorLayoutWrapper>

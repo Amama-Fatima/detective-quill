@@ -152,7 +152,7 @@ const MembersTable = ({
                     <TableCell>
                       <Badge
                         variant="secondary"
-                        className="border border-border/60 bg-secondary/90 text-secondary-foreground text-[0.85rem] font-medium"
+                        className={`border border-border ${!member.is_author && "bg-secondary/90 text-secondary-foreground"} text-[0.8rem] font-medium case-file ${member.is_author && "bg-foreground text-background"}`}
                       >
                         {!member.is_author ? "Beta Reader" : "Author"}
                       </Badge>

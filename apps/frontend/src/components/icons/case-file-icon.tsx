@@ -1,10 +1,23 @@
-export const CaseFileIcon = () => (
+import React from "react";
+
+interface CaseFileIconProps {
+  size?: number | string;
+  color?: string;
+  className?: string;
+}
+
+export const CaseFileIcon = ({
+  size = 24,
+  color = "currentColor",
+  className,
+}: CaseFileIconProps) => (
   <svg
-    width="24"
-    height="24"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
-    className="text-primary"
+    className={className}
+    style={{ color }}
   >
     {/* File body */}
     <rect

@@ -4,6 +4,12 @@ import { History, GitBranch } from "lucide-react";
 import Link from "next/link";
 import BranchList from "@/components/branches/branch-list";
 import { Plus } from "lucide-react";
+
+export const metadata = {
+  title: "Manuscript History",
+  description: "History page for managing branches and commits",
+};
+
 interface VersionControlPageProps {
   params: Promise<{
     projectId: string;

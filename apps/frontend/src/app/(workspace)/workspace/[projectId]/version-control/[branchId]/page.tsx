@@ -1,11 +1,16 @@
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import CommitsPaginatedList from "@/components/commits/commits-paginated-list";
 import { getBranchCommits } from "@/lib/supabase-calls/commits";
-import { getBranchesOfProject } from "@/lib/supabase-calls/branches";
+import { getBranchById } from "@/lib/supabase-calls/branches";
 import { GitBranch } from "lucide-react";
 import type { Commit } from "@detective-quill/shared-types";
 import { notFound } from "next/navigation";
 import BranchCommitsHeader from "@/components/branches/branch-commits-header";
+
+export const metadata = {
+  title: "Branch Commits",
+  description: "View the list of commits for a specific branch",
+};
 
 interface BranchCommitsPageProps {
   params: Promise<{
@@ -20,17 +25,12 @@ export default async function BranchCommitsPage({
   const { projectId, branchId } = await params;
   const supabase = await createSupabaseServerClient();
 
-  const { branches, error: branchesError } = await getBranchesOfProject(
-    projectId,
+  const { branch, error: branchError } = await getBranchById(
+    branchId,
     supabase,
   );
 
-  if (branchesError || !branches) {
-    notFound();
-  }
-
-  const branch = branches.find((item) => item.id === branchId);
-  if (!branch) {
+  if (branchError || !branch) {
     notFound();
   }
 

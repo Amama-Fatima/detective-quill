@@ -5,6 +5,7 @@ import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
+import { useWorkspaceContext } from "@/context/workspace-context";
 
 export default function CreateBlueprintBtns({
   projectId,
@@ -28,11 +29,20 @@ export default function CreateBlueprintBtns({
     }
   };
 
+  const { isOwner, isActive } = useWorkspaceContext();
+
+  if (!isOwner || !isActive) {
+    return null;
+  }
+
   return (
     <div>
       <Popover>
         <PopoverTrigger asChild>
-          <Button className="bg-primary shadow-lg cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]" disabled={loading}>
+          <Button
+            className="bg-primary shadow-lg cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]"
+            disabled={loading}
+          >
             <Plus className="h-5 w-5 mr-2" />
             Create New Blueprint
           </Button>

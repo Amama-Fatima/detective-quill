@@ -51,7 +51,7 @@ export default function HeroSection() {
       <div className="relative z-[2]">
         <div className="inline-flex items-center gap-2 bg-accent rounded-full px-[14px] py-[6px] mb-[28px]">
           <CasePinIcon />
-          <span className="noir-text text-[12px] uppercase tracking-[0.08em] text-primary">
+          <span className="case-file font-bold text-[14px] tracking-tight uppercase tracking-[0.08em] text-primary">
             The Writer&apos;s Studio
           </span>
         </div>
@@ -129,8 +129,8 @@ export default function HeroSection() {
             ))}
           </div>
 
-          <span className="font-[Georgia,serif] text-[13px] text-muted-foreground noir-text">
-            Loved by <strong className="text-primary">2,400+</strong> crime
+          <span className="text-[15px] italic text-muted-foreground noir-text">
+            Loved by <strong className="text-primary">1,200+</strong> crime
             fiction writers
           </span>
         </div>

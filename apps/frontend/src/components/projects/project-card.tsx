@@ -71,7 +71,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </CardHeader>
 
           <CardContent className="pt-0">
-            <p className="text-sm text-muted-foreground noir-text text-[1rem] mb-4 line-clamp-2 italic">
+            <p className="text-sm text-muted-foreground noir-text text-[1rem] mb-4 line-clamp-2 italic min-h-[70px]">
               {project.description || "No case summary available..."}
             </p>
 

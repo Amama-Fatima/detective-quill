@@ -20,13 +20,13 @@ async function getEditorWorkspaceData(
 }> {
   try {
     const [projectResult, activeBranchResult] = await Promise.allSettled([
-      fetchProject(supabase, projectId),
+      getProjectById(projectId, supabase),
       fetchActiveBranchId(supabase, projectId),
     ]);
 
     // Handle project result
     if (projectResult.status === "rejected") {
-      console.error("Failed to fetch project:", projectResult.reason);
+      console.error("Failed to fetch project");
       notFound();
     }
 
@@ -52,7 +52,7 @@ async function getEditorWorkspaceData(
     const currentNode =
       nodeResult.status === "fulfilled" ? nodeResult.value : null;
     return {
-      project: projectResult.value,
+      project: projectResult.value.project!,
       nodes: nodesResult.value,
       currentNode,
       activeBranchId,
@@ -63,21 +63,24 @@ async function getEditorWorkspaceData(
   }
 }
 
-async function fetchProject(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+async function getProjectById(
   projectId: string,
-): Promise<Project> {
-  const { data, error } = await supabase
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<{ project: Project | null; error: string | null }> {
+  const { data: project, error } = await supabase
     .from("projects")
     .select("*")
     .eq("id", projectId)
     .single();
 
-  if (error || !data) {
-    throw new Error("Project not found");
+  if (error || !project) {
+    return {
+      project: null,
+      error: error ? error.message : "Project not found",
+    };
   }
 
-  return data;
+  return { project, error: null };
 }
 
 async function fetchProjectTree(
@@ -227,8 +230,9 @@ async function fetchProjectTitle(
 
 export {
   getEditorWorkspaceData,
-  fetchProject,
+  getProjectById,
   fetchProjectTree,
+  fetchActiveBranchId,
   fetchNode,
   fetchProjectTitle,
 };

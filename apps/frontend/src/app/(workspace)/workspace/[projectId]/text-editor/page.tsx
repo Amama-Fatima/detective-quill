@@ -1,10 +1,16 @@
 // todo: you get error cz of using button and redirect on server side i think, so fix this
 
-import { fetchProject } from "@/lib/supabase-calls/editor-workspace";
+import { getProjectById } from "@/lib/supabase-calls/editor-workspace";
 import { createSupabaseServerClient } from "@/supabase/server-client";
-import { FileText, FolderOpen } from "lucide-react";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getUserFromCookie } from "@/lib/utils/get-user";
+import ErrorMsg from "@/components/error-msg";
+import { CaseFileIcon } from "@/components/icons/case-file-icon";
+
+export const metadata = {
+  title: "Text Editor",
+  description: "Text Editor page for editing text-based nodes",
+};
 
 interface ProjectPageProps {
   params: Promise<{
@@ -22,37 +28,24 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     redirect("/auth/sign-in");
   }
 
+  const { project, error: projectError } = await getProjectById(
+    projectId,
+    supabase,
+  );
 
-  let project;
+  if (projectError) {
+    return <ErrorMsg message="Error fetching project" />;
+  }
 
-  try {
-    project = await fetchProject(supabase, projectId);
-  } catch (error) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="rounded-full bg-muted p-6">
-            <FileText className="h-12 w-12 text-muted-foreground" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="myster-title text-xl font-semibold">
-              Project not found
-            </h2>
-            <p className="noir-text text-sm text-muted-foreground">
-              The project you're looking for doesn't exist or you don't have
-              access to it.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+  if (!project) {
+    return notFound();
   }
 
   return (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex h-full items-center justify-center ">
       <div className="text-center space-y-6 max-w-md">
-        <div className="rounded-full bg-primary/10 p-8">
-          <FolderOpen className="h-16 w-16 text-primary mx-auto" />
+        <div className="rounded-full bg-primary text-background mx-auto h-20 w-20 flex items-center justify-center">
+          <CaseFileIcon size={42} className="block" />
         </div>
 
         <div className="space-y-2">
@@ -63,7 +56,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </div>
 
         <div className="space-y-4">
-          <p className="noir-text text-sm text-muted-foreground">
+          <p className="noir-text text-md text-muted-foreground">
             Select a file from the sidebar to start editing, or create a new
             file to begin writing.
           </p>

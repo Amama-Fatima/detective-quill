@@ -20,9 +20,18 @@ export default async function CasesPage() {
   if (!user || !user.sub) {
     redirect("/auth/sign-in");
   }
-  const { projects, error } = await getUserProjects(user.sub, supabase);
-  const { projects: invitedProjects, error: invitedError } =
-    await getInvitedProjects(user.sub, supabase);
+  // const { projects, error } = await getUserProjects(user.sub, supabase);
+  // const { projects: invitedProjects, error: invitedError } =
+  //   await getInvitedProjects(user.sub, supabase);
+
+  // fetch in parallel
+  const [
+    { projects, error },
+    { projects: invitedProjects, error: invitedError },
+  ] = await Promise.all([
+    getUserProjects(user.sub, supabase),
+    getInvitedProjects(user.sub, supabase),
+  ]);
 
   if (error) {
     return <ErrorMsg message="Failed to load projects" />;
