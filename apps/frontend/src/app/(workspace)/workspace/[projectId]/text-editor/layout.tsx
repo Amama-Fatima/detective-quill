@@ -23,18 +23,14 @@ export async function generateMetadata({
 
 interface WorkspaceLayoutPageProps {
   children: React.ReactNode;
-  params: Promise<{ projectId: string; nodeId: string | undefined }>; // params is now a Promise
+  params: Promise<{ projectId: string }>;
 }
 
 export default async function Layout({
   children,
   params,
 }: WorkspaceLayoutPageProps) {
-  const { projectId, nodeId } = await params;
+  const { projectId } = await params;
 
-  return (
-    <TextEditorLayout projectId={projectId} nodeId={nodeId}>
-      {children}
-    </TextEditorLayout>
-  );
+  return <TextEditorLayout projectId={projectId}>{children}</TextEditorLayout>;
 }

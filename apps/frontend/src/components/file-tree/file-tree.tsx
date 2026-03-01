@@ -48,7 +48,6 @@ const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
   const {
     nodes,
     isLoading,
-    isFetching,
     createNodeMutation,
     renameNodeMutation,
     moveNodeMutation,
@@ -84,10 +83,11 @@ const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
     closeDialogs,
   } = useFileTreeState({ nodes });
 
-  const { navigateToNode, handleSearchSelect } = useFileTreeNavigation({
-    projectId,
-    nodes,
-  });
+  const { navigateToNode, prefetchNodeRoute, handleSearchSelect } =
+    useFileTreeNavigation({
+      projectId,
+      nodes,
+    });
 
   const handleCreateNode = async (
     name: string,
@@ -128,7 +128,7 @@ const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
     closeDialogs();
   };
 
-  if (isLoading || isFetching) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -236,6 +236,7 @@ const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
                 element={element}
                 selectedNodeId={selectedNodeId}
                 onNodeSelect={navigateToNode}
+                onNodeHover={prefetchNodeRoute}
                 onRenameNode={openRenameDialog}
                 onMoveNode={openMoveDialog}
                 onDeleteNode={openDeleteDialog}

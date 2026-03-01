@@ -1,33 +1,19 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { FsNodeTreeResponse, FsNode } from "@detective-quill/shared-types";
-import {
-  MoreHorizontal,
-  Edit,
-  FolderX,
-  Trash2,
-} from "lucide-react";
 import { TreeViewElement } from "@/lib/types/workspace";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils/utils";
 import { File, Folder as TreeFolder } from "../magicui/file-tree";
 import { findNodeById } from "@/lib/utils/file-tree-utils";
 import { useWorkspaceContext } from "@/context/workspace-context";
 import { CaseFileIcon } from "../icons/case-file-icon";
-import { DeleteIcon } from "../icons/delete-icon";
-import { EditIcon } from "../icons/edit-icon";
+import NodeActionsDropdown from "./node-actions-dropdown";
 
 const TreeItem = ({
   element,
   selectedNodeId,
   onNodeSelect,
+  onNodeHover,
   onRenameNode,
   onMoveNode,
   onDeleteNode,
@@ -38,6 +24,7 @@ const TreeItem = ({
   element: TreeViewElement;
   selectedNodeId: string;
   onNodeSelect: (nodeId: string) => void;
+  onNodeHover: (nodeId: string) => void;
   onRenameNode: (node: FsNode) => void;
   onMoveNode: (node: FsNode) => void;
   onDeleteNode: (node: FsNode) => void;
@@ -51,7 +38,6 @@ const TreeItem = ({
   const isHovered = hoveredFolder === element.id;
 
   if (element.isSelectable === false) {
-    // This is a folder
     return (
       <div
         className="relative group"
@@ -69,6 +55,7 @@ const TreeItem = ({
               element={child}
               selectedNodeId={selectedNodeId}
               onNodeSelect={onNodeSelect}
+              onNodeHover={onNodeHover}
               onRenameNode={onRenameNode}
               onMoveNode={onMoveNode}
               onDeleteNode={onDeleteNode}
@@ -79,134 +66,64 @@ const TreeItem = ({
           ))}
         </TreeFolder>
 
-        {/* Context Menu */}
         <div
           className={cn(
             "absolute top-1 right-2 transition-opacity duration-200",
             isHovered ? "opacity-100" : "opacity-0",
           )}
         >
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5 shrink-0 cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-                disabled={!isOwner || !isActive}
-              >
-                <MoreHorizontal className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                onClick={() => node && onRenameNode(node as FsNode)}
-                className="cursor-pointer"
-                disabled={!isOwner || !isActive}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Rename
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => node && onMoveNode(node as FsNode)}
-                className="cursor-pointer"
-                disabled={!isOwner || !isActive}
-              >
-                <FolderX className="h-6 w-6 mr-2" />
-                Move
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive cursor-pointer"
-                onClick={() => onDeleteNode(node as FsNode)}
-                disabled={!isOwner || !isActive}
-              >
-                <DeleteIcon className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <NodeActionsDropdown
+            node={(node as FsNode) ?? null}
+            isOwner={isOwner}
+            isActive={isActive}
+            onRenameNode={onRenameNode}
+            onMoveNode={onMoveNode}
+            onDeleteNode={onDeleteNode}
+          />
         </div>
       </div>
     );
-  } else {
-    // This is a file
-    return (
-      <File
-        value={element.id}
-        isSelect={isSelected}
-        handleSelect={onNodeSelect}
-        className={cn(
-          "px-2 py-1 group flex items-center justify-between",
-          isSelected && "bg-primary/10 text-primary",
-        )}
-        fileIcon={<CaseFileIcon />}
-        asChild
-      >
-        <div
-          onClick={() => onNodeSelect(element.id)}
-          className="flex items-center justify-between w-full cursor-pointer"
-        >
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <CaseFileIcon />
-            <span className="truncate">{element.name}</span>
-            {node?.word_count && node.word_count > 0 && (
-              <span className="text-xs text-muted-foreground">
-                {node.word_count} words
-              </span>
-            )}
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5 opacity-0 group-hover:opacity-100 shrink-0 cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-                disabled={!isOwner || !isActive}
-              >
-                <MoreHorizontal className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                onClick={() => node && onRenameNode(node as FsNode)}
-                className="cursor-pointer"
-                disabled={!isOwner || !isActive}
-              >
-                <EditIcon className="h-4 w-4 mr-2" />
-                Rename
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => node && onMoveNode(node as FsNode)}
-                className="cursor-pointer"
-                disabled={!isOwner || !isActive}
-              >
-                <FolderX className="h-4 w-4 mr-2" />
-                Move
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive cursor-pointer"
-                onClick={() => onDeleteNode(node as FsNode)}
-                disabled={!isOwner || !isActive}
-              >
-                <DeleteIcon className="!size-5" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </File>
-    );
   }
+
+  return (
+    <File
+      value={element.id}
+      isSelect={isSelected}
+      handleSelect={onNodeSelect}
+      className={cn(
+        "px-2 py-1 group flex items-center justify-between",
+        isSelected && "bg-primary/10 text-primary",
+      )}
+      fileIcon={<CaseFileIcon />}
+      asChild
+    >
+      <div
+        onMouseEnter={() => onNodeHover(element.id)}
+        onClick={() => onNodeSelect(element.id)}
+        className="flex items-center justify-between w-full cursor-pointer"
+      >
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <CaseFileIcon />
+          <span className="truncate">{element.name}</span>
+          {node?.word_count && node.word_count > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {node.word_count} words
+            </span>
+          )}
+        </div>
+
+        <NodeActionsDropdown
+          node={(node as FsNode) ?? null}
+          isOwner={isOwner}
+          isActive={isActive}
+          onRenameNode={onRenameNode}
+          onMoveNode={onMoveNode}
+          onDeleteNode={onDeleteNode}
+          triggerClassName="h-5 w-5 opacity-0 group-hover:opacity-100 shrink-0 cursor-pointer"
+        />
+      </div>
+    </File>
+  );
 };
 
 export default TreeItem;

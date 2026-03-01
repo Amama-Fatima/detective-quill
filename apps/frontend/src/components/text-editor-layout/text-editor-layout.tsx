@@ -9,13 +9,11 @@ import { getUserFromCookie } from "@/lib/utils/get-user";
 interface TextEditorLayoutProps {
   children: React.ReactNode;
   projectId: string;
-  nodeId?: string;
 }
 
 export default async function TextEditorLayout({
   children,
   projectId,
-  nodeId,
 }: TextEditorLayoutProps) {
   const supabase = await createSupabaseServerClient();
   const user = await getUserFromCookie();
@@ -25,19 +23,16 @@ export default async function TextEditorLayout({
   }
 
   try {
-    const { project, nodes, currentNode } = await getEditorWorkspaceData(
+    const { project, nodes } = await getEditorWorkspaceData(
       supabase,
       projectId,
-      nodeId,
     );
 
     return (
       <TextEditorLayoutWrapper
         project={project}
         initialNodes={nodes}
-        currentNode={currentNode}
         projectId={projectId}
-        nodeId={nodeId}
       >
         {children}
       </TextEditorLayoutWrapper>

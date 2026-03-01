@@ -19,7 +19,14 @@ export const useFileTreeNavigation = ({
     (nodeId: string) => {
       router.push(`/workspace/${projectId}/text-editor/${nodeId}`);
     },
-    [router, projectId]
+    [router, projectId],
+  );
+
+  const prefetchNodeRoute = useCallback(
+    (nodeId: string) => {
+      router.prefetch(`/workspace/${projectId}/text-editor/${nodeId}`);
+    },
+    [router, projectId],
   );
 
   const handleSearchSelect = useCallback(
@@ -33,11 +40,12 @@ export const useFileTreeNavigation = ({
         }
       }
     },
-    [nodes, navigateToNode]
+    [nodes, navigateToNode],
   );
 
   return {
     navigateToNode,
+    prefetchNodeRoute,
     handleSearchSelect,
   };
 };

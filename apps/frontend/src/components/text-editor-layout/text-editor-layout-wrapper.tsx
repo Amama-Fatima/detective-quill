@@ -4,28 +4,20 @@ import React, { useState } from "react";
 import { useFocusModeStore } from "@/stores/use-focus-mode-store";
 import TextEditorSidebar from "@/components/text-editor-layout/text-editor-sidebar";
 import TextEditorHeaderBar from "@/components/text-editor-layout/text-editor-header-bar";
-import {
-  FsNodeTreeResponse,
-  FsNode,
-  Project,
-} from "@detective-quill/shared-types";
+import { FsNodeTreeResponse, Project } from "@detective-quill/shared-types";
 
 interface TextEditorLayoutWrapperProps {
   children: React.ReactNode;
   project: Project;
   initialNodes: FsNodeTreeResponse[];
-  currentNode: FsNode | null;
   projectId: string;
-  nodeId?: string;
 }
 
 export default function TextEditorLayoutWrapper({
   children,
   project,
   initialNodes,
-  currentNode,
   projectId,
-  nodeId,
 }: TextEditorLayoutWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -54,8 +46,6 @@ export default function TextEditorLayoutWrapper({
             sidebarOpen={sidebarOpen}
             onSidebarToggle={handleSidebarToggle}
             projectName={project.title}
-            nodeId={nodeId}
-            currentNodePath={currentNode?.path ?? undefined}
           />
         )}
 
