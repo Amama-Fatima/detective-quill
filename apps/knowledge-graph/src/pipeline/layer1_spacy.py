@@ -19,6 +19,12 @@ def _resolve_coreferences(doc) -> str:
         best_mention = chain[chain.most_specific_mention_index]
         primary_text = " ".join(doc[i].text for i in best_mention)
 
+        # Only replace pronouns when the referent is a proper noun
+        # Prevents "accountant", "detective" etc. becoming replacements
+        primary_is_proper = any(doc[i].pos_ == "PROPN" for i in best_mention)
+        if not primary_is_proper:
+            continue
+
         for mention in chain:
             mention_start = mention[0]
             first_token = doc[mention_start]
@@ -27,7 +33,7 @@ def _resolve_coreferences(doc) -> str:
                 continue
 
             is_pronoun = first_token.pos_ == "PRON"
-            is_possessive = "Poss=Yes" in str(first_token.morph)  # ← fixed
+            is_possessive = "Poss=Yes" in str(first_token.morph)
 
             if is_pronoun and not is_possessive:
                 replacements[mention_start] = primary_text
@@ -48,7 +54,6 @@ def _resolve_coreferences(doc) -> str:
             result.append(replacements[token.i] + token.whitespace_)
 
     return "".join(result)
-
 
 class SpacyEntityExtractor:
 

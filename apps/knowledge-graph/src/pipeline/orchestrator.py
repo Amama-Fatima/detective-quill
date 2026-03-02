@@ -16,7 +16,7 @@ class NarrativeAnalysisPipeline:
         if nlp is not None:
             self.nlp = nlp
         else:
-            self.nlp = spacy.load("en_core_web_sm")
+            self.nlp = spacy.load("en_core_web_lg")
 
     def process_scene(self, scene_text: str, verbose: bool = True) -> PipelineResult:
 

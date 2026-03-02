@@ -19,7 +19,7 @@ class Settings:
     MODEL_MAX_LENGTH: int = int(os.environ.get("MODEL_MAX_LENGTH", "2048"))
     MODEL_TEMPERATURE: float = float(os.environ.get("MODEL_TEMPERATURE", "0.1"))
 
-    SPACY_MODEL: str = os.environ.get("SPACY_MODEL", "en_core_web_sm")
+    SPACY_MODEL: str = os.environ.get("SPACY_MODEL", "en_core_web_lg")
 
     FILTERED_ENTITY_TYPES: list = os.environ.get(
         "FILTERED_ENTITY_TYPES", "TIME,DATE,CARDINAL,MONEY,PERCENT"
