@@ -10,11 +10,15 @@ import {
 import { CommitsService } from "./commits.service";
 import { CreateCommitDto } from "./dto/commits.dto";
 import { ApiResponse } from "@detective-quill/shared-types";
+import { QueueService } from "src/queue/queue.service";
 
 @Controller(":projectId/commits")
 @UseGuards(AuthGuard)
 export class CommitsController {
-  constructor(private readonly commitsService: CommitsService) {}
+  constructor(
+    private readonly commitsService: CommitsService,
+    private readonly queueService: QueueService,
+  ) {}
 
   @Post()
   async createCommit(
@@ -23,15 +27,15 @@ export class CommitsController {
     @Request() req: any,
   ) {
     const userId = req.user.sub;
-    const commit = await this.commitsService.createCommit(
-      createCommitDto,
+    this.queueService.sendCreateCommitJob({
       projectId,
       userId,
-    );
+      createCommitDto,
+    });
+
     return {
       success: true,
-      data: commit,
-      message: "Commit created successfully",
+      message: "Commit job queued successfully",
     };
   }
 
@@ -76,11 +80,14 @@ export class CommitsController {
       deletedSnapshotsCount: number;
     }>
   > {
-    const data = await this.commitsService.revertToCommit(commitId, projectId);
+    this.queueService.sendRevertCommitJob({
+      projectId,
+      commitId,
+    });
+
     return {
       success: true,
-      data,
-      message: "Branch reverted successfully",
+      message: "Revert commit job queued successfully",
     };
   }
 
