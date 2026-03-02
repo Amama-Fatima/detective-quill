@@ -31,7 +31,7 @@ class Settings:
     LOG_LEVEL: str = os.environ.get("LOG_LEVEL", "INFO")
 
     NEO4J_URI: Optional[str] = os.environ.get("NEO4J_URI", None)
-    NEO4J_USER: Optional[str] = os.environ.get("NEO4J_USER", None)
+    NEO4J_USERNAME: Optional[str] = os.environ.get("NEO4J_USERNAME", None)
     NEO4J_PASSWORD: Optional[str] = os.environ.get("NEO4J_PASSWORD", None)
 
 

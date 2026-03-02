@@ -42,7 +42,8 @@ image = (
 # ─────────────────────────────────────────────
 
 secrets = [
-    modal.Secret.from_name("detective-quill-secrets")
+    modal.Secret.from_name("detective-quill-secrets"),
+    modal.Secret.from_name("neo4j-secret")
 ]
 
 # ─────────────────────────────────────────────
@@ -90,20 +91,25 @@ class KnowledgeGraphWorker:
     def process_job(self, job_id: str, scene_text: str, user_id: str) -> dict:
         import time
         self.logger.info(f"Processing job {job_id}")
+        self.logger.info(f"Scene length: {len(scene_text)} characters")
         start_time = time.time()
 
         try:
             result = self.pipeline.process_scene(scene_text=scene_text)
+            self.logger.info(f"Pipeline complete — {len(result.entities)} entities, {len(result.relationships)} relationships")
 
+            # Layer 5 — persist graph to Neo4j
+            self.logger.info("Starting Layer 5: saving graph to Neo4j...")
             from src.pipeline.layer5_graph import save_graph_layer5
-            save_graph_layer5(
+            graph_result = save_graph_layer5(
                 scene_id=job_id,
                 user_id=user_id,
                 scene_text=scene_text,
-                resolved_text=getattr(result, "resolved_text", scene_text),
+                resolved_text=result.resolved_text,
                 entities=result.entities,
                 relationships=result.relationships,
             )
+            self.logger.info(f"Layer 5 complete: {graph_result}")
 
             elapsed = time.time() - start_time
             self.logger.info(f"Job {job_id} completed in {elapsed:.2f}s")
@@ -117,8 +123,10 @@ class KnowledgeGraphWorker:
             }
 
         except Exception as e:
+            import traceback
             elapsed = time.time() - start_time
             self.logger.error(f"Job {job_id} failed after {elapsed:.2f}s: {e}")
+            self.logger.error(traceback.format_exc())  # full stack trace
             return {
                 "job_id": job_id,
                 "status": "failed",
@@ -126,8 +134,6 @@ class KnowledgeGraphWorker:
                 "error": str(e),
                 "processing_time": f"{elapsed:.2f}s"
             }
-
-
 # ─────────────────────────────────────────────
 # Scheduled Queue Poller
 # ─────────────────────────────────────────────
