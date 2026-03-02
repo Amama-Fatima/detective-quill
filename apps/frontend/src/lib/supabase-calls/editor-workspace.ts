@@ -1,6 +1,7 @@
-// lib/server/workspace-data.ts
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import {
+  buildTreeFromFlat,
+  Database,
   FsNodeTreeResponse,
   FsNode,
   Project,
@@ -15,20 +16,31 @@ async function getEditorWorkspaceData(
   project: Project;
   nodes: FsNodeTreeResponse[];
   currentNode: FsNode | null;
+  activeBranchId: string | null;
 }> {
   try {
-    // Fetch all data in parallel
-    const [projectResult, nodesResult, nodeResult] = await Promise.allSettled([
-      fetchProject(supabase, projectId),
-      fetchProjectTree(supabase, projectId),
-      nodeId ? fetchNode(supabase, nodeId) : Promise.resolve(null),
+    const [projectResult, activeBranchResult] = await Promise.allSettled([
+      getProjectById(projectId, supabase),
+      fetchActiveBranchId(supabase, projectId),
     ]);
 
     // Handle project result
     if (projectResult.status === "rejected") {
-      console.error("Failed to fetch project:", projectResult.reason);
+      console.error("Failed to fetch project");
       notFound();
     }
+
+    const activeBranchId =
+      activeBranchResult.status === "fulfilled"
+        ? activeBranchResult.value
+        : null;
+
+    const [nodesResult, nodeResult] = await Promise.allSettled([
+      fetchProjectTree(supabase, projectId, activeBranchId),
+      nodeId && activeBranchId
+        ? fetchNode(supabase, nodeId, projectId, activeBranchId)
+        : Promise.resolve(null),
+    ]);
 
     // Handle nodes result
     if (nodesResult.status === "rejected") {
@@ -39,11 +51,11 @@ async function getEditorWorkspaceData(
     // Handle node result (optional)
     const currentNode =
       nodeResult.status === "fulfilled" ? nodeResult.value : null;
-
     return {
-      project: projectResult.value,
+      project: projectResult.value.project!,
       nodes: nodesResult.value,
       currentNode,
+      activeBranchId,
     };
   } catch (error) {
     console.error("Error fetching workspace data:", error);
@@ -51,31 +63,40 @@ async function getEditorWorkspaceData(
   }
 }
 
-async function fetchProject(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+async function getProjectById(
   projectId: string,
-): Promise<Project> {
-  const { data, error } = await supabase
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<{ project: Project | null; error: string | null }> {
+  const { data: project, error } = await supabase
     .from("projects")
     .select("*")
     .eq("id", projectId)
     .single();
 
-  if (error || !data) {
-    throw new Error("Project not found");
+  if (error || !project) {
+    return {
+      project: null,
+      error: error ? error.message : "Project not found",
+    };
   }
 
-  return data;
+  return { project, error: null };
 }
 
 async function fetchProjectTree(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   projectId: string,
+  branchId: string | null,
 ): Promise<FsNodeTreeResponse[]> {
+  if (!branchId) {
+    return [];
+  }
+
   const { data: nodes, error } = await supabase
     .from("project_file_tree")
     .select("*")
     .eq("project_id", projectId)
+    .eq("branch_id", branchId)
     .order("depth", { ascending: true })
     .order("sort_order", { ascending: true });
 
@@ -86,9 +107,30 @@ async function fetchProjectTree(
   return buildTreeFromView(nodes || []);
 }
 
+async function fetchActiveBranchId(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  projectId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("branches")
+    .select("id, is_active, project_id")
+    .eq("project_id", projectId)
+    .eq("is_active", true)
+    .single();
+
+  if (error || !data) {
+    // If no active branch is found or there's an error, return null.
+    return null;
+  }
+
+  return data.id;
+}
+
 async function fetchNode(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   nodeId: string,
+  projectId: string,
+  branchId: string,
 ): Promise<FsNode> {
   const { data: node, error } = await supabase
     .from("fs_nodes")
@@ -99,6 +141,8 @@ async function fetchNode(
     `,
     )
     .eq("id", nodeId)
+    .eq("project_id", projectId)
+    .eq("branch_id", branchId)
     .single();
 
   if (error || !node) {
@@ -108,43 +152,65 @@ async function fetchNode(
   return node;
 }
 
-// todo: add type as FsNodeTreeResponse if that is accurate
-function buildTreeFromView(nodes: any[]): FsNodeTreeResponse[] {
-  const nodeMap = new Map<string, FsNodeTreeResponse>();
-  const rootNodes: FsNodeTreeResponse[] = [];
+type ProjectFileTreeRow =
+  Database["public"]["Views"]["project_file_tree"]["Row"];
 
-  nodes.forEach((node) => {
-    nodeMap.set(node.id, {
+type WorkspaceTreeNode = FsNodeTreeResponse & {
+  depth: number | null;
+  children: WorkspaceTreeNode[];
+};
+
+function buildTreeFromView(nodes: ProjectFileTreeRow[]): FsNodeTreeResponse[] {
+  const normalizedNodes: WorkspaceTreeNode[] = nodes
+    .filter(
+      (
+        node,
+      ): node is ProjectFileTreeRow & {
+        id: string;
+        name: string;
+        node_type: "folder" | "file";
+        path: string;
+        created_at: string;
+        updated_at: string;
+      } =>
+        !!node.id &&
+        !!node.name &&
+        !!node.node_type &&
+        !!node.path &&
+        !!node.created_at &&
+        !!node.updated_at,
+    )
+    .map((node) => ({
       id: node.id,
       name: node.name,
       node_type: node.node_type,
+      branch_id: node.branch_id,
       parent_id: node.parent_id,
-      content: node.content,
-      word_count: node.word_count,
-      path: node.path, // ✅ Already calculated by DB
+      content: node.content ?? undefined,
+      word_count: node.word_count ?? 0,
+      path: node.path,
       sort_order: node.sort_order,
+      depth: node.depth,
       created_at: node.created_at,
       updated_at: node.updated_at,
       children: [],
-    });
+    }));
+
+  const tree = buildTreeFromFlat(normalizedNodes, {
+    getId: (node) => node.id,
+    getParentId: (node) => node.parent_id,
+    getDepth: (node) => node.depth,
+    getSortOrder: (node) => node.sort_order,
+    getTieBreaker: (node) => node.name,
   });
 
-  nodes.forEach((node) => {
-    const treeNode = nodeMap.get(node.id);
-    if (!treeNode) return;
+  const stripDepth = (treeNodes: WorkspaceTreeNode[]): FsNodeTreeResponse[] =>
+    treeNodes.map(({ depth: _depth, ...node }) => ({
+      ...node,
+      children: stripDepth(node.children),
+    }));
 
-    if (node.parent_id) {
-      const parent = nodeMap.get(node.parent_id);
-      if (parent) {
-        parent.children = parent.children || [];
-        parent.children.push(treeNode);
-      }
-    } else {
-      rootNodes.push(treeNode);
-    }
-  });
-
-  return rootNodes;
+  return stripDepth(tree);
 }
 
 async function fetchProjectTitle(
@@ -164,8 +230,9 @@ async function fetchProjectTitle(
 
 export {
   getEditorWorkspaceData,
-  fetchProject,
+  getProjectById,
   fetchProjectTree,
+  fetchActiveBranchId,
   fetchNode,
   fetchProjectTitle,
 };

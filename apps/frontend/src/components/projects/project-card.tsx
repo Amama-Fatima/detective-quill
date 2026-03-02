@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, FileText, Clock } from "lucide-react";
 import { Project } from "@detective-quill/shared-types";
 import { Badge } from "../ui/badge";
 import Link from "next/link";
 import { getStatusColor, getStatusIcon } from "@/lib/utils/project-utils";
+import { CaseFileIcon } from "@/components/icons/case-file-icon";
+import { ClockIcon } from "../icons/clock-icon";
+import { CornerOrnamentIcon } from "@/components/icons/corner-ornament-icon";
 
 interface ProjectCardProps {
   project: Project;
@@ -33,14 +35,21 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   }, []);
 
   return (
-    <div ref={cardRef}>
+    <div ref={cardRef} className="h-full">
       {isVisible ? (
-        <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-border hover:-translate-y-2 bg-card shadow-lg">
+        <Card className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-sm border-border bg-card shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+          <div className="pointer-events-none absolute left-0 top-1 text-border/70">
+            <CornerOrnamentIcon className="h-11 w-11 translate-x-0.5 -translate-y-0.5" />
+          </div>
+          <div className="pointer-events-none absolute bottom-1 right-0 text-border/70">
+            <CornerOrnamentIcon className="h-11 w-11 -translate-x-0.5 translate-y-0.5 rotate-180" />
+          </div>
+
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
-                  <BookOpen className="h-5 w-5 text-primary" />
+                  <CaseFileIcon />
                 </div>
                 <div className="flex-1">
                   <CardTitle className="font-serif text-xl group-hover:text-primary transition-colors line-clamp-1">
@@ -62,24 +71,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </CardHeader>
 
           <CardContent className="pt-0">
-            <p className="text-sm text-muted-foreground noir-text text-[1rem] mb-4 line-clamp-2">
+            <p className="text-sm text-muted-foreground noir-text text-[1rem] mb-4 line-clamp-2 italic min-h-[70px]">
               {project.description || "No case summary available..."}
             </p>
 
             <div className="noir-text space-y-3">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center">
-                    <FileText className="h-3 w-3 mr-1" />
-                    Word Count words
-                  </div>
-                  <div className="flex items-center">
-                    <BookOpen className="h-3 w-3 mr-1" />
-                    Chapter number chapters
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="h-3 w-3 mr-1" />
+                <div className="flex items-center gap-2">
+                  <ClockIcon />
                   {project.updated_at}
                 </div>
               </div>

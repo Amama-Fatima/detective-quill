@@ -38,7 +38,7 @@ export default function ChangeStateDropDown({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="border-2 border-secondary-foreground bg-secondary text-secondary-foreground cursor-pointer hover:text-secondary hover:bg-secondary-foreground shadow-lg">
-            {loading ? "Loading..." : currentStatus.toUpperCase()}
+            {loading ? "Loading..." : "Change State"}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 bg-secondary" align="start">
@@ -49,22 +49,37 @@ export default function ChangeStateDropDown({
             <DropdownMenuItem
               onClick={() => handleChangeState("active")}
               disabled={currentStatus === "active" || loading}
-              className="disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              className="disabled:opacity-90 cursor-pointer disabled:cursor-not-allowed"
             >
-              Active
+              {
+                currentStatus === "active" && (
+                  <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-green-500" />
+                )
+              }
+              Active 
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleChangeState("completed")}
               disabled={currentStatus === "completed" || loading}
-              className="disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              className="disabled:opacity-90 cursor-pointer disabled:cursor-not-allowed"
             >
+              {
+                currentStatus === "completed" && (
+                  <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-green-500" />
+                )
+              }
               Completed
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleChangeState("archived")}
               disabled={currentStatus === "archived" || loading}
-              className="disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              className="disabled:opacity-90 cursor-pointer disabled:cursor-not-allowed"
             >
+              {
+                currentStatus === "archived" && (
+                  <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-green-500" />
+                )
+              }
               Archived
             </DropdownMenuItem>
           </DropdownMenuGroup>

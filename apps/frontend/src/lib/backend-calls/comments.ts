@@ -3,7 +3,6 @@ import {
   CreateCommentDto,
   UpdateCommentDto,
   CommentStats,
-  DeleteResponse,
   ApiResponse,
 } from "@detective-quill/shared-types";
 
@@ -25,7 +24,6 @@ async function makeAuthenticatedRequest<T>(
   });
 
   if (!response.ok) {
-    console.log("API request failed:", response);
     throw new Error(
       `API request failed: ${response.status} ${response.statusText}`,
     );
@@ -39,10 +37,14 @@ export async function createComment(
   data: CreateCommentDto,
   accessToken: string,
 ): Promise<ApiResponse<CommentResponse>> {
-  return makeAuthenticatedRequest<CommentResponse>(`/${data.project_id}/comments`, accessToken, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  return makeAuthenticatedRequest<CommentResponse>(
+    `/${data.project_id}/comments`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    },
+  );
 }
 
 export async function getCommentsByNode(
@@ -91,8 +93,8 @@ export async function deleteComment(
   projectId: string,
   commentId: string,
   accessToken: string,
-): Promise<ApiResponse<DeleteResponse>> {
-  return makeAuthenticatedRequest<DeleteResponse>(
+): Promise<ApiResponse<void>> {
+  return makeAuthenticatedRequest<void>(
     `/${projectId}/comments/${commentId}`,
     accessToken,
     {

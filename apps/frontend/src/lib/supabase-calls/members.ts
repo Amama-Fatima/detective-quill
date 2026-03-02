@@ -38,11 +38,13 @@ export async function getProjectMembers(
       full_name: profile?.full_name ?? profile?.username ?? null,
       user_name: profile?.username ?? null,
       email: profile?.email,
-      avatar: profile?.avatar_url ?? null,
+      avatar_url: profile?.avatar_url ?? null,
       created_at: member.created_at,
       is_author: member.is_author,
     };
   });
+
+  console.log("Fetched members:", members);
 
   return { members: members as unknown as ProjectMember[], error: null };
 }

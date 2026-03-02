@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { DeleteIcon } from "@/components/icons/delete-icon";
 
 interface DeleteBlueprintButtonProps {
   blueprintId: string;
@@ -37,7 +38,9 @@ export const DeleteBlueprintButton = ({
         onOpenChange={(open) => setOpenDialogId(open ? blueprintId : null)}
       >
         <DialogTrigger asChild>
-          <Trash className="h-5 w-5 cursor-pointer  hover:text-red-600" />
+          <div className="cursor-pointer rounded-md p-1 hover:bg-accent">
+            <DeleteIcon />
+          </div>
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>

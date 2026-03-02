@@ -21,7 +21,6 @@ export class EmailController {
 
   @Post("test")
   testBody(@Body() body: any) {
-    console.log("TEST BODY:", body);
     return body;
   }
 

@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/auth-context";
-import { Inter, Crimson_Text, Geist_Mono } from "next/font/google";
+import {
+  Inter,
+  Crimson_Text,
+  Geist_Mono,
+  Playfair_Display,
+} from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/header";
 import TanstackProvider from "@/lib/providers/tanstack-provider";
 
 const crimsonText = Crimson_Text({
@@ -24,6 +28,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair-display",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Detective's Quill - Crime Fiction Writing Platform",
   description:
@@ -38,11 +50,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${crimsonText.variable} ${inter.variable} ${geistMono.variable} font-serif antialiased`}
+        className={`${crimsonText.variable} ${inter.variable} ${geistMono.variable} ${playfairDisplay.variable} font-serif antialiased`}
       >
         <TanstackProvider>
           <AuthProvider>
-            <Header />
             {children}
             <Toaster richColors position="top-right" />
           </AuthProvider>

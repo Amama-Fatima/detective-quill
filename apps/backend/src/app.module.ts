@@ -15,6 +15,9 @@ import { InvitationsModule } from "./invitations/invitations.module";
 import { EmailModule } from "./email/email.module";
 import { QueueModule } from "./queue/queue.module";
 import { NlpAnalysisModule } from "./nlp-analysis/nlp-analysis.module";
+import { CommitsModule } from "./commits/commits.module";
+import { ContributionsModule } from "./contributions/contributions.module";
+
 @Module({
   controllers: [AppController],
   providers: [AppService, ProjectsService],
@@ -46,6 +49,8 @@ import { NlpAnalysisModule } from "./nlp-analysis/nlp-analysis.module";
     InvitationsModule,
     EmailModule,
     QueueModule,
+    CommitsModule,
+    ContributionsModule,
     NlpAnalysisModule,
   ],
 })

@@ -1,9 +1,26 @@
+import type { Metadata } from "next";
+import Navbar from "@/components/landing/navbar";
+import HeroSection from "@/components/landing/hero-section";
+import FeaturesSection from "@/components/landing/features-section";
+import TestimonialsSection from "@/components/landing/testimonials-section";
+import CtaSection from "@/components/landing/cta-section";
+import Footer from "@/components/landing/footer";
+
+export const metadata: Metadata = {
+  title: "Detective's Quill — The Writing Studio for Crime Fiction",
+  description:
+    "Draft, plot, and investigate. A writing platform built for detective fiction authors.",
+};
+
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <h1 className="mystery-title">The Case of the Missing Manuscript</h1>
-      <p className="noir-text">It was a dark and stormy night...</p>
-      <span className="case-file">Case #2024-001</span>
+    <div className="bg-background font-serif">
+      <Navbar />
+      <HeroSection />
+      <FeaturesSection />
+      <TestimonialsSection />
+      <CtaSection />
+      <Footer />
     </div>
   );
 }

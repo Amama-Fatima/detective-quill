@@ -5,19 +5,16 @@ import React, { useState } from "react";
 import { FileText } from "lucide-react";
 import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 import BlueprintCard from "./blueprint-card";
+import { useWorkspaceContext } from "@/context/workspace-context";
 
 interface UserBlueprintsListProps {
   blueprints: Blueprint[];
   projectId: string;
-  isOwner: boolean;
-  isActive: boolean;
 }
 
 export const UserBlueprintsList = ({
   blueprints: initialBlueprints,
   projectId,
-  isOwner,
-  isActive,
 }: UserBlueprintsListProps) => {
   const [blueprints, setBlueprints] = useState<Blueprint[]>(initialBlueprints);
 
@@ -28,6 +25,8 @@ export const UserBlueprintsList = ({
     await deleteMutation.mutateAsync(blueprintId);
     setBlueprints((prev) => prev.filter((bp) => bp.id !== blueprintId));
   };
+
+  const { isOwner, isActive } = useWorkspaceContext();
 
   if (blueprints.length === 0) {
     return (

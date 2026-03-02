@@ -9,7 +9,6 @@ import {
   UpdateProjectDto,
   Project,
   ProjectStats,
-  DeleteResponse,
 } from "@detective-quill/shared-types";
 
 // todo: add transactions where needed
@@ -104,10 +103,7 @@ export class ProjectsService {
     return data;
   }
 
-  async deleteProject(
-    projectId: string,
-    userId: string,
-  ): Promise<DeleteResponse> {
+  async deleteProject(projectId: string, userId: string): Promise<void> {
     const supabase = this.supabaseService.client;
 
     await this.verifyProjectOwnership(projectId, userId);
@@ -129,7 +125,7 @@ export class ProjectsService {
       throw new Error(`Failed to delete project: ${error.message}`);
     }
 
-    return { message: "Project permanently deleted" };
+    return;
   }
 
   async restoreProject(projectId: string, userId: string): Promise<Project> {
@@ -252,6 +248,8 @@ export class ProjectsService {
       throw new NotFoundException("Project not found");
     }
 
+    console.log("Project author ID:", data.author_id, "User ID:", userId);
+
     if (data.author_id !== userId) {
       throw new ForbiddenException(
         "Only the project owner can perform this action",
@@ -260,7 +258,6 @@ export class ProjectsService {
   }
 
   async fetchProjectTitle(projectId: string): Promise<string> {
-    console.log("Fetching project title for projectId:", projectId);
     const supabase = this.supabaseService.client;
     const { data, error } = await supabase
       .from("projects")

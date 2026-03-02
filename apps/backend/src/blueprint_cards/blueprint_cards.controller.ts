@@ -34,7 +34,6 @@ export class BlueprintCardsController {
     @Body(new ParseArrayPipe({ items: CreateBlueprintCardDto }))
     cardData: CreateBlueprintCardDto[],
   ): Promise<ApiResponse<BlueprintCard[]>> {
-    console.log("Received request to create blueprint cards:");
 
     await this.projectsService.verifyProjectOwnership(
       projectId,

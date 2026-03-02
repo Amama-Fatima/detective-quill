@@ -22,7 +22,6 @@ import { AuthGuard } from "../auth/auth.guard";
 import {
   Project,
   ProjectStats,
-  DeleteResponse,
   ApiResponse,
 } from "@detective-quill/shared-types";
 
@@ -106,9 +105,9 @@ export class ProjectsController {
   async remove(
     @Param("id") id: string,
     @Request() req,
-  ): Promise<ApiResponse<DeleteResponse>> {
-    const data = await this.projectsService.deleteProject(id, req.user.id);
-    return { success: true, data, message: "Project deleted successfully" };
+  ): Promise<ApiResponse<void>> {
+    await this.projectsService.deleteProject(id, req.user.id);
+    return { success: true, message: "Project deleted successfully" };
   }
 
   @Post(":id/restore")

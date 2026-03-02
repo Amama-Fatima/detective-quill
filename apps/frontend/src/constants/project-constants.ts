@@ -1,33 +1,36 @@
-import { Map, FileText, BarChart3 } from "lucide-react";
-
+import { Map, FileText, BarChart3, History } from "lucide-react";
+import { BlueprintIcon } from "@/components/icons/blueprint-icon";
+import { CaseFileIcon } from "@/components/icons/case-file-icon";
+import { GraphIcon } from "@/components/icons/graph-icon";
+import { VersionControlIcon } from "@/components/icons/version-control-icon";
 export const NAV_ITEMS = [
   {
     id: "blueprint",
     label: "Case Blueprint",
     href: `/workspace/123/blueprint`,
-    icon: Map,
+    icon: BlueprintIcon,
     description: "Story structure & planning",
   },
   {
     id: "text-editor",
     label: "Case Files",
     href: `/workspace/123/text-editor`,
-    icon: FileText,
+    icon: CaseFileIcon,
     description: "Writing & editing",
   },
   {
     id: "visualization",
     label: "Case Visuals",
     href: `/workspace/123/visualization`,
-    icon: BarChart3,
+    icon: GraphIcon,
     description: "Visual story analysis",
   },
   {
     id: "version-control",
     label: "Case History",
     href: `/workspace/123/version-control`,
-    icon: BarChart3,
-    description: "Visual story analysis",
+    icon: VersionControlIcon,
+    description: "Commit history & version control",
   },
 ];
 

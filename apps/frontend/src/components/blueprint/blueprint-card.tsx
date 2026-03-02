@@ -3,10 +3,11 @@
 import { Blueprint } from "@detective-quill/shared-types/api";
 import Link from "next/dist/client/link";
 import React, { useState, useRef, useEffect } from "react";
-import { Tag } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { getBlueprintTypeColor } from "@/lib/utils/blueprint-utils";
 import { DeleteBlueprintButton } from "./btns/delete-blueprint-btn";
+import { CornerOrnamentIcon } from "../icons/corner-ornament-icon";
+import { TagIcon } from "../icons/tag-icon";
 
 interface BlueprintCardProps {
   blueprint: Blueprint;
@@ -49,7 +50,13 @@ const BlueprintCard = ({
   return (
     <div ref={cardRef}>
       {isVisible ? (
-        <Card className="group hover:shadow-lg hover:-translate-y-2 transition-all duration-200 relative">
+        <Card className="min-h-[170px] group hover:shadow-lg hover:-translate-y-2 transition-all duration-200 relative">
+          <div className="pointer-events-none absolute left-0 top-1 text-border/70">
+            <CornerOrnamentIcon className="h-11 w-11 translate-x-0.5 -translate-y-0.5" />
+          </div>
+          <div className="pointer-events-none absolute bottom-1 right-0 text-border/70">
+            <CornerOrnamentIcon className="h-11 w-11 -translate-x-0.5 translate-y-0.5 rotate-180" />
+          </div>
           <CardHeader className="pb-1">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -58,7 +65,7 @@ const BlueprintCard = ({
                     href={`/workspace/${projectId}/blueprint/${blueprint.id}?type=${blueprint.type}`}
                     className="block w-full"
                   >
-                    <CardTitle className="text-lg font-semibold transition-colors line-clamp-1">
+                    <CardTitle className="text-lg noir-text font-semibold transition-colors line-clamp-1">
                       {blueprint.title}
                     </CardTitle>
                   </Link>
@@ -80,7 +87,7 @@ const BlueprintCard = ({
               )} flex justify-items-center align-middle gap-2 items-center`}
             >
               <>
-                <Tag />
+                <TagIcon size={18} />
                 <p className="case-file text-lg font-medium">
                   {blueprint.type}
                 </p>

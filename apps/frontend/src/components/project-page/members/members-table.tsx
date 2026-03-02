@@ -63,10 +63,10 @@ const MembersTable = ({
 
   if (members.length === 0) {
     return (
-      <Card className="text-center py-16 border-2 border-muted bg-gradient-to-br from-card/70 to-chart-5/30">
+      <Card className="rounded-lg border border-border/70 bg-gradient-to-br from-card to-background py-16 text-center shadow-sm">
         <CardContent>
           <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="rounded-full bg-primary/10 p-8 text-center">
+            <div className="rounded-full border border-border/60 bg-primary/10 p-8 text-center">
               <UserPlus className="h-12 w-12 text-primary" />
             </div>
             <div className="space-y-2">
@@ -83,92 +83,101 @@ const MembersTable = ({
   }
 
   return (
-    <div className="">
-      <div className="space-y-4">
-        <div className="flex items-center justify-start gap-4 mb-8">
-          <h2 className="mystery-title font-bold text-2xl">Project Members</h2>
-          <span className="noir-text text-[1rem] text-muted-foreground">
-            {members.length} members
+    <div className="rounded-lg border border-border/70 bg-card/85 p-5 shadow-sm md:p-6">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 pb-4">
+        <div className="flex items-center gap-3">
+          <h2 className="mystery-title text-2xl font-bold">Members</h2>
+          <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
+            {members.length}
           </span>
         </div>
-        <div className="w-[65%] mx-auto">
-          <div className="noir-text bg-card-foreground/20 rounded-lg border overflow-hidden shadow-sm">
-            {members.length > 0 && (
-              <Table>
-                <TableHeader>
-                  <TableRow className="">
-                    <TableHead className="font-semibold text-lg">
-                      Member
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-border/70 bg-background/70">
+        {members.length > 0 && (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="p-2">
+                <TableRow className="bg-muted/40">
+                  <TableHead className="text-base font-semibold">
+                    Member
+                  </TableHead>
+                  <TableHead className="text-base font-semibold">
+                    Role
+                  </TableHead>
+                  {isOwner && (
+                    <TableHead className="text-right text-base font-semibold">
+                      Actions
                     </TableHead>
-                    <TableHead className="font-semibold text-lg">
-                      Role
-                    </TableHead>
-                    {isOwner && (
-                      <TableHead className="text-right font-semibold text-lg">
-                        Actions
-                      </TableHead>
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((member) => (
+                  <TableRow
+                    key={member.user_id}
+                    className="transition-colors hover:bg-muted/40"
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 border border-border/70">
+                          <AvatarImage
+                            src={member.avatar_url?.trim() || undefined}
+                            alt={member.full_name}
+                            referrerPolicy="no-referrer"
+                            crossOrigin="anonymous"
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="bg-gradient-to-br from-chart-1 to-chart-3 text-white font-medium">
+                            {(
+                              member.full_name ??
+                              member.username ??
+                              member.email
+                            )
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground">
+                            {member.full_name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {member.email}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="secondary"
+                        className={`border border-border ${!member.is_author && "bg-secondary/90 text-secondary-foreground"} text-[0.8rem] font-medium case-file ${member.is_author && "bg-foreground text-background"}`}
+                      >
+                        {!member.is_author ? "Beta Reader" : "Author"}
+                      </Badge>
+                    </TableCell>
+                    {isOwner && member.user_id !== userId && (
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={!isActive || deleting}
+                          onClick={() => handleRemoveMember(member)}
+                          className="cursor-pointer rounded-md transition-colors hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     )}
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {members.map((member) => (
-                    <TableRow
-                      key={member.user_id}
-                      className="hover:bg-card transition-colors"
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10 border-2 border-gray-100">
-                            <AvatarImage
-                              src={member.avatar_url ?? undefined}
-                              alt={member.full_name}
-                            />
-                            <AvatarFallback className="bg-gradient-to-br from-chart-1 to-chart-3 text-white font-medium">
-                              {member.full_name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <span className="font-medium">
-                              {member.full_name}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {member.email}
-                            </span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className="bg-secondary-foreground text-secondary text-[0.9rem] hover:bg-muted-foreground font-medium"
-                        >
-                          {!member.is_author ? "Beta Reader" : "Author"}
-                        </Badge>
-                      </TableCell>
-                      {isOwner && member.user_id !== userId && (
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={!isActive || deleting}
-                            onClick={() => handleRemoveMember(member)}
-                            className="hover:bg-red-50 hover:text-red-600 cursor-pointer transition-colors"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        </div>
+        )}
       </div>
+
       {/* Delete Confirmation Dialog */}
       <RemoveMemberDialog
         open={removeDialogOpen}

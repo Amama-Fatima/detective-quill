@@ -1,25 +1,54 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Clock } from "lucide-react";
-import { NAV_ITEMS } from "@/constants/project-constants";
 import ChangeStateDropDown from "./change-state-dropdown";
 import InviteMembersDialog from "./members/invite-memebers-dialog";
 import {
   Project,
   ProjectMember,
   Invitation,
+  Branch,
 } from "@detective-quill/shared-types";
-import MembersTable from "./members/members-table";
-import PendingInvitations from "./members/pending-invitations";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
+import { ClockIcon } from "../icons/clock-icon";
+import { MailIcon } from "../icons/mail-icon";
+import { UsersIcon } from "../icons/users-icon";
+import { GitBranchIcon } from "../icons/git-branch-icon";
+import { Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const MembersTable = dynamic(() => import("./members/members-table"), {
+  loading: () => (
+    <>
+      <div className="flex items-center justify-center gap-2">
+        <Loader2 className="animate-spin h-6 w-6 text-primary mx-auto" />
+        <p className="noir-text text-primary text-[14px]">Loading...</p>
+      </div>
+    </>
+  ),
+});
+
+const PendingInvitations = dynamic(
+  () => import("./invitations/pending-invitations"),
+  {
+    loading: () => (
+      <>
+        <div className="flex items-center justify-center gap-2">
+          <Loader2 className="animate-spin h-6 w-6 text-primary mx-auto" />
+          <p className="noir-text text-primary text-[14px]">Loading...</p>
+        </div>
+      </>
+    ),
+  },
+);
 
 interface WorkspaceMainBodyProps {
   project: Project;
   userId: string;
   members: ProjectMember[] | [];
   invitations: Invitation[] | [];
+  numBranches: number;
+  activeBranch: Branch | null;
 }
 
 export default function WorkspaceMainBody({
@@ -27,12 +56,9 @@ export default function WorkspaceMainBody({
   userId,
   members,
   invitations,
+  numBranches,
+  activeBranch,
 }: WorkspaceMainBodyProps) {
-  const navItems = NAV_ITEMS.map((item) => ({
-    ...item,
-    href: item.href.replace("123", project.id),
-  }));
-
   const isOwner = userId === project.author_id;
 
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -69,71 +95,101 @@ export default function WorkspaceMainBody({
 
   const isActive = project.status === "active";
 
+  const currentBranchLabel = activeBranch?.name ?? "No active branch";
+  const statusLabel =
+    project.status.charAt(0).toUpperCase() + project.status.slice(1);
+
   return (
-    <div className="min-h-[80vh] px-10 py-6">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h4 className="font-bold text-xl">Description</h4>
-          <p className="text-[1.1rem] w-[100%] noir-text mb-2">
-            {project.description ??
-              "This section provides an overview and notes for the ongoing project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."}
-          </p>
-          <p className="noir-text text-xs mt-1">
-            <span className="flex items-center text-secondary-foreground">
-              <Clock className="mr-1 h-4 w-4" />
-              <span className="font-semibold mr-2">Last updated:</span>
-              {project.updated_at ?? "N/A"}
-            </span>
-          </p>
-        </div>
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,oklch(24%_0.022_245)_1px,transparent_1px),linear-gradient(to_bottom,oklch(24%_0.022_245)_1px,transparent_1px)] [background-size:28px_28px]" />
 
-        {isOwner && (
-          <div className="flex items-center gap-4">
-            <ChangeStateDropDown
-              projectId={project.id}
-              status={project.status}
-            />
-            {isActive && (
-              <InviteMembersDialog
-                inviteDialogOpen={inviteDialogOpen}
-                setInviteDialogOpen={setInviteDialogOpen}
-                projectId={project.id}
-              />
-            )}
-          </div>
-        )}
-      </div>
-
-      <nav className="flex flex-wrap gap-4 mb-8 justify-center">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={
-                "flex noir-text items-center gap-3 px-6 py-2 rounded-md border transition-colors bg-card hover:bg-secondary-foreground hover:text-secondary"
-              }
-            >
-              <Icon className="h-5 w-5" />
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">{item.label}</span>
-                <span className="text-xs">{item.description}</span>
+      <div className="relative z-10 mx-auto min-h-[80vh] w-full max-w-7xl px-4 py-6 md:px-6">
+        <section className="mb-8 rounded-lg border border-border/70 bg-gradient-to-br from-card via-card/90 to-background p-6 shadow-sm md:p-8">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground case-file">
+                  Case Workspace
+                </span>
+                <span className="rounded-full border bg-foreground text-background px-3 py-1 text-xs font-medium case-file">
+                  {statusLabel}
+                </span>
               </div>
-            </Link>
-          );
-        })}
-      </nav>
 
-      <MembersTable
-        isOwner={isOwner}
-        initialMembers={members}
-        projectId={project.id}
-        userId={userId}
-        isActive={isActive}
-      />
+              <h4 className="mystery-title text-2xl md:text-3xl">
+                Case Summary
+              </h4>
+              <p className="noir-text text-[1.05rem] leading-relaxed text-foreground/90">
+                {project.description ??
+                  "This section provides an overview and notes for the ongoing project. Lorem ipsum dolor sit amet, consectetur adipiscing elit."}
+              </p>
 
-      {isOwner && isActive && <PendingInvitations projectId={project.id} />}
+              <div className="flex flex-wrap items-center gap-4 text-sm text-primary">
+                <span className="inline-flex items-center gap-1.5 rounded-full border  bg-background/60 px-3 py-1.5 hover:-translate-y-0.5 transition-transform">
+                  <ClockIcon />
+                  Updated: {project.updated_at ?? "N/A"}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border  bg-background/60 px-3 py-1.5 hover:-translate-y-0.5 transition-transform">
+                  <UsersIcon />
+                  {members.length} Members
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border  bg-background/60 px-3 py-1.5 hover:-translate-y-0.5 transition-transform ">
+                  <MailIcon />
+                  {invitations.length} Pending Invites
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border  bg-background/60 px-3 py-1.5 hover:-translate-y-0.5 transition-transform">
+                  <GitBranchIcon />
+                  {numBranches} Branches
+                </span>
+              </div>
+            </div>
+
+            <div className="w-full rounded-2xl border border-border/70 bg-background/70 p-4 shadow-sm lg:w-auto lg:min-w-[20rem]">
+              <div className="mt-2 flex items-center gap-3 rounded-lg border border-primary/10 bg-primary/5 p-3">
+                <div className="rounded-full bg-primary/10 p-2">
+                  <GitBranchIcon />
+                </div>
+                <div className="flex-1">
+                  <div className="text-md text-muted-foreground">
+                    Current Branch
+                  </div>
+                  <div className="font-mono text-sm font-medium truncate max-w-[14rem]">
+                    {currentBranchLabel}
+                  </div>
+                </div>
+              </div>
+
+              {isOwner && (
+                <div className="flex flex-wrap items-center gap-3 pt-4">
+                  <ChangeStateDropDown
+                    projectId={project.id}
+                    status={project.status}
+                  />
+                  {isActive && (
+                    <InviteMembersDialog
+                      inviteDialogOpen={inviteDialogOpen}
+                      setInviteDialogOpen={setInviteDialogOpen}
+                      projectId={project.id}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-8">
+          <MembersTable
+            isOwner={isOwner}
+            initialMembers={members}
+            projectId={project.id}
+            userId={userId}
+            isActive={isActive}
+          />
+
+          {isOwner && isActive && <PendingInvitations projectId={project.id} />}
+        </section>
+      </div>
     </div>
   );
 }

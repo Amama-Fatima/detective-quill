@@ -4,6 +4,8 @@ import { Popover, PopoverTrigger, PopoverContent } from "../../ui/popover";
 import { useBlueprints } from "@/hooks/blueprints/use-blueprints";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
+import { useWorkspaceContext } from "@/context/workspace-context";
 
 export default function CreateBlueprintBtns({
   projectId,
@@ -27,37 +29,49 @@ export default function CreateBlueprintBtns({
     }
   };
 
+  const { isOwner, isActive } = useWorkspaceContext();
+
+  if (!isOwner || !isActive) {
+    return null;
+  }
+
   return (
     <div>
       <Popover>
-        <PopoverTrigger className="bg-primary px-4 py-2 cursor-pointer rounded-md text-white hover:bg-primary/90 shadow-lg">
-          Create New Blueprint
+        <PopoverTrigger asChild>
+          <Button
+            className="bg-primary shadow-lg cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]"
+            disabled={loading}
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Create New Blueprint
+          </Button>
         </PopoverTrigger>
         <PopoverContent>
           <div className="flex flex-col gap-2">
             <Button
-              className="cursor-pointer"
+              className="cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]"
               onClick={() => handleCreate("character")}
               disabled={loading}
             >
               Character
             </Button>
             <Button
-              className="cursor-pointer"
+              className="cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]"
               onClick={() => handleCreate("timeline")}
               disabled={loading}
             >
               Timeline
             </Button>
             <Button
-              className="cursor-pointer"
+              className="cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]"
               onClick={() => handleCreate("item")}
               disabled={loading}
             >
               Item
             </Button>
             <Button
-              className="cursor-pointer"
+              className="cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]"
               onClick={() => handleCreate("location")}
               disabled={loading}
             >

@@ -2,19 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, Briefcase } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { Project } from "@detective-quill/shared-types";
 import CreateProjectDialog from "@/components/projects/create-project-dialog";
 import ProjectsDisplay from "./projects-display";
+import { BriefcaseIcon } from "../icons/brief-case-icon";
 
 type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
 interface ProjectsPageClientProps {
-  user: User;
   initialProjects: Project[];
   invitedProjects?: Project[];
 }
@@ -71,14 +70,17 @@ export default function UserProjectsPage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-card">
-      {/* Header Section */}
-      <div className="border-b border-border bg-gradient-to-r from-primary/5 via-accent/5 to-primary/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,oklch(24%_0.022_245)_1px,transparent_1px),linear-gradient(to_bottom,oklch(24%_0.022_245)_1px,transparent_1px)] [background-size:28px_28px]" />
+      <div className="pointer-events-none absolute -right-20 top-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+      <div className="pointer-events-none absolute -left-16 bottom-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+
+      <div className="border-b border-border bg-muted/90 backdrop-blur-sm">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
               <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                <Briefcase className="h-8 w-8 text-primary" />
+                <BriefcaseIcon />
               </div>
               <div>
                 <h1 className="mystery-title text-4xl mb-2">
@@ -92,7 +94,7 @@ export default function UserProjectsPage({
             <Button
               onClick={() => setShowCreateDialog(true)}
               size="lg"
-              className="bg-primary hover:bg-primary/90 shadow-lg cursor-pointer"
+              className="bg-primary shadow-lg cursor-pointer font-playfair-display text-[1rem] hover:-translate-y-0.5 duration-300"
             >
               <Plus className="h-5 w-5 mr-2" />
               Open New Case
@@ -101,7 +103,7 @@ export default function UserProjectsPage({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs
           value={filter}
           onValueChange={(value) => {
@@ -111,36 +113,33 @@ export default function UserProjectsPage({
         >
           <div className="noir-text flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
             <TabsList className="bg-card/50 border border-border">
-              <TabsTrigger value="all" className="font-serif cursor-pointer">
+              <TabsTrigger value="all" className="case-file cursor-pointer">
                 All Cases
               </TabsTrigger>
-              <TabsTrigger value="active" className="font-serif cursor-pointer">
+              <TabsTrigger value="active" className="case-file cursor-pointer">
                 Active
               </TabsTrigger>
               <TabsTrigger
                 value="completed"
-                className="font-serif cursor-pointer"
+                className="case-file cursor-pointer"
               >
                 Completed
               </TabsTrigger>
               <TabsTrigger
                 value="archived"
-                className="font-serif cursor-pointer"
+                className="case-file cursor-pointer"
               >
                 Archived
               </TabsTrigger>
-              <TabsTrigger
-                value="invited"
-                className="font-serif cursor-pointer"
-              >
+              <TabsTrigger value="invited" className="case-file cursor-pointer">
                 Invited
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex items-center gap-3">
+            <div className="relative z-10 flex items-center gap-3">
               {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="relative border rounded-md">
+                <Search className="absolute left-3  top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search case files..."
                   value={searchTerm}

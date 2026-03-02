@@ -29,7 +29,6 @@ export class WorkerEmailService implements OnModuleInit {
   async onModuleInit() {
     try {
       await this.transporter.verify();
-      console.log("Email transporter verified on module init");
     } catch (err) {
       this.enabled = false;
       console.error("Email transporter verification failed", err);
@@ -45,7 +44,6 @@ export class WorkerEmailService implements OnModuleInit {
     projectId:string
   ): Promise<boolean> {
     if (!this.enabled) {
-      console.log("Email service is disabled. Skipping email to", toEmail);
       return false;
     }
     try {

@@ -18,7 +18,7 @@ const ConfirmEmailInstruction = ({
       </div>
 
       <div className="space-y-2">
-        <h3 className="noir-text text-[2rem] font-semibold">
+        <h3 className="myster-title text-[2rem] font-semibold">
           Check your email
         </h3>
         <p className="noir-text text-[1rem]">
@@ -27,8 +27,8 @@ const ConfirmEmailInstruction = ({
         </p>
       </div>
 
-      <div className="noir-text bg-card border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left">
-        <h4 className="noir-text text-[1rem] font-medium  text-primary mb-2">
+      <div className="bg-card border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left">
+        <h4 className="myster-title text-[1rem] font-medium  text-primary mb-2">
           Next steps:
         </h4>
         <ol className="noir-text text-[1rem]  text-primary space-y-1 list-decimal list-inside">
