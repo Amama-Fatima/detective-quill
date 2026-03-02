@@ -77,7 +77,8 @@ class NarrativeAnalysisPipeline:
         result = PipelineResult(
             entities=enriched_entities,
             relationships=relationships,
-            metadata=metadata
+            metadata=metadata,
+            resolved_text=resolved_text
         )
 
         if verbose:

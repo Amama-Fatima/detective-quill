@@ -25,6 +25,8 @@ image = (
         "pika==1.3.2",
         "spacy==3.5.4",
         "pydantic==1.10.13",
+        "supabase==1.2.0", 
+        "neo4j==5.14.0",  
     ])
     .pip_install([
         "https://github.com/explosion/spacy-models/releases/download/"
@@ -86,18 +88,23 @@ class KnowledgeGraphWorker:
 
     @modal.method()
     def process_job(self, job_id: str, scene_text: str, user_id: str) -> dict:
-        """
-        Runs the full 4-layer pipeline for one job.
-        """
         import time
-
         self.logger.info(f"Processing job {job_id}")
-        self.logger.info(f"Scene length: {len(scene_text)} characters")
-
         start_time = time.time()
 
         try:
             result = self.pipeline.process_scene(scene_text=scene_text)
+
+            from src.pipeline.layer5_graph import save_graph_layer5
+            save_graph_layer5(
+                scene_id=job_id,
+                user_id=user_id,
+                scene_text=scene_text,
+                resolved_text=getattr(result, "resolved_text", scene_text),
+                entities=result.entities,
+                relationships=result.relationships,
+            )
+
             elapsed = time.time() - start_time
             self.logger.info(f"Job {job_id} completed in {elapsed:.2f}s")
 
@@ -112,7 +119,6 @@ class KnowledgeGraphWorker:
         except Exception as e:
             elapsed = time.time() - start_time
             self.logger.error(f"Job {job_id} failed after {elapsed:.2f}s: {e}")
-
             return {
                 "job_id": job_id,
                 "status": "failed",
