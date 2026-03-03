@@ -8,11 +8,10 @@ import { ManualRabbitMQConsumer } from "./manual-rabbitmq.consumer";
 import { CommitsConsumer } from "./commits.consumer";
 import { CommitsModule } from "src/commits/commits.module";
 import { BranchesModule } from "src/branches/branches.module";
-import { BranchesConsumer } from "./branches.consumer";
 
 @Module({
   imports: [ConfigModule.forRoot(), EmailModule, CommitsModule, BranchesModule],
-  controllers: [EmailConsumer, CommitsConsumer, BranchesConsumer],
+  controllers: [EmailConsumer, CommitsConsumer],
   providers: [
     AdminSupabaseService,
     WorkerNlpAnalysisService,

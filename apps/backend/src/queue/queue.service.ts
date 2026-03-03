@@ -1,8 +1,11 @@
-// src/queue/queue.service.ts
 import { Injectable, Inject } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
 import { EmailSendingJobData } from "@detective-quill/shared-types";
-import { firstValueFrom } from "rxjs";
+import {
+  type SceneAnalysisJobData,
+  type CreateCommitJobData,
+  type RevertCommitJobData,
+} from "./dto/queue.dto";
 
 // export interface EmbeddingJobData {
 //   fs_node_id: string;
@@ -16,27 +19,6 @@ import { firstValueFrom } from "rxjs";
 //   global_sequence?: number;
 //   timeline_path?: string;
 // }
-
-export interface SceneAnalysisJobData {
-  job_id: string;
-  scene_text: string;
-  user_id: string;
-  project_id?: string;
-}
-
-export interface CreateCommitJobData {
-  projectId: string;
-  userId: string;
-  createCommitDto: {
-    message: string;
-    branch_id: string;
-  };
-}
-
-export interface RevertCommitJobData {
-  projectId: string;
-  commitId: string;
-}
 
 // todo: where will errors that are thrown here be catched?
 @Injectable()

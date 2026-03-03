@@ -26,19 +26,9 @@ async function bootstrap() {
     },
   });
 
-  const branchWorkerApp = await NestFactory.createMicroservice(WorkerModule, {
-    transport: Transport.RMQ,
-    options: {
-      urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
-      queue: "switch_branch_queue",
-      queueOptions: { durable: true },
-    },
-  });
-
   await Promise.all([
     emailWorkerApp.listen(),
     commitWorkerApp.listen(),
-    branchWorkerApp.listen(),
   ]);
   console.log("Worker microservices are running...");
 

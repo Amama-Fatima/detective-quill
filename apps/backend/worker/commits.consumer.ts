@@ -4,7 +4,7 @@ import { CommitsService } from "src/commits/commits.service";
 import {
   type CreateCommitJobData,
   type RevertCommitJobData,
-} from "src/queue/queue.service";
+} from "src/queue/dto/queue.dto";
 
 @Controller()
 export class CommitsConsumer {
