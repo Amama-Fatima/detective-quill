@@ -22,7 +22,7 @@ export class CommitsController {
     @Body() createCommitDto: CreateCommitDto,
     @Request() req: any,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     const commit = await this.commitsService.createCommit(
       createCommitDto,
       projectId,

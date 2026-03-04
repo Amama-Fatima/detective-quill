@@ -1,6 +1,7 @@
 // src/queue/queue.service.ts
 import { Injectable, Inject } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
+import * as amqp from "amqplib";
 import { EmailSendingJobData } from "@detective-quill/shared-types";
 
 export interface EmbeddingJobData {
@@ -21,6 +22,16 @@ export interface SceneAnalysisJobData {
   scene_text: string;
   user_id: string;
   project_id?: string;
+  /** If set, Python worker uses this as Neo4j scene_id; otherwise job_id is used. */
+  scene_id?: string;
+}
+
+const SCENE_ANALYSIS_QUEUE = "scene_analysis_queue";
+
+/** amqplib connection shape at runtime (@types/amqplib is inconsistent) */
+interface AmqpConnection {
+  createChannel(): Promise<amqp.Channel>;
+  close(): Promise<void>;
 }
 
 // todo: where will errors that are thrown here be catched?
@@ -28,7 +39,11 @@ export interface SceneAnalysisJobData {
 export class QueueService {
   constructor(
     @Inject("RABBITMQ_SERVICE") private readonly rabbitClient: ClientProxy,
-  ) {}
+  ) {
+    const url = process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672";
+    const host = url.replace(/^amqps?:\/\/([^:]+:[^@]+@)?/, "").split("/")[0];
+    console.log(`[QueueService] RabbitMQ broker: ${host}`);
+  }
 
   sendEmbeddingJob(jobData: EmbeddingJobData) {
     try {
@@ -58,17 +73,56 @@ export class QueueService {
     }
   }
 
-  sendSceneAnalysisJob(jobData: SceneAnalysisJobData) {
-    try {
-      this.rabbitClient.emit("scene_analysis_queue", {
-        ...jobData,
-        timestamp: new Date().toISOString(),
-      });
+  /**
+   * Publish scene analysis job directly to RabbitMQ (plain JSON) so Modal/pika
+   * consumers receive it. NestJS ClientProxy was not reliably putting messages
+   * in the queue visible to CloudAMQP / Modal.
+   */
+  async sendSceneAnalysisJob(jobData: SceneAnalysisJobData): Promise<void> {
+    const payload = {
+      job_id: jobData.job_id,
+      scene_text: jobData.scene_text,
+      user_id: jobData.user_id,
+      scene_id: jobData.scene_id ?? jobData.job_id,
+      timestamp: new Date().toISOString(),
+    };
 
-      console.log(`Scene analysis job queued: ${jobData.job_id}`);
-    } catch (error) {
-      console.error("Failed to queue scene analysis job:", error);
-      throw error;
+    const url =
+      process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672";
+    let conn: AmqpConnection | null = null;
+
+    try {
+      conn = (await amqp.connect(url)) as unknown as AmqpConnection;
+      const ch = await conn.createChannel();
+      await ch.assertQueue(SCENE_ANALYSIS_QUEUE, { durable: true });
+      const sent = ch.sendToQueue(
+        SCENE_ANALYSIS_QUEUE,
+        Buffer.from(JSON.stringify(payload)),
+        { persistent: true },
+      );
+      await ch.close();
+      if (!sent) {
+        throw new Error("Channel buffer full, message not sent");
+      }
+
+      const logPayload = {
+        job_id: payload.job_id,
+        scene_id: payload.scene_id,
+        user_id: payload.user_id,
+        scene_text_preview:
+          payload.scene_text?.slice(0, 60) +
+          (payload.scene_text && payload.scene_text.length > 60 ? "…" : ""),
+        scene_text_length: payload.scene_text?.length ?? 0,
+        timestamp: payload.timestamp,
+      };
+      console.log(
+        `Scene analysis job published to ${SCENE_ANALYSIS_QUEUE}: ${payload.job_id}`,
+        JSON.stringify(logPayload, null, 2),
+      );
+    } finally {
+      if (conn) {
+        await conn.close();
+      }
     }
   }
 }

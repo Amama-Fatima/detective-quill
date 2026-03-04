@@ -9,6 +9,7 @@ import { CreateCommitDto } from "./dto/commits.dto";
 import { BranchesService } from "src/branches/branches.service";
 import { SnapshotsService } from "src/snapshots/snapshots.service";
 import { ContributionsService } from "src/contributions/contributions.service";
+import { CommitKnowledgeGraphService } from "src/commit-knowledge-graph/commit-knowledge-graph.service";
 
 @Injectable()
 export class CommitsService {
@@ -19,6 +20,7 @@ export class CommitsService {
     private readonly branchesService: BranchesService,
     private readonly snapshotsService: SnapshotsService,
     private readonly contributionsService: ContributionsService,
+    private readonly commitKnowledgeGraphService: CommitKnowledgeGraphService,
   ) {}
 
   async createCommit(
@@ -40,7 +42,6 @@ export class CommitsService {
         project_id: projectId,
         branch_id: createCommitDto.branch_id,
         message: createCommitDto.message,
-        created_by: userId,
         parent_commit_id: parentCommitId || null,
       })
       .select("*")
@@ -67,6 +68,26 @@ export class CommitsService {
         error instanceof Error ? error.message : "Unknown contribution error";
       this.logger.warn(
         `Failed to log commit contribution for commit ${commit.id}: ${message}`,
+      );
+    }
+
+    try {
+      const { enqueued } =
+        await this.commitKnowledgeGraphService.enqueueCommitKnowledgeGraphJobs(
+          commit.id,
+          projectId,
+          userId,
+        );
+      if (enqueued > 0) {
+        this.logger.log(
+          `Commit ${commit.id}: enqueued ${enqueued} knowledge graph job(s)`,
+        );
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown error";
+      this.logger.warn(
+        `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
       );
     }
 

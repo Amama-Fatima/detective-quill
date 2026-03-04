@@ -6,6 +6,7 @@ import { CommitsController } from "./commits.controller";
 import { BranchesModule } from "src/branches/branches.module";
 import { SnapshotsModule } from "src/snapshots/snapshots.module";
 import { ContributionsModule } from "src/contributions/contributions.module";
+import { CommitKnowledgeGraphModule } from "src/commit-knowledge-graph/commit-knowledge-graph.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ContributionsModule } from "src/contributions/contributions.module";
     BranchesModule,
     SnapshotsModule,
     ContributionsModule,
+    CommitKnowledgeGraphModule,
   ],
   controllers: [CommitsController],
   providers: [CommitsService],
