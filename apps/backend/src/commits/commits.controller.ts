@@ -14,9 +14,7 @@ import { QueueService } from "src/queue/queue.service";
 @Controller(":projectId/commits")
 @UseGuards(AuthGuard)
 export class CommitsController {
-  constructor(
-    private readonly queueService: QueueService,
-  ) {}
+  constructor(private readonly queueService: QueueService) {}
 
   @Post()
   async createCommit(
@@ -24,7 +22,8 @@ export class CommitsController {
     @Body() createCommitDto: CreateCommitDto,
     @Request() req: any,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.id;
+
     this.queueService.sendCreateCommitJob({
       projectId,
       userId,

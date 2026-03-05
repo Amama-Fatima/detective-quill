@@ -91,7 +91,7 @@ const TreeItem = ({
       isSelect={isSelected}
       handleSelect={onNodeSelect}
       className={cn(
-        "px-2 py-1 group flex items-center justify-between",
+        "w-full min-w-0 max-w-[270px] overflow-hidden px-2 py-1 group flex items-center justify-between",
         isSelected && "bg-primary/10 text-primary",
       )}
       fileIcon={<CaseFileIcon />}
@@ -100,13 +100,13 @@ const TreeItem = ({
       <div
         onMouseEnter={() => onNodeHover(element.id)}
         onClick={() => onNodeSelect(element.id)}
-        className="flex items-center justify-between w-full cursor-pointer"
+        className="flex w-full min-w-0 items-center justify-between cursor-pointer overflow-hidden"
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <CaseFileIcon />
-          <span className="truncate">{element.name}</span>
+          <span className="min-w-0 flex-1 truncate">{element.name}</span>
           {node?.word_count && node.word_count > 0 && (
-            <span className="text-xs text-muted-foreground">
+            <span className="shrink-0 text-xs text-muted-foreground">
               {node.word_count} words
             </span>
           )}
@@ -119,7 +119,7 @@ const TreeItem = ({
           onRenameNode={onRenameNode}
           onMoveNode={onMoveNode}
           onDeleteNode={onDeleteNode}
-          triggerClassName="h-5 w-5 opacity-0 group-hover:opacity-100 shrink-0 cursor-pointer"
+          triggerClassName="h-5 w-5 shrink-0 cursor-pointer"
         />
       </div>
     </File>

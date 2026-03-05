@@ -37,7 +37,7 @@ export class WorkerCommitsService {
         project_id: projectId,
         branch_id: createCommitDto.branch_id,
         message: createCommitDto.message,
-        created_by: userId,
+        // created_by: userId,
         parent_commit_id: parentCommitId || null,
       })
       .select("*")
