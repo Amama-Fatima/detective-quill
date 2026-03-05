@@ -7,7 +7,6 @@ import {
   UseGuards,
   Request,
 } from "@nestjs/common";
-import { CommitsService } from "./commits.service";
 import { CreateCommitDto } from "./dto/commits.dto";
 import { ApiResponse } from "@detective-quill/shared-types";
 import { QueueService } from "src/queue/queue.service";
@@ -16,7 +15,6 @@ import { QueueService } from "src/queue/queue.service";
 @UseGuards(AuthGuard)
 export class CommitsController {
   constructor(
-    private readonly commitsService: CommitsService,
     private readonly queueService: QueueService,
   ) {}
 

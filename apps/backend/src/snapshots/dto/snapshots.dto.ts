@@ -43,6 +43,10 @@ export class CreateSnapshotDto {
   @IsOptional()
   file_extension?: string;
 
+  @IsString()
+  @IsOptional()
+  content_hash?: string;
+
   @IsNumber()
   @IsOptional()
   sort_order?: number | null;

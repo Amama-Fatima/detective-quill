@@ -59,18 +59,30 @@ export class ContributionsService {
     return data as Contribution;
   }
 
-  async logSaveContribution(userId: string, referenceId?: string | null) {
-    return this.createContribution(userId, {
-      contribution_type: "save",
-      reference_id: referenceId ?? undefined,
-    });
+  async logSaveContribution(
+    userId: string,
+    referenceId?: string | null,
+  ) {
+    return this.createContribution(
+      userId,
+      {
+        contribution_type: "save",
+        reference_id: referenceId ?? undefined,
+      },
+    );
   }
 
-  async logCommitContribution(userId: string, referenceId?: string | null) {
-    return this.createContribution(userId, {
-      contribution_type: "commit",
-      reference_id: referenceId ?? undefined,
-    });
+  async logCommitContribution(
+    userId: string,
+    referenceId?: string | null,
+  ) {
+    return this.createContribution(
+      userId,
+      {
+        contribution_type: "commit",
+        reference_id: referenceId ?? undefined,
+      },
+    );
   }
 
   async getMonthlyContributions(
