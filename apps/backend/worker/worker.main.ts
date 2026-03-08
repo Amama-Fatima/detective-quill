@@ -26,10 +26,7 @@ async function bootstrap() {
     },
   });
 
-  await Promise.all([
-    emailWorkerApp.listen(),
-    commitWorkerApp.listen(),
-  ]);
+  await Promise.all([emailWorkerApp.listen(), commitWorkerApp.listen()]);
   console.log("Worker microservices are running...");
 
   const httpApp = express();
@@ -37,7 +34,7 @@ async function bootstrap() {
     res.json({ status: "ok", service: "worker" });
   });
 
-  const port = process.env.PORT || 3002;
+  const port = process.env.WORKER_PORT || 3002;
   httpApp.listen(port, () => {
     console.log(`Health check server running on port ${port}`);
   });

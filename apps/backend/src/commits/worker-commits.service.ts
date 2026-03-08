@@ -1,25 +1,22 @@
 import {
   BadRequestException,
   Injectable,
-  Logger,
   NotFoundException,
 } from "@nestjs/common";
-import { SupabaseService } from "../supabase/supabase.service";
+import { AdminSupabaseService } from "../supabase/admin-supabase.service";
 import { CreateCommitDto } from "./dto/commits.dto";
-import { BranchesService } from "src/branches/branches.service";
-import { SnapshotsService } from "src/snapshots/snapshots.service";
-import { ContributionsService } from "src/contributions/contributions.service";
+import { WorkerBranchesService } from "src/branches/worker-branches.service";
+import { WorkerSnapshotsService } from "src/snapshots/worker-snapshots.service";
+import { WorkerContributionsService } from "src/contributions/worker-contributions.service";
 import { CommitKnowledgeGraphService } from "src/commit-knowledge-graph/commit-knowledge-graph.service";
 
 @Injectable()
-export class CommitsService {
-  private readonly logger = new Logger(CommitsService.name);
-
+export class WorkerCommitsService {
   constructor(
-    private readonly supabaseService: SupabaseService,
-    private readonly branchesService: BranchesService,
-    private readonly snapshotsService: SnapshotsService,
-    private readonly contributionsService: ContributionsService,
+    private adminSupabaseService: AdminSupabaseService,
+    private workerBranchesService: WorkerBranchesService,
+    private workerSnapshotsService: WorkerSnapshotsService,
+    private workerContributionsService: WorkerContributionsService,
     private readonly commitKnowledgeGraphService: CommitKnowledgeGraphService,
   ) {}
 
@@ -28,10 +25,10 @@ export class CommitsService {
     projectId: string,
     userId: string,
   ) {
-    const supabase = this.supabaseService.client;
+    const supabase = this.adminSupabaseService.client;
 
     // let parentCommitId = createCommitDto.parent_commit_id;
-    const headCommitId = await this.branchesService.getHeadCommitId(
+    const headCommitId = await this.workerBranchesService.getHeadCommitId(
       createCommitDto.branch_id,
     );
     const parentCommitId = headCommitId; // it cannot be undefined because even when we first create a project, we create an initial commit for the default branch
@@ -42,6 +39,7 @@ export class CommitsService {
         project_id: projectId,
         branch_id: createCommitDto.branch_id,
         message: createCommitDto.message,
+        // created_by: userId,
         parent_commit_id: parentCommitId || null,
       })
       .select("*")
@@ -51,23 +49,31 @@ export class CommitsService {
       throw new Error(`Failed to create commit: ${commitError.message}`);
     }
 
-    await this.snapshotsService.createSnapshotsFromNodes(
+    await this.workerSnapshotsService.createSnapshotsFromNodes(
       commit.id,
       projectId,
       createCommitDto.branch_id,
     );
 
-    await this.branchesService.updateBranch(createCommitDto.branch_id, {
+    await this.workerBranchesService.updateBranch(createCommitDto.branch_id, {
       head_commit_id: commit.id,
     });
 
+    const changed = await this.workerSnapshotsService.getChangedFiles(
+      commit.id,
+      parentCommitId ?? null,
+    );
+
     try {
-      await this.contributionsService.logCommitContribution(userId, commit.id);
+      await this.workerContributionsService.logCommitContribution(
+        userId,
+        commit.id,
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Unknown contribution error";
-      this.logger.warn(
-        `Failed to log commit contribution for commit ${commit.id}: ${message}`,
+      console.error(
+        `Failed to log contribution for commit ${commit.id}: ${message}`,
       );
     }
 
@@ -84,80 +90,51 @@ export class CommitsService {
         );
       }
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unknown error";
+      const message = error instanceof Error ? error.message : "Unknown error";
       this.logger.warn(
         `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
       );
     }
 
-    return commit;
-  }
-
-  async getCommitById(commitId: string) {
-    const supabase = this.supabaseService.client;
-    const { data, error } = await supabase
-      .from("commits")
-      .select("*")
-      .eq("id", commitId)
-      .single();
-
-    if (error) {
-      throw new NotFoundException(`Commit with ID ${commitId} not found`);
+    try {
+      const { enqueued } =
+        await this.commitKnowledgeGraphService.enqueueCommitKnowledgeGraphJobs(
+          commit.id,
+          projectId,
+          userId,
+        );
+      if (enqueued > 0) {
+        this.logger.log(
+          `Commit ${commit.id}: enqueued ${enqueued} knowledge graph job(s)`,
+        );
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      this.logger.warn(
+        `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
+      );
     }
 
-    return data;
-  }
+    console.log("commit created");
+    const added = changed.added.map((n) => n.fs_node_id);
+    const modified = changed.modified.map((n) => n.fs_node_id);
+    const deleted = changed.deleted.map((n) => n.fs_node_id);
+    console.log(
+      `Changed files for commit ${commit.id} - Added: ${added.length}, Modified: ${modified.length}, Deleted: ${deleted.length}`,
+    );
 
-  async getCommitsByBranch(
-    branchId: string,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ data: any[]; total: number }> {
-    const supabase = this.supabaseService.client;
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-
-    const { count, error: countError } = await supabase
-      .from("commits")
-      .select("*", { count: "exact", head: true })
-      .eq("branch_id", branchId);
-
-    if (countError) {
-      throw new Error(`Failed to count commits: ${countError.message}`);
-    }
-
-    const { data, error } = await supabase
-      .from("commits")
-      .select("*")
-      .eq("branch_id", branchId)
-      .order("created_at", { ascending: false })
-      .range(from, to);
-
-    if (error) {
-      throw new Error(`Failed to fetch commits: ${error.message}`);
-    }
-
-    return { data: data || [], total: count ?? 0 };
-  }
-
-  async getCommitsByProject(projectId: string) {
-    const supabase = this.supabaseService.client;
-    const { data, error } = await supabase
-      .from("commits")
-      .select("*")
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      throw new Error(`Failed to fetch commits: ${error.message}`);
-    }
-
-    return data;
+    return {
+      commit,
+      changedFiles: {
+        added: added,
+        modified: modified,
+        deleted: deleted,
+      },
+    };
   }
 
   private async getCommitForRevert(commitId: string, projectId: string) {
-    const supabase = this.supabaseService.client;
+    const supabase = this.adminSupabaseService.client;
     const { data, error } = await supabase
       .from("commits")
       .select("id, branch_id, parent_commit_id, project_id")
@@ -179,7 +156,7 @@ export class CommitsService {
       return { success: true, deletedCommits: 0 };
     }
 
-    const supabase = this.supabaseService.client;
+    const supabase = this.adminSupabaseService.client;
     const { error } = await supabase
       .from("commits")
       .delete()
@@ -221,7 +198,7 @@ export class CommitsService {
 
   async revertToCommit(commitId: string, projectId: string) {
     const targetCommit = await this.getCommitForRevert(commitId, projectId);
-    const headCommitId = await this.branchesService.getHeadCommitId(
+    const headCommitId = await this.workerBranchesService.getHeadCommitId(
       targetCommit.branch_id,
     );
 
@@ -246,17 +223,19 @@ export class CommitsService {
       projectId,
     );
 
-    await this.snapshotsService.restoreProjectNodesFromCommitSnapshot(
+    await this.workerSnapshotsService.restoreProjectNodesFromCommitSnapshot(
       commitId,
       projectId,
       targetCommit.branch_id,
     );
 
-    await this.branchesService.updateBranch(targetCommit.branch_id, {
+    await this.workerBranchesService.updateBranch(targetCommit.branch_id, {
       head_commit_id: commitId,
     });
 
-    await this.snapshotsService.deleteSnapshotsByCommitIds(commitIdsToDelete);
+    await this.workerSnapshotsService.deleteSnapshotsByCommitIds(
+      commitIdsToDelete,
+    );
     await this.deleteCommitsByIds(commitIdsToDelete);
 
     return {
@@ -266,5 +245,4 @@ export class CommitsService {
       deletedSnapshotsCount: commitIdsToDelete.length,
     };
   }
-
 }

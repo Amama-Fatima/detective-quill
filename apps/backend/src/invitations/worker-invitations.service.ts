@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { type Invitation } from "@detective-quill/shared-types";
 import { AdminSupabaseService } from "../supabase/admin-supabase.service";
 
 @Injectable()
