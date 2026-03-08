@@ -13,20 +13,27 @@ app = modal.App("detective-quill-knowledge-graph")
 # ─────────────────────────────────────────────
 
 image = (
-    modal.Image.debian_slim(python_version="3.11")
+    modal.Image.debian_slim(python_version="3.10")
     .pip_install([
         "torch==2.1.0",
         "transformers==4.36.0",
         "accelerate==0.25.0",
+        "bitsandbytes>=0.43.0",
+        "scipy",
         "sentencepiece",
-        "spacy==3.7.2",
+        "numpy<2.0",
         "pika==1.3.2",
-        "pydantic==2.5.0",
-        "pydantic-settings==2.1.0",
+        "spacy==3.5.4",
+        "pydantic==1.10.13",
+        "supabase==1.2.0", 
+        "neo4j==5.14.0",  
     ])
     .pip_install([
-        "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl"
+        "https://github.com/explosion/spacy-models/releases/download/"
+        "en_core_web_lg-3.5.0/en_core_web_lg-3.5.0-py3-none-any.whl"
     ])
+    .pip_install(["coreferee==1.4.1"])
+    .run_commands("python -m coreferee install en")
     .add_local_dir("src", remote_path="/root/src")
 )
 
@@ -35,7 +42,8 @@ image = (
 # ─────────────────────────────────────────────
 
 secrets = [
-    modal.Secret.from_name("detective-quill-secrets")
+    modal.Secret.from_name("detective-quill-secrets"),
+    modal.Secret.from_name("neo4j-secret")
 ]
 
 # ─────────────────────────────────────────────
@@ -46,7 +54,7 @@ secrets = [
     image=image,
     gpu="T4",
     secrets=secrets,
-    container_idle_timeout=300,
+    scaledown_window=300,
     timeout=1800,
 )
 class KnowledgeGraphWorker:
@@ -66,7 +74,8 @@ class KnowledgeGraphWorker:
 
         import spacy
         self.logger.info("Loading spaCy model...")
-        self.nlp = spacy.load("en_core_web_sm")
+        self.nlp = spacy.load("en_core_web_lg")
+        self.nlp.add_pipe("coreferee")
         self.logger.info("spaCy loaded")
 
         self.logger.info("Loading OpenHermes LLM - this takes a few minutes...")
@@ -75,38 +84,49 @@ class KnowledgeGraphWorker:
         self.logger.info("LLM loaded and ready")
 
         from src.pipeline.orchestrator import NarrativeAnalysisPipeline
-        self.pipeline = NarrativeAnalysisPipeline()
+        self.pipeline = NarrativeAnalysisPipeline(nlp=self.nlp)
         self.logger.info("Pipeline ready")
 
     @modal.method()
     def process_job(self, job_id: str, scene_text: str, user_id: str) -> dict:
-        """
-        Runs the full 4-layer pipeline for one job.
-        """
         import time
-
         self.logger.info(f"Processing job {job_id}")
         self.logger.info(f"Scene length: {len(scene_text)} characters")
-
         start_time = time.time()
 
         try:
             result = self.pipeline.process_scene(scene_text=scene_text)
+            self.logger.info(f"Pipeline complete — {len(result.entities)} entities, {len(result.relationships)} relationships")
+
+            # Layer 5 — persist graph to Neo4j
+            self.logger.info("Starting Layer 5: saving graph to Neo4j...")
+            from src.pipeline.layer5_graph import save_graph_layer5
+            graph_result = save_graph_layer5(
+                scene_id=job_id,
+                user_id=user_id,
+                scene_text=scene_text,
+                resolved_text=result.resolved_text,
+                entities=result.entities,
+                relationships=result.relationships,
+            )
+            self.logger.info(f"Layer 5 complete: {graph_result}")
+
             elapsed = time.time() - start_time
             self.logger.info(f"Job {job_id} completed in {elapsed:.2f}s")
 
             return {
                 "job_id": job_id,
                 "status": "completed",
-                "result": result.model_dump(),
+                "result": result.dict(),
                 "error": None,
                 "processing_time": f"{elapsed:.2f}s"
             }
 
         except Exception as e:
+            import traceback
             elapsed = time.time() - start_time
             self.logger.error(f"Job {job_id} failed after {elapsed:.2f}s: {e}")
-
+            self.logger.error(traceback.format_exc())  # full stack trace
             return {
                 "job_id": job_id,
                 "status": "failed",
@@ -114,8 +134,6 @@ class KnowledgeGraphWorker:
                 "error": str(e),
                 "processing_time": f"{elapsed:.2f}s"
             }
-
-
 # ─────────────────────────────────────────────
 # Scheduled Queue Poller
 # ─────────────────────────────────────────────

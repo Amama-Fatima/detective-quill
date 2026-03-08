@@ -1,166 +1,196 @@
 import re
 import json
 from typing import List
-from itertools import combinations
 
 from src.models.schemas import Entity, Relationship
 from src.models.llm_loader import get_llm_loader
 from src.utils.logger import setup_logger
 
-
 logger = setup_logger(__name__)
+
+
+def _build_sentence_token_sets(text: str, nlp) -> list[set[str]]:
+    doc = nlp(text)
+    return [
+        {token.lower_ for token in sent if not token.is_space}
+        for sent in doc.sents
+    ]
+
+
+def _entities_co_occur(
+    entity_a: Entity,
+    entity_b: Entity,
+    sentence_sets: list[set[str]],
+) -> bool:
+    tokens_a = {t.lower() for t in entity_a.name.split()}
+    tokens_b = {t.lower() for t in entity_b.name.split()}
+
+    for sent_tokens in sentence_sets:
+        if tokens_a & sent_tokens and tokens_b & sent_tokens:
+            return True
+    return False
 
 
 class LLMRelationshipExtractor:
 
-    
     def __init__(self):
         self.llm_loader = get_llm_loader()
-    
+
     def extract_pairwise_relationship(
         self,
         entity_a: Entity,
         entity_b: Entity,
         scene_text: str
     ) -> List[Relationship]:
-        
-        entity_a_context = f"{entity_a.name} ({entity_a.type})"
+
+        entity_a_context = f"{entity_a.name} ({entity_a.type}"
         if entity_a.attributes.get('role'):
-            entity_a_context += f" - Role: {entity_a.attributes['role']}"
-        if entity_a.attributes.get('description'):
-            entity_a_context += f" - {entity_a.attributes['description']}"
-        
-        entity_b_context = f"{entity_b.name} ({entity_b.type})"
+            entity_a_context += f", {entity_a.attributes['role']}"
+        entity_a_context += ")"
+
+        entity_b_context = f"{entity_b.name} ({entity_b.type}"
         if entity_b.attributes.get('role'):
-            entity_b_context += f" - Role: {entity_b.attributes['role']}"
-        if entity_b.attributes.get('description'):
-            entity_b_context += f" - {entity_b.attributes['description']}"
-        
+            entity_b_context += f", {entity_b.attributes['role']}"
+        entity_b_context += ")"
+
         logger.debug(f"Analyzing relationship: {entity_a.name} ↔ {entity_b.name}")
-        
-        prompt = f"""Analyze if these two entities have any relationships in this scene. Use careful reasoning.
 
-        Scene:
-        {scene_text}
+        prompt = f"""Scene: "{scene_text}"
 
-        Entity A: {entity_a_context}
-        Entity B: {entity_b_context}
+A: {entity_a_context}
+B: {entity_b_context}
 
-        Think step-by-step:
-        1. What does the text say about how A and B interact?
-        2. Based on their roles, what relationships are possible?
-        3. Who is the ACTOR (does the action) and who is ACTED UPON (receives the action)?
-        4. Does the evidence clearly support this relationship direction?
+Does the scene text EXPLICITLY show a relationship between A and B?
+Only use evidence that is a direct quote or clear paraphrase from the scene.
+Do not infer relationships. If uncertain, output null.
 
-        Key reasoning rules:
-        - Victims (dead) cannot perform actions after death (can't investigate, kill, interrogate)
-        - Detectives investigate/interrogate others (detective → suspect/victim)
-        - Witnesses observe events (witness → event/person)
-        - "killed" means: killer → victim (NOT victim → anyone)
-        - "investigated" means: investigator → subject (NOT subject → investigator)
-        - "suspected" means: detective → suspect (NOT suspect → detective)
+Output ONLY one of:
+{{"source":"<name>","target":"<name>","type":"<verb>","evidence":"<exact quote from scene>"}}
+null"""
 
-        Output ONLY relationships you are confident about. Output valid JSON:
-        {{
-        "reasoning": "brief explanation of what the text shows",
-        "relationships": [
-            {{"source": "{entity_a.name}", "target": "{entity_b.name}", "type": "relationship_type", "evidence": "quote from text"}}
-        ]
-        }}
-
-        If NO clear relationship exists between A and B, return empty relationships list.
-        Use exact names: "{entity_a.name}" and "{entity_b.name}"
-
-        Only output valid JSON:"""
-        
-        response = self.llm_loader.generate(prompt, max_tokens=400)
-        
+        response = self.llm_loader.generate(prompt, max_tokens=60)
         logger.debug(f"LLM response for {entity_a.name} ↔ {entity_b.name}: {response[:150]}")
-        
+
         try:
             response = re.sub(r'```json\s*', '', response)
             response = re.sub(r'```\s*', '', response)
-            
+            response = response.strip()
+
+            if response.lower() == 'null' or response == '':
+                logger.debug(f"  No relationship found between {entity_a.name} and {entity_b.name}")
+                return []
+
             json_match = re.search(r'\{.*\}', response, re.DOTALL)
             if json_match:
                 data = json.loads(json_match.group())
             else:
                 data = json.loads(response)
-            
-            relationships = []
-            for rel in data.get('relationships', []):
-                source = rel.get('source', '')
-                target = rel.get('target', '')
-                
-                source_match = source.lower().strip() in [entity_a.name.lower(), entity_b.name.lower()]
-                target_match = target.lower().strip() in [entity_a.name.lower(), entity_b.name.lower()]
-                
-                if source_match and target_match and source.lower() != target.lower():
-                    relationship = Relationship(
-                        source=source,
-                        target=target,
-                        relation_type=rel.get('type', 'unknown'),
-                        description=rel.get('evidence', ''),
-                        confidence=0.9  
-                    )
-                    relationships.append(relationship)
-                    logger.debug(f" Found: {source} --[{rel.get('type')}]--> {target}")
-            
-            if not relationships:
-                logger.debug(f"  No relationship found between {entity_a.name} and {entity_b.name}")
-            
-            return relationships
-        
+
+            source = data.get('source', '')
+            target = data.get('target', '')
+
+            source_match = source.lower().strip() in [entity_a.name.lower(), entity_b.name.lower()]
+            target_match = target.lower().strip() in [entity_a.name.lower(), entity_b.name.lower()]
+
+            if source_match and target_match and source.lower() != target.lower():
+                relationship = Relationship(
+                    source=source,
+                    target=target,
+                    relation_type=data.get('type', 'unknown'),
+                    description=data.get('evidence', ''),
+                    confidence=0.9
+                )
+                logger.debug(f"  Found: {source} --[{data.get('type')}]--> {target}")
+                return [relationship]
+
+            return []
+
         except json.JSONDecodeError as e:
             logger.debug(f"  JSON parsing error for {entity_a.name} ↔ {entity_b.name}: {e}")
             return []
         except Exception as e:
             logger.debug(f"  Error extracting relationship: {e}")
             return []
-    
-    def extract_relationships(self, entities: List[Entity], scene_text: str) -> List[Relationship]:
-        
+
+    def extract_relationships(
+        self,
+        entities: List[Entity],
+        scene_text: str,
+        nlp,                          # ← added
+    ) -> List[Relationship]:
+
         all_relationships = []
         total_pairs = len(entities) * (len(entities) - 1) // 2
         processed = 0
-        
+        skipped_type = 0              # ← was just 'skipped', now split for clarity
+        skipped_cooc = 0              # ← was missing entirely
+
+        MEANINGFUL_TYPES = {'PERSON', 'ORG', 'GPE'}
+        SAME_TYPE_SKIP = {'FAC', 'LOC', 'GPE', 'NORP'}
+        SKIP_AS_ACTOR = {'NORP', 'FAC', 'LOC', 'DATE', 'TIME', 'MONEY', 'QUANTITY', 'CARDINAL', 'ORDINAL'}
+
+        # Built once here, passed into _entities_co_occur for every pair
+        sentence_sets = _build_sentence_token_sets(scene_text, nlp)  # ← was missing
+        logger.debug(f"  Built {len(sentence_sets)} sentence token sets for co-occurrence filter")
+
         logger.info(f"Extracting relationships from {total_pairs} entity pairs")
-        
+
         for i, entity_a in enumerate(entities):
             for entity_b in entities[i+1:]:
                 processed += 1
-                
+
                 logger.info(f"  [{processed}/{total_pairs}] Analyzing: {entity_a.name} ↔ {entity_b.name}")
-                
-                
-                skip_types = {('FAC', 'FAC'), ('LOC', 'LOC'), ('GPE', 'GPE')}
-                if (entity_a.type, entity_b.type) in skip_types:
-                    logger.debug(f"  ⊘ Skipping {entity_a.type} ↔ {entity_b.type} pair")
+
+                if entity_a.type in SAME_TYPE_SKIP and entity_a.type == entity_b.type:
+                    logger.debug(f"  ⊘ Skipping same-type non-person pair: {entity_a.type} ↔ {entity_b.type}")
+                    skipped_type += 1
                     continue
-                
-                # Extract pairwise relationships
+
+                if entity_a.type not in MEANINGFUL_TYPES and entity_b.type not in MEANINGFUL_TYPES:
+                    logger.debug(f"  ⊘ Skipping low-value pair: {entity_a.name} ({entity_a.type}) ↔ {entity_b.name} ({entity_b.type})")
+                    skipped_type += 1
+                    continue
+
+                if entity_a.type in SKIP_AS_ACTOR and entity_b.type in SKIP_AS_ACTOR:
+                    skipped_type += 1
+                    continue
+
+                if not _entities_co_occur(entity_a, entity_b, sentence_sets):  # ← sentence_sets now defined
+                    logger.info(f"  ⊘ Skipping ({entity_a.name} ↔ {entity_b.name}): no sentence co-occurrence")
+                    skipped_cooc += 1
+                    continue
+
                 pair_relationships = self.extract_pairwise_relationship(
                     entity_a, entity_b, scene_text
                 )
                 all_relationships.extend(pair_relationships)
-        
+
+        llm_calls = processed - skipped_type - skipped_cooc
+        logger.info(
+            f"Skipped {skipped_type} pairs (type filter), "
+            f"{skipped_cooc} pairs (co-occurrence filter), "
+            f"ran LLM on {llm_calls}/{total_pairs} pairs"
+        )
         logger.info(f"Found {len(all_relationships)} total relationships")
-        
+
         return all_relationships
 
 
-def extract_relationships_layer4(entities: List[Entity], scene_text: str) -> List[Relationship]:
-    
+def extract_relationships_layer4(
+    entities: List[Entity],
+    scene_text: str,
+    nlp,                              # ← added
+) -> List[Relationship]:
+
     logger.info("=" * 60)
     logger.info("LAYER 4: LLM Relationship Extraction")
     logger.info("=" * 60)
-    
+
     extractor = LLMRelationshipExtractor()
-    
-    relationships = extractor.extract_relationships(entities, scene_text)
-    
+    relationships = extractor.extract_relationships(entities, scene_text, nlp=nlp)  # ← forwarded
+
     logger.info(f"Layer 4 complete: {len(relationships)} relationships extracted")
     for rel in relationships:
         logger.debug(f"  - {rel.source} --[{rel.relation_type}]--> {rel.target}")
-    
+
     return relationships

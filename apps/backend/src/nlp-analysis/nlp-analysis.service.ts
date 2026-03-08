@@ -72,7 +72,7 @@ export class NlpAnalysisService {
     const job_id = data.job_id;
 
     // Publish to RabbitMQ (Python worker will consume this)
-    this.queueService.sendSceneAnalysisJob({
+    await this.queueService.sendSceneAnalysisJob({
       job_id,
       scene_text: dto.scene_text,
       user_id: userId,
