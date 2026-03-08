@@ -20,8 +20,8 @@ import {
 //   global_sequence?: number;
 //   timeline_path?: string;
 //   /** If set, Python worker uses this as Neo4j scene_id; otherwise job_id is used. */
-  scene_id?: string;
-}
+// scene_id?: string;
+// }
 
 const SCENE_ANALYSIS_QUEUE = "scene_analysis_queue";
 
@@ -90,8 +90,7 @@ export class QueueService {
       timestamp: new Date().toISOString(),
     };
 
-    const url =
-      process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672";
+    const url = process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672";
     let conn: AmqpConnection | null = null;
 
     try {

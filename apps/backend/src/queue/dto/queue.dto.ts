@@ -3,6 +3,7 @@ export interface SceneAnalysisJobData {
   scene_text: string;
   user_id: string;
   project_id?: string;
+  scene_id?: string;
 }
 
 export interface CreateCommitJobData {
