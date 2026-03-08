@@ -8,6 +8,7 @@ import { CreateCommitDto } from "./dto/commits.dto";
 import { WorkerBranchesService } from "src/branches/worker-branches.service";
 import { WorkerSnapshotsService } from "src/snapshots/worker-snapshots.service";
 import { WorkerContributionsService } from "src/contributions/worker-contributions.service";
+import { CommitKnowledgeGraphService } from "src/commit-knowledge-graph/commit-knowledge-graph.service";
 
 @Injectable()
 export class WorkerCommitsService {
@@ -16,6 +17,7 @@ export class WorkerCommitsService {
     private workerBranchesService: WorkerBranchesService,
     private workerSnapshotsService: WorkerSnapshotsService,
     private workerContributionsService: WorkerContributionsService,
+    private readonly commitKnowledgeGraphService: CommitKnowledgeGraphService,
   ) {}
 
   async createCommit(
@@ -72,6 +74,44 @@ export class WorkerCommitsService {
         error instanceof Error ? error.message : "Unknown contribution error";
       console.error(
         `Failed to log contribution for commit ${commit.id}: ${message}`,
+      );
+    }
+
+    try {
+      const { enqueued } =
+        await this.commitKnowledgeGraphService.enqueueCommitKnowledgeGraphJobs(
+          commit.id,
+          projectId,
+          userId,
+        );
+      if (enqueued > 0) {
+        console.log(
+          `Commit ${commit.id}: enqueued ${enqueued} knowledge graph job(s)`,
+        );
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.warn(
+        `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
+      );
+    }
+
+    try {
+      const { enqueued } =
+        await this.commitKnowledgeGraphService.enqueueCommitKnowledgeGraphJobs(
+          commit.id,
+          projectId,
+          userId,
+        );
+      if (enqueued > 0) {
+        console.log(
+          `Commit ${commit.id}: enqueued ${enqueued} knowledge graph job(s)`,
+        );
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.warn(
+        `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
       );
     }
 

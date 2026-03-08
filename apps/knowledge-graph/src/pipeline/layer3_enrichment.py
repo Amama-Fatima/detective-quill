@@ -21,33 +21,18 @@ class LLMEntityEnricher:
       
         logger.debug(f"Enriching entity: {entity.name} ({entity.type})")
         
-        prompt = f"""Given this detective fiction scene, provide rich contextual information for the entity "{entity.name}".
+        prompt = f"""Scene: "{scene_text}"
 
-        Scene:
-        {scene_text}
+Entity: "{entity.name}" (type: {entity.type})
 
-        Entity to analyze:
-        - Name: {entity.name}
-        - Type: {entity.type}
-        - Mentions in text: {', '.join(entity.mentions)}
+Look at the scene text only. Do not infer or guess.
 
-        Extract relevant attributes for this entity based on the context. Output valid JSON:
-        {{
-        "description": "brief description from context",
-        "role": "detective/suspect/victim/witness/location/object/etc",
-        "attributes": {{
-            "key": "value"
-        }}
-        }}
+Output ONLY this JSON:
+{{"description":"<what the scene explicitly says about this entity, or null>","role":"<detective|suspect|victim|witness|object|location|other>","attributes":{{}}}}
 
-        Examples of attributes you might include:
-        - For people: occupation, motive, alibi, behavior, emotional_state
-        - For locations: significance, atmosphere, accessibility
-        - For objects: type (weapon/evidence/clue), owner, condition
-
-        Only output valid JSON for "{entity.name}":"""
+Only add keys to "attributes" if the scene text explicitly states them. If nothing is explicit, leave attributes as {{}}."""
         
-        response = self.llm_loader.generate(prompt, max_tokens=400)
+        response = self.llm_loader.generate(prompt, max_tokens=150)
         
         logger.debug(f"LLM response for '{entity.name}': {response[:150]}")
         
