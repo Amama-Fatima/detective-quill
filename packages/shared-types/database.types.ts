@@ -264,54 +264,6 @@ export type Database = {
           },
         ];
       };
-      commit_knowledge_graphs: {
-        Row: {
-          commit_id: string;
-          commit_snapshot_id: string;
-          completed_at: string | null;
-          created_at: string;
-          error_message: string | null;
-          id: string;
-          job_id: string;
-          status: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Insert: {
-          commit_id: string;
-          commit_snapshot_id: string;
-          completed_at?: string | null;
-          created_at?: string;
-          error_message?: string | null;
-          id?: string;
-          job_id: string;
-          status?: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Update: {
-          commit_id?: string;
-          commit_snapshot_id?: string;
-          completed_at?: string | null;
-          created_at?: string;
-          error_message?: string | null;
-          id?: string;
-          job_id?: string;
-          status?: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Relationships: [
-          {
-            foreignKeyName: "commit_knowledge_graphs_commit_id_fkey";
-            columns: ["commit_id"];
-            isOneToOne: false;
-            referencedRelation: "commits";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "commit_knowledge_graphs_commit_snapshot_id_fkey";
-            columns: ["commit_snapshot_id"];
-            isOneToOne: false;
-            referencedRelation: "commit_snapshots";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       commit_snapshots: {
         Row: {
           commit_id: string | null;
@@ -1017,7 +969,6 @@ export type Database = {
     Enums: {
       blueprint_type: "character" | "timeline" | "location" | "item";
       blueprint_types: "character" | "timeline" | "location" | "item";
-      commit_kg_status: "pending" | "processing" | "completed" | "failed";
       commit_kg_status: "pending" | "processing" | "completed" | "failed";
       contribution_type: "commit" | "save";
       invitation_status: "pending" | "rejected";

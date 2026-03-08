@@ -85,13 +85,13 @@ export class WorkerCommitsService {
           userId,
         );
       if (enqueued > 0) {
-        this.logger.log(
+        console.log(
           `Commit ${commit.id}: enqueued ${enqueued} knowledge graph job(s)`,
         );
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      this.logger.warn(
+      console.warn(
         `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
       );
     }
@@ -104,13 +104,13 @@ export class WorkerCommitsService {
           userId,
         );
       if (enqueued > 0) {
-        this.logger.log(
+        console.log(
           `Commit ${commit.id}: enqueued ${enqueued} knowledge graph job(s)`,
         );
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      this.logger.warn(
+      console.warn(
         `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
       );
     }
