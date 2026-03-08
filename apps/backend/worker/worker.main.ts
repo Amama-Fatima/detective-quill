@@ -8,17 +8,29 @@ import express from "express";
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice(WorkerModule, {
+  const emailWorkerApp = await NestFactory.createMicroservice(WorkerModule, {
     transport: Transport.RMQ,
     options: {
       urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
-      queue: "invite_email_job",
+      queue: "invite_email_queue",
       queueOptions: { durable: true },
     },
   });
 
-  await app.listen();
-  console.log("Worker microservice is running...");
+  const commitWorkerApp = await NestFactory.createMicroservice(WorkerModule, {
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
+      queue: "commit_jobs_queue",
+      queueOptions: { durable: true },
+    },
+  });
+
+  await Promise.all([
+    emailWorkerApp.listen(),
+    commitWorkerApp.listen(),
+  ]);
+  console.log("Worker microservices are running...");
 
   const httpApp = express();
   httpApp.get("/health", (req, res) => {

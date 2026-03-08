@@ -26,19 +26,6 @@ import { ContributionsModule } from "./contributions/contributions.module";
       isGlobal: true,
       envFilePath: ".env",
     }),
-    ClientsModule.register([
-      {
-        name: "RABBITMQ_SERVICE",
-        transport: Transport.RMQ,
-        options: {
-          urls: ["amqp://guest:guest@localhost:5672"],
-          queue: "my_queue",
-          queueOptions: {
-            durable: false,
-          },
-        },
-      },
-    ]),
     SupabaseModule,
     ProjectsModule,
     FsNodesModule,

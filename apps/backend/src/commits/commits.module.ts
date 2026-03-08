@@ -7,6 +7,7 @@ import { BranchesModule } from "src/branches/branches.module";
 import { SnapshotsModule } from "src/snapshots/snapshots.module";
 import { ContributionsModule } from "src/contributions/contributions.module";
 import { CommitKnowledgeGraphModule } from "src/commit-knowledge-graph/commit-knowledge-graph.module";
+import { QueueModule } from "src/queue/queue.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CommitKnowledgeGraphModule } from "src/commit-knowledge-graph/commit-kn
     SnapshotsModule,
     ContributionsModule,
     CommitKnowledgeGraphModule,
+    QueueModule,
   ],
   controllers: [CommitsController],
   providers: [CommitsService],

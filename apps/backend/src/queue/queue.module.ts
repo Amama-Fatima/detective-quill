@@ -6,13 +6,52 @@ import { QueueService } from "./queue.service";
   imports: [
     ClientsModule.register([
       {
-        name: "RABBITMQ_SERVICE",
+        name: "RABBITMQ_NLP_SERVICE",
         transport: Transport.RMQ,
         options: {
           urls: [
             process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
           ],
           queue: "scene_analysis_queue",
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
+      {
+        name: "RABBITMQ_COMMITS_SERVICE",
+        transport: Transport.RMQ,
+        options: {
+          urls: [
+            process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
+          ],
+          queue: "commit_jobs_queue",
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
+      {
+        name: "RABBITMQ_EMAIL_SERVICE",
+        transport: Transport.RMQ,
+        options: {
+          urls: [
+            process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
+          ],
+          queue: "invite_email_queue",
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
+      {
+        name: "RABBITMQ_BRANCHES_SERVICE",
+        transport: Transport.RMQ,
+        options: {
+          urls: [
+            process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
+          ],
+          queue: "branch_jobs_queue",
           queueOptions: {
             durable: true,
           },

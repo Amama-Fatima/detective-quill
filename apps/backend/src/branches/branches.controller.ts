@@ -42,16 +42,6 @@ export class BranchesController {
     };
   }
 
-  // @Get()
-  // async getBranchesByProject(@Param("projectId") projectId: string) {
-  //   return await this.branchesService.getBranchesByProject(projectId);
-  // }
-
-  // @Get(":branchId")
-  // async getBranchById(@Param("branchId") branchId: string) {
-  //   return await this.branchesService.getBranchById(branchId);
-  // }
-
   @Put(":branchId")
   async updateBranch(
     @Param("projectId") projectId: string,

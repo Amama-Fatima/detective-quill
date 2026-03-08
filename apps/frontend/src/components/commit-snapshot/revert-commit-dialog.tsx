@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useRevertCommit } from "@/hooks/use-revert-commit";
+import { useRevertCommit } from "@/hooks/commits/use-revert-commit";
 
 interface RevertCommitDialogProps {
   projectId: string;

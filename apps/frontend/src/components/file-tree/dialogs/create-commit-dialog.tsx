@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useCommits } from "@/hooks/use-commits";
+import { useCommits } from "@/hooks/commits/use-commits";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,7 +23,6 @@ const CreateCommitDialog = (props: CreateCommitDialogProps) => {
   const [commitMessage, setCommitMessage] = useState("");
   const { createCommitMutation } = useCommits(
     props.projectId,
-    props.branchId || null,
   );
   const loading = createCommitMutation.isPending;
 
