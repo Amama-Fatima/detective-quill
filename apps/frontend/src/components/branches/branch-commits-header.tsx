@@ -28,7 +28,7 @@ export default function BranchCommitsHeader({
               <h1 className="mystery-title mb-2 text-4xl">Branch History</h1>
               <p className="noir-text text-muted-foreground">
                 Commits for branch:
-                <span className="text-primary font-playfair-display text-lg">
+                <span className="text-background bg-foreground uppercase font-playfair-display text-lg ml-2 px-2 py-1 rounded">
                   {" "}
                   {branchName}
                 </span>

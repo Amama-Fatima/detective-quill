@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  activityRateFillClasses,
   monthNames,
   getCellFill,
   weekdayLabels,
@@ -288,11 +289,12 @@ const Heatmap = () => {
             <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
               <TrendingUp className="h-3.5 w-3.5" />
               <span>Low</span>
-              <div className="h-3 w-3 rounded-[3px] border border-border/30 bg-accent" />
-              <div className="h-3 w-3 rounded-[3px] border border-border/30 bg-blue-300" />
-              <div className="h-3 w-3 rounded-[3px] border border-border/30 bg-blue-500" />
-              <div className="h-3 w-3 rounded-[3px] border border-border/30 bg-blue-700" />
-              <div className="h-3 w-3 rounded-[3px] border border-border/30 bg-blue-950" />
+              {activityRateFillClasses.map((fillClass) => (
+                <div
+                  key={fillClass}
+                  className={`h-3 w-3 rounded-[3px] border border-border/30 ${fillClass}`}
+                />
+              ))}
               <span>High</span>
             </div>
           </>

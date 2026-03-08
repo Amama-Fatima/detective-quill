@@ -85,7 +85,7 @@ export default function CommitSnapshotViewer({
               isActiveBranch={isActiveBranch}
               historyPath={historyPath}
             />
-            <div className="mt-2 px-2 py-1 border border-dashed border-primary rounded text-sm font-medium text-primary italic noit-text w-fit bg-background/20">
+            <div className="mt-2 px-2 py-1 border border-dashed bg-foreground text-background rounded text-sm font-medium case-file w-fit">
               Read-only snapshot
             </div>
           </div>
