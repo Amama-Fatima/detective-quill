@@ -1,0 +1,293 @@
+<mxfile host="app.diagrams.net" modified="2025-03-09T00:00:00.000Z" agent="DrawIO" version="22.0.0" etag="data-flow-dfd" type="device">
+  <diagram id="level0" name="Level 0 - Context">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="level0-root" value="Level 0 - Context Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="300" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="level0-user" value="User / Client" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="320" width="50" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="level0-system" value="NLP Job to Knowledge Graph&#xa;System" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="280" width="300" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="level0-db" value="Supabase&#xa;(DB)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="220" y="300" width="80" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="level0-queue" value="RabbitMQ&#xa;(Queues)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="500" y="480" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="level0-neo4j" value="Neo4j&#xa;(Knowledge Graph)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="920" y="300" width="100" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="level0-f1" value="Create commit request&#xa;(projectId, branchId, message)" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="level0-user" target="level0-system">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="130" y="365" as="sourcePoint"/><mxPoint x="400" y="320" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="level0-f2" value="Commit job queued" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="level0-system" target="level0-queue">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="550" y="360" as="sourcePoint"/><mxPoint x="550" y="480" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="level0-f3" value="Scene analysis jobs" style="endArrow=classic;html=1;rounded=0;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="level0-system" target="level0-queue">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="610" y="360" as="sourcePoint"/><mxPoint x="550" y="480" as="targetPoint"/><Array as="points"><mxPoint x="610" y="440"/><mxPoint x="550" y="440"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="level0-f4" value="Read/write commits,&#xa;snapshots, jobs" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="level0-system" target="level0-db">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="400" y="320" as="sourcePoint"/><mxPoint x="300" y="350" as="targetPoint"/><Array as="points"><mxPoint x="320" y="320"/><mxPoint x="320" y="350"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="level0-f5" value="Knowledge graph&#xa;(entities, relationships)" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="level0-system" target="level0-neo4j">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="700" y="320" as="sourcePoint"/><mxPoint x="920" y="350" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="level0-f6" value="Success response" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="level0-system" target="level0-user">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="400" y="320" as="sourcePoint"/><mxPoint x="130" y="365" as="targetPoint"/></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="level1" name="Level 1 - Main Processes">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="l1-title" value="Level 1 - Main Data Flows" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="450" y="20" width="300" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-user" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="380" width="40" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-p1" value="1.0&#xa;Commits&#xa;Controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="140" y="360" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-queue-commit" value="RabbitMQ&#xa;commit_create_job" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=12;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="320" y="350" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-p2" value="2.0&#xa;Commits&#xa;Consumer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="480" y="360" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-p3" value="3.0&#xa;Worker Commits&#xa;Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="480" y="480" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-db" value="Supabase&#xa;(commits, snapshots,&#xa;nlp_analysis_jobs,&#xa;commit_knowledge_graphs)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=12;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="320" y="520" width="140" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-p4" value="4.0&#xa;Commit KG&#xa;Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="480" y="600" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-queue-scene" value="RabbitMQ&#xa;scene_analysis_queue" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=12;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="680" y="350" width="120" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-p5" value="5.0&#xa;Modal&#xa;Poll Queue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="680" y="480" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-p6" value="6.0&#xa;KG Worker&#xa;(NLP + Graph)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="680" y="600" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-neo4j" value="Neo4j" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=12;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="880" y="580" width="80" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-queue-results" value="scene_analysis_&#xa;results_queue" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=12;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="880" y="380" width="100" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="l1-flow-1" value="POST create commit" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-user" target="l1-p1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="80" y="415" as="sourcePoint"/><mxPoint x="140" y="390" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-2" value="sendCreateCommitJob" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p1" target="l1-queue-commit">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="260" y="390" as="sourcePoint"/><mxPoint x="320" y="390" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-3" value="Commit job queued" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p1" target="l1-user">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="140" y="400" as="sourcePoint"/><mxPoint x="80" y="420" as="targetPoint"/><Array as="points"><mxPoint x="100" y="340"/><mxPoint x="60" y="340"/><mxPoint x="60" y="415"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-4" value="commit_create_job payload" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-queue-commit" target="l1-p2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="420" y="390" as="sourcePoint"/><mxPoint x="480" y="390" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-5" value="createCommit()" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p2" target="l1-p3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="540" y="420" as="sourcePoint"/><mxPoint x="540" y="480" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-6" value="Insert commit, snapshots;&#xa;update branch" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p3" target="l1-db">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="480" y="520" as="sourcePoint"/><mxPoint x="320" y="570" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-7" value="enqueueCommitKnowledgeGraphJobs()" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p3" target="l1-p4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="540" y="540" as="sourcePoint"/><mxPoint x="540" y="600" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-8" value="Get file snapshots" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p4" target="l1-db">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="480" y="630" as="sourcePoint"/><mxPoint x="390" y="620" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-9" value="Insert nlp_analysis_jobs,&#xa;commit_knowledge_graphs" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p4" target="l1-db">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="460" y="620" as="sourcePoint"/><mxPoint x="400" y="560" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-10" value="sendSceneAnalysisJob&#xa;(job_id, scene_text, user_id)" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p4" target="l1-queue-scene">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="600" y="630" as="sourcePoint"/><mxPoint x="740" y="430" as="targetPoint"/><Array as="points"><mxPoint x="680" y="630"/><mxPoint x="740" y="390"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-11" value="Consume message" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-queue-scene" target="l1-p5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="740" y="430" as="sourcePoint"/><mxPoint x="740" y="480" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-12" value="process_job.remote()" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p5" target="l1-p6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="740" y="540" as="sourcePoint"/><mxPoint x="740" y="600" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-13" value="NLP pipeline +&#xa;save_graph_layer5" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p6" target="l1-neo4j">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="800" y="630" as="sourcePoint"/><mxPoint x="880" y="630" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="l1-flow-14" value="Publish result" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l1-p5" target="l1-queue-results">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><mxPoint x="800" y="510" as="sourcePoint"/><mxPoint x="880" y="410" as="targetPoint"/><Array as="points"><mxPoint x="820" y="410"/></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="level2" name="Level 2 - Process Decomposition">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="l2-title" value="Level 2 - Process Decomposition" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="500" y="20" width="400" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-user" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="30" y="400" width="40" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-1.1" value="1.1&#xa;Receive POST&#xa;createCommit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="120" y="380" width="100" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-1.2" value="1.2&#xa;QueueService.&#xa;sendCreateCommitJob" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="120" y="450" width="100" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-queue-commit" value="commit_create_job&#xa;(RabbitMQ)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="280" y="420" width="90" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-2.1" value="2.1&#xa;CommitsConsumer&#xa;handleCreateCommit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="430" y="380" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-3.1" value="3.1 getHeadCommitId" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="430" y="480" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-3.2" value="3.2 insert commit&#xa;(commits table)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="430" y="530" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-3.3" value="3.3 createSnapshots&#xa;FromNodes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="430" y="580" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-3.4" value="3.4 updateBranch&#xa;(head_commit_id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="430" y="630" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-3.5" value="3.5 enqueueCommit&#xa;KnowledgeGraphJobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="430" y="680" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-db" value="Supabase" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=10;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="280" y="560" width="90" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-4.1" value="4.1 getSnapshotsByCommit&#xa;filter file snapshots" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="600" y="560" width="110" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-4.2" value="4.2 For each file: insert&#xa;nlp_analysis_jobs row" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="600" y="610" width="110" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-4.3" value="4.3 insert&#xa;commit_knowledge_graphs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="600" y="660" width="110" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-4.4" value="4.4 sendSceneAnalysisJob&#xa;(amqp sendToQueue)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="600" y="710" width="110" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-queue-scene" value="scene_analysis_queue" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="780" y="420" width="100" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-5.1" value="5.1 poll_queue (schedule 60s)&#xa;basic_get scene_analysis_queue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="780" y="520" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-5.2" value="5.2 Parse message&#xa;(job_id, scene_text, user_id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="780" y="575" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-5.3" value="5.3 KnowledgeGraphWorker&#xa;.process_job.remote()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="780" y="625" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-5.4" value="5.4 basic_publish to&#xa;scene_analysis_results_queue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="780" y="675" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-6.1" value="6.1 pipeline.process_scene&#xa;(NLP: NER, coref, etc.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="960" y="560" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-6.2" value="6.2 save_graph_layer5&#xa;(entities, relationships)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="960" y="615" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-6.3" value="6.3 Return result&#xa;(status, entities, rels)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="960" y="670" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-neo4j" value="Neo4j" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=10;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="600" width="80" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-results-q" value="results_queue" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="420" width="80" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f1" value="POST" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-user" target="l2-1.1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f2" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-1.1" target="l2-1.2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f3" value="emit commit_create_job" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-1.2" target="l2-queue-commit">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f4" value="payload" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-queue-commit" target="l2-2.1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f5" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-2.1" target="l2-3.1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f6" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-3.1" target="l2-3.2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f7" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-3.2" target="l2-3.3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f8" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-3.3" target="l2-3.4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f9" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-3.4" target="l2-3.5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f10" value="read/write" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-3.1" target="l2-db">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><Array as="points"><mxPoint x="370" y="500"/><mxPoint x="325" y="500"/><mxPoint x="325" y="605"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="l2-f11" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-3.5" target="l2-4.1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><Array as="points"><mxPoint x="540" y="700"/><mxPoint x="655" y="700"/><mxPoint x="655" y="580"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="l2-f12" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-4.1" target="l2-4.2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f13" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-4.2" target="l2-4.3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f14" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-4.3" target="l2-4.4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f15" value="sendToQueue" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-4.4" target="l2-queue-scene">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><Array as="points"><mxPoint x="755" y="730"/><mxPoint x="830" y="730"/><mxPoint x="830" y="450"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="l2-f16" value="message" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-queue-scene" target="l2-5.1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f17" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-5.1" target="l2-5.2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f18" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-5.2" target="l2-5.3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f19" value="job_id, scene_text, user_id" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-5.3" target="l2-6.1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><Array as="points"><mxPoint x="920" y="645"/><mxPoint x="920" y="582"/><mxPoint x="960" y="582"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="l2-f20" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-6.1" target="l2-6.2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f21" value="graph" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-6.2" target="l2-neo4j">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f22" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-6.2" target="l2-6.3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l2-f23" value="result" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-6.3" target="l2-5.4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><Array as="points"><mxPoint x="1080" y="692"/><mxPoint x="840" y="692"/><mxPoint x="840" y="695"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="l2-f24" value="publish" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="l2-5.4" target="l2-results-q">
+          <mxGeometry width="50" height="50" relative="1" as="geometry"><Array as="points"><mxPoint x="920" y="695"/><mxPoint x="1180" y="695"/><mxPoint x="1180" y="445"/></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

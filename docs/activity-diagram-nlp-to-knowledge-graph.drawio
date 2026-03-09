@@ -1,0 +1,153 @@
+<mxfile host="app.diagrams.net" modified="2025-03-09T00:00:00.000Z" agent="Auto" version="22.1.0" etag="nlp-kg-activity" type="device">
+  <diagram name="NLP Job to Knowledge Graph" id="nlp-kg-flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Vertical swimlanes: horizontal=1 = column layout, startSize = title width on left -->
+        <!-- Backend column -->
+        <mxCell id="lane-backend" value="Backend" style="swimlane;horizontal=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;startSize=40;" parent="1" vertex="1">
+          <mxGeometry x="40" y="40" width="360" height="1100" as="geometry"/>
+        </mxCell>
+        <mxCell id="start" value="Start" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" parent="lane-backend" vertex="1">
+          <mxGeometry x="130" y="20" width="50" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="commit-enqueue" value="Commit module: enqueue KG jobs&#xa;(after commit created)&#xa;• Get file snapshots&#xa;• Insert nlp_analysis_jobs (QUEUED)&#xa;• Insert commit_knowledge_graphs&#xa;• sendSceneAnalysisJob()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="lane-backend" vertex="1">
+          <mxGeometry x="50" y="90" width="300" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="queue-publish" value="QueueService: sendSceneAnalysisJob&#xa;• Connect to RabbitMQ&#xa;• Publish to scene_analysis_queue&#xa;(job_id, scene_text, user_id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="lane-backend" vertex="1">
+          <mxGeometry x="50" y="195" width="300" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="consumer-receive" value="NLP Consumer: receive result&#xa;from scene_analysis_results_queue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="lane-backend" vertex="1">
+          <mxGeometry x="50" y="520" width="300" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="consumer-save" value="saveAnalysisResult&#xa;• Update nlp_analysis_jobs (COMPLETED)&#xa;• Insert nlp_entities, nlp_relationships" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="lane-backend" vertex="1">
+          <mxGeometry x="50" y="590" width="300" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="consumer-ack" value="channel.ack(message)&#xa;Acknowledgement to broker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="lane-backend" vertex="1">
+          <mxGeometry x="50" y="665" width="300" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="end" value="End" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;" parent="lane-backend" vertex="1">
+          <mxGeometry x="130" y="725" width="50" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- RabbitMQ column -->
+        <mxCell id="lane-rabbitmq" value="RabbitMQ" style="swimlane;horizontal=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;startSize=40;" parent="1" vertex="1">
+          <mxGeometry x="420" y="40" width="340" height="1100" as="geometry"/>
+        </mxCell>
+        <mxCell id="mq-queue-in" value="scene_analysis_queue&#xa;(job message stored)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="lane-rabbitmq" vertex="1">
+          <mxGeometry x="50" y="200" width="260" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mq-queue-out" value="scene_analysis_results_queue&#xa;(result message stored)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="lane-rabbitmq" vertex="1">
+          <mxGeometry x="50" y="530" width="260" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Python pipeline column -->
+        <mxCell id="lane-python" value="Python pipeline" style="swimlane;horizontal=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;startSize=40;" parent="1" vertex="1">
+          <mxGeometry x="780" y="40" width="360" height="1100" as="geometry"/>
+        </mxCell>
+        <mxCell id="py-consume" value="Consume from scene_analysis_queue&#xa;(poll_queue / RabbitMQ worker)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="lane-python" vertex="1">
+          <mxGeometry x="50" y="200" width="280" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="py-ack-input" value="basic_ack (input message)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="lane-python" vertex="1">
+          <mxGeometry x="50" y="270" width="280" height="38" as="geometry"/>
+        </mxCell>
+        <mxCell id="py-pipeline" value="process_scene (Narrative pipeline)&#xa;• Layer 1: spaCy + coreference&#xa;• Layer 2: Post-process entities&#xa;• Layer 3: LLM enrichment&#xa;• Layer 4: LLM relationships" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="lane-python" vertex="1">
+          <mxGeometry x="50" y="328" width="280" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="py-layer5" value="Layer 5: save_graph_layer5&#xa;Write entities &amp; relationships to Neo4j" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="lane-python" vertex="1">
+          <mxGeometry x="50" y="420" width="280" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="py-publish" value="Publish result to&#xa;scene_analysis_results_queue&#xa;(job_id, status, result)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="lane-python" vertex="1">
+          <mxGeometry x="50" y="490" width="280" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Database column -->
+        <mxCell id="lane-db" value="Database" style="swimlane;horizontal=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;startSize=40;" parent="1" vertex="1">
+          <mxGeometry x="1160" y="40" width="400" height="1100" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-supabase-jobs" value="Supabase: nlp_analysis_jobs&#xa;(insert QUEUED, later COMPLETED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="lane-db" vertex="1">
+          <mxGeometry x="50" y="100" width="320" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-supabase-ckg" value="Supabase: commit_knowledge_graphs&#xa;(link commit ↔ job)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="lane-db" vertex="1">
+          <mxGeometry x="50" y="155" width="320" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-neo4j" value="Neo4j: Knowledge graph&#xa;(Scene, Entity nodes; Relationship edges)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="lane-db" vertex="1">
+          <mxGeometry x="50" y="430" width="320" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="db-supabase-result" value="Supabase: nlp_analysis_jobs update,&#xa;nlp_entities, nlp_relationships insert" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="lane-db" vertex="1">
+          <mxGeometry x="50" y="595" width="320" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Backend flow (vertical) -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-backend" source="start" target="commit-enqueue" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-backend" source="commit-enqueue" target="queue-publish" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-backend" source="consumer-receive" target="consumer-save" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-backend" source="consumer-save" target="consumer-ack" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-backend" source="consumer-ack" target="end" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Backend → RabbitMQ (publish job) -->
+        <mxCell id="e-pub" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="queue-publish" target="mq-queue-in" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-pub-lbl" value="publish" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="378" y="268" width="40" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- RabbitMQ → Python (consume job) -->
+        <mxCell id="e-consume" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="mq-queue-in" target="py-consume" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Python internal flow (vertical) -->
+        <mxCell id="ep1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-python" source="py-consume" target="py-ack-input" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-python" source="py-ack-input" target="py-pipeline" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-python" source="py-pipeline" target="py-layer5" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="lane-python" source="py-layer5" target="py-publish" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Python → RabbitMQ (publish result) -->
+        <mxCell id="e-result" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="py-publish" target="mq-queue-out" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- RabbitMQ → Backend (consume result) -->
+        <mxCell id="e-rec" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="mq-queue-out" target="consumer-receive" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Database edges -->
+        <mxCell id="e-db1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#666666;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="commit-enqueue" target="db-supabase-jobs" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-db2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#666666;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="commit-enqueue" target="db-supabase-ckg" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-db3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#666666;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="py-layer5" target="db-neo4j" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-db4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#666666;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="consumer-save" target="db-supabase-result" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
