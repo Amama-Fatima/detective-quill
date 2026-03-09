@@ -8,21 +8,6 @@ import {
   type RevertCommitJobData,
 } from "./dto/queue.dto";
 
-// export interface EmbeddingJobData {
-//   fs_node_id: string;
-//   content: string;
-//   project_id: string;
-//   user_id: string;
-//   scene_name: string;
-//   chapter_name?: string;
-//   chapter_sort_order?: number;
-//   scene_sort_order?: number;
-//   global_sequence?: number;
-//   timeline_path?: string;
-//   /** If set, Python worker uses this as Neo4j scene_id; otherwise job_id is used. */
-// scene_id?: string;
-// }
-
 const SCENE_ANALYSIS_QUEUE = "scene_analysis_queue";
 
 /** amqplib connection shape at runtime (@types/amqplib is inconsistent) */
@@ -47,22 +32,6 @@ export class QueueService {
     const host = url.replace(/^amqps?:\/\/([^:]+:[^@]+@)?/, "").split("/")[0];
     console.log(`[QueueService] RabbitMQ broker: ${host}`);
   }
-
-  // sendEmbeddingJob(jobData: EmbeddingJobData) {
-  //   try {
-  //     // Send the job to RabbitMQ
-  //     this.rabbitClient.emit("embedding_job", {
-  //       ...jobData,
-  //       timestamp: new Date().toISOString(),
-  //       max_chunk_size: 800, // words per chunk
-  //     });
-
-  //     console.log(`Embedding job queued for fs_node_id: ${jobData.fs_node_id}`);
-  //   } catch (error) {
-  //     console.error("Failed to queue embedding job:", error);
-  //     throw error;
-  //   }
-  // }
 
   sendInviteEmailsJob(jobData: EmailSendingJobData) {
     try {

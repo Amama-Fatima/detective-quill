@@ -17,6 +17,12 @@ import type {
   UpdateFileContentDto,
   UpdateNodeMetadataDto,
 } from "@detective-quill/shared-types";
+import {
+  buildTreeFromFlat,
+  mapProjectFileTreeRowsToTreeNodes,
+  ProjectFileTreeRow,
+} from "./tree-utils";
+
 import { CreateFsNodeDto } from "./validation/fs-nodes.validation";
 
 @Injectable()
@@ -586,6 +592,19 @@ export class FsNodesService {
   }
 
   // simpler tree building using view data
+  private buildTreeFromView(nodes: ProjectFileTreeRow[]): FsNodeTreeResponse[] {
+    const normalizedNodes = mapProjectFileTreeRowsToTreeNodes(nodes);
+
+    return buildTreeFromFlat(normalizedNodes, {
+      getId: (node) => node.id,
+      getParentId: (node) => node.parent_id,
+      getDepth: (node) => node.depth,
+      getSortOrder: (node) => node.sort_order,
+      getTieBreaker: (node) => node.name,
+    });
+  }
+
+  /*
   private buildTreeFromView(
     nodes: Database["public"]["Views"]["project_file_tree"]["Row"][],
   ): FsNodeTreeResponse[] {
@@ -687,6 +706,7 @@ export class FsNodesService {
 
     return stripDepth(rootNodes);
   }
+  */
 
   private countWords(text: string): number {
     return text
@@ -713,42 +733,4 @@ export class FsNodesService {
 
     return data.id;
   }
-
-  // private async getParentInfo(
-  //   nodeData: FsNode,
-  //   supabase: any,
-  // ): Promise<{
-  //   chapter_name?: string;
-  //   chapter_sort_order?: number;
-  // }> {
-  //   try {
-  //     let chapterName: string | undefined;
-  //     let chapterSortOrder: number | undefined;
-
-  //     // Get chapter info if this scene has a parent folder
-  //     if (nodeData.parent_id) {
-  //       const { data: chapter } = await supabase
-  //         .from("fs_nodes")
-  //         .select("name, sort_order, node_type")
-  //         .eq("id", nodeData.parent_id)
-  //         .single();
-
-  //       if (chapter?.node_type === "folder") {
-  //         chapterName = chapter.name;
-  //         chapterSortOrder = chapter.sort_order;
-  //       }
-  //     }
-
-  //     return {
-  //       chapter_name: chapterName,
-  //       chapter_sort_order: chapterSortOrder,
-  //     };
-  //   } catch (error) {
-  //     console.error("Error getting description path:", error);
-  //     return {
-  //       chapter_name: undefined,
-  //       chapter_sort_order: undefined,
-  //     };
-  //   }
-  // }
 }

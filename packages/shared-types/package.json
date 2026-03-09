@@ -15,6 +15,10 @@
     "./api": {
       "types": "./api.types.ts",
       "default": "./api.types.ts"
+    },
+    "./tree-utils": {
+      "types": "./tree-utils.ts",
+      "default": "./tree-utils.ts"
     }
   },
   "files": [
