@@ -4,6 +4,7 @@ import { Database } from "@detective-quill/shared-types";
 import { SupabaseService } from "../supabase/supabase.service";
 import { SnapshotsService } from "../snapshots/snapshots.service";
 import { QueueService } from "../queue/queue.service";
+import { extractPlainTextFromEditorContent } from "../utils/editor-content";
 
 type CommitSnapshotRow = Database["public"]["Tables"]["commit_snapshots"]["Row"];
 type CommitKgStatus = Database["public"]["Enums"]["commit_kg_status"];
@@ -20,14 +21,19 @@ export class CommitKnowledgeGraphService {
 
   /**
    * After a commit is created and snapshots are in place, enqueue one KG job per
-   * file snapshot (node_type === 'file' with non-empty content). Creates
-   * nlp_analysis_jobs and commit_knowledge_graphs rows and sends each job to RabbitMQ
-   * with scene_id = job_id for Neo4j.
+   * relevant file snapshot. Only files that changed (added or modified by content_hash)
+   * are processed when changedFileFsNodeIds is provided; otherwise all file snapshots
+   * with content are processed. Creates nlp_analysis_jobs and commit_knowledge_graphs
+   * rows and sends each job to RabbitMQ with scene_id = job_id for Neo4j.
+   *
+   * @param changedFileFsNodeIds - Optional. When provided, only snapshots whose
+   *   fs_node_id is in this set are enqueued (use added + modified from getChangedFiles).
    */
   async enqueueCommitKnowledgeGraphJobs(
     commitId: string,
     _projectId: string,
     userId: string | null | undefined,
+    changedFileFsNodeIds?: string[],
   ): Promise<{ enqueued: number }> {
     if (userId == null || String(userId).trim() === "") {
       this.logger.warn(
@@ -42,12 +48,22 @@ export class CommitKnowledgeGraphService {
       commitId,
     );
 
-    const fileSnapshots = snapshots.filter(
+    let fileSnapshots = snapshots.filter(
       (row: CommitSnapshotRow): boolean =>
         row.node_type === "file" &&
         row.content != null &&
         String(row.content).trim() !== "",
     );
+
+    if (changedFileFsNodeIds != null && Array.isArray(changedFileFsNodeIds)) {
+      const changedSet = new Set(changedFileFsNodeIds);
+      fileSnapshots = fileSnapshots.filter((row) =>
+        changedSet.has(row.fs_node_id),
+      );
+      this.logger.debug(
+        `KG enqueue: limiting to ${fileSnapshots.length} changed file(s) (added/modified)`,
+      );
+    }
 
     if (fileSnapshots.length === 0) {
       this.logger.log(
@@ -59,8 +75,15 @@ export class CommitKnowledgeGraphService {
     let enqueued = 0;
 
     for (const snapshot of fileSnapshots) {
+      const sceneText = extractPlainTextFromEditorContent(snapshot.content);
+      if (sceneText.trim() === "") {
+        this.logger.debug(
+          `Skipping snapshot ${snapshot.id}: no plain text after extraction`,
+        );
+        continue;
+      }
+
       const jobId = randomUUID();
-      const sceneText = String(snapshot.content);
 
       const { error: jobError } = await supabase.from("nlp_analysis_jobs").insert({
         job_id: jobId,
