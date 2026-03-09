@@ -50,7 +50,7 @@ export default async function NewBranchPage({ params }: NewBranchPageProps) {
             </h1>
             <p className="text-muted-foreground text-lg mt-0.5">
               Branching from{" "}
-              <span className="text-xl font-playfair-display text-primary underline">
+              <span className="text-lg font-playfair-display text-background bg-foreground uppercase rounded px-2 ml-2 py-1 w-fit">
                 {baseBranch?.name ?? "current branch"}
               </span>
             </p>

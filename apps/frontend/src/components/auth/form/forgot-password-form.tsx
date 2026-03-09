@@ -54,7 +54,7 @@ export function ForgotPasswordForm() {
 
       setUserEmail(values.email);
       setEmailSent(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending reset email:", error);
       setError(
         error.message || "Failed to send reset email. Please try again.",

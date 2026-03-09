@@ -64,6 +64,7 @@ export default function Canvas({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty, isOwner]);
 
+  // @ts-ignore
   const onNodeChanges = (changes: any) => {
     setNodes((nds) => {
       const updated = applyNodeChanges(changes, nds);

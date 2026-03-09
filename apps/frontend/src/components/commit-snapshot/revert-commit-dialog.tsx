@@ -58,7 +58,7 @@ export default function RevertCommitDialog({
         </Button>
       </AlertDialogTrigger>
       {!isActiveBranch && (
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="mt-2 text-md text-primary">
           Switch to this branch to revert its history.
         </p>
       )}

@@ -104,10 +104,10 @@ export default function SnapshotTextViewer({
 
   return (
     <div className="flex flex-col h-full py-2 mx-2">
-      <div className="border-b bg-card px-6 py-3">
+      <div className="border-b  bg-foreground text-background px-6 py-3">
         <div className="flex items-center gap-2">
           <CaseFileIcon />
-          <h2 className="text-sm font-medium">{selectedNode.name}</h2>
+          <h2 className="text-md font-medium">{selectedNode.name}</h2>
         </div>
       </div>
 
@@ -131,11 +131,11 @@ export default function SnapshotTextViewer({
         ) : (
           <div className="p-6">
             {selectedNode.content ? (
-              <pre className="text-sm font-mono whitespace-pre-wrap break-words p-4 border">
+              <pre className="text-md font-mono whitespace-pre-wrap break-words p-4 border">
                 {selectedNode.content}
               </pre>
             ) : (
-              <div className="text-sm text-muted-foreground italic">
+              <div className="text-md text-muted-foreground italic">
                 This file has no content
               </div>
             )}

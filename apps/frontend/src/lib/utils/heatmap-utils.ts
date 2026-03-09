@@ -13,15 +13,20 @@ export const monthNames = [
   "December",
 ];
 
-export const getCellFill = (count: number) => {
-  if (count <= 0) return "bg-accent";
-  if (count <= 2) return "bg-blue-300";
-  if (count <= 5) return "bg-blue-400";
-  if (count <= 10) return "bg-blue-500";
-  if (count <= 25) return "bg-blue-600";
-  if (count <= 50) return "bg-blue-700";
+export const activityRateFillClasses = [
+  "bg-accent",
+  "bg-blue-300",
+  "bg-blue-500",
+  "bg-blue-700",
+  "bg-blue-950",
+];
 
-  return "bg-blue-950";
+export const getCellFill = (count: number) => {
+  if (count <= 0) return activityRateFillClasses[0];
+  if (count <= 3) return activityRateFillClasses[1];
+  if (count <= 10) return activityRateFillClasses[2];
+  if (count <= 25) return activityRateFillClasses[3];
+  return activityRateFillClasses[4];
 };
 
 export const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

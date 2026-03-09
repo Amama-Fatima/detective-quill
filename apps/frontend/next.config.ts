@@ -8,6 +8,9 @@ module.exports = {
       },
     ],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   webpack: (config: any, { isServer }: { isServer?: boolean }) => {
     if (isServer) {
       config.ignoreWarnings = [

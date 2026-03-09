@@ -2,8 +2,9 @@ import ProjectCard from "./project-card";
 import { useSearchParams } from "next/navigation";
 import { tab_message } from "@/constants/project-constants";
 import NoProjectCard from "./no-project-card";
+import { Project } from "@detective-quill/shared-types";
 interface ProjectsDisplayProps {
-  projects: any[];
+  projects: Project[];
 }
 
 export default function ProjectsDisplay({ projects }: ProjectsDisplayProps) {
