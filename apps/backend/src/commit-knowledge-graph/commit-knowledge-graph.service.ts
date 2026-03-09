@@ -4,6 +4,7 @@ import { Database } from "@detective-quill/shared-types";
 import { SupabaseService } from "../supabase/supabase.service";
 import { SnapshotsService } from "../snapshots/snapshots.service";
 import { QueueService } from "../queue/queue.service";
+import { extractPlainTextFromEditorContent } from "../utils/editor-content";
 
 type CommitSnapshotRow = Database["public"]["Tables"]["commit_snapshots"]["Row"];
 type CommitKgStatus = Database["public"]["Enums"]["commit_kg_status"];
@@ -59,8 +60,15 @@ export class CommitKnowledgeGraphService {
     let enqueued = 0;
 
     for (const snapshot of fileSnapshots) {
+      const sceneText = extractPlainTextFromEditorContent(snapshot.content);
+      if (sceneText.trim() === "") {
+        this.logger.debug(
+          `Skipping snapshot ${snapshot.id}: no plain text after extraction`,
+        );
+        continue;
+      }
+
       const jobId = randomUUID();
-      const sceneText = String(snapshot.content);
 
       const { error: jobError } = await supabase.from("nlp_analysis_jobs").insert({
         job_id: jobId,

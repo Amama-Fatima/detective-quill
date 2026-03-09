@@ -96,24 +96,6 @@ export class WorkerCommitsService {
       );
     }
 
-    try {
-      const { enqueued } =
-        await this.commitKnowledgeGraphService.enqueueCommitKnowledgeGraphJobs(
-          commit.id,
-          projectId,
-          userId,
-        );
-      if (enqueued > 0) {
-        console.log(
-          `Commit ${commit.id}: enqueued ${enqueued} knowledge graph job(s)`,
-        );
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-      console.warn(
-        `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
-      );
-    }
 
     console.log("commit created");
     const added = changed.added.map((n) => n.fs_node_id);
