@@ -243,7 +243,7 @@ const Heatmap = () => {
                     key={label}
                     className="text-center text-xs font-medium text-muted-foreground"
                   >
-                    {label.slice(0, 1)}
+                    {label}
                   </div>
                 ))}
               </div>

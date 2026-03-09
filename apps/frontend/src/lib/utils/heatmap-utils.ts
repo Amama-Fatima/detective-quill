@@ -14,11 +14,11 @@ export const monthNames = [
 ];
 
 export const activityRateFillClasses = [
-  "bg-accent",
-  "bg-blue-300",
-  "bg-blue-500",
-  "bg-blue-700",
-  "bg-blue-950",
+  "bg-[oklch(90%_0.012_80)]",
+  "bg-[oklch(80%_0.030_245)]",
+  "bg-[oklch(60%_0.040_245)]",
+  "bg-[oklch(38%_0.035_245)]",
+  "bg-[oklch(24%_0.022_245)]",
 ];
 
 export const getCellFill = (count: number) => {

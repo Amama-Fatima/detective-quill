@@ -17,9 +17,9 @@ export default function BranchCommitsHeader({
   const [branchName, setBranchName] = useState(branch.name);
 
   return (
-    <div className="mb-8 px-32 border-b border-border bg-muted/90 backdrop-blur-sm">
-      <div className="px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
+    <div className="mb-8 px-14 border-b border-border bg-muted/90 backdrop-blur-sm">
+      <div className="px-2 py-8 sm:px-6">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-6">
           <div className="flex items-center space-x-4">
             <div className="rounded-xl border border-primary/20 bg-primary/10 p-4">
               <History className="h-8 w-8 text-primary" />
@@ -28,7 +28,7 @@ export default function BranchCommitsHeader({
               <h1 className="mystery-title mb-2 text-4xl">Branch History</h1>
               <p className="noir-text text-muted-foreground">
                 Commits for branch:
-                <span className="text-background bg-foreground uppercase font-playfair-display text-lg ml-2 px-2 py-1 rounded">
+                <span className="text-background bg-foreground uppercase font-playfair-display text-sm md:text-lg ml-2 px-2 py-1 rounded">
                   {" "}
                   {branchName}
                 </span>

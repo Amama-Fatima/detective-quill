@@ -80,7 +80,7 @@ const WorkspaceLayout = async ({
         <div className="sticky top-0 z-50">
           <WorkspaceHeader projectId={projectId} projectTitle={title} />
         </div>
-        <main className="mt-17">{children}</main>
+        <main className="mt-14 md:mt-27 lg:mt-17">{children}</main>
       </div>
     </WorkspaceContextProvider>
   );

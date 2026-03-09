@@ -1,5 +1,3 @@
-// No "use client" needed — pure render, no hooks or browser APIs
-
 const COLORS = [
   "oklch(90% 0.012 80)",
   "oklch(80% 0.030 245)",
@@ -8,7 +6,6 @@ const COLORS = [
   "oklch(24% 0.022 245)",
 ];
 
-// Deterministic seeded PRNG (mulberry32) — identical on server and client
 function seededRandom(seed: number) {
   return function () {
     seed |= 0;

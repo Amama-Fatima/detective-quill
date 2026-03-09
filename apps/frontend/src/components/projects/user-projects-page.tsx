@@ -77,7 +77,7 @@ export default function UserProjectsPage({
 
       <div className="border-b border-border bg-muted/90 backdrop-blur-sm">
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-6 mb-3">
             <div className="flex items-center space-x-4">
               <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                 <BriefcaseIcon />
