@@ -60,12 +60,14 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
       console.log("===========================");
 
       const data = JSON.parse(content);
-      const { job_id, status, result, error } = data;
+      const { job_id, status, result, error, processing_time } = data;
 
       console.log(`Received result for job ${job_id}: ${status}`);
 
       if (status === "completed" && result) {
-        await this.nlpAnalysisService.saveAnalysisResult(job_id, result);
+        await this.nlpAnalysisService.saveAnalysisResult(job_id, result, {
+          processingTime: processing_time ?? undefined,
+        });
 
         console.log(`✓ Saved knowledge graph for job ${job_id}`);
         console.log(`  - Entities: ${result.metadata.num_entities}`);

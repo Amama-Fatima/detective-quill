@@ -63,12 +63,14 @@ export class NlpAnalysisConsumer {
     try {
       // Parse the raw content since Modal sends plain JSON
       const parsed = JSON.parse(content);
-      const { job_id, status, result, error } = parsed;
+      const { job_id, status, result, error, processing_time } = parsed;
 
       console.log(`Received result for job ${job_id}: ${status}`);
 
       if (status === "completed" && result) {
-        await this.nlpAnalysisService.saveAnalysisResult(job_id, result);
+        await this.nlpAnalysisService.saveAnalysisResult(job_id, result, {
+          processingTime: processing_time ?? undefined,
+        });
 
         console.log(`✓ Saved knowledge graph for job ${job_id}`);
         console.log(`  - Entities: ${result.metadata.num_entities}`);
