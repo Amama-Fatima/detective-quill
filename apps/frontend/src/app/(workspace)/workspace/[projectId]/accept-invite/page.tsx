@@ -6,22 +6,22 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 interface AcceptInvitePageProps {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     email: string;
     projectTitle: string;
     code: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }): Promise<Metadata> {
-  const { projectId } = params;
+  const { projectId } = await params;
   const { title, error } = await fetchProjectTitle(projectId);
   if (error || !title) {
     return {
@@ -42,13 +42,16 @@ export default async function AcceptInvitePage({
   const supabase = await createSupabaseServerClient();
   // Get the current user
   const user = await getUserFromCookie();
-
-  const email = await searchParams?.email;
-  const projectTitle = await searchParams?.projectTitle;
-  const code = await searchParams?.code;
   const { projectId } = await params;
+  const resolvedSearchParams = await searchParams;
+
+  const email = resolvedSearchParams.email;
+  const projectTitle = resolvedSearchParams.projectTitle;
+  const code = resolvedSearchParams.code;
   const query = new URLSearchParams(
-    Object.entries(searchParams ?? {}).filter(([, v]) => v != null) as any,
+    Object.entries(resolvedSearchParams ?? {}).filter(
+      ([, v]) => v != null,
+    ) as any,
   ).toString();
   const callbackUrl = `/workspace/${projectId}/accept-invite${
     query ? `?${query}` : ""
