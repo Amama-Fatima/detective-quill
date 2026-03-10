@@ -21,18 +21,6 @@ const getHeaderClass = (focusMode: FocusMode) =>
     focusMode === "BROWSER" && "backdrop-blur-sm",
   );
 
-const formatDate = (dateString: string | null): string => {
-  if (!dateString) return "N/A";
-
-  const date = new Date(dateString);
-  // Use a consistent format that doesn't depend on locale
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
 const requireAccessToken = (accessToken: string) => {
   if (!accessToken) {
     throw new Error("No access token found in session");
@@ -44,6 +32,5 @@ export {
   cn,
   getContainerClass,
   getHeaderClass,
-  formatDate,
   requireAccessToken,
 };

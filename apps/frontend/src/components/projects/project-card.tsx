@@ -7,6 +7,7 @@ import { getStatusColor, getStatusIcon } from "@/lib/utils/project-utils";
 import { CaseFileIcon } from "@/components/icons/case-file-icon";
 import { ClockIcon } from "../icons/clock-icon";
 import { CornerOrnamentIcon } from "@/components/icons/corner-ornament-icon";
+import { formatDate } from "date-fns";
 
 interface ProjectCardProps {
   project: Project;
@@ -33,6 +34,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
     return () => observer.disconnect();
   }, []);
+
+  const formattedUpdatedAt = project.updated_at
+    ? formatDate(new Date(project.updated_at), "PPP")
+    : "Unknown date";
 
   return (
     <div ref={cardRef} className="h-full">
@@ -79,7 +84,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <ClockIcon />
-                  {project.updated_at}
+                  {formattedUpdatedAt}
                 </div>
               </div>
             </div>

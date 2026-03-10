@@ -74,7 +74,7 @@ export default function FeaturesSection() {
             />
           </div>
 
-          <div className="col-span-6 md:col-span-4">
+          <div className="col-span-12 md:col-span-4 lg:col-span-4">
             <FeatureCard
               tag="Productivity"
               title="Writing Heatmap"

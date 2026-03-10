@@ -1,9 +1,10 @@
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import {
   buildTreeFromFlat,
-  Database,
   FsNodeTreeResponse,
   FsNode,
+  mapProjectFileTreeRowsToTreeNodes,
+  ProjectFileTreeRow,
   Project,
 } from "@detective-quill/shared-types";
 import { notFound } from "next/navigation";
@@ -152,49 +153,8 @@ async function fetchNode(
   return node;
 }
 
-type ProjectFileTreeRow =
-  Database["public"]["Views"]["project_file_tree"]["Row"];
-
-type WorkspaceTreeNode = FsNodeTreeResponse & {
-  depth: number | null;
-  children: WorkspaceTreeNode[];
-};
-
 function buildTreeFromView(nodes: ProjectFileTreeRow[]): FsNodeTreeResponse[] {
-  const normalizedNodes: WorkspaceTreeNode[] = nodes
-    .filter(
-      (
-        node,
-      ): node is ProjectFileTreeRow & {
-        id: string;
-        name: string;
-        node_type: "folder" | "file";
-        path: string;
-        created_at: string;
-        updated_at: string;
-      } =>
-        !!node.id &&
-        !!node.name &&
-        !!node.node_type &&
-        !!node.path &&
-        !!node.created_at &&
-        !!node.updated_at,
-    )
-    .map((node) => ({
-      id: node.id,
-      name: node.name,
-      node_type: node.node_type,
-      branch_id: node.branch_id,
-      parent_id: node.parent_id,
-      content: node.content ?? undefined,
-      word_count: node.word_count ?? 0,
-      path: node.path,
-      sort_order: node.sort_order,
-      depth: node.depth,
-      created_at: node.created_at,
-      updated_at: node.updated_at,
-      children: [],
-    }));
+  const normalizedNodes = mapProjectFileTreeRowsToTreeNodes(nodes);
 
   const tree = buildTreeFromFlat(normalizedNodes, {
     getId: (node) => node.id,
@@ -204,13 +164,7 @@ function buildTreeFromView(nodes: ProjectFileTreeRow[]): FsNodeTreeResponse[] {
     getTieBreaker: (node) => node.name,
   });
 
-  const stripDepth = (treeNodes: WorkspaceTreeNode[]): FsNodeTreeResponse[] =>
-    treeNodes.map(({ depth: _depth, ...node }) => ({
-      ...node,
-      children: stripDepth(node.children),
-    }));
-
-  return stripDepth(tree);
+  return tree;
 }
 
 async function fetchProjectTitle(

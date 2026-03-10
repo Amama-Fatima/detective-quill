@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Project } from "@detective-quill/shared-types";
 import CreateProjectDialog from "@/components/projects/create-project-dialog";
 import ProjectsDisplay from "./projects-display";
 import { BriefcaseIcon } from "../icons/brief-case-icon";
+import ProjectsSearchInput from "./projects-search-input";
 
 type FilterOption = "all" | "active" | "completed" | "archived" | "invited";
 
@@ -30,20 +30,50 @@ export default function UserProjectsPage({
     ...invitedProjects,
   ]);
 
-  const activeProjects = projects.filter(
-    (project) => project.status === "active",
-  );
-  const completedProjects = projects.filter(
-    (project) => project.status === "completed",
-  );
-  const archivedProjects = projects.filter(
-    (project) => project.status === "archived",
-  );
-
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<FilterOption>("all");
   const [isClient, setIsClient] = useState(false);
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const matchesSearch = (project: Project) => {
+    if (!normalizedSearch) return true;
+
+    const title = project.title?.toLowerCase() ?? "";
+    const description = project.description?.toLowerCase() ?? "";
+
+    return (
+      title.includes(normalizedSearch) ||
+      description.includes(normalizedSearch) ||
+      project.status.toLowerCase().includes(normalizedSearch)
+    );
+  };
+
+  const filteredProjects = useMemo(
+    () => projects.filter(matchesSearch),
+    [projects, normalizedSearch],
+  );
+
+  const activeProjects = useMemo(
+    () => filteredProjects.filter((project) => project.status === "active"),
+    [filteredProjects],
+  );
+
+  const completedProjects = useMemo(
+    () => filteredProjects.filter((project) => project.status === "completed"),
+    [filteredProjects],
+  );
+
+  const archivedProjects = useMemo(
+    () => filteredProjects.filter((project) => project.status === "archived"),
+    [filteredProjects],
+  );
+
+  const filteredInvitedProjects = useMemo(
+    () => invitedProjects.filter(matchesSearch),
+    [invitedProjects, normalizedSearch],
+  );
 
   // Only run client-side to avoid hydration issues todo: is this necessary?
   useEffect(() => {
@@ -77,7 +107,7 @@ export default function UserProjectsPage({
 
       <div className="border-b border-border bg-muted/90 backdrop-blur-sm">
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-6 mb-3">
             <div className="flex items-center space-x-4">
               <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                 <BriefcaseIcon />
@@ -136,22 +166,11 @@ export default function UserProjectsPage({
               </TabsTrigger>
             </TabsList>
 
-            <div className="relative z-10 flex items-center gap-3">
-              {/* Search */}
-              <div className="relative border rounded-md">
-                <Search className="absolute left-3  top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search case files..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64 bg-card/50"
-                />
-              </div>
-            </div>
+            <ProjectsSearchInput value={searchTerm} onChange={setSearchTerm} />
           </div>
           {/* todo: add proper filteration for these, just filter on client side based on status, can do this inside the useProjects hook as well */}
           <TabsContent value="all">
-            <ProjectsDisplay projects={projects} />
+            <ProjectsDisplay projects={filteredProjects} />
           </TabsContent>
           <TabsContent value="active">
             <ProjectsDisplay projects={activeProjects} />
@@ -163,7 +182,7 @@ export default function UserProjectsPage({
             <ProjectsDisplay projects={archivedProjects} />
           </TabsContent>
           <TabsContent value="invited">
-            <ProjectsDisplay projects={invitedProjects} />
+            <ProjectsDisplay projects={filteredInvitedProjects} />
           </TabsContent>
         </Tabs>
       </div>

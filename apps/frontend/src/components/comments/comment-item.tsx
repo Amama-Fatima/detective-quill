@@ -11,10 +11,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatDate } from "@/lib/utils/comments-utils";
 import { useComments } from "@/hooks/use-comments";
 import { EditIcon } from "../icons/edit-icon";
 import {DeleteIcon} from "../icons/delete-icon";
+import { formatDate } from "date-fns";
+
 
 interface CommentItemProps {
   comment: CommentResponse;
@@ -69,6 +70,8 @@ export default function CommentItem({
     setIsResolved(true);
   };
 
+  const formattedDate = comment.created_at ? formatDate(new Date(comment.created_at), "PPPpp") : "Unknown date";
+
   return (
     <div
       className={cn(
@@ -90,7 +93,7 @@ export default function CommentItem({
             )}
           </div>
           <span className="text-xs text-muted-foreground">
-            {formatDate(comment.created_at)}
+            {formattedDate}
           </span>
         </div>
       </div>
