@@ -32,6 +32,9 @@ export class WorkerNlpAnalysisService {
       throw new Error(`Failed to update job: ${jobError.message}`);
     }
 
+    await supabase.from("nlp_entities").delete().eq("job_id", jobId);
+    await supabase.from("nlp_relationships").delete().eq("job_id", jobId);
+
     const entities = result.entities.map((entity) => ({
       job_id: jobId,
       name: entity.name,
