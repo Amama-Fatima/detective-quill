@@ -9,7 +9,7 @@ import ErrorMsg from "@/components/error-msg";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 
 export const metadata = {
-  title: "My Cases",
+  title: "My Projects",
 };
 
 export default async function CasesPage() {
@@ -20,9 +20,6 @@ export default async function CasesPage() {
   if (!user || !user.sub) {
     redirect("/auth/sign-in");
   }
-  // const { projects, error } = await getUserProjects(user.sub, supabase);
-  // const { projects: invitedProjects, error: invitedError } =
-  //   await getInvitedProjects(user.sub, supabase);
 
   // fetch in parallel
   const [
