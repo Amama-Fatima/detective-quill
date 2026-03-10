@@ -11,17 +11,17 @@ import { BlueprintIcon } from "@/components/icons/blueprint-icon";
 import { useWorkspaceContext } from "@/context/workspace-context";
 
 interface BlueprintPageProps {
-  params: {
+  params: Promise<{
     projectId: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }): Promise<Metadata> {
-  const { projectId } = params;
+  const { projectId } = await params;
   const { title, error } = await fetchProjectTitle(projectId);
   if (error || !title) {
     return {
@@ -51,7 +51,6 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
     return <ErrorMsg message="Failed to load blueprints" />;
   }
 
-
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,oklch(24%_0.022_245)_1px,transparent_1px),linear-gradient(to_bottom,oklch(24%_0.022_245)_1px,transparent_1px)] [background-size:28px_28px]" />
@@ -73,18 +72,13 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
                 </p>
               </div>
             </div>
-              <CreateBlueprintBtns projectId={projectId} />
-            
+            <CreateBlueprintBtns projectId={projectId} />
           </div>
         </div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <UserBlueprintsList
-          blueprints={blueprints}
-          projectId={projectId}
-       
-        />
+        <UserBlueprintsList blueprints={blueprints} projectId={projectId} />
       </div>
     </div>
   );
