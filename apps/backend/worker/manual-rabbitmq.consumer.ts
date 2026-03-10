@@ -17,6 +17,9 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
     const rabbitmqUrl =
       this.configService.get<string>("RABBITMQ_URL") ||
       "amqp://guest:guest@localhost:5672";
+    const resultsQueue =
+      this.configService.get<string>("SCENE_ANALYSIS_RESULTS_QUEUE") ||
+      "scene_analysis_results_queue";
 
     console.log("Connecting to RabbitMQ for NLP results consumer...");
 
@@ -25,12 +28,12 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
     this.channelWrapper = this.connection.createChannel({
       json: false, // We'll parse JSON manually
       setup: async (channel: any) => {
-        await channel.assertQueue("scene_analysis_results_queue", {
+        await channel.assertQueue(resultsQueue, {
           durable: true,
         });
 
         await channel.consume(
-          "scene_analysis_results_queue",
+          resultsQueue,
           async (msg: any) => {
             if (msg) {
               await this.handleMessage(msg, channel);
@@ -39,7 +42,7 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
           { noAck: false },
         );
 
-        console.log("✓ Listening on scene_analysis_results_queue");
+        console.log(`✓ Listening on ${resultsQueue}`);
       },
     });
 
@@ -61,6 +64,12 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
 
       const data = JSON.parse(content);
       const { job_id, status, result, error } = data;
+
+      if (job_id == null || job_id === "") {
+        console.error("Invalid message: missing job_id");
+        channel.nack(msg, false, false);
+        return;
+      }
 
       console.log(`Received result for job ${job_id}: ${status}`);
 

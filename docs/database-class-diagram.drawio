@@ -1,0 +1,173 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="detective-quill-class-diagram" name="Class Diagram">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Profile (User) -->
+        <mxCell id="Profile" value="&lt;div&gt;&lt;b&gt;Profile&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;user_id: string&lt;br/&gt;username: string&lt;br/&gt;email: string&lt;br/&gt;full_name: string?&lt;br/&gt;role: user_role&lt;br/&gt;created_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods&lt;/i&gt;&lt;br/&gt;getUserProjects()&lt;br/&gt;getMonthlyContributions()&lt;br/&gt;submitAnalysis()&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="220" height="220" as="geometry"/>
+        </mxCell>
+
+        <!-- Project -->
+        <mxCell id="Project" value="&lt;div&gt;&lt;b&gt;Project&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;title: string&lt;br/&gt;description: string?&lt;br/&gt;status: project_status&lt;br/&gt;author_id: string?&lt;br/&gt;created_at: string?&lt;br/&gt;updated_at: string?&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (ProjectsController)&lt;/i&gt;&lt;br/&gt;create(createProjectDto)&lt;br/&gt;findAll(includeInactive)&lt;br/&gt;findOne(id)&lt;br/&gt;getStats(id)&lt;br/&gt;update(id, updateProjectDto)&lt;br/&gt;changeStatus(id, status)&lt;br/&gt;remove(id)&lt;br/&gt;restore(id)&lt;br/&gt;verifyProjectOwnership(projectId, userId)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="40" width="260" height="280" as="geometry"/>
+        </mxCell>
+
+        <!-- Branch -->
+        <mxCell id="Branch" value="&lt;div&gt;&lt;b&gt;Branch&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;project_id: string&lt;br/&gt;name: string&lt;br/&gt;is_default: boolean&lt;br/&gt;is_active: boolean&lt;br/&gt;head_commit_id: string?&lt;br/&gt;parent_commit_id: string?&lt;br/&gt;created_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (BranchesController)&lt;/i&gt;&lt;br/&gt;createBranch(projectId, dto)&lt;br/&gt;updateBranch(projectId, branchId, dto)&lt;br/&gt;deleteBranch(projectId, branchId)&lt;br/&gt;switchActiveBranch(projectId, branchId)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="40" width="260" height="260" as="geometry"/>
+        </mxCell>
+
+        <!-- Commit -->
+        <mxCell id="Commit" value="&lt;div&gt;&lt;b&gt;Commit&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;project_id: string?&lt;br/&gt;branch_id: string?&lt;br/&gt;parent_commit_id: string?&lt;br/&gt;message: string&lt;br/&gt;created_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (CommitsController)&lt;/i&gt;&lt;br/&gt;createCommit(projectId, dto)&lt;br/&gt;revertToCommit(projectId, commitId)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="40" width="240" height="230" as="geometry"/>
+        </mxCell>
+
+        <!-- CommitSnapshot -->
+        <mxCell id="CommitSnapshot" value="&lt;div&gt;&lt;b&gt;CommitSnapshot&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;commit_id: string?&lt;br/&gt;fs_node_id: string?&lt;br/&gt;project_id: string&lt;br/&gt;name: string&lt;br/&gt;node_type: node_type?&lt;br/&gt;path: string?&lt;br/&gt;content: string?&lt;br/&gt;word_count: number?&lt;br/&gt;created_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods&lt;/i&gt;&lt;br/&gt;createSnapshot(createSnapshotDto)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="300" width="260" height="260" as="geometry"/>
+        </mxCell>
+
+        <!-- FsNode -->
+        <mxCell id="FsNode" value="&lt;div&gt;&lt;b&gt;FsNode&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;project_id: string&lt;br/&gt;branch_id: string?&lt;br/&gt;parent_id: string?&lt;br/&gt;name: string&lt;br/&gt;node_type: node_type&lt;br/&gt;path: string&lt;br/&gt;file_extension: string&lt;br/&gt;description: string?&lt;br/&gt;word_count: number&lt;br/&gt;created_at: string&lt;br/&gt;updated_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (FsNodesController)&lt;/i&gt;&lt;br/&gt;create(createNodeDto)&lt;br/&gt;getEditorWorkspaceData(projectId, nodeId?)&lt;br/&gt;getProjectTree(projectId)&lt;br/&gt;getProjectStats(projectId)&lt;br/&gt;getNodeChildren(id)&lt;br/&gt;findOne(id)&lt;br/&gt;updateContent(id, dto)&lt;br/&gt;updateMetadata(id, dto)&lt;br/&gt;move(id, parent_id, sort_order)&lt;br/&gt;remove(id)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="360" width="320" height="360" as="geometry"/>
+        </mxCell>
+
+        <!-- Comment -->
+        <mxCell id="Comment" value="&lt;div&gt;&lt;b&gt;Comment&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;fs_node_id: string&lt;br/&gt;author_id: string&lt;br/&gt;block_id: string&lt;br/&gt;start_offset: number&lt;br/&gt;end_offset: number&lt;br/&gt;content: string&lt;br/&gt;selected_text: string?&lt;br/&gt;is_resolved: boolean?&lt;br/&gt;created_at: string?&lt;br/&gt;updated_at: string?&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (CommentsController)&lt;/i&gt;&lt;br/&gt;create(createCommentDto)&lt;br/&gt;findByNode(projectId, fsNodeId)&lt;br/&gt;getNodeStats(projectId, fsNodeId)&lt;br/&gt;findOne(projectId, id)&lt;br/&gt;update(projectId, id, dto)&lt;br/&gt;remove(projectId, id)&lt;br/&gt;resolve(projectId, id)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="360" width="320" height="360" as="geometry"/>
+        </mxCell>
+
+        <!-- Blueprint -->
+        <mxCell id="Blueprint" value="&lt;div&gt;&lt;b&gt;Blueprint&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;project_id: string&lt;br/&gt;user_id: string&lt;br/&gt;title: string&lt;br/&gt;type: blueprint_type&lt;br/&gt;created_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (BlueprintsController)&lt;/i&gt;&lt;br/&gt;createBlueprint(dto, userId)&lt;br/&gt;updateBlueprintById(userId, blueprintId, dto)&lt;br/&gt;deleteBlueprintById(userId, blueprintId)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="320" width="260" height="260" as="geometry"/>
+        </mxCell>
+
+        <!-- BlueprintCard -->
+        <mxCell id="BlueprintCard" value="&lt;div&gt;&lt;b&gt;BlueprintCard&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;blueprint_id: string&lt;br/&gt;user_id: string&lt;br/&gt;title: string?&lt;br/&gt;content: string?&lt;br/&gt;position_x: number&lt;br/&gt;position_y: number&lt;br/&gt;created_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods&lt;/i&gt;&lt;br/&gt;createBlueprintCard(dto)&lt;br/&gt;updateBlueprintCard(id, dto)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="600" width="260" height="250" as="geometry"/>
+        </mxCell>
+
+        <!-- ProjectMember -->
+        <mxCell id="ProjectMember" value="&lt;div&gt;&lt;b&gt;ProjectMember&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;user_id: string&lt;br/&gt;project_id: string&lt;br/&gt;is_author: boolean?&lt;br/&gt;created_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (MembersService/Controller)&lt;/i&gt;&lt;br/&gt;removeProjectMember(projectId, memberId, userId)&lt;br/&gt;verifyProjectAccess(projectId, userId)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="760" width="280" height="230" as="geometry"/>
+        </mxCell>
+
+        <!-- Invitation -->
+        <mxCell id="Invitation" value="&lt;div&gt;&lt;b&gt;Invitation&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;invite_code: string&lt;br/&gt;project_id: string&lt;br/&gt;email: string&lt;br/&gt;created_at: string&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (InvitationsController)&lt;/i&gt;&lt;br/&gt;respondToInvitation(inviteCode, body)&lt;br/&gt;deleteInvitation(inviteCode, projectId, userId)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="760" width="260" height="230" as="geometry"/>
+        </mxCell>
+
+        <!-- Contribution -->
+        <mxCell id="Contribution" value="&lt;div&gt;&lt;b&gt;Contribution&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;user_id: string&lt;br/&gt;contribution_type: contribution_type&lt;br/&gt;reference_id: string?&lt;br/&gt;score: number&lt;br/&gt;contribution_date: string&lt;br/&gt;created_at: string?&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (ContributionsController)&lt;/i&gt;&lt;br/&gt;createContribution(dto, userId)&lt;br/&gt;getMonthlyContributions(userId, year, month)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="940" y="760" width="280" height="250" as="geometry"/>
+        </mxCell>
+
+        <!-- NlpAnalysisJob -->
+        <mxCell id="NlpAnalysisJob" value="&lt;div&gt;&lt;b&gt;NlpAnalysisJob&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;job_id: string&lt;br/&gt;user_id: string&lt;br/&gt;scene_text: string&lt;br/&gt;status: string&lt;br/&gt;current_stage: string?&lt;br/&gt;progress: number?&lt;br/&gt;entity_count: number?&lt;br/&gt;relationship_count: number?&lt;br/&gt;result_data: Json?&lt;br/&gt;created_at: string?&lt;br/&gt;started_at: string?&lt;br/&gt;completed_at: string?&lt;br/&gt;error_message: string?&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods (NlpAnalysisController)&lt;/i&gt;&lt;br/&gt;submitAnalysis(submitAnalysisDto, userId)&lt;br/&gt;submitTestAnalysis(submitAnalysisDto)&lt;br/&gt;getStatus(jobId, userId)&lt;br/&gt;getResults(jobId, userId)&lt;br/&gt;getUserHistory(userId)&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="880" width="320" height="340" as="geometry"/>
+        </mxCell>
+
+        <!-- NlpEntity -->
+        <mxCell id="NlpEntity" value="&lt;div&gt;&lt;b&gt;NlpEntity&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;job_id: string&lt;br/&gt;name: string&lt;br/&gt;type: string&lt;br/&gt;mentions: string[]?&lt;br/&gt;attributes: Json?&lt;br/&gt;created_at: string?&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods&lt;/i&gt;&lt;br/&gt;createFromPipelineResult()&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="920" width="260" height="230" as="geometry"/>
+        </mxCell>
+
+        <!-- NlpRelationship -->
+        <mxCell id="NlpRelationship" value="&lt;div&gt;&lt;b&gt;NlpRelationship&lt;/b&gt;&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Attributes&lt;/i&gt;&lt;br/&gt;id: string&lt;br/&gt;job_id: string&lt;br/&gt;source: string&lt;br/&gt;target: string&lt;br/&gt;relation_type: string&lt;br/&gt;description: string?&lt;br/&gt;confidence: number?&lt;br/&gt;created_at: string?&lt;br/&gt;---&lt;br/&gt;&lt;i&gt;Methods&lt;/i&gt;&lt;br/&gt;createFromPipelineResult()&lt;br/&gt;&lt;/div&gt;" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;rounded=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="920" width="260" height="230" as="geometry"/>
+        </mxCell>
+
+        <!-- Relationships -->
+
+        <!-- Profile 1..* Project (author) -->
+        <mxCell id="rel_Profile_Project" value="author_id" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Profile" target="Project">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Project 1..* Branch -->
+        <mxCell id="rel_Project_Branch" value="1..* branches" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Project" target="Branch">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Branch 1..* Commit -->
+        <mxCell id="rel_Branch_Commit" value="1..* commits" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Branch" target="Commit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Commit 1..* CommitSnapshot -->
+        <mxCell id="rel_Commit_CommitSnapshot" value="1..* snapshots" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Commit" target="CommitSnapshot">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Project 1..* FsNode -->
+        <mxCell id="rel_Project_FsNode" value="1..* fs_nodes" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Project" target="FsNode">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- FsNode hierarchy (self-parent) -->
+        <mxCell id="rel_FsNode_parent" value="parent_id" style="endArrow=open;dashed=1;html=1;" edge="1" parent="1" source="FsNode" target="FsNode">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- FsNode 1..* Comment -->
+        <mxCell id="rel_FsNode_Comment" value="1..* comments" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="FsNode" target="Comment">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Profile 1..* Comment -->
+        <mxCell id="rel_Profile_Comment" value="author_id" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Profile" target="Comment">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Project 1..* Blueprint -->
+        <mxCell id="rel_Project_Blueprint" value="1..* blueprints" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Project" target="Blueprint">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Blueprint 1..* BlueprintCard -->
+        <mxCell id="rel_Blueprint_BlueprintCard" value="1..* cards" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Blueprint" target="BlueprintCard">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Project 1..* ProjectMember -->
+        <mxCell id="rel_Project_ProjectMember" value="1..* members" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Project" target="ProjectMember">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Profile 1..* ProjectMember -->
+        <mxCell id="rel_Profile_ProjectMember" value="1..* project_members" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Profile" target="ProjectMember">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Project 1..* Invitation -->
+        <mxCell id="rel_Project_Invitation" value="1..* invitations" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Project" target="Invitation">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Profile 1..* Contribution -->
+        <mxCell id="rel_Profile_Contribution" value="1..* contributions" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Profile" target="Contribution">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Profile 1..* NlpAnalysisJob -->
+        <mxCell id="rel_Profile_NlpAnalysisJob" value="1..* nlp_jobs" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="Profile" target="NlpAnalysisJob">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- NlpAnalysisJob 1..* NlpEntity -->
+        <mxCell id="rel_NlpJob_NlpEntity" value="1..* entities" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="NlpAnalysisJob" target="NlpEntity">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- NlpAnalysisJob 1..* NlpRelationship -->
+        <mxCell id="rel_NlpJob_NlpRelationship" value="1..* relationships" style="endArrow=block;endFill=0;html=1;" edge="1" parent="1" source="NlpAnalysisJob" target="NlpRelationship">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

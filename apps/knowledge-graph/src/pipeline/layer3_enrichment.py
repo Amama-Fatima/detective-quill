@@ -12,70 +12,74 @@ logger = setup_logger(__name__)
 
 class LLMEntityEnricher:
 
-    
     def __init__(self):
         """Initialize the enricher with the LLM model."""
         self.llm_loader = get_llm_loader()
-    
-    def enrich_single_entity(self, entity: Entity, scene_text: str) -> Entity:
-      
-        logger.debug(f"Enriching entity: {entity.name} ({entity.type})")
-        
+
+    def enrich_entity_pair(self, entities: List[Entity], scene_text: str) -> List[Entity]:
+        """Enrich 1 or 2 entities in a single LLM call."""
+
         prompt = f"""Scene: "{scene_text}"
 
-Entity: "{entity.name}" (type: {entity.type})
+You are extracting information about specific entities from the scene above.
 
-Look at the scene text only. Do not infer or guess.
+For each entity below, write what the scene text says about them. Be descriptive. Do not return null for description unless the entity is literally not mentioned.
 
-Output ONLY this JSON:
-{{"description":"<what the scene explicitly says about this entity, or null>","role":"<detective|suspect|victim|witness|object|location|other>","attributes":{{}}}}
+Entities:
+{chr(10).join(f'{idx+1}. "{e.name}" (type: {e.type})' for idx, e in enumerate(entities))}
 
-Only add keys to "attributes" if the scene text explicitly states them. If nothing is explicit, leave attributes as {{}}."""
-        
-        response = self.llm_loader.generate(prompt, max_tokens=150)
-        
-        logger.debug(f"LLM response for '{entity.name}': {response[:150]}")
-        
+Output ONLY a JSON array with exactly {len(entities)} object(s), one per entity, in the same order as listed above:
+[
+  {{"name":"<entity name>","description":"<1-2 sentences about this entity from the scene>","role":"<detective|suspect|victim|witness|object|location|other>","attributes":{{}}}},
+  ...
+]
+
+Only add extra keys to "attributes" if the scene explicitly states them (e.g. age, occupation). Keep each object focused on its own entity only."""
+
+        response = self.llm_loader.generate(prompt, max_tokens=300)
+        logger.debug(f"LLM response for pair {[e.name for e in entities]}: {response[:300]}")
+
         try:
             response = re.sub(r'```json\s*', '', response)
             response = re.sub(r'```\s*', '', response)
-            
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            json_match = re.search(r'\[.*\]', response, re.DOTALL)
             if json_match:
-                entity_data = json.loads(json_match.group())
+                results = json.loads(json_match.group())
             else:
-                entity_data = json.loads(response)
-            
-            entity.attributes = {
-                'description': entity_data.get('description', ''),
-                'role': entity_data.get('role', ''),
-                **entity_data.get('attributes', {})
-            }
-            
-            logger.debug(f"  ✓ Enriched '{entity.name}' with role: {entity.attributes.get('role')}")
-            
-            return entity
-        
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON parsing error for '{entity.name}': {e}")
-            logger.error(f"Response: {response[:300]}")
-            return entity 
-        except Exception as e:
-            logger.error(f"Unexpected error enriching '{entity.name}': {e}")
-            return entity
-    
-    def enrich_entities(self, entities: List[Entity], scene_text: str) -> List[Entity]:
+                results = json.loads(response)
 
-        logger.info(f"Enriching {len(entities)} entities individually")
-        
-        enriched_entities = []
-        
-        for i, entity in enumerate(entities, 1):
-            logger.info(f"  [{i}/{len(entities)}] Processing: {entity.name}")
-            enriched_entity = self.enrich_single_entity(entity, scene_text)
-            enriched_entities.append(enriched_entity)
-        
-        return enriched_entities
+            if not isinstance(results, list):
+                results = [results] if isinstance(results, dict) else []
+
+            for idx, entity in enumerate(entities):
+                if idx < len(results):
+                    data = results[idx]
+                    if isinstance(data, dict):
+                        entity.attributes.update({
+                            'description': data.get('description', ''),
+                            'role': data.get('role', ''),
+                            **data.get('attributes', {})
+                        })
+                        logger.debug(f"  ✓ Enriched '{entity.name}' with role: {entity.attributes.get('role')}")
+
+            return entities
+
+        except (json.JSONDecodeError, Exception) as e:
+            logger.error(f"Error enriching pair {[e.name for e in entities]}: {e}")
+            logger.error(f"Response: {response[:300]}")
+            return entities  # return unenriched rather than crashing
+
+    def enrich_entities(self, entities: List[Entity], scene_text: str) -> List[Entity]:
+        logger.info(f"Enriching {len(entities)} entities in pairs")
+
+        enriched = []
+        for i in range(0, len(entities), 2):
+            batch = entities[i:i+2]
+            names = [e.name for e in batch]
+            logger.info(f"  [{i+1}-{min(i+2, len(entities))}/{len(entities)}] Processing: {names}")
+            enriched.extend(self.enrich_entity_pair(batch, scene_text))
+
+        return enriched
 
 
 def enrich_entities_layer3(entities: List[Entity], scene_text: str) -> List[Entity]:
@@ -92,5 +96,6 @@ def enrich_entities_layer3(entities: List[Entity], scene_text: str) -> List[Enti
     for entity in enriched_entities:
         role = entity.attributes.get('role', 'unknown')
         logger.debug(f"  - {entity.name} ({entity.type}) → role: {role}")
-    
+
+    logger.info(f"Layer 3 final enriched entities JSON: {json.dumps([e.dict() for e in enriched_entities], indent=2)}")
     return enriched_entities

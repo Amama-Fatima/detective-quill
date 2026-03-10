@@ -1,5 +1,6 @@
+import re
 import spacy
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Optional
 from collections import defaultdict
 from src.models.schemas import Entity, RawEntity
 from src.config import settings
@@ -7,63 +8,123 @@ from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
+# Span types worth using as canonical coreference anchors
+_ANCHOR_TYPES = {'PERSON', 'ORG', 'FAC', 'GPE', 'LOC'}
 
-def _resolve_coreferences(doc) -> str:
-    if not doc._.coref_chains:
-        logger.debug("No coreference chains found — returning original text")
-        return doc.text
+# Pronouns and short function words we want to resolve
+_POSSESSIVES = {"his", "her", "their", "its", "hers", "theirs"}
 
-    replacements = {}
 
-    for chain in doc._.coref_chains:
-        best_mention = chain[chain.most_specific_mention_index]
-        primary_text = " ".join(doc[i].text for i in best_mention)
+def _find_canonical_for_cluster(
+    cluster: List[Tuple[int, int]],
+    text: str,
+    spacy_entities: Dict[Tuple[int, int], str],
+) -> Optional[str]:
+    """
+    Given a coreference cluster (list of char-offset spans) and the spaCy named
+    entities extracted from the same text, return the clean entity name that
+    anchors this cluster.
 
-        # Only replace pronouns when the referent is a proper noun
-        # Prevents "accountant", "detective" etc. becoming replacements
-        primary_is_proper = any(doc[i].pos_ == "PROPN" for i in best_mention)
-        if not primary_is_proper:
+    Strategy: iterate every span in the cluster; if any span fully contains (or
+    exactly matches) a spaCy named entity of an anchor type, use that entity's
+    text as the canonical name.  If multiple named entities are found in the
+    cluster, prefer the longest one (most specific).
+
+    Returns None if no anchor is found — callers should skip the cluster.
+    """
+    candidates = []
+
+    for span_start, span_end in cluster:
+        for (ent_start, ent_end), ent_text in spacy_entities.items():
+            # The cluster span must contain the entity span
+            if span_start <= ent_start and span_end >= ent_end:
+                candidates.append(ent_text)
+
+    if not candidates:
+        return None
+
+    # Prefer the longest (most specific) name, e.g. "Marcus Chen" over "Marcus"
+    return max(candidates, key=len)
+
+
+def _resolve_coreferences_fastcoref(
+    text: str,
+    coref_model,
+    spacy_entities: Dict[Tuple[int, int], str],
+) -> str:
+    """
+    Use fastcoref to resolve pronouns and short mentions to their canonical
+    proper name, anchored by spaCy-identified named entities.
+
+    For each coreference cluster:
+      1. Find the canonical name by locating the spaCy named entity within the
+         cluster.  If none exists, skip the cluster entirely.
+      2. Replace short, non-possessive mentions (pronouns, partial names) with
+         the canonical name.
+
+    This avoids all hardcoded heuristics — the canonical is always a name that
+    spaCy has already validated, never raw span text.
+    """
+    preds = coref_model.predict(texts=[text])
+    clusters = preds[0].get_clusters(as_strings=False)  # list of lists of (start, end)
+
+    if not clusters:
+        return text
+
+    replacements = []
+
+    for cluster in clusters:
+        if len(cluster) < 2:
             continue
 
-        for mention in chain:
-            mention_start = mention[0]
-            first_token = doc[mention_start]
+        canonical = _find_canonical_for_cluster(cluster, text, spacy_entities)
 
-            if mention == best_mention:
+        if not canonical:
+            logger.debug(
+                f"  coref: skipping cluster — no spaCy anchor found. "
+                f"First mention: {text[cluster[0][0]:cluster[0][1]]!r}"
+            )
+            continue
+
+        logger.debug(f"  coref: cluster canonical={canonical!r}, spans={len(cluster)}")
+
+        for start, end in cluster:
+            mention_text = text[start:end]
+
+            # Skip possessives — replacing "his" with "Marcus Chen" breaks grammar
+            if mention_text.lower() in _POSSESSIVES:
                 continue
 
-            is_pronoun = first_token.pos_ == "PRON"
-            is_possessive = "Poss=Yes" in str(first_token.morph)
+            # Skip if the mention already is (or contains) the canonical name
+            if canonical.lower() in mention_text.lower():
+                continue
 
-            if is_pronoun and not is_possessive:
-                replacements[mention_start] = primary_text
-                for idx in mention[1:]:
-                    replacements[idx] = None
+            # Only replace short mentions: pronouns and partial names (<=3 words)
+            if len(mention_text.split()) > 3:
+                continue
+
+            replacements.append((start, end, canonical))
 
     if not replacements:
-        logger.debug("Coreference chains found but no pronouns to replace")
-        return doc.text
+        return text
 
-    result = []
-    for token in doc:
-        if token.i not in replacements:
-            result.append(token.text_with_ws)
-        elif replacements[token.i] is None:
-            pass
-        else:
-            result.append(replacements[token.i] + token.whitespace_)
+    # Apply right-to-left so earlier char offsets stay valid
+    replacements.sort(key=lambda x: x[0], reverse=True)
+    chars = list(text)
+    for start, end, replacement in replacements:
+        chars[start:end] = list(replacement)
 
-    return "".join(result)
+    return "".join(chars)
+
 
 class SpacyEntityExtractor:
 
-    def __init__(self, nlp=None):
+    def __init__(self, nlp=None, coref_model=None):
+        self.coref_model = coref_model
         if nlp is not None:
-            # Use the pre-loaded nlp from the Modal worker (has coreferee)
             self.nlp = nlp
             self._owns_nlp = False
         else:
-            # Local dev fallback — load our own without coreferee
             self._load_model()
             self._owns_nlp = True
 
@@ -73,42 +134,69 @@ class SpacyEntityExtractor:
             self.nlp = spacy.load(settings.SPACY_MODEL)
             logger.info("spaCy model loaded successfully.")
         except OSError:
-            logger.warning(f"spaCy model '{settings.SPACY_MODEL}' not found. Attempting to download...")
+            logger.warning(
+                f"spaCy model '{settings.SPACY_MODEL}' not found. Attempting to download..."
+            )
             self.nlp = spacy.load(settings.SPACY_MODEL, exclude=["parser", "tagger", "lemmatizer"])
             logger.info("spaCy model downloaded and loaded successfully.")
 
+    def _extract_spacy_anchors(self, doc) -> Dict[Tuple[int, int], str]:
+        """
+        Return a dict of {(start_char, end_char): ent_text} for all spaCy
+        entities whose label is in _ANCHOR_TYPES.  These are used to identify
+        canonical names within coreference clusters.
+        """
+        return {
+            (ent.start_char, ent.end_char): ent.text
+            for ent in doc.ents
+            if ent.label_ in _ANCHOR_TYPES
+        }
+
     def resolve_and_extract(self, text: str) -> Tuple[List[RawEntity], str]:
         """
-        Runs the full doc through spaCy (NER + coreferee if available).
-        Returns raw entities and the resolved text.
+        1. Run spaCy NER on the original text.
+        2. If fastcoref is available, use the spaCy entities as anchors to
+           resolve pronouns and short mentions, then re-run NER on the resolved
+           text.
+        3. Return raw entities and the (possibly resolved) text.
         """
+        # Step 1 — initial NER pass to get anchor entities for coreference
         doc = self.nlp(text)
-        coref_available = "coreferee" in self.nlp.pipe_names
 
-        if coref_available:
+        if self.coref_model is not None:
             try:
-                resolved_text = _resolve_coreferences(doc)
+                # Build anchor map from the first NER pass
+                spacy_entities = self._extract_spacy_anchors(doc)
+                logger.debug(f"  coref anchors available: {len(spacy_entities)}")
+
+                resolved_text = _resolve_coreferences_fastcoref(
+                    text, self.coref_model, spacy_entities
+                )
+
                 if resolved_text != text:
-                    logger.info("Coreference resolution changed the text — re-running NER on resolved version")
+                    logger.info(
+                        "fastcoref resolution changed the text — re-running NER on resolved version"
+                    )
                     doc = self.nlp(resolved_text)
                 else:
-                    logger.info("Coreference ran but found nothing to replace")
+                    logger.info("fastcoref ran but found nothing to replace")
                     resolved_text = text
+
             except Exception as e:
-                logger.warning(f"Coreference resolution failed ({e}) — using original text")
+                logger.warning(f"fastcoref resolution failed ({e}) — using original text")
                 resolved_text = text
         else:
             resolved_text = text
 
-        raw_entities = []
-        for ent in doc.ents:
-            raw_entity = RawEntity(
+        raw_entities = [
+            RawEntity(
                 text=ent.text,
                 label=ent.label_,
                 start=ent.start_char,
-                end=ent.end_char
+                end=ent.end_char,
             )
-            raw_entities.append(raw_entity)
+            for ent in doc.ents
+        ]
 
         logger.debug(f"Extracted {len(raw_entities)} raw entities from text.")
         return raw_entities, resolved_text
@@ -127,20 +215,24 @@ class SpacyEntityExtractor:
                 name=name,
                 type=entity_type,
                 mentions=list(set(mention_texts)),
-                attributes={}
+                attributes={},
             )
             entities.append(entity)
 
-        logger.debug(f"Converted {len(raw_entities)} raw entities into {len(entities)} unique entities.")
+        logger.debug(
+            f"Converted {len(raw_entities)} raw entities into {len(entities)} unique entities."
+        )
         return entities
 
 
-def extract_entities_layer1(scene_text: str, nlp=None) -> Tuple[List[Entity], str]:
+def extract_entities_layer1(
+    scene_text: str, nlp=None, coref_model=None
+) -> Tuple[List[Entity], str]:
     logger.info("=" * 60)
     logger.info("LAYER 1: spaCy Entity Extraction")
     logger.info("=" * 60)
 
-    extractor = SpacyEntityExtractor(nlp=nlp)
+    extractor = SpacyEntityExtractor(nlp=nlp, coref_model=coref_model)
 
     raw_entities, resolved_text = extractor.resolve_and_extract(scene_text)
     logger.info(f"Found {len(raw_entities)} raw entities")

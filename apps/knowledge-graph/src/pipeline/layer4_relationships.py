@@ -31,6 +31,23 @@ def _entities_co_occur(
     return False
 
 
+def _evidence_mentions_both(evidence: str, entity_a: Entity, entity_b: Entity) -> bool:
+    """
+    Return True only if the evidence string contains at least one token from
+    each entity's name.  This prevents the LLM from citing a sentence that
+    mentions only one of the two entities and fabricating the other side of
+    the relationship.
+    """
+    evidence_lower = evidence.lower()
+    name_a_tokens = {t.lower() for t in entity_a.name.split()}
+    name_b_tokens = {t.lower() for t in entity_b.name.split()}
+
+    a_present = any(token in evidence_lower for token in name_a_tokens)
+    b_present = any(token in evidence_lower for token in name_b_tokens)
+
+    return a_present and b_present
+
+
 class LLMRelationshipExtractor:
 
     def __init__(self):
@@ -40,7 +57,7 @@ class LLMRelationshipExtractor:
         self,
         entity_a: Entity,
         entity_b: Entity,
-        scene_text: str
+        scene_text: str,
     ) -> List[Relationship]:
 
         entity_a_context = f"{entity_a.name} ({entity_a.type}"
@@ -53,57 +70,102 @@ class LLMRelationshipExtractor:
             entity_b_context += f", {entity_b.attributes['role']}"
         entity_b_context += ")"
 
-        logger.debug(f"Analyzing relationship: {entity_a.name} ↔ {entity_b.name}")
-
         prompt = f"""Scene: "{scene_text}"
 
 A: {entity_a_context}
 B: {entity_b_context}
 
-Does the scene text EXPLICITLY show a relationship between A and B?
-Only use evidence that is a direct quote or clear paraphrase from the scene.
-Do not infer relationships. If uncertain, output null.
+Task: Find ONE direct, explicit relationship between A and B stated in the scene.
 
-Output ONLY one of:
-{{"source":"<name>","target":"<name>","type":"<verb>","evidence":"<exact quote from scene>"}}
+Rules:
+- The relationship MUST be directly stated, not inferred or implied.
+- "source" must be the entity that performs the action.
+- "target" must be the entity that receives the action.
+- "type" must be a short active verb or verb phrase (e.g. "works_at", "found", "ignored").
+- "evidence" must be a verbatim sentence or clause from the scene that proves the relationship.
+- The evidence MUST explicitly mention both "{entity_a.name}" and "{entity_b.name}" by name.
+- source and target must be exactly "{entity_a.name}" or "{entity_b.name}".
+- If no direct relationship exists, output null.
+
+Output ONLY:
+{{"source":"<n>","target":"<n>","type":"<verb>","evidence":"<verbatim quote>"}}
 null"""
 
-        response = self.llm_loader.generate(prompt, max_tokens=60)
-        logger.debug(f"LLM response for {entity_a.name} ↔ {entity_b.name}: {response[:150]}")
+        response = self.llm_loader.generate(prompt, max_tokens=120)
+        logger.debug(f"LLM response for {entity_a.name} ↔ {entity_b.name}: {response[:200]}")
 
         try:
             response = re.sub(r'```json\s*', '', response)
             response = re.sub(r'```\s*', '', response)
             response = response.strip()
 
-            if response.lower() == 'null' or response == '':
+            if not response or response.lower().startswith('null'):
                 logger.debug(f"  No relationship found between {entity_a.name} and {entity_b.name}")
                 return []
 
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if json_match:
-                data = json.loads(json_match.group())
-            else:
-                data = json.loads(response)
+            json_match = re.search(r'\{.*?\}', response, re.DOTALL)
+            if not json_match:
+                logger.debug(f"  No JSON found in response for {entity_a.name} ↔ {entity_b.name}")
+                return []
 
-            source = data.get('source', '')
-            target = data.get('target', '')
+            data = json.loads(json_match.group())
 
-            source_match = source.lower().strip() in [entity_a.name.lower(), entity_b.name.lower()]
-            target_match = target.lower().strip() in [entity_a.name.lower(), entity_b.name.lower()]
+            source   = data.get('source', '').strip()
+            target   = data.get('target', '').strip()
+            rel_type = data.get('type', '').strip()
+            evidence = data.get('evidence', '').strip()
 
-            if source_match and target_match and source.lower() != target.lower():
-                relationship = Relationship(
-                    source=source,
-                    target=target,
-                    relation_type=data.get('type', 'unknown'),
-                    description=data.get('evidence', ''),
-                    confidence=0.9
+            # All four fields must be present and non-empty
+            if not all([source, target, rel_type, evidence]):
+                logger.debug(f"  Incomplete relationship fields for {entity_a.name} ↔ {entity_b.name}")
+                return []
+
+            # source and target must exactly match the two entity names
+            valid_names = {entity_a.name.lower(), entity_b.name.lower()}
+            if source.lower() not in valid_names or target.lower() not in valid_names:
+                logger.debug(
+                    f"  Invalid source/target names: {source!r}, {target!r} "
+                    f"(expected {entity_a.name!r} or {entity_b.name!r})"
                 )
-                logger.debug(f"  Found: {source} --[{data.get('type')}]--> {target}")
-                return [relationship]
+                return []
 
-            return []
+            # source and target must be different
+            if source.lower() == target.lower():
+                logger.debug(f"  Self-referential relationship skipped for {entity_a.name}")
+                return []
+
+            # Evidence must be grounded in the scene —
+            # at least 3 consecutive words from the evidence must appear verbatim
+            evidence_words = evidence.lower().split()
+            scene_lower = scene_text.lower()
+            evidence_grounded = any(
+                ' '.join(evidence_words[i:i + 3]) in scene_lower
+                for i in range(max(1, len(evidence_words) - 2))
+            )
+            if not evidence_grounded:
+                logger.debug(
+                    f"  Evidence not grounded in scene text for "
+                    f"{entity_a.name} ↔ {entity_b.name}: {evidence!r}"
+                )
+                return []
+
+            # Evidence must mention BOTH entity names — prevents the LLM from
+            # citing a sentence about only one entity and fabricating the link
+            if not _evidence_mentions_both(evidence, entity_a, entity_b):
+                logger.debug(
+                    f"  Evidence does not mention both entities — skipping: {evidence!r}"
+                )
+                return []
+
+            relationship = Relationship(
+                source=source,
+                target=target,
+                relation_type=rel_type,
+                description=evidence,
+                confidence=0.9,
+            )
+            logger.debug(f"  Found: {source} --[{rel_type}]--> {target}")
+            return [relationship]
 
         except json.JSONDecodeError as e:
             logger.debug(f"  JSON parsing error for {entity_a.name} ↔ {entity_b.name}: {e}")
@@ -116,27 +178,26 @@ null"""
         self,
         entities: List[Entity],
         scene_text: str,
-        nlp,                          # ← added
+        nlp,
     ) -> List[Relationship]:
 
         all_relationships = []
         total_pairs = len(entities) * (len(entities) - 1) // 2
         processed = 0
-        skipped_type = 0              # ← was just 'skipped', now split for clarity
-        skipped_cooc = 0              # ← was missing entirely
+        skipped_type = 0
+        skipped_cooc = 0
 
         MEANINGFUL_TYPES = {'PERSON', 'ORG', 'GPE'}
-        SAME_TYPE_SKIP = {'FAC', 'LOC', 'GPE', 'NORP'}
-        SKIP_AS_ACTOR = {'NORP', 'FAC', 'LOC', 'DATE', 'TIME', 'MONEY', 'QUANTITY', 'CARDINAL', 'ORDINAL'}
+        SAME_TYPE_SKIP   = {'FAC', 'LOC', 'GPE', 'NORP'}
+        SKIP_AS_ACTOR    = {'NORP', 'FAC', 'LOC', 'DATE', 'TIME', 'MONEY', 'QUANTITY', 'CARDINAL', 'ORDINAL'}
 
-        # Built once here, passed into _entities_co_occur for every pair
-        sentence_sets = _build_sentence_token_sets(scene_text, nlp)  # ← was missing
+        sentence_sets = _build_sentence_token_sets(scene_text, nlp)
         logger.debug(f"  Built {len(sentence_sets)} sentence token sets for co-occurrence filter")
 
         logger.info(f"Extracting relationships from {total_pairs} entity pairs")
 
         for i, entity_a in enumerate(entities):
-            for entity_b in entities[i+1:]:
+            for entity_b in entities[i + 1:]:
                 processed += 1
 
                 logger.info(f"  [{processed}/{total_pairs}] Analyzing: {entity_a.name} ↔ {entity_b.name}")
@@ -155,7 +216,7 @@ null"""
                     skipped_type += 1
                     continue
 
-                if not _entities_co_occur(entity_a, entity_b, sentence_sets):  # ← sentence_sets now defined
+                if not _entities_co_occur(entity_a, entity_b, sentence_sets):
                     logger.info(f"  ⊘ Skipping ({entity_a.name} ↔ {entity_b.name}): no sentence co-occurrence")
                     skipped_cooc += 1
                     continue
@@ -179,7 +240,7 @@ null"""
 def extract_relationships_layer4(
     entities: List[Entity],
     scene_text: str,
-    nlp,                              # ← added
+    nlp,
 ) -> List[Relationship]:
 
     logger.info("=" * 60)
@@ -187,7 +248,7 @@ def extract_relationships_layer4(
     logger.info("=" * 60)
 
     extractor = LLMRelationshipExtractor()
-    relationships = extractor.extract_relationships(entities, scene_text, nlp=nlp)  # ← forwarded
+    relationships = extractor.extract_relationships(entities, scene_text, nlp=nlp)
 
     logger.info(f"Layer 4 complete: {len(relationships)} relationships extracted")
     for rel in relationships:
