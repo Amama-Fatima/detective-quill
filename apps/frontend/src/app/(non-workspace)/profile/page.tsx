@@ -6,6 +6,10 @@ import RecentProjects from "@/components/profile/recent-projects";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { getUserProjects } from "@/lib/supabase-calls/user-projects";
 
+export const metadata = {
+  title: "My Profile",
+};
+
 export default async function ProfilePage() {
   const user = await getUserFromCookie();
 

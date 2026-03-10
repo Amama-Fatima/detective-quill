@@ -18,12 +18,12 @@ export default function HeroSection() {
     <section
       className="
         noir-text
-        grid grid-cols-2 items-center
-        gap-[60px]
+        grid grid-cols-1 lg:grid-cols-2 items-center
+        gap-10 lg:gap-[60px]
         bg-background
         relative overflow-hidden
-        min-h-screen
-        px-24 py-24
+        min-h-[100svh]
+        px-6 py-14 sm:px-10 sm:py-16 lg:px-24 lg:py-24
       "
     >
       <div
@@ -39,42 +39,43 @@ export default function HeroSection() {
       <div
         className="
           absolute top-[80px] right-0
-          w-[340px] h-[340px]
+          w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] lg:w-[340px] lg:h-[340px]
           rounded-full
           bg-secondary
           opacity-50
-          translate-x-[120px] -translate-y-[80px]
+          translate-x-[100px] -translate-y-[70px] lg:translate-x-[120px] lg:-translate-y-[80px]
           pointer-events-none
         "
       />
 
       <div className="relative z-[2]">
-        <div className="inline-flex items-center gap-2 bg-accent rounded-full px-[14px] py-[6px] mb-[28px]">
+        <div className="inline-flex items-center gap-2 bg-accent rounded-full px-[12px] py-[6px] mb-5 lg:mb-[28px]">
           <CasePinIcon />
           <span className="case-file font-bold text-[14px] tracking-tight uppercase tracking-[0.08em] text-primary">
             The Writer&apos;s Studio
           </span>
         </div>
 
-        <h1 className="font-playfair-display text-[clamp(44px,5vw,72px)] font-bold leading-[1.08] tracking-[-0.03em] text-primary mb-[24px]">
+        <h1 className="font-playfair-display text-[clamp(36px,10vw,72px)] font-bold leading-[1.08] tracking-[-0.03em] text-primary mb-4 lg:mb-[24px]">
           Where Every <br />
           <em className="italic text-muted-foreground">Clue</em> Becomes <br />a
           Chapter.
         </h1>
 
-        <p className="noir-text text-[18px] leading-[1.75] text-muted-foreground max-w-[460px] mb-[40px]">
+        <p className="noir-text text-base sm:text-[17px] lg:text-[18px] leading-[1.75] text-muted-foreground max-w-[460px] mb-8 lg:mb-[40px]">
           A writing platform built for detective fiction authors. Draft in the
           editor, map suspects on the canvas, trace connections in the graph —
           all in one focused space.
         </p>
 
-        <div className="flex items-center gap-[14px]">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-[14px]">
           <Button
             className="
               bg-primary
               text-primary-foreground
               rounded-lg
-              px-8 py-6
+              w-full sm:w-auto
+              px-6 sm:px-8 py-5 sm:py-6
               mystery-title
               text-[16px]
               tracking-[0.02em]
@@ -95,7 +96,8 @@ export default function HeroSection() {
               border-[1.5px]
               mystery-title
               rounded-lg
-              px-8 py-6
+              w-full sm:w-auto
+              px-6 sm:px-8 py-5 sm:py-6
               font-[Georgia,serif]
               text-[16px]
               tracking-[0.02em]
@@ -109,7 +111,7 @@ export default function HeroSection() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-[14px] mt-[40px]">
+        <div className="flex items-center gap-[14px] mt-8 lg:mt-[40px]">
           <div className="flex">
             {authorImgPaths.map((src, i) => (
               <div
@@ -136,7 +138,7 @@ export default function HeroSection() {
         </div>
       </div>
 
-      <div className="relative flex justify-center items-center h-[520px]">
+      <div className="relative hidden lg:flex justify-center items-center h-[520px]">
         <div className="relative z-[3] w-[280px] bg-card border rounded-xl px-[28px] py-[32px] shadow-xl">
           <div className="mystery-title text-[12px] uppercase tracking-[0.12em] text-muted-foreground mb-[12px]">
             Case File — Draft
@@ -154,7 +156,9 @@ export default function HeroSection() {
               <div className="h-[2px] flex-1 rounded bg-accent">
                 <div className="h-full w-[68%] rounded bg-accent-foreground" />
               </div>
-              <span className="text-[11px] text-muted-foreground noir-text">68%</span>
+              <span className="text-[11px] text-muted-foreground noir-text">
+                68%
+              </span>
             </div>
           </div>
         </div>

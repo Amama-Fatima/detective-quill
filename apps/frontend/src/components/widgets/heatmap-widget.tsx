@@ -1,5 +1,3 @@
-// No "use client" needed — pure render, no hooks or browser APIs
-
 const COLORS = [
   "oklch(90% 0.012 80)",
   "oklch(80% 0.030 245)",
@@ -8,7 +6,6 @@ const COLORS = [
   "oklch(24% 0.022 245)",
 ];
 
-// Deterministic seeded PRNG (mulberry32) — identical on server and client
 function seededRandom(seed: number) {
   return function () {
     seed |= 0;
@@ -49,7 +46,7 @@ export const HeatmapWidget = () => (
               {week.map((val, di) => (
                 <div
                   key={di}
-                  className="w-4 h-4 rounded-[2px]"
+                  className="w-4 h-4 md:w-2.5 md:h-3 lg:w-4 lg:h-4 rounded-[2px]"
                   style={{ background: COLORS[val] }}
                 />
               ))}
@@ -67,7 +64,7 @@ export const HeatmapWidget = () => (
               {week.map((val, di) => (
                 <div
                   key={di}
-                  className="w-4 h-4 rounded-[2px]"
+                  className="w-4 h-4 md:w-2.5 md:h-3 lg:w-4 lg:h-4 rounded-[2px]"
                   style={{ background: COLORS[val] }}
                 />
               ))}

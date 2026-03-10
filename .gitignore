@@ -21,3 +21,4 @@ apps/backend/.env
 apps/knowledge-graph/venv/
 apps/knowledge-graph/__pycache__/
 /test
+

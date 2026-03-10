@@ -1,5 +1,7 @@
-import type { FsNodeTreeResponse } from "./api.types";
-import type { Database } from "./database.types";
+import type {
+  Database,
+  FsNodeTreeResponse,
+} from "@detective-quill/shared-types";
 
 export type TreeWithChildren<T> = T & {
   children: TreeWithChildren<T>[];
