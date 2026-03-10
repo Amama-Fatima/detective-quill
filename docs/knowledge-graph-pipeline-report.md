@@ -409,6 +409,41 @@ So the graph has one Scene per job, shared entity nodes by name, and directed ed
 
 ---
 
+## 11.4 RabbitMQ: Production (CloudAMQP) vs Local — Commit → Modal Flow
+
+For the **commit → knowledge graph** flow to work end-to-end, **every component that talks to RabbitMQ must use the same broker**.
+
+| Component | Env var | Local default | Production (Render + Modal) |
+|-----------|--------|----------------|-----------------------------|
+| Backend API (QueueService) | `RABBITMQ_URL` | `amqp://guest:guest@localhost:5672` | **Must be your CloudAMQP URL** |
+| Backend worker (commits, email, NLP results consumer) | `RABBITMQ_URL` | same | **Same CloudAMQP URL** |
+| Modal `poll_queue` | `CLOUDAMQP_URL` (Modal secret) | N/A | Your CloudAMQP URL |
+
+**Why there is a discrepancy locally**
+
+- Locally, the backend and worker use `RABBITMQ_URL` (or fallback to localhost). So commit jobs and **scene analysis jobs** are published to **local** RabbitMQ (e.g. Docker).
+- Modal is deployed with **CloudAMQP** only (`CLOUDAMQP_URL`). It never connects to your local broker.
+- So: local commits → jobs go to local queue → Modal never sees them.
+
+**How to fix it**
+
+1. **Production (Render)**  
+   In Render, set **`RABBITMQ_URL`** to your **CloudAMQP** URL (the same broker you use in Modal secrets as `CLOUDAMQP_URL`). Then:
+   - Commit create is published to CloudAMQP.
+   - Render worker consumes commit jobs from CloudAMQP, creates the commit, then calls `sendSceneAnalysisJob`, which publishes to CloudAMQP.
+   - Modal’s `poll_queue` (every 60s) consumes from CloudAMQP and runs the KG pipeline.
+   - Results are published back to CloudAMQP; Render worker’s `ManualRabbitMQConsumer` receives them.
+
+2. **Local testing of “commit → Modal”**  
+   To have Modal pick up jobs from your machine:
+   - Set **`RABBITMQ_URL`** in your local `.env` to your **CloudAMQP** URL (same as in Modal).
+   - Run backend + worker locally; make a commit. Scene (and commit) traffic goes to CloudAMQP, and Modal will process the scene analysis jobs.
+   - For day-to-day local work with only local workers, leave `RABBITMQ_URL` unset or pointing to local RabbitMQ.
+
+**Summary:** For the deployed workflow (Render + Modal), set **`RABBITMQ_URL`** on Render to your **CloudAMQP** URL so the backend and worker use the same broker as Modal.
+
+---
+
 ## 12. Backend Consumer and Database Diagram
 
 ### 12.1 ManualRabbitMQConsumer (NestJS)
