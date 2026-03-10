@@ -61,7 +61,7 @@ export function ResetPasswordForm() {
       setTimeout(() => {
         router.push("/auth/sign-in?message=password_updated");
       }, 2000);
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Error updating password:", error);
       setError(error.message || "Failed to update password. Please try again.");
     } finally {

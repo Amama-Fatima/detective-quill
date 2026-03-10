@@ -21,7 +21,7 @@ interface ProjectWorkspacePageProps {
 export async function generateMetadata({
   params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }): Promise<Metadata> {
   const { projectId } = await params;
   const { title, error } = await fetchProjectTitle(projectId);
