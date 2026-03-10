@@ -60,7 +60,7 @@ Only add extra keys to "attributes" if the scene explicitly states them (e.g. ag
                             'role': data.get('role', ''),
                             **data.get('attributes', {})
                         })
-                        logger.debug(f"  ✓ Enriched '{entity.name}' with role: {entity.attributes.get('role')}")
+                        logger.debug(f" Enriched '{entity.name}' with role: {entity.attributes.get('role')}")
 
             return entities
 
@@ -95,7 +95,7 @@ def enrich_entities_layer3(entities: List[Entity], scene_text: str) -> List[Enti
     logger.info(f"Layer 3 complete: {len(enriched_entities)} entities enriched")
     for entity in enriched_entities:
         role = entity.attributes.get('role', 'unknown')
-        logger.debug(f"  - {entity.name} ({entity.type}) → role: {role}")
+        logger.debug(f"  - {entity.name} ({entity.type}), role: {role}")
 
     logger.info(f"Layer 3 final enriched entities JSON: {json.dumps([e.dict() for e in enriched_entities], indent=2)}")
     return enriched_entities

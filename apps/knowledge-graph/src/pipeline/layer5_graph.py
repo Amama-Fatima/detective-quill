@@ -27,7 +27,7 @@ def _to_rel_type(relation_type: str) -> str:
     """
     Converts a free-text relation type from the LLM into a valid
     Neo4j relationship type — uppercase, underscores, no special chars.
-    e.g. 'last seen by' → 'LAST_SEEN_BY'
+    e.g. 'last seen by' becomes 'LAST_SEEN_BY'
     """
     cleaned = re.sub(r"[^a-zA-Z0-9\s]", "", relation_type)
     return "_".join(cleaned.upper().split())
@@ -138,10 +138,6 @@ def _create_relationship(tx, rel: Relationship, scene_id: str):
 
 
 def get_scene_graph(scene_id: str) -> dict:
-    """
-    Retrieves the full graph for a scene — called by NestJS backend.
-    Returns nodes and edges in a format ready for the frontend.
-    """
     from neo4j import GraphDatabase
 
     uri      = os.environ["NEO4J_URI"]

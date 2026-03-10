@@ -153,14 +153,8 @@ class SpacyEntityExtractor:
         }
 
     def resolve_and_extract(self, text: str) -> Tuple[List[RawEntity], str]:
-        """
-        1. Run spaCy NER on the original text.
-        2. If fastcoref is available, use the spaCy entities as anchors to
-           resolve pronouns and short mentions, then re-run NER on the resolved
-           text.
-        3. Return raw entities and the (possibly resolved) text.
-        """
-        # Step 1 — initial NER pass to get anchor entities for coreference
+
+        # initial NER pass to get anchor entities for coreference
         doc = self.nlp(text)
 
         if self.coref_model is not None:

@@ -203,12 +203,12 @@ null"""
                 logger.info(f"  [{processed}/{total_pairs}] Analyzing: {entity_a.name} ↔ {entity_b.name}")
 
                 if entity_a.type in SAME_TYPE_SKIP and entity_a.type == entity_b.type:
-                    logger.debug(f"  ⊘ Skipping same-type non-person pair: {entity_a.type} ↔ {entity_b.type}")
+                    logger.debug(f"  Skipping same-type non-person pair: {entity_a.type} ↔ {entity_b.type}")
                     skipped_type += 1
                     continue
 
                 if entity_a.type not in MEANINGFUL_TYPES and entity_b.type not in MEANINGFUL_TYPES:
-                    logger.debug(f"  ⊘ Skipping low-value pair: {entity_a.name} ({entity_a.type}) ↔ {entity_b.name} ({entity_b.type})")
+                    logger.debug(f"  Skipping low-value pair: {entity_a.name} ({entity_a.type}) ↔ {entity_b.name} ({entity_b.type})")
                     skipped_type += 1
                     continue
 
@@ -217,7 +217,7 @@ null"""
                     continue
 
                 if not _entities_co_occur(entity_a, entity_b, sentence_sets):
-                    logger.info(f"  ⊘ Skipping ({entity_a.name} ↔ {entity_b.name}): no sentence co-occurrence")
+                    logger.info(f"  Skipping ({entity_a.name} ↔ {entity_b.name}): no sentence co-occurrence")
                     skipped_cooc += 1
                     continue
 

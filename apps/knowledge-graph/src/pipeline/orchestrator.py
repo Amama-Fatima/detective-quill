@@ -10,7 +10,6 @@ from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
-# Truncate long text for logging to avoid huge log lines
 def _truncate(s: str, max_len: int = 500) -> str:
     if not s or len(s) <= max_len:
         return s or ""
@@ -24,7 +23,7 @@ class NarrativeAnalysisPipeline:
             self.nlp = nlp
         else:
             self.nlp = spacy.load("en_core_web_lg")
-        self.coref_model = coref_model  # may be None in local dev
+        self.coref_model = coref_model 
 
     def process_scene(self, scene_text: str, verbose: bool = True) -> PipelineResult:
         pipeline_start = time.time()
