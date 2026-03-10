@@ -9,6 +9,7 @@ export class WorkerNlpAnalysisService {
   async saveAnalysisResult(
     jobId: string,
     result: PipelineResult,
+    options?: { processingTime?: string | null },
   ): Promise<void> {
     const supabase = this.adminSupabaseService.client;
 
@@ -21,6 +22,9 @@ export class WorkerNlpAnalysisService {
         completed_at: new Date().toISOString(),
         entity_count: result.metadata.num_entities,
         relationship_count: result.metadata.num_relationships,
+        neo4j_graph_id: jobId,
+        result_data: result as unknown as Record<string, unknown>,
+        processing_time: options?.processingTime ?? null,
       })
       .eq("job_id", jobId);
 

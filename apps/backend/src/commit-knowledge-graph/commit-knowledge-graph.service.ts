@@ -1,5 +1,4 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { randomUUID } from "crypto";
 import { Database } from "@detective-quill/shared-types";
 import { AdminSupabaseService } from "../supabase/admin-supabase.service";
 import { WorkerSnapshotsService } from "../snapshots/worker-snapshots.service";
@@ -73,7 +72,7 @@ export class CommitKnowledgeGraphService {
         continue;
       }
 
-      const jobId = randomUUID();
+      const jobId = snapshot.id;
 
       const { error: jobError } = await supabase.from("nlp_analysis_jobs").insert({
         job_id: jobId,
