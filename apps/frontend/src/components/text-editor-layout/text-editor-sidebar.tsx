@@ -10,6 +10,8 @@ interface TextEditorSidebarProps {
   projectId: string;
   /** Base path for file links, e.g. "text-editor" or "knowledge-graph". Default "text-editor". */
   fileLinkBasePath?: string;
+  /** Use solid background (e.g. on knowledge-graph page). Default false. */
+  solidBackground?: boolean;
 }
 
 export default function TextEditorSidebar({
@@ -17,14 +19,21 @@ export default function TextEditorSidebar({
   nodes,
   projectId,
   fileLinkBasePath = "text-editor",
+  solidBackground = false,
 }: TextEditorSidebarProps) {
   return (
     <aside
       className={cn(
-        "m-3 flex   h-full w-80 flex-col overflow-hidden rounded-2xl border border-border/70 bg-sidebar shadow-sm transition-all duration-300",
+        "m-3 flex h-full w-80 flex-col overflow-hidden rounded-2xl border border-border/70 shadow-sm transition-all duration-300",
+        solidBackground ? "bg-card" : "bg-sidebar",
       )}
     >
-      <div className="border-b border-border/70 bg-background/50 px-4 py-3">
+      <div
+        className={cn(
+          "border-b border-border/70 px-4 py-3 bg-background/50"
+          // solidBackground ? "bg-background" : "bg-background/",
+        )}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FolderTree className="h-4 w-4 text-primary" />
