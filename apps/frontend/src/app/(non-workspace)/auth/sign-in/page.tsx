@@ -1,6 +1,7 @@
 import { SignInForm } from "@/components/auth/form/sign-in-form";
 import { SocialAuth } from "@/components/auth/social-auth";
 import { Separator } from "@/components/ui/separator";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Sign In",
@@ -21,7 +22,15 @@ export default function SignInPage() {
                 Sign in to your account to continue
               </p>
             </div>
-            <SignInForm />
+            <Suspense
+              fallback={
+                <div className="text-sm text-muted-foreground">
+                  Loading sign-in form...
+                </div>
+              }
+            >
+              <SignInForm />
+            </Suspense>
           </div>
 
           {/* Separator */}
@@ -39,14 +48,20 @@ export default function SignInPage() {
           {/* Right Column - Social Auth */}
           <div className="flex-1 space-y-6">
             <div className="space-y-2">
-              <h2 className="text-xl font-medium">
-                Or continue with
-              </h2>
+              <h2 className="text-xl font-medium">Or continue with</h2>
               <p className="myster-title text-muted-foreground">
                 Choose your preferred sign-in method
               </p>
             </div>
-            <SocialAuth mode="signin" />
+            <Suspense
+              fallback={
+                <div className="text-sm text-muted-foreground">
+                  Loading sign-in options...
+                </div>
+              }
+            >
+              <SocialAuth mode="signin" />
+            </Suspense>
           </div>
         </div>
       </div>
