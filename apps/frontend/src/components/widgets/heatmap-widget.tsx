@@ -46,7 +46,7 @@ export const HeatmapWidget = () => (
               {week.map((val, di) => (
                 <div
                   key={di}
-                  className="w-4 h-4 rounded-[2px]"
+                  className="w-4 h-4 md:w-2.5 md:h-3 lg:w-4 lg:h-4 rounded-[2px]"
                   style={{ background: COLORS[val] }}
                 />
               ))}
@@ -64,7 +64,7 @@ export const HeatmapWidget = () => (
               {week.map((val, di) => (
                 <div
                   key={di}
-                  className="w-4 h-4 rounded-[2px]"
+                  className="w-4 h-4 md:w-2.5 md:h-3 lg:w-4 lg:h-4 rounded-[2px]"
                   style={{ background: COLORS[val] }}
                 />
               ))}

@@ -28,8 +28,7 @@ const VersionWidget = () => {
   ];
 
   return (
-    <div className="flex gap-4 w-full mt-5">
-      {/* Timeline */}
+    <div className="flex flex-col md:flex-row gap-8 md:gap-4 w-full my-5">
       <div className="flex-1 space-y-2">
         {commits.map((c, i) => (
           <div key={i} className="flex items-start gap-2.5">

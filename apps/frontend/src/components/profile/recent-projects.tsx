@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatDate } from "@/lib/utils/utils";
+import { formatDate } from "date-fns";
 import { CaseFileIcon } from "../icons/case-file-icon";
 import { ClockIcon } from "../icons/clock-icon";
 
@@ -59,7 +59,7 @@ const RecentProjects = ({ projects }: RecentProjectsProps) => {
 
               <div className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
                 <ClockIcon />
-                Updated {formatDate(project.updated_at)}
+                Updated {project.updated_at ? formatDate(new Date(project.updated_at), "PPP") : "Never"}
               </div>
             </Link>
           ))
