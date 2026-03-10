@@ -37,31 +37,31 @@ export const NAV_ITEMS = [
 export const tab_message = [
   {
     tab: "all",
-    title: "Cases",
+    title: "Projects",
     description:
       "The detective's desk is empty. Time to start a new investigation!",
   },
   {
     tab: "active",
-    title: "Active Cases",
+    title: "Active Projects",
     description:
       "The detective's desk is empty. Time to start a new investigation!",
   },
   {
     tab: "completed",
-    title: "Completed Cases",
-    description: "No cases have been solved yet. Time to crack some mysteries!",
+    title: "Completed Projects",
+    description: "No investigations have been solved yet. Time to crack some mysteries!",
   },
   {
     tab: "archived",
-    title: "Archived Cases",
+    title: "Archived Projects",
     description:
-      "No cases have been archived yet. Your detective work is still ongoing!",
+      "No investigations have been archived yet. Your detective work is still ongoing!",
   },
   {
     tab: "invited",
-    title: "Invited Cases",
+    title: "Invited Projects",
     description:
-      "You haven't been invited to any cases yet. Check back later for new mysteries to solve!",
+      "You haven't been invited to any investigations yet. Check back later for new mysteries to solve!",
   },
 ];

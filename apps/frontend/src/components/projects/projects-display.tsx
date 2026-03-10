@@ -11,7 +11,7 @@ export default function ProjectsDisplay({ projects }: ProjectsDisplayProps) {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
   const tabMeta = tab_message.find((m) => m.tab === tab);
-  const title = tabMeta?.title ?? "Cases";
+  const title = tabMeta?.title ?? "Projects";
   const description =
     tabMeta?.description ??
     "The detective's desk is empty. Time to start a new investigation!";

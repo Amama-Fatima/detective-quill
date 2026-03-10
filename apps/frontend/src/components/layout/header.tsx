@@ -44,7 +44,7 @@ export default async function Header() {
               href="/cases"
               className="noir-text text-[1.1rem] text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
             >
-              Cases
+              Projects
             </Link>
           )}
         </nav>
@@ -79,7 +79,7 @@ function MobileNav() {
           href="/cases"
           className="text-sm text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
         >
-          Cases
+          Projects
         </Link>
       </nav>
     </div>
