@@ -1,8 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { Database } from "@detective-quill/shared-types";
-import { SupabaseService } from "../supabase/supabase.service";
-import { SnapshotsService } from "../snapshots/snapshots.service";
+import { AdminSupabaseService } from "../supabase/admin-supabase.service";
+import { WorkerSnapshotsService } from "../snapshots/worker-snapshots.service";
 import { QueueService } from "../queue/queue.service";
 import { extractPlainTextFromEditorContent } from "../utils/editor-content";
 
@@ -14,21 +14,11 @@ export class CommitKnowledgeGraphService {
   private readonly logger = new Logger(CommitKnowledgeGraphService.name);
 
   constructor(
-    private readonly supabaseService: SupabaseService,
-    private readonly snapshotsService: SnapshotsService,
+    private readonly adminSupabaseService: AdminSupabaseService,
+    private readonly snapshotsService: WorkerSnapshotsService,
     private readonly queueService: QueueService,
   ) {}
 
-  /**
-   * After a commit is created and snapshots are in place, enqueue one KG job per
-   * relevant file snapshot. Only files that changed (added or modified by content_hash)
-   * are processed when changedFileFsNodeIds is provided; otherwise all file snapshots
-   * with content are processed. Creates nlp_analysis_jobs and commit_knowledge_graphs
-   * rows and sends each job to RabbitMQ with scene_id = job_id for Neo4j.
-   *
-   * @param changedFileFsNodeIds - Optional. When provided, only snapshots whose
-   *   fs_node_id is in this set are enqueued (use added + modified from getChangedFiles).
-   */
   async enqueueCommitKnowledgeGraphJobs(
     commitId: string,
     _projectId: string,
@@ -42,7 +32,7 @@ export class CommitKnowledgeGraphService {
       return { enqueued: 0 };
     }
 
-    const supabase = this.supabaseService.client;
+    const supabase = this.adminSupabaseService.client;
 
     const snapshots = await this.snapshotsService.getSnapshotsByCommit(
       commitId,

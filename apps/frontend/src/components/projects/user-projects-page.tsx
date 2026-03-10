@@ -114,10 +114,10 @@ export default function UserProjectsPage({
               </div>
               <div>
                 <h1 className="mystery-title text-4xl mb-2">
-                  Detective's Case Files
+                  All Projects
                 </h1>
                 <p className="text-muted-foreground noir-text">
-                  Manage your ongoing investigations and completed cases
+                  Manage your ongoing investigations and completed projects
                 </p>
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function UserProjectsPage({
               className="bg-primary shadow-lg cursor-pointer font-playfair-display text-[1rem] hover:-translate-y-0.5 duration-300"
             >
               <Plus className="h-5 w-5 mr-2" />
-              Open New Case
+              Open New Project
             </Button>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function UserProjectsPage({
           <div className="noir-text flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
             <TabsList className="bg-card/50 border border-border">
               <TabsTrigger value="all" className="case-file cursor-pointer">
-                All Cases
+                All Projects
               </TabsTrigger>
               <TabsTrigger value="active" className="case-file cursor-pointer">
                 Active
