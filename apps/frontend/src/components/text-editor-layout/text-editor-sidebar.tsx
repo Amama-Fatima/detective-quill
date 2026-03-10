@@ -8,12 +8,15 @@ interface TextEditorSidebarProps {
   projectName: string;
   nodes: FsNodeTreeResponse[];
   projectId: string;
+  /** Base path for file links, e.g. "text-editor" or "knowledge-graph". Default "text-editor". */
+  fileLinkBasePath?: string;
 }
 
 export default function TextEditorSidebar({
   projectName,
   nodes,
   projectId,
+  fileLinkBasePath = "text-editor",
 }: TextEditorSidebarProps) {
   return (
     <aside
@@ -32,7 +35,11 @@ export default function TextEditorSidebar({
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-1 py-2">
-        <FileTree initialNodes={nodes} projectId={projectId} />
+        <FileTree
+          initialNodes={nodes}
+          projectId={projectId}
+          fileLinkBasePath={fileLinkBasePath}
+        />
       </div>
     </aside>
   );
