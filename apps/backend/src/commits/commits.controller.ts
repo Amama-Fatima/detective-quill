@@ -30,6 +30,10 @@ export class CommitsController {
       createCommitDto,
     });
 
+    console.log(
+      `[Commits] Commit job queued: project=${projectId} branch=${createCommitDto.branch_id} user=${userId}`,
+    );
+
     return {
       success: true,
       message: "Commit job queued successfully",

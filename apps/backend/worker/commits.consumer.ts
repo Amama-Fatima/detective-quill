@@ -15,6 +15,9 @@ export class CommitsConsumer {
   @EventPattern("commit_create_job")
   async handleCreateCommit(@Payload() payload: CreateCommitJobData) {
     const { createCommitDto, projectId, userId } = payload;
+    this.logger.log(
+      `Received commit_create_job: project=${projectId} branch=${createCommitDto.branch_id} user=${userId}`,
+    );
     await this.workerCommitsService.createCommit(
       createCommitDto,
       projectId,
