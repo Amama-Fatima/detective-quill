@@ -14,7 +14,6 @@ class LLMEntityEnricher:
 
     
     def __init__(self):
-        """Initialize the enricher with the LLM model."""
         self.llm_loader = get_llm_loader()
     
     def enrich_single_entity(self, entity: Entity, scene_text: str) -> Entity:
@@ -52,7 +51,7 @@ Only add keys to "attributes" if the scene text explicitly states them. If nothi
                 **entity_data.get('attributes', {})
             }
             
-            logger.debug(f"  ✓ Enriched '{entity.name}' with role: {entity.attributes.get('role')}")
+            logger.debug(f"  Enriched '{entity.name}' with role: {entity.attributes.get('role')}")
             
             return entity
         

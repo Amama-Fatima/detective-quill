@@ -28,7 +28,6 @@ class NarrativeAnalysisPipeline:
         if verbose:
             logger.info("\n[1/4] Extracting entities with spaCy...")
 
-        # Pass nlp down so Layer 1 can use coreferee if available
         raw_entities, resolved_text = extract_entities_layer1(scene_text, nlp=self.nlp)
         num_raw_entities = len(raw_entities)
 
@@ -53,7 +52,6 @@ class NarrativeAnalysisPipeline:
         if verbose:
             logger.info("\n[3/4] Enriching entities with LLM...")
 
-        # Use resolved_text so LLM sees clean context without pronouns
         enriched_entities = enrich_entities_layer3(clean_entities, resolved_text)
 
         if verbose:
@@ -62,7 +60,6 @@ class NarrativeAnalysisPipeline:
         if verbose:
             logger.info("\n[4/4] Extracting relationships with LLM...")
 
-        # Use resolved_text here too
         relationships = extract_relationships_layer4(enriched_entities, resolved_text, nlp=self.nlp)
 
         if verbose:

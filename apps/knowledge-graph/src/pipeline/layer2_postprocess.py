@@ -9,14 +9,13 @@ class EntityPostProcessor:
     def __init__(self):
         self.keep_types = {
             'PERSON',      
-            'ORG',         # Organizations
-            'GPE',         # Geopolitical entities (cities, countries)
-            'LOC',         # Non-GPE locations
-            'FAC',         # Facilities (buildings, airports, etc.)
-            'PRODUCT',     # Objects, vehicles, foods, etc.
-            'EVENT',       # Named events
-            'WORK_OF_ART', # Titles of books, songs, etc.
-            'LAW',         # Named documents made into laws
+            'ORG',       
+            'GPE',         
+            'LOC',        
+            'FAC',        
+            'PRODUCT',     
+            'EVENT',       
+                 
         }
 
         self.skip_types = {
@@ -31,14 +30,11 @@ class EntityPostProcessor:
         
         short = self.normalize_name(short_name)
         long = self.normalize_name(long_name)
-        
-        # Handle cases like "Marcus" in "Marcus Chen"
-        # or "Sullivan" in "Robert Sullivan"
+    
         return short in long.split() or short == long
     
     def merge_duplicate_entities(self, entities: List[Entity]) -> List[Entity]:
         
-        # Sort by name length (longer names first)
         sorted_entities = sorted(entities, key=lambda e: len(e.name), reverse=True)
         
         merged = []
@@ -94,8 +90,7 @@ class EntityPostProcessor:
             'GPE': 5,
             'PRODUCT': 4,
             'EVENT': 3,
-            'WORK_OF_ART': 2,
-            'LAW': 1
+          
         }
         
         for entity in entities:
@@ -110,19 +105,19 @@ class EntityPostProcessor:
 
     def process(self, entities: List[Entity], verbose: bool = True) -> List[Entity]:
         if verbose:
-            logger.info(f"  → Input: {len(entities)} raw entities")
+            logger.info(f"  Input: {len(entities)} raw entities")
         
         entities = self.filter_entity_types(entities)
         if verbose:
-            logger.info(f"  → After filtering: {len(entities)} entities")
+            logger.info(f"  After filtering: {len(entities)} entities")
         
         entities = self.merge_duplicate_entities(entities)
         if verbose:
-            logger.info(f"  → After deduplication: {len(entities)} entities")
+            logger.info(f"  After deduplication: {len(entities)} entities")
         
         entities = self.resolve_type_conflicts(entities)
         if verbose:
-            logger.info(f"  → After type resolution: {len(entities)} entities")
+            logger.info(f"  After type resolution: {len(entities)} entities")
         
         return entities
     

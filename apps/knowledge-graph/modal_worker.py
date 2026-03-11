@@ -2,15 +2,8 @@ import modal
 import os
 import sys
 
-# ─────────────────────────────────────────────
-# Modal App Definition
-# ─────────────────────────────────────────────
-
 app = modal.App("detective-quill-knowledge-graph")
 
-# ─────────────────────────────────────────────
-# Container Image
-# ─────────────────────────────────────────────
 
 image = (
     modal.Image.debian_slim(python_version="3.10")
@@ -37,18 +30,10 @@ image = (
     .add_local_dir("src", remote_path="/root/src")
 )
 
-# ─────────────────────────────────────────────
-# Modal Secrets
-# ─────────────────────────────────────────────
-
 secrets = [
     modal.Secret.from_name("detective-quill-secrets"),
     modal.Secret.from_name("neo4j-secret")
 ]
-
-# ─────────────────────────────────────────────
-# The Worker Class
-# ─────────────────────────────────────────────
 
 @app.cls(
     image=image,
@@ -66,7 +51,7 @@ class KnowledgeGraphWorker:
         src/ is already at /root/src/ via the image mount.
         """
         import sys
-        sys.path.insert(0, "/root")  # makes 'from src.xxx import yyy' work
+        sys.path.insert(0, "/root") 
 
         from src.utils.logger import setup_logger
         self.logger = setup_logger(__name__)
@@ -98,7 +83,6 @@ class KnowledgeGraphWorker:
             result = self.pipeline.process_scene(scene_text=scene_text)
             self.logger.info(f"Pipeline complete — {len(result.entities)} entities, {len(result.relationships)} relationships")
 
-            # Layer 5 — persist graph to Neo4j
             self.logger.info("Starting Layer 5: saving graph to Neo4j...")
             from src.pipeline.layer5_graph import save_graph_layer5
             graph_result = save_graph_layer5(
@@ -134,9 +118,6 @@ class KnowledgeGraphWorker:
                 "error": str(e),
                 "processing_time": f"{elapsed:.2f}s"
             }
-# ─────────────────────────────────────────────
-# Scheduled Queue Poller
-# ─────────────────────────────────────────────
 
 @app.function(
     image=image,

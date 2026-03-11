@@ -19,8 +19,7 @@ def _resolve_coreferences(doc) -> str:
         best_mention = chain[chain.most_specific_mention_index]
         primary_text = " ".join(doc[i].text for i in best_mention)
 
-        # Only replace pronouns when the referent is a proper noun
-        # Prevents "accountant", "detective" etc. becoming replacements
+
         primary_is_proper = any(doc[i].pos_ == "PROPN" for i in best_mention)
         if not primary_is_proper:
             continue
@@ -59,11 +58,9 @@ class SpacyEntityExtractor:
 
     def __init__(self, nlp=None):
         if nlp is not None:
-            # Use the pre-loaded nlp from the Modal worker (has coreferee)
             self.nlp = nlp
             self._owns_nlp = False
         else:
-            # Local dev fallback — load our own without coreferee
             self._load_model()
             self._owns_nlp = True
 
@@ -78,10 +75,7 @@ class SpacyEntityExtractor:
             logger.info("spaCy model downloaded and loaded successfully.")
 
     def resolve_and_extract(self, text: str) -> Tuple[List[RawEntity], str]:
-        """
-        Runs the full doc through spaCy (NER + coreferee if available).
-        Returns raw entities and the resolved text.
-        """
+
         doc = self.nlp(text)
         coref_available = "coreferee" in self.nlp.pipe_names
 

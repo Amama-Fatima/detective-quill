@@ -13,8 +13,6 @@ TYPE_LABEL_MAP = {
     "GPE":    "Location",
     "LOC":    "Location",
     "NORP":   "Group",
-    "WORK_OF_ART": "Artefact",
-    "EVENT":  "Event",
 }
 DEFAULT_LABEL = "Entity"
 
@@ -24,11 +22,7 @@ def _get_node_label(entity_type: str) -> str:
 
 
 def _to_rel_type(relation_type: str) -> str:
-    """
-    Converts a free-text relation type from the LLM into a valid
-    Neo4j relationship type — uppercase, underscores, no special chars.
-    e.g. 'last seen by' → 'LAST_SEEN_BY'
-    """
+    
     cleaned = re.sub(r"[^a-zA-Z0-9\s]", "", relation_type)
     return "_".join(cleaned.upper().split())
 

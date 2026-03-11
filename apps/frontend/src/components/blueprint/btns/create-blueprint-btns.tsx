@@ -56,13 +56,7 @@ export default function CreateBlueprintBtns({
             >
               Character
             </Button>
-            <Button
-              className="cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]"
-              onClick={() => handleCreate("timeline")}
-              disabled={loading}
-            >
-              Timeline
-            </Button>
+            
             <Button
               className="cursor-pointer hover:-translate-y-0.5 duration-300 font-playfair-display text-[1rem]"
               onClick={() => handleCreate("item")}
