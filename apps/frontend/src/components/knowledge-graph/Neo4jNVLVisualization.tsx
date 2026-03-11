@@ -430,7 +430,7 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
     <div className="relative w-full h-full" ref={containerRef}>
       {status === 'loading' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-background rounded-lg">
-          <div className="relative mb-6">
+          {/* <div className="relative mb-6">
             <div
               className="w-16 h-16 rounded-full border-2 border-transparent animate-spin border-t-primary border-r-primary/70"
               style={{ animationDuration: "1.2s" }}
@@ -439,7 +439,7 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
               className="absolute inset-2 w-12 h-12 rounded-full border-2 border-transparent animate-spin border-t-chart-3 border-l-chart-5"
               style={{ animationDuration: "0.8s", animationDirection: "reverse" }}
             />
-          </div>
+          </div> */}
           <p className="text-sm tracking-[0.25em] uppercase text-muted-foreground font-serif">
             Mapping the web…
           </p>
