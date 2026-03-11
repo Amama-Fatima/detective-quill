@@ -37,13 +37,18 @@ import { useWorkspaceContext } from "@/context/workspace-context";
 interface FileTreeProps {
   initialNodes: FsNodeTreeResponse[];
   projectId: string;
+  /** Base path for file links, e.g. "text-editor" or "knowledge-graph". Default "text-editor". */
+  fileLinkBasePath?: string;
 }
 
-const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
+const FileTree = ({ initialNodes, projectId, fileLinkBasePath = "text-editor" }: FileTreeProps) => {
   const { activeBranchId, isOwner, isActive } = useWorkspaceContext();
   const [commitDialogOpen, setCommitDialogOpen] = useState(false);
   const params = useParams();
-  const selectedNodeId = params.nodeId as string;
+  const selectedNodeId =
+    (fileLinkBasePath === "knowledge-graph"
+      ? (params.fileId as string)
+      : (params.nodeId as string)) ?? undefined;
 
   const {
     nodes,
@@ -87,6 +92,7 @@ const FileTree = ({ initialNodes, projectId }: FileTreeProps) => {
     useFileTreeNavigation({
       projectId,
       nodes,
+      fileLinkBasePath,
     });
 
   const handleCreateNode = async (

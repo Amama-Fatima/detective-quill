@@ -1,5 +1,4 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { randomUUID } from "crypto";
 import { Database } from "@detective-quill/shared-types";
 import { AdminSupabaseService } from "../supabase/admin-supabase.service";
 import { WorkerSnapshotsService } from "../snapshots/worker-snapshots.service";
@@ -73,19 +72,24 @@ export class CommitKnowledgeGraphService {
         continue;
       }
 
-      const jobId = randomUUID();
+      const jobId = snapshot.fs_node_id;
 
-      const { error: jobError } = await supabase.from("nlp_analysis_jobs").insert({
-        job_id: jobId,
-        user_id: userId,
-        scene_text: sceneText,
-        status: "QUEUED",
-        progress: 0,
-      });
+      const { error: jobError } = await supabase
+        .from("nlp_analysis_jobs")
+        .upsert(
+          {
+            job_id: jobId,
+            user_id: userId,
+            scene_text: sceneText,
+            status: "QUEUED",
+            progress: 0,
+          },
+          { onConflict: "job_id" },
+        );
 
       if (jobError) {
         this.logger.error(
-          `Failed to create nlp_analysis_jobs row for snapshot ${snapshot.id}: ${jobError.message}`,
+          `Failed to upsert nlp_analysis_jobs row for file ${snapshot.fs_node_id}: ${jobError.message}`,
         );
         continue;
       }
@@ -120,7 +124,7 @@ export class CommitKnowledgeGraphService {
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         this.logger.error(
-          `Failed to send scene analysis job ${jobId} to queue: ${message}`,
+          `Failed to send scene analysis job for file ${jobId} to queue: ${message}`,
         );
       }
     }

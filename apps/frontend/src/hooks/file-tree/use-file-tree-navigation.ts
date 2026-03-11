@@ -7,26 +7,29 @@ import { findNodeById } from "@/lib/utils/file-tree-utils";
 interface UseFileTreeNavigationProps {
   projectId: string;
   nodes: FsNodeTreeResponse[];
+  /** Base path for file links, e.g. "text-editor" or "knowledge-graph". Default "text-editor". */
+  fileLinkBasePath?: string;
 }
 
 export const useFileTreeNavigation = ({
   projectId,
   nodes,
+  fileLinkBasePath = "text-editor",
 }: UseFileTreeNavigationProps) => {
   const router = useRouter();
 
   const navigateToNode = useCallback(
     (nodeId: string) => {
-      router.push(`/workspace/${projectId}/text-editor/${nodeId}`);
+      router.push(`/workspace/${projectId}/${fileLinkBasePath}/${nodeId}`);
     },
-    [router, projectId],
+    [router, projectId, fileLinkBasePath],
   );
 
   const prefetchNodeRoute = useCallback(
     (nodeId: string) => {
-      router.prefetch(`/workspace/${projectId}/text-editor/${nodeId}`);
+      router.prefetch(`/workspace/${projectId}/${fileLinkBasePath}/${nodeId}`);
     },
-    [router, projectId],
+    [router, projectId, fileLinkBasePath],
   );
 
   const handleSearchSelect = useCallback(

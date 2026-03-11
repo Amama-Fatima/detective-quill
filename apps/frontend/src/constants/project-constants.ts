@@ -6,28 +6,28 @@ import { VersionControlIcon } from "@/components/icons/version-control-icon";
 export const NAV_ITEMS = [
   {
     id: "blueprint",
-    label: "Case Blueprint",
+    label: "Blueprints",
     href: `/workspace/123/blueprint`,
     icon: BlueprintIcon,
     description: "Story structure & planning",
   },
   {
     id: "text-editor",
-    label: "Case Files",
+    label: "Manuscript",
     href: `/workspace/123/text-editor`,
     icon: CaseFileIcon,
     description: "Writing & editing",
   },
   {
     id: "visualization",
-    label: "Case Visuals",
+    label: "Graph Visuals",
     href: `/workspace/123/visualization`,
     icon: GraphIcon,
     description: "Visual story analysis",
   },
   {
     id: "version-control",
-    label: "Case History",
+    label: "History",
     href: `/workspace/123/version-control`,
     icon: VersionControlIcon,
     description: "Commit history & version control",

@@ -17,21 +17,21 @@ export async function generateMetadata({}: {}): Promise<Metadata> {
 }
 
 interface CreateBlueprintPageProps {
-  params: {
+  params: Promise<{
     projectId: string;
     blueprintId: string;
-  };
-  searchParams: {
-    [key: string]: BlueprintType;
-  };
+  }>;
+  searchParams: Promise<{
+    type: BlueprintType;
+  }>;
 }
 
 export default async function CreateBlueprintPage({
   params,
   searchParams,
 }: CreateBlueprintPageProps) {
-  const { blueprintId } = await params;
-  const type = await searchParams?.type;
+  const { projectId, blueprintId } = await params;
+  const { type } = await searchParams;
 
   const supabase = await createSupabaseServerClient();
   const user = await getUserFromCookie();
@@ -44,7 +44,7 @@ export default async function CreateBlueprintPage({
 
   const { blueprint, error: blueprintError } = await getProjectBlueprintById(
     blueprintId,
-    params.projectId,
+    projectId,
     supabase,
   );
   if (blueprintError || !blueprint) {

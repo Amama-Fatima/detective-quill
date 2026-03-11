@@ -5,9 +5,9 @@ import { Metadata } from "next";
 export async function generateMetadata({
   params,
 }: {
-  params: { projectId: string };
+  params: Promise<{ projectId: string }>;
 }): Promise<Metadata> {
-  const { projectId } = params;
+  const { projectId } = await params;
   const { title, error } = await fetchProjectTitle(projectId);
   if (error || !title) {
     return {
