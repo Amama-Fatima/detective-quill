@@ -16,9 +16,7 @@ TYPE_PRIORITY = {
     'LOC': 6,
     'GPE': 5,
     'PRODUCT': 4,
-    'EVENT': 3,
-    'WORK_OF_ART': 2,
-    'LAW': 1,
+    'EVENT': 3
 }
 
 
@@ -26,14 +24,12 @@ class EntityPostProcessor:
     def __init__(self):
         self.keep_types = {
             'PERSON',
-            'ORG',         # Organizations
-            'GPE',         # Geopolitical entities (cities, countries)
-            'LOC',         # Non-GPE locations
-            'FAC',         # Facilities (buildings, airports, etc.)
-            'PRODUCT',     # Objects, vehicles, foods, etc.
-            'EVENT',       # Named events
-            'WORK_OF_ART', # Titles of books, songs, etc.
-            'LAW',         # Named documents made into laws
+            'ORG',        
+            'GPE',         
+            'LOC',       
+            'FAC',         
+            'PRODUCT',   
+            'EVENT',       
         }
 
         self.skip_types = {
@@ -52,7 +48,7 @@ class EntityPostProcessor:
         Return True if short_entity's name is a contiguous word subsequence of
         long_entity's name (after normalising both).
 
-        Types must agree — cross-type duplicates are handled separately in
+        Types must agree, cross-type duplicates are handled separately in
         merge_cross_type_duplicates.
         """
         if short_entity.type != long_entity.type:
@@ -70,7 +66,7 @@ class EntityPostProcessor:
         if len(short_words) > len(long_words):
             return False
 
-        # Sliding window — checks contiguous word sequences
+        # Sliding window checks contiguous word sequences
         for i in range(len(long_words) - len(short_words) + 1):
             if long_words[i:i + len(short_words)] == short_words:
                 return True
@@ -112,8 +108,8 @@ class EntityPostProcessor:
         """
         Merge entities that have the same normalised name but different types.
 
-        Example: "the Hartwell Hotel" as FAC and "the Hartwell Hotel" as ORG
-        → kept as FAC (higher priority in TYPE_PRIORITY).
+        Example: "the Hartwell Hotel" as FAC and "the Hartwell Hotel" as ORG,
+        kept as FAC (higher priority in TYPE_PRIORITY).
 
         The winning entity absorbs all mentions from the duplicates.
         """
@@ -152,29 +148,28 @@ class EntityPostProcessor:
 
     def resolve_type_conflicts(self, entities: List[Entity]) -> List[Entity]:
         for entity in entities:
-            if entity.type == 'GPE' and len(entity.name.split()) <= 2:
+            if len(entity.name.split()) <= 2:
                 entity.attributes['uncertain_type'] = True
         return entities
 
     def process(self, entities: List[Entity], verbose: bool = True) -> List[Entity]:
-        if verbose:
-            logger.info(f"  → Input: {len(entities)} raw entities")
+        logger.info(f"  Input: {len(entities)} raw entities")
 
         entities = self.filter_entity_types(entities)
         if verbose:
-            logger.info(f"  → After filtering: {len(entities)} entities")
+            logger.info(f"  After filtering: {len(entities)} entities")
 
         entities = self.merge_duplicate_entities(entities)
         if verbose:
-            logger.info(f"  → After same-type deduplication: {len(entities)} entities")
+            logger.info(f"  After same-type deduplication: {len(entities)} entities")
 
         entities = self.merge_cross_type_duplicates(entities)
         if verbose:
-            logger.info(f"  → After cross-type deduplication: {len(entities)} entities")
+            logger.info(f"  After cross-type deduplication: {len(entities)} entities")
 
         entities = self.resolve_type_conflicts(entities)
         if verbose:
-            logger.info(f"  → After type resolution: {len(entities)} entities")
+            logger.info(f" After type resolution: {len(entities)} entities")
 
         return entities
 

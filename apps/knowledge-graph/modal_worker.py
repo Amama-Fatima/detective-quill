@@ -2,10 +2,6 @@ import modal
 import os
 import sys
 
-# ─────────────────────────────────────────────
-# Merge chunk results (used by poll_queue; no GPU, no Modal)
-# ─────────────────────────────────────────────
-
 
 def merge_chunk_results_for_job(chunk_outputs: list[dict], wall_clock_seconds: float) -> dict:
     """
@@ -92,15 +88,8 @@ def merge_chunk_results_for_job(chunk_outputs: list[dict], wall_clock_seconds: f
     }
 
 
-# ─────────────────────────────────────────────
-# Modal App Definition
-# ─────────────────────────────────────────────
-
 app = modal.App("detective-quill-knowledge-graph")
 
-# ─────────────────────────────────────────────
-# Container Image
-# ─────────────────────────────────────────────
 
 image = (
     modal.Image.debian_slim(python_version="3.10")
@@ -128,18 +117,11 @@ image = (
     .add_local_dir("src", remote_path="/root/src")
 )
 
-# ─────────────────────────────────────────────
-# Modal Secrets
-# ─────────────────────────────────────────────
 
 secrets = [
     modal.Secret.from_name("detective-quill-secrets"),
     modal.Secret.from_name("neo4j-secret")
 ]
-
-# ─────────────────────────────────────────────
-# The Worker Class
-# ─────────────────────────────────────────────
 
 @app.cls(
     image=image,
@@ -262,9 +244,7 @@ class KnowledgeGraphWorker:
         elapsed = time.time() - start_time
         self.logger.info(f"save_graph end: scene_id={scene_id}, result={graph_result}, elapsed_seconds={elapsed:.2f}")
         return graph_result
-# ─────────────────────────────────────────────
-# Scheduled Queue Poller
-# ─────────────────────────────────────────────
+
 
 @app.function(
     image=image,
