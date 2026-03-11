@@ -20,18 +20,7 @@ def _find_canonical_for_cluster(
     text: str,
     spacy_entities: Dict[Tuple[int, int], str],
 ) -> Optional[str]:
-    """
-    Given a coreference cluster (list of char-offset spans) and the spaCy named
-    entities extracted from the same text, return the clean entity name that
-    anchors this cluster.
 
-    Strategy: iterate every span in the cluster; if any span fully contains (or
-    exactly matches) a spaCy named entity of an anchor type, use that entity's
-    text as the canonical name.  If multiple named entities are found in the
-    cluster, prefer the longest one (most specific).
-
-    Returns None if no anchor is found — callers should skip the cluster.
-    """
     candidates = []
 
     for span_start, span_end in cluster:
@@ -52,19 +41,7 @@ def _resolve_coreferences_fastcoref(
     coref_model,
     spacy_entities: Dict[Tuple[int, int], str],
 ) -> str:
-    """
-    Use fastcoref to resolve pronouns and short mentions to their canonical
-    proper name, anchored by spaCy-identified named entities.
 
-    For each coreference cluster:
-      1. Find the canonical name by locating the spaCy named entity within the
-         cluster.  If none exists, skip the cluster entirely.
-      2. Replace short, non-possessive mentions (pronouns, partial names) with
-         the canonical name.
-
-    This avoids all hardcoded heuristics — the canonical is always a name that
-    spaCy has already validated, never raw span text.
-    """
     preds = coref_model.predict(texts=[text])
     clusters = preds[0].get_clusters(as_strings=False)  # list of lists of (start, end)
 
@@ -141,11 +118,6 @@ class SpacyEntityExtractor:
             logger.info("spaCy model downloaded and loaded successfully.")
 
     def _extract_spacy_anchors(self, doc) -> Dict[Tuple[int, int], str]:
-        """
-        Return a dict of {(start_char, end_char): ent_text} for all spaCy
-        entities whose label is in _ANCHOR_TYPES.  These are used to identify
-        canonical names within coreference clusters.
-        """
         return {
             (ent.start_char, ent.end_char): ent.text
             for ent in doc.ents

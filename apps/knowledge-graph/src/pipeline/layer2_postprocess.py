@@ -8,7 +8,6 @@ logger = setup_logger(__name__)
 
 _LEADING_ARTICLES = re.compile(r'^(the|a|an)\s+', re.IGNORECASE)
 
-# Higher number = higher priority when merging same-name entities of different types
 TYPE_PRIORITY = {
     'PERSON': 10,
     'ORG': 8,
@@ -44,13 +43,7 @@ class EntityPostProcessor:
         return name
 
     def is_substring_match(self, short_entity: Entity, long_entity: Entity) -> bool:
-        """
-        Return True if short_entity's name is a contiguous word subsequence of
-        long_entity's name (after normalising both).
 
-        Types must agree, cross-type duplicates are handled separately in
-        merge_cross_type_duplicates.
-        """
         if short_entity.type != long_entity.type:
             return False
 
@@ -74,7 +67,6 @@ class EntityPostProcessor:
         return False
 
     def merge_duplicate_entities(self, entities: List[Entity]) -> List[Entity]:
-        """Merge same-name same-type entities, keeping the longest name as primary."""
         sorted_entities = sorted(
             entities,
             key=lambda e: len(self.normalize_name(e.name)),
@@ -105,14 +97,7 @@ class EntityPostProcessor:
         return merged
 
     def merge_cross_type_duplicates(self, entities: List[Entity]) -> List[Entity]:
-        """
-        Merge entities that have the same normalised name but different types.
 
-        Example: "the Hartwell Hotel" as FAC and "the Hartwell Hotel" as ORG,
-        kept as FAC (higher priority in TYPE_PRIORITY).
-
-        The winning entity absorbs all mentions from the duplicates.
-        """
         # Group by normalised name
         groups: dict[str, List[Entity]] = {}
         for entity in entities:

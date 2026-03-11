@@ -4,11 +4,7 @@ import sys
 
 
 def merge_chunk_results_for_job(chunk_outputs: list[dict], wall_clock_seconds: float) -> dict:
-    """
-    Merge chunk results for a single original job_id.
-    chunk_outputs must be sorted by chunk index (e.g. by job_id suffix _chunk_0, _chunk_1).
-    Returns one result dict in the same shape as process_job (job_id, status, result, error, processing_time).
-    """
+
     if not chunk_outputs:
         return {
             "job_id": "",
@@ -171,7 +167,6 @@ class KnowledgeGraphWorker:
 
     @modal.method()
     def process_job(self, job_id: str, scene_text: str, user_id: str) -> dict:
-        """Layers 1–4 only. Layer 5 (Neo4j) is called once per file via save_graph after merging chunks."""
         import time
         from datetime import datetime
         start_time = time.time()
@@ -220,7 +215,6 @@ class KnowledgeGraphWorker:
         entities: list,
         relationships: list,
     ) -> dict:
-        """Layer 5 only: persist merged graph to Neo4j. Called once per file after merging chunks."""
         import time
         from src.models.schemas import Entity, Relationship
         from src.pipeline.layer5_graph import save_graph_layer5
