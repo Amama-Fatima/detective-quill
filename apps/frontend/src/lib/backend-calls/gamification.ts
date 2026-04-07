@@ -1,5 +1,6 @@
 import type {
   ApiResponse,
+  Badge,
   GamificationSummary,
 } from "@detective-quill/shared-types";
 
@@ -38,6 +39,18 @@ export async function getMyGamification(
 
   if (!response.success) {
     throw new Error(response.error || "Failed to fetch gamification summary");
+  }
+
+  return response;
+}
+
+export async function getAllBadges(
+  accessToken: string,
+): Promise<ApiResponse<Badge[]>> {
+  const response = await makeAuthenticatedRequest<Badge[]>("/badges", accessToken);
+
+  if (!response.success) {
+    throw new Error(response.error || "Failed to fetch all badges");
   }
 
   return response;

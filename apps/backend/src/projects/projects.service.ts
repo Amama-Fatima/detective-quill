@@ -36,7 +36,8 @@ export class ProjectsService {
     if (error) {
       throw new Error(`Failed to create project: ${error.message}`);
     }
-    await this.badgesNStatsService.evaluateAndAward(userId); // ← NEW
+    console.log("about to check badges");
+    await this.badgesNStatsService.evaluateAndAward(userId); 
 
     return data;
   }

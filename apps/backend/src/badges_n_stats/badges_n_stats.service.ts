@@ -263,4 +263,15 @@ export class BadgesNStatsService {
       metrics: metricValues,
     };
   }
+
+  async getAllBadges(): Promise<Badge[]> {
+    const supabase = this.supabaseService.client;
+
+    const { data: badges, error } = await supabase.from("badges").select("*");
+
+    if (error) {
+      throw new Error(`Failed to fetch badges: ${error.message}`);
+    }
+    return badges ?? [];
+  }
 }
