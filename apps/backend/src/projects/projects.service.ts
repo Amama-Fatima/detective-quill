@@ -4,6 +4,7 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
+import { BadgesNStatsService } from "src/badges_n_stats/badges_n_stats.service";
 import {
   CreateProjectDto,
   UpdateProjectDto,
@@ -15,7 +16,10 @@ import {
 
 @Injectable()
 export class ProjectsService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private badgesNStatsService: BadgesNStatsService,
+  ) {}
 
   async createProject(
     createProjectDto: CreateProjectDto,
@@ -32,6 +36,8 @@ export class ProjectsService {
     if (error) {
       throw new Error(`Failed to create project: ${error.message}`);
     }
+    await this.badgesNStatsService.evaluateAndAward(userId); // ← NEW
+
     return data;
   }
 
@@ -174,7 +180,6 @@ export class ProjectsService {
     // First verify project exists and belongs to user
     await this.findProjectById(projectId, userId);
 
-
     const { data: activeBranch, error: branchError } = await supabase
       .from("branches")
       .select("current_word_count")
@@ -183,7 +188,9 @@ export class ProjectsService {
       .single();
 
     if (branchError) {
-      throw new Error(`Failed to get active branch stats: ${branchError.message}`);
+      throw new Error(
+        `Failed to get active branch stats: ${branchError.message}`,
+      );
     }
 
     // Get file and folder counts

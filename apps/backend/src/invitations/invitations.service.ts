@@ -59,6 +59,7 @@ export class InvitationsService {
 
       await this.badgesNStatsService.createEvent(eventData);
       await this.badgesNStatsService.updateTotalXp(invitedUserId, 10);
+      await this.badgesNStatsService.evaluateAndAward(invitedUserId);
     }
 
     const { error } = await supabase

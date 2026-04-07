@@ -318,9 +318,3 @@ export type GamificationSummary = {
   stats: GameStats | null;
   earnedBadges: Badge[];
 };
-
-export type GamificationEvaluationResult = {
-  awardedCount: number;
-  awardedBadges: Badge[];
-  metrics: Record<string, number>;
-};

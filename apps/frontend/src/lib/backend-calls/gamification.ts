@@ -1,6 +1,5 @@
 import type {
   ApiResponse,
-  GamificationEvaluationResult,
   GamificationSummary,
 } from "@detective-quill/shared-types";
 
@@ -44,20 +43,20 @@ export async function getMyGamification(
   return response;
 }
 
-export async function evaluateGamification(
-  accessToken: string,
-): Promise<ApiResponse<GamificationEvaluationResult>> {
-  const response = await makeAuthenticatedRequest<GamificationEvaluationResult>(
-    "/badges/evaluate",
-    accessToken,
-    {
-      method: "POST",
-    },
-  );
+// export async function evaluateGamification(
+//   accessToken: string,
+// ): Promise<ApiResponse<GamificationEvaluationResult>> {
+//   const response = await makeAuthenticatedRequest<GamificationEvaluationResult>(
+//     "/badges/evaluate",
+//     accessToken,
+//     {
+//       method: "POST",
+//     },
+//   );
 
-  if (!response.success) {
-    throw new Error(response.error || "Failed to evaluate gamification");
-  }
+//   if (!response.success) {
+//     throw new Error(response.error || "Failed to evaluate gamification");
+//   }
 
-  return response;
-}
+//   return response;
+// }

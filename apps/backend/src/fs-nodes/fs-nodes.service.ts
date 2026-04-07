@@ -126,7 +126,9 @@ export class FsNodesService {
       );
     } catch (statsError) {
       const message =
-        statsError instanceof Error ? statsError.message : "Unknown stats error";
+        statsError instanceof Error
+          ? statsError.message
+          : "Unknown stats error";
       this.logger.warn(
         `Failed to update current_word_count for branch ${activeBranchId}: ${message}`,
       );
@@ -137,9 +139,12 @@ export class FsNodesService {
         userId,
         Number(data?.word_count ?? 0),
       );
+      await this.badgesNStatsService.evaluateAndAward(userId);
     } catch (statsError) {
       const message =
-        statsError instanceof Error ? statsError.message : "Unknown stats error";
+        statsError instanceof Error
+          ? statsError.message
+          : "Unknown stats error";
       this.logger.warn(
         `Failed to update words_written for user ${userId}: ${message}`,
       );
@@ -315,7 +320,9 @@ export class FsNodesService {
       );
     } catch (statsError) {
       const message =
-        statsError instanceof Error ? statsError.message : "Unknown stats error";
+        statsError instanceof Error
+          ? statsError.message
+          : "Unknown stats error";
       this.logger.warn(
         `Failed to update current_word_count for branch ${existingNode.branch_id}: ${message}`,
       );
@@ -323,6 +330,7 @@ export class FsNodesService {
 
     try {
       await this.badgesNStatsService.updateWordsWritten(userId, wordDelta);
+      await this.badgesNStatsService.evaluateAndAward(userId);
     } catch (statsError) {
       const message =
         statsError instanceof Error
@@ -474,7 +482,9 @@ export class FsNodesService {
       await this.adjustBranchWordCount(activeBranchId, -wordsRemoved);
     } catch (statsError) {
       const message =
-        statsError instanceof Error ? statsError.message : "Unknown stats error";
+        statsError instanceof Error
+          ? statsError.message
+          : "Unknown stats error";
       this.logger.warn(
         `Failed to update current_word_count for branch ${activeBranchId}: ${message}`,
       );
@@ -482,9 +492,12 @@ export class FsNodesService {
 
     try {
       await this.badgesNStatsService.updateWordsWritten(userId, -wordsRemoved);
+      await this.badgesNStatsService.evaluateAndAward(userId); // ← NEW
     } catch (statsError) {
       const message =
-        statsError instanceof Error ? statsError.message : "Unknown stats error";
+        statsError instanceof Error
+          ? statsError.message
+          : "Unknown stats error";
       this.logger.warn(
         `Failed to update words_written for user ${userId}: ${message}`,
       );
@@ -556,7 +569,9 @@ export class FsNodesService {
     }
 
     if (branchError) {
-      throw new Error(`Failed to get branch word count: ${branchError.message}`);
+      throw new Error(
+        `Failed to get branch word count: ${branchError.message}`,
+      );
     }
 
     const totalFiles =

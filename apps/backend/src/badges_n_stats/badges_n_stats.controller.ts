@@ -20,15 +20,15 @@ export class BadgesNStatsController {
     };
   }
 
-  @Post("evaluate")
-  async evaluate(@Req() req: any): Promise<ApiResponse<any>> {
-    const userId = req.user.id;
-    const data = await this.badgesNStatsService.evaluateAndAward(userId);
+  // @Post("evaluate")
+  // async evaluate(@Req() req: any): Promise<ApiResponse<any>> {
+  //   const userId = req.user.id;
+  //   const data = await this.badgesNStatsService.evaluateAndAward(userId);
 
-    return {
-      success: true,
-      data,
-      message: "Badge evaluation completed",
-    };
-  }
+  //   return {
+  //     success: true,
+  //     data,
+  //     message: "Badge evaluation completed",
+  //   };
+  // }
 }
