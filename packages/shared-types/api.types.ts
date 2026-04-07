@@ -313,3 +313,14 @@ export type CreateSnapshotDto = Pick<
 >;
 
 export type CreateEventDto = Omit<Event, "id" | "created_at">;
+
+export type GamificationSummary = {
+  stats: GameStats | null;
+  earnedBadges: Badge[];
+};
+
+export type GamificationEvaluationResult = {
+  awardedCount: number;
+  awardedBadges: Badge[];
+  metrics: Record<string, number>;
+};

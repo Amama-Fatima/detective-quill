@@ -1,13 +1,11 @@
-import {
-  Commit,
+import type {
   ApiResponse,
-  CreateCommitDto,
-  RevertCommitResponse,
+  GamificationEvaluationResult,
+  GamificationSummary,
 } from "@detective-quill/shared-types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-// Helper function to make authenticated requests
 async function makeAuthenticatedRequest<T>(
   endpoint: string,
   accessToken: string,
@@ -31,41 +29,35 @@ async function makeAuthenticatedRequest<T>(
   return response.json();
 }
 
-export async function createCommit(
-  projectId: string,
-  data: CreateCommitDto,
+export async function getMyGamification(
   accessToken: string,
-): Promise<ApiResponse<Commit>> {
-  const response = await makeAuthenticatedRequest<Commit>(
-    `/${projectId}/commits`,
+): Promise<ApiResponse<GamificationSummary>> {
+  const response = await makeAuthenticatedRequest<GamificationSummary>(
+    "/badges/me",
     accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify(data),
-    },
   );
 
   if (!response.success) {
-    throw new Error(response.error || "Failed to create commit");
+    throw new Error(response.error || "Failed to fetch gamification summary");
   }
 
   return response;
 }
 
-export async function revertToCommit(
-  projectId: string,
-  commitId: string,
+export async function evaluateGamification(
   accessToken: string,
-): Promise<ApiResponse<RevertCommitResponse>> {
-  const response = await makeAuthenticatedRequest<RevertCommitResponse>(
-    `/${projectId}/commits/${commitId}/revert`,
+): Promise<ApiResponse<GamificationEvaluationResult>> {
+  const response = await makeAuthenticatedRequest<GamificationEvaluationResult>(
+    "/badges/evaluate",
     accessToken,
     {
       method: "POST",
     },
   );
+
   if (!response.success) {
-    throw new Error(response.error || "Failed to revert commit");
+    throw new Error(response.error || "Failed to evaluate gamification");
   }
+
   return response;
 }

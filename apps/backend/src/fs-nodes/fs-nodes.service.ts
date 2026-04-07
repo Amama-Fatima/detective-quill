@@ -7,8 +7,8 @@ import {
 } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { ProjectsService } from "../projects/projects.service";
-import { QueueService } from "src/queue/queue.service";
 import { ContributionsService } from "src/contributions/contributions.service";
+import { BadgesNStatsService } from "src/badges_n_stats/badges_n_stats.service";
 import type {
   Database,
   CommitSnapshot,
@@ -27,14 +27,13 @@ import { CreateFsNodeDto } from "./validation/fs-nodes.validation";
 
 @Injectable()
 export class FsNodesService {
-  private sceneTimeouts = new Map<string, NodeJS.Timeout>();
   private readonly logger = new Logger(FsNodesService.name);
 
   constructor(
     private supabaseService: SupabaseService,
     private projectsService: ProjectsService,
-    private queueService: QueueService,
     private contributionsService: ContributionsService,
+    private badgesNStatsService: BadgesNStatsService,
   ) {}
 
   async createNode(
@@ -82,6 +81,7 @@ export class FsNodesService {
       }
     }
 
+    // todo: i dont think this is needed, because i think sort order will exist
     // Generate sort_order if not provided
     if (createNodeDto.sort_order === undefined) {
       const { data: siblings } = await supabase
@@ -117,6 +117,32 @@ export class FsNodesService {
     if (error) {
       // Circular reference check is handled by the prevent_circular_reference() trigger
       throw new BadRequestException(`Failed to create node: ${error.message}`);
+    }
+
+    try {
+      await this.adjustBranchWordCount(
+        activeBranchId,
+        Number(data?.word_count ?? 0),
+      );
+    } catch (statsError) {
+      const message =
+        statsError instanceof Error ? statsError.message : "Unknown stats error";
+      this.logger.warn(
+        `Failed to update current_word_count for branch ${activeBranchId}: ${message}`,
+      );
+    }
+
+    try {
+      await this.badgesNStatsService.updateWordsWritten(
+        userId,
+        Number(data?.word_count ?? 0),
+      );
+    } catch (statsError) {
+      const message =
+        statsError instanceof Error ? statsError.message : "Unknown stats error";
+      this.logger.warn(
+        `Failed to update words_written for user ${userId}: ${message}`,
+      );
     }
 
     return data;
@@ -260,6 +286,8 @@ export class FsNodesService {
       throw new BadRequestException("Only file nodes can have content updated");
     }
 
+    const previousWordCount = Number(existingNode.word_count ?? 0);
+
     const { data, error } = await supabase
       .from("fs_nodes")
       .update({
@@ -274,6 +302,34 @@ export class FsNodesService {
     if (error) {
       throw new BadRequestException(
         `Failed to update file content: ${error.message}`,
+      );
+    }
+
+    const nextWordCount = Number(data?.word_count ?? 0);
+    const wordDelta = nextWordCount - previousWordCount;
+
+    try {
+      await this.adjustBranchWordCount(
+        String(existingNode.branch_id),
+        wordDelta,
+      );
+    } catch (statsError) {
+      const message =
+        statsError instanceof Error ? statsError.message : "Unknown stats error";
+      this.logger.warn(
+        `Failed to update current_word_count for branch ${existingNode.branch_id}: ${message}`,
+      );
+    }
+
+    try {
+      await this.badgesNStatsService.updateWordsWritten(userId, wordDelta);
+    } catch (statsError) {
+      const message =
+        statsError instanceof Error
+          ? statsError.message
+          : "Unknown stats error";
+      this.logger.warn(
+        `Failed to update words_written for user ${userId}: ${message}`,
       );
     }
 
@@ -373,12 +429,13 @@ export class FsNodesService {
     }
 
     // If it's a folder, check for children and handle cascade
+    let wordsRemoved = Number(node.word_count ?? 0);
     if (node.node_type === "folder") {
       // Fetch descendants within the active branch by path prefix
       const pathPrefix = `${node.path}/%`;
       const { data: allChildren, error: childrenError } = await supabase
         .from("fs_nodes")
-        .select("id, depth")
+        .select("id, depth, word_count")
         .eq("project_id", node.project_id)
         .eq("branch_id", activeBranchId)
         .like("path", pathPrefix);
@@ -390,6 +447,10 @@ export class FsNodesService {
       }
 
       const children = allChildren || [];
+      wordsRemoved += children.reduce(
+        (sum, child) => sum + Number(child.word_count ?? 0),
+        0,
+      );
 
       // If children exist, delete all children first (in reverse order to handle nested folders)
       if (children.length > 0) {
@@ -407,6 +468,26 @@ export class FsNodesService {
           );
         }
       }
+    }
+
+    try {
+      await this.adjustBranchWordCount(activeBranchId, -wordsRemoved);
+    } catch (statsError) {
+      const message =
+        statsError instanceof Error ? statsError.message : "Unknown stats error";
+      this.logger.warn(
+        `Failed to update current_word_count for branch ${activeBranchId}: ${message}`,
+      );
+    }
+
+    try {
+      await this.badgesNStatsService.updateWordsWritten(userId, -wordsRemoved);
+    } catch (statsError) {
+      const message =
+        statsError instanceof Error ? statsError.message : "Unknown stats error";
+      this.logger.warn(
+        `Failed to update words_written for user ${userId}: ${message}`,
+      );
     }
 
     // Hide the main node from the active branch workspace
@@ -456,26 +537,33 @@ export class FsNodesService {
     const activeBranchId = await this.getActiveBranchId(projectId);
 
     // Using the project_file_tree view for efficient stats
-    const { data: stats, error } = await supabase
-      .from("project_file_tree")
-      .select("node_type, total_word_count, parent_id")
-      .eq("project_id", projectId)
-      .eq("branch_id", activeBranchId);
+    const [{ data: stats, error }, { data: branch, error: branchError }] =
+      await Promise.all([
+        supabase
+          .from("project_file_tree")
+          .select("node_type, parent_id")
+          .eq("project_id", projectId)
+          .eq("branch_id", activeBranchId),
+        supabase
+          .from("branches")
+          .select("current_word_count")
+          .eq("id", activeBranchId)
+          .single(),
+      ]);
 
     if (error) {
       throw new Error(`Failed to get project stats: ${error.message}`);
+    }
+
+    if (branchError) {
+      throw new Error(`Failed to get branch word count: ${branchError.message}`);
     }
 
     const totalFiles =
       stats?.filter((node) => node.node_type === "file").length || 0;
     const totalFolders =
       stats?.filter((node) => node.node_type === "folder").length || 0;
-    const totalWordCount =
-      stats?.reduce((sum, node) => {
-        return (
-          sum + (node.node_type === "file" ? node.total_word_count || 0 : 0)
-        );
-      }, 0) || 0;
+    const totalWordCount = Number(branch?.current_word_count ?? 0);
     const rootNodes =
       stats?.filter((node) => node.parent_id === null).length || 0;
 
@@ -604,115 +692,45 @@ export class FsNodesService {
     });
   }
 
-  /*
-  private buildTreeFromView(
-    nodes: Database["public"]["Views"]["project_file_tree"]["Row"][],
-  ): FsNodeTreeResponse[] {
-    type WorkspaceTreeNode = FsNodeTreeResponse & {
-      depth: number | null;
-      children: WorkspaceTreeNode[];
-    };
-
-    const normalizedNodes: WorkspaceTreeNode[] = nodes
-      .filter(
-        (
-          node,
-        ): node is Database["public"]["Views"]["project_file_tree"]["Row"] & {
-          id: string;
-          name: string;
-          node_type: "folder" | "file";
-          path: string;
-          created_at: string;
-          updated_at: string;
-        } =>
-          !!node.id &&
-          !!node.name &&
-          !!node.node_type &&
-          !!node.path &&
-          !!node.created_at &&
-          !!node.updated_at,
-      )
-      .map((node) => ({
-        id: node.id,
-        name: node.name,
-        node_type: node.node_type,
-        parent_id: node.parent_id,
-        branch_id: node.branch_id,
-        content: node.content ?? undefined,
-        word_count: node.word_count ?? 0,
-        path: node.path,
-        sort_order: node.sort_order,
-        depth: node.depth,
-        created_at: node.created_at,
-        updated_at: node.updated_at,
-        children: [],
-      }));
-
-    const compareNodes = (a: WorkspaceTreeNode, b: WorkspaceTreeNode) => {
-      const depthA = a.depth ?? 0;
-      const depthB = b.depth ?? 0;
-      if (depthA !== depthB) return depthA - depthB;
-
-      const sortOrderA = a.sort_order ?? 0;
-      const sortOrderB = b.sort_order ?? 0;
-      if (sortOrderA !== sortOrderB) return sortOrderA - sortOrderB;
-
-      return a.name.localeCompare(b.name);
-    };
-
-    const sortedNodes = [...normalizedNodes].sort(compareNodes);
-    const nodeMap = new Map<string, WorkspaceTreeNode>();
-    const rootNodes: WorkspaceTreeNode[] = [];
-
-    sortedNodes.forEach((node) => {
-      nodeMap.set(node.id, {
-        ...node,
-        children: [],
-      });
-    });
-
-    sortedNodes.forEach((node) => {
-      const treeNode = nodeMap.get(node.id);
-      if (!treeNode) return;
-
-      if (node.parent_id) {
-        const parent = nodeMap.get(node.parent_id);
-        if (parent) {
-          parent.children.push(treeNode);
-        } else {
-          rootNodes.push(treeNode);
-        }
-      } else {
-        rootNodes.push(treeNode);
-      }
-    });
-
-    const sortTree = (treeNodes: WorkspaceTreeNode[]) => {
-      treeNodes.sort(compareNodes);
-      treeNodes.forEach((node) => {
-        if (node.children.length > 0) {
-          sortTree(node.children);
-        }
-      });
-    };
-
-    sortTree(rootNodes);
-
-    const stripDepth = (treeNodes: WorkspaceTreeNode[]): FsNodeTreeResponse[] =>
-      treeNodes.map(({ depth: _depth, ...node }) => ({
-        ...node,
-        children: stripDepth(node.children),
-      }));
-
-    return stripDepth(rootNodes);
-  }
-  */
-
   private countWords(text: string): number {
     return text
       .trim()
       .split(/\s+/)
       .filter((word) => word.length > 0).length;
+  }
+
+  private async adjustBranchWordCount(branchId: string, delta: number) {
+    if (delta === 0) {
+      return;
+    }
+
+    const supabase = this.supabaseService.client;
+
+    const { data: currentBranch, error: branchError } = await supabase
+      .from("branches")
+      .select("current_word_count")
+      .eq("id", branchId)
+      .single();
+
+    if (branchError) {
+      throw new Error(`Failed to fetch branch stats: ${branchError.message}`);
+    }
+
+    const nextCurrentWordCount = Math.max(
+      0,
+      Number(currentBranch?.current_word_count ?? 0) + delta,
+    );
+
+    const { error: updateError } = await supabase
+      .from("branches")
+      .update({ current_word_count: nextCurrentWordCount })
+      .eq("id", branchId);
+
+    if (updateError) {
+      throw new Error(
+        `Failed to update branch word count: ${updateError.message}`,
+      );
+    }
   }
 
   private async getActiveBranchId(projectId: string): Promise<string> {

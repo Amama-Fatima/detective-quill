@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
-import { type CreateEventDto } from "@detective-quill/shared-types";
+import { type CreateEventDto, type Badge } from "@detective-quill/shared-types";
 @Injectable()
 export class BadgesNStatsService {
   constructor(private readonly supabaseService: SupabaseService) {}
@@ -27,7 +27,7 @@ export class BadgesNStatsService {
     }
   }
 
-  private async getEarnedBadges(userId: string) {
+  private async getEarnedBadges(userId: string): Promise<Badge[]> {
     const supabase = this.supabaseService.client;
 
     const { data: earnedRows, error: earnedError } = await supabase
@@ -60,7 +60,6 @@ export class BadgesNStatsService {
     const earnedBadges = (earnedRows ?? [])
       .map((row) => ({
         ...badgesById.get(row.badge_id),
-        earned_at: row.created_at,
       }))
       .filter((badge) => Boolean(badge.id));
 
@@ -149,6 +148,38 @@ export class BadgesNStatsService {
 
     if (statsUpdateError) {
       throw new Error(`Failed to update total XP: ${statsUpdateError.message}`);
+    }
+  }
+
+  async updateWordsWritten(userId: string, wordsDelta: number) {
+    if (wordsDelta === 0) {
+      return;
+    }
+
+    const supabase = this.supabaseService.client;
+
+    const { data: currentStats, error: statsFetchError } = await supabase
+      .from("game_stats")
+      .select("words_written")
+      .eq("user_id", userId)
+      .single();
+
+    if (statsFetchError) {
+      throw new Error(`Failed to fetch user stats: ${statsFetchError.message}`);
+    }
+
+    const nextWordsWritten =
+      Number(currentStats?.words_written ?? 0) + Number(wordsDelta);
+
+    const { error: statsUpdateError } = await supabase
+      .from("game_stats")
+      .update({ words_written: Math.max(0, nextWordsWritten) })
+      .eq("user_id", userId);
+
+    if (statsUpdateError) {
+      throw new Error(
+        `Failed to update words written: ${statsUpdateError.message}`,
+      );
     }
   }
 

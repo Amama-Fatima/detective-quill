@@ -174,6 +174,18 @@ export class ProjectsService {
     // First verify project exists and belongs to user
     await this.findProjectById(projectId, userId);
 
+
+    const { data: activeBranch, error: branchError } = await supabase
+      .from("branches")
+      .select("current_word_count")
+      .eq("project_id", projectId)
+      .eq("is_active", true)
+      .single();
+
+    if (branchError) {
+      throw new Error(`Failed to get active branch stats: ${branchError.message}`);
+    }
+
     // Get file and folder counts
     const { data: stats, error } = await supabase
       .from("fs_nodes")
@@ -188,8 +200,7 @@ export class ProjectsService {
       stats?.filter((node) => node.node_type === "file").length || 0;
     const totalFolders =
       stats?.filter((node) => node.node_type === "folder").length || 0;
-    const totalWordCount =
-      stats?.reduce((sum, node) => sum + (node.word_count || 0), 0) || 0;
+    const totalWordCount = Number(activeBranch?.current_word_count ?? 0);
     const lastModified =
       stats?.reduce((latest, node) => {
         return new Date(node.updated_at) > new Date(latest)
