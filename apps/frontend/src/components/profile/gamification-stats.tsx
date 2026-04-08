@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { Sparkles, Trophy, Lock, Loader2 } from "lucide-react";
+import { Lock, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGamification } from "@/hooks/use-gamification";
 import type { Badge } from "@detective-quill/shared-types";
+import Image from "next/image";
 
 type BadgeDisplayItem = {
   code: string;
@@ -72,7 +73,15 @@ const toBadgeDisplayList = (
 };
 
 export const GamificationStats = () => {
-  const { stats, earnedBadges, allBadges, isLoading, isLoadingBadges, error, badgesError } = useGamification();
+  const {
+    stats,
+    earnedBadges,
+    allBadges,
+    isLoading,
+    isLoadingBadges,
+    error,
+    badgesError,
+  } = useGamification();
 
   const totalXp = Number(stats?.total_xp ?? 0);
   const level = Math.max(1, Math.floor(totalXp / 500) + 1);
@@ -106,6 +115,20 @@ export const GamificationStats = () => {
   if (error || badgesError) {
     return (
       <Card className="overflow-hidden border shadow-md rounded-lg">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center justify-between gap-2 text-base">
+            <span className="flex items-center gap-2">
+              <Image
+                src="/gamification.svg"
+                alt="Sparkles Icon"
+                width={20}
+                height={20}
+                className="object-contain"
+              />
+              <h3 className="mystery-title text-primary">Gamification</h3>
+            </span>
+          </CardTitle>
+        </CardHeader>
         <CardContent className="py-6 text-sm text-destructive">
           Failed to load gamification stats: {error || badgesError}
         </CardContent>
@@ -118,7 +141,13 @@ export const GamificationStats = () => {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between gap-2 text-base">
           <span className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" />
+            <Image
+              src="/gamification.svg"
+              alt="Sparkles Icon"
+              width={30}
+              height={30}
+              className="object-contain"
+            />
             Gamification
           </span>
           <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
@@ -163,7 +192,7 @@ export const GamificationStats = () => {
               key={badge.code}
               className={`group rounded-xl border p-2.5 transition-all ${
                 badge.earned
-                  ? "border-primary/50 bg-primary/10"
+                  ? "border-border bg-primary text-background"
                   : "border-border bg-muted/60 opacity-85"
               }`}
               title={badge.description}
@@ -175,15 +204,29 @@ export const GamificationStats = () => {
                   {badge.icon}
                 </span>
                 {badge.earned ? (
-                  <Trophy className="size-3.5 text-primary" />
+                  <Image
+                    src="/trophy.png"
+                    alt="Trophy Icon"
+                    width={24}
+                    height={24}
+                    className="object-contain"
+                  />
                 ) : (
-                  <Lock className="size-3.5 text-muted-foreground" />
+                  <Image
+                    src="/lock.png"
+                    alt="Lock Icon"
+                    width={24}
+                    height={24}
+                    className="object-contain rounded-full"
+                  />
                 )}
               </div>
               <p className="line-clamp-1 text-sm font-semibold leading-tight">
                 {badge.name}
               </p>
-              <p className="line-clamp-4 mt-0.5 text-[11px] text-muted-foreground">
+              <p
+                className={`line-clamp-4 mt-0.5 text-[11px] ${badge.earned ? "text-secondary" : "text-muted-foreground"}`}
+              >
                 {badge.description}
               </p>
             </div>
