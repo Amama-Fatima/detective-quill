@@ -40,8 +40,8 @@ export default async function ProfilePage() {
         <div className="absolute -left-16 bottom-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
       </div>
 
-      <section className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 p-4 md:p-6 lg:grid-cols-[320px_1fr]">
-        <div className="lg:sticky lg:top-24 lg:self-start">
+      <section className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 p-3 lg:grid-cols-[420px_1fr]">
+        <div className="lg:sticky lg:top-20 lg:self-start">
           <UserProfile />
         </div>
         <div className="flex flex-col gap-6">

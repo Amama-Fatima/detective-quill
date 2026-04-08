@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { SupabaseService } from "../supabase/supabase.service";
 import { MembersService } from "../members/members.service";
 import { ProjectsService } from "../projects/projects.service";
+import { BadgesNStatsService } from "src/badges_n_stats/badges_n_stats.service";
+import { type CreateEventDto } from "@detective-quill/shared-types";
 
 @Injectable()
 export class InvitationsService {
@@ -9,6 +11,7 @@ export class InvitationsService {
     private supabaseService: SupabaseService,
     private membersService: MembersService,
     private projectsService: ProjectsService,
+    private badgesNStatsService: BadgesNStatsService,
   ) {}
 
   async respondToInvitation(
@@ -34,13 +37,31 @@ export class InvitationsService {
         // explicit not found
         throw new NotFoundException("Invitation not found");
       }
-      await this.membersService.addProjectMemberWithEmail(
+      const invitedUserId = await this.membersService.addProjectMemberWithEmail(
         projectId,
         data[0].email,
       );
+
+      await this.badgesNStatsService.increaseProjectsInvitedTo(invitedUserId);
+
+      const eventData: CreateEventDto = {
+        user_id: invitedUserId,
+        source_table: "invitations",
+        source_id: null,
+        event_type: "invitation_accepted",
+        xp: 10,
+        metadata: {
+          project_id: projectId,
+          invite_code: inviteCode,
+          response: "accept",
+        },
+      };
+
+      await this.badgesNStatsService.createEvent(eventData);
+      await this.badgesNStatsService.updateTotalXp(invitedUserId, 10);
+      await this.badgesNStatsService.evaluateAndAward(invitedUserId);
     }
 
-    // delete the invitation after response (this delete action can be done by the invitee so we will not verify ownership here)
     const { error } = await supabase
       .from("invitations")
       .delete()
@@ -59,7 +80,7 @@ export class InvitationsService {
     projectId: string,
     userId: string,
   ): Promise<void> {
-    // this user id is of the owner who has requested deletion not the invitee
+    // this user id is of the owner who has requested deletion not the invitee who was invited
     await this.projectsService.verifyProjectOwnership(projectId, userId);
     const supabase = this.supabaseService.client;
     const { error } = await supabase

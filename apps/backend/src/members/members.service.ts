@@ -18,7 +18,7 @@ export class MembersService {
   async addProjectMemberWithEmail(
     projectId: string,
     email: string,
-  ): Promise<void> {
+  ): Promise<string> {
     const supabase = this.supabaseService.client;
     // First, find the user by email
     const { data: profile, error: profileError } = await supabase
@@ -44,7 +44,7 @@ export class MembersService {
     }
 
     // Add the member
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("projects_members")
       .insert({
         project_id: projectId,
@@ -56,7 +56,7 @@ export class MembersService {
     if (error) {
       throw new Error(`Failed to add member: ${error.message}`);
     }
-    return;
+    return profile.user_id;
   }
 
   // Remove a member from the project
