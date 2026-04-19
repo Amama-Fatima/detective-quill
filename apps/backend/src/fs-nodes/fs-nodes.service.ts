@@ -23,7 +23,7 @@ import {
   ProjectFileTreeRow,
 } from "./tree-utils";
 
-import { CreateFsNodeDto } from "./validation/fs-nodes.validation";
+import { CreateFsNodeDto } from "./dto/fs-nodes.dto";
 
 @Injectable()
 export class FsNodesService {

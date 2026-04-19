@@ -9,19 +9,19 @@ import {
 export class CreateSnapshotDto {
   @IsUUID()
   @IsNotEmpty()
-  commit_id: string;
+  commit_id!: string;
 
   @IsUUID()
   @IsNotEmpty()
-  fs_node_id: string;
+  fs_node_id!: string;
 
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsNotEmpty()
-  node_type: string;
+  node_type!: string;
 
   @IsUUID()
   @IsOptional()
@@ -29,7 +29,7 @@ export class CreateSnapshotDto {
 
   @IsString()
   @IsNotEmpty()
-  path: string;
+  path!: string;
 
   @IsString()
   @IsOptional()

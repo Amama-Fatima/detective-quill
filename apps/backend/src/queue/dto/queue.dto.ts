@@ -2,8 +2,8 @@ export interface SceneAnalysisJobData {
   job_id: string;
   scene_text: string;
   user_id: string;
-  project_id?: string;
-  scene_id?: string;
+  project_id: string;
+  commit_id: string;
 }
 
 export interface CreateCommitJobData {

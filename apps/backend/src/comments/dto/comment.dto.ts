@@ -19,32 +19,32 @@ import {
 export class CreateCommentDto implements ICreateCommentDto {
   @IsUUID()
   @IsNotEmpty()
-  project_id: string;
+  project_id!: string;
 
   @IsUUID()
   @IsNotEmpty()
-  fs_node_id: string;
+  fs_node_id!: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(1)
-  block_id: string;
+  block_id!: string;
 
   @IsInt()
   @Min(0)
   @Type(() => Number)
-  start_offset: number;
+  start_offset!: number;
 
   @IsInt()
   @Min(0)
   @Type(() => Number)
-  end_offset: number;
+  end_offset!: number;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(1)
   @Transform(({ value }) => value?.trim())
-  content: string;
+  content!: string;
 
   @IsOptional()
   @IsString()

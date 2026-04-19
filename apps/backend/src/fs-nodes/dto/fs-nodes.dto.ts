@@ -17,7 +17,7 @@ import e from "express";
 export class CreateFsNodeDto implements ICreateFsNodeDto {
   @IsUUID()
   @IsNotEmpty()
-  project_id: string;
+  project_id!: string;
 
   @IsUUID()
   @IsOptional()
@@ -25,10 +25,10 @@ export class CreateFsNodeDto implements ICreateFsNodeDto {
 
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsEnum(["folder", "file"])
-  node_type: "folder" | "file";
+  node_type!: "folder" | "file";
 
   @IsString()
   @IsOptional()
@@ -72,7 +72,7 @@ export class UpdateFsNodeDto implements IUpdateFsNodeDto {
 export class UpdateFileContentDto implements IUpdateFileContentDto {
   @IsString()
   @IsNotEmpty()
-  content: string;
+  content!: string;
 }
 
 export class UpdateNodeMetadataDto implements IUpdateNodeMetadataDto {
@@ -86,7 +86,7 @@ export class UpdateNodeMetadataDto implements IUpdateNodeMetadataDto {
 
   @IsUUID()
   @IsOptional()
-  parent_id: string | null;
+  parent_id!: string | null;
 
   @IsNumber()
   @IsOptional()
