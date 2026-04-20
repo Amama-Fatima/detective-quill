@@ -8,6 +8,10 @@ class Settings:
     RABBITMQ_USER: str = os.environ.get("RABBITMQ_USER", "guest")
     RABBITMQ_PASSWORD: str = os.environ.get("RABBITMQ_PASSWORD", "guest")
     RABBITMQ_VHOST: str = os.environ.get("RABBITMQ_VHOST", "/")
+    RABBITMQ_HEARTBEAT: int = int(os.environ.get("RABBITMQ_HEARTBEAT", "60"))
+    RABBITMQ_BLOCKED_CONNECTION_TIMEOUT: int = int(
+        os.environ.get("RABBITMQ_BLOCKED_CONNECTION_TIMEOUT", "30")
+    )
 
     SCENE_ANALYSIS_QUEUE: str = os.environ.get("SCENE_ANALYSIS_QUEUE", "scene_analysis_queue")
     SCENE_ANALYSIS_RESULTS_QUEUE: str = os.environ.get("SCENE_ANALYSIS_RESULTS_QUEUE", "scene_analysis_results_queue")

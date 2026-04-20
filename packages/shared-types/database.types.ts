@@ -281,54 +281,6 @@ export type Database = {
           },
         ];
       };
-      commit_knowledge_graphs: {
-        Row: {
-          commit_id: string;
-          commit_snapshot_id: string;
-          completed_at: string | null;
-          created_at: string;
-          error_message: string | null;
-          id: string;
-          job_id: string;
-          status: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Insert: {
-          commit_id: string;
-          commit_snapshot_id: string;
-          completed_at?: string | null;
-          created_at?: string;
-          error_message?: string | null;
-          id?: string;
-          job_id: string;
-          status?: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Update: {
-          commit_id?: string;
-          commit_snapshot_id?: string;
-          completed_at?: string | null;
-          created_at?: string;
-          error_message?: string | null;
-          id?: string;
-          job_id?: string;
-          status?: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Relationships: [
-          {
-            foreignKeyName: "commit_knowledge_graphs_commit_id_fkey";
-            columns: ["commit_id"];
-            isOneToOne: false;
-            referencedRelation: "commits";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "commit_knowledge_graphs_commit_snapshot_id_fkey";
-            columns: ["commit_snapshot_id"];
-            isOneToOne: false;
-            referencedRelation: "commit_snapshots";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       commit_snapshots: {
         Row: {
           commit_id: string | null;
@@ -677,11 +629,13 @@ export type Database = {
       };
       nlp_analysis_jobs: {
         Row: {
+          commit_id: string | null;
           completed_at: string | null;
           created_at: string | null;
           current_stage: string | null;
           entity_count: number | null;
           error_message: string | null;
+          fs_node_id: string | null;
           job_id: string;
           neo4j_graph_id: string | null;
           processing_time: string | null;
@@ -689,17 +643,20 @@ export type Database = {
           relationship_count: number | null;
           result_data: Json | null;
           scene_text: string;
+          snapshot_id: string | null;
           started_at: string | null;
           status: string;
           updated_at: string | null;
           user_id: string;
         };
         Insert: {
+          commit_id?: string | null;
           completed_at?: string | null;
           created_at?: string | null;
           current_stage?: string | null;
           entity_count?: number | null;
           error_message?: string | null;
+          fs_node_id?: string | null;
           job_id?: string;
           neo4j_graph_id?: string | null;
           processing_time?: string | null;
@@ -707,17 +664,20 @@ export type Database = {
           relationship_count?: number | null;
           result_data?: Json | null;
           scene_text: string;
+          snapshot_id?: string | null;
           started_at?: string | null;
           status?: string;
           updated_at?: string | null;
           user_id: string;
         };
         Update: {
+          commit_id?: string | null;
           completed_at?: string | null;
           created_at?: string | null;
           current_stage?: string | null;
           entity_count?: number | null;
           error_message?: string | null;
+          fs_node_id?: string | null;
           job_id?: string;
           neo4j_graph_id?: string | null;
           processing_time?: string | null;
@@ -725,12 +685,48 @@ export type Database = {
           relationship_count?: number | null;
           result_data?: Json | null;
           scene_text?: string;
+          snapshot_id?: string | null;
           started_at?: string | null;
           status?: string;
           updated_at?: string | null;
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "nlp_analysis_jobs_commit_id_fkey";
+            columns: ["commit_id"];
+            isOneToOne: false;
+            referencedRelation: "commits";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "nlp_analysis_jobs_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "fs_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "nlp_analysis_jobs_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "project_file_tree";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "nlp_analysis_jobs_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "project_root_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "nlp_analysis_jobs_snapshot_id_fkey";
+            columns: ["snapshot_id"];
+            isOneToOne: false;
+            referencedRelation: "commit_snapshots";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "nlp_analysis_jobs_user_id_fkey";
             columns: ["user_id"];
@@ -744,6 +740,7 @@ export type Database = {
         Row: {
           attributes: Json | null;
           created_at: string | null;
+          description: string | null;
           id: string;
           job_id: string;
           mentions: string[] | null;
@@ -753,6 +750,7 @@ export type Database = {
         Insert: {
           attributes?: Json | null;
           created_at?: string | null;
+          description?: string | null;
           id?: string;
           job_id: string;
           mentions?: string[] | null;
@@ -762,6 +760,7 @@ export type Database = {
         Update: {
           attributes?: Json | null;
           created_at?: string | null;
+          description?: string | null;
           id?: string;
           job_id?: string;
           mentions?: string[] | null;

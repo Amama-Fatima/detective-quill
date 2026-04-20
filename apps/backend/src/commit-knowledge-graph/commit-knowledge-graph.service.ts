@@ -1,12 +1,10 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Database } from "@detective-quill/shared-types";
+import { CommitSnapshot } from "@detective-quill/shared-types";
 import { AdminSupabaseService } from "../supabase/admin-supabase.service";
 import { WorkerSnapshotsService } from "../snapshots/worker-snapshots.service";
 import { QueueService } from "../queue/queue.service";
 import { extractPlainTextFromEditorContent } from "../utils/editor-content";
-
-type CommitSnapshotRow = Database["public"]["Tables"]["commit_snapshots"]["Row"];
-type CommitKgStatus = Database["public"]["Enums"]["commit_kg_status"];
+import { randomUUID } from "crypto";
 
 @Injectable()
 export class CommitKnowledgeGraphService {
@@ -19,26 +17,25 @@ export class CommitKnowledgeGraphService {
   ) {}
 
   async enqueueCommitKnowledgeGraphJobs(
+    projectId: string,
     commitId: string,
-    _projectId: string,
     userId: string | null | undefined,
     changedFileFsNodeIds?: string[],
   ): Promise<{ enqueued: number }> {
     if (userId == null || String(userId).trim() === "") {
       this.logger.warn(
-        `Skipping KG enqueue for commit ${commitId}: no user_id (RLS/nlp_analysis_jobs require it)`,
+        `Skipping KG enqueue for commit ${commitId}: no user_id (nlp_analysis_jobs require it)`,
       );
       return { enqueued: 0 };
     }
 
     const supabase = this.adminSupabaseService.client;
 
-    const snapshots = await this.snapshotsService.getSnapshotsByCommit(
-      commitId,
-    );
+    const snapshots =
+      await this.snapshotsService.getSnapshotsByCommit(commitId);
 
     let fileSnapshots = snapshots.filter(
-      (row: CommitSnapshotRow): boolean =>
+      (row: CommitSnapshot): boolean =>
         row.node_type === "file" &&
         row.content != null &&
         String(row.content).trim() !== "",
@@ -71,8 +68,7 @@ export class CommitKnowledgeGraphService {
         );
         continue;
       }
-
-      const jobId = snapshot.fs_node_id;
+      const jobId = randomUUID();
 
       const { error: jobError } = await supabase
         .from("nlp_analysis_jobs")
@@ -83,6 +79,9 @@ export class CommitKnowledgeGraphService {
             scene_text: sceneText,
             status: "QUEUED",
             progress: 0,
+            commit_id: commitId,
+            fs_node_id: snapshot.fs_node_id,
+            snapshot_id: snapshot.id,
           },
           { onConflict: "job_id" },
         );
@@ -94,31 +93,13 @@ export class CommitKnowledgeGraphService {
         continue;
       }
 
-      const ckgInsert: Database["public"]["Tables"]["commit_knowledge_graphs"]["Insert"] =
-        {
-          commit_id: commitId,
-          commit_snapshot_id: snapshot.id,
-          job_id: jobId,
-          status: "pending" as CommitKgStatus,
-        };
-
-      const { error: ckgError } = await supabase
-        .from("commit_knowledge_graphs")
-        .insert(ckgInsert);
-
-      if (ckgError) {
-        this.logger.error(
-          `Failed to create commit_knowledge_graphs row for job ${jobId}: ${ckgError.message}`,
-        );
-        continue;
-      }
-
       try {
         await this.queueService.sendSceneAnalysisJob({
           job_id: jobId,
           scene_text: sceneText,
           user_id: userId,
-          scene_id: jobId,
+          commit_id: commitId,
+          project_id: projectId,
         });
         enqueued++;
       } catch (err) {

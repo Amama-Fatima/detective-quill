@@ -12,7 +12,6 @@ import {
   UpdateFileContentDto as IUpdateFileContentDto,
   UpdateNodeMetadataDto as IUpdateNodeMetadataDto,
 } from "@detective-quill/shared-types";
-import e from "express";
 
 export class CreateFsNodeDto implements ICreateFsNodeDto {
   @IsUUID()

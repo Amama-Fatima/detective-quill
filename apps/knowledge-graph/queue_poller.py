@@ -4,6 +4,7 @@ import pika
 import json
 
 
+from src.config import settings
 from src.utils.logger import setup_logger
 from .knowledge_graph_worker import KnowledgeGraphWorker
 from .modal_app import app, image, secrets, POLL_INTERVAL_SECONDS, MAX_JOBS_PER_POLL
@@ -24,8 +25,8 @@ def poll_queue():
 
     logger.info("Connecting to CloudAMQP...")
     params = pika.URLParameters(rabbitmq_url)
-    params.heartbeat = 60
-    params.blocked_connection_timeout = 30
+    params.heartbeat = settings.RABBITMQ_HEARTBEAT
+    params.blocked_connection_timeout = settings.RABBITMQ_BLOCKED_CONNECTION_TIMEOUT
 
     connection = None
 
@@ -34,15 +35,15 @@ def poll_queue():
         logger.info("Connected to CloudAMQP")
         channel = connection.channel()
 
-        channel.queue_declare(queue="scene_analysis_queue", durable=True)
-        channel.queue_declare(queue="scene_analysis_results_queue", durable=True)
+        channel.queue_declare(queue=settings.SCENE_ANALYSIS_QUEUE, durable=True)
+        channel.queue_declare(queue=settings.SCENE_ANALYSIS_RESULTS_QUEUE, durable=True)
 
         worker = KnowledgeGraphWorker()
         processed = 0
 
         while processed < MAX_JOBS_PER_POLL:
             method_frame, properties, body = channel.basic_get(
-                queue="scene_analysis_queue",
+                queue=settings.SCENE_ANALYSIS_QUEUE,
                 auto_ack=False
             )
 
@@ -81,7 +82,7 @@ def poll_queue():
 
                 channel.basic_publish(
                     exchange="",
-                    routing_key="scene_analysis_results_queue",
+                    routing_key=settings.SCENE_ANALYSIS_RESULTS_QUEUE,
                     body=json.dumps(output),
                     properties=pika.BasicProperties(
                         delivery_mode=2,

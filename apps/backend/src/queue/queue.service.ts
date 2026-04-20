@@ -127,13 +127,13 @@ export class QueueService implements OnModuleDestroy {
       job_id: jobData.job_id,
       scene_text: jobData.scene_text,
       user_id: jobData.user_id,
-      scene_id: jobData.scene_id ?? jobData.job_id,
+      commit_id: jobData.commit_id,
+      project_id: jobData.project_id,
       timestamp: new Date().toISOString(),
     };
 
     const logPayload = {
       job_id: payload.job_id,
-      scene_id: payload.scene_id,
       user_id: payload.user_id,
       scene_text_preview:
         payload.scene_text?.slice(0, 60) +

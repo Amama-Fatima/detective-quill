@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { AdminSupabaseService } from "../supabase/admin-supabase.service";
-import { PipelineResult } from "./nlp-analysis.service";
+import { PipelineResult } from "@detective-quill/shared-types";
 
 @Injectable()
 export class WorkerNlpAnalysisService {
@@ -72,7 +72,7 @@ export class WorkerNlpAnalysisService {
       }
     }
 
-    console.log(`✓ Saved analysis result for job ${jobId}`);
+    console.log(`Saved analysis result for job ${jobId}`);
   }
 
   async markJobAsFailed(jobId: string, error: string): Promise<void> {

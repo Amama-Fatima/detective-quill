@@ -3,6 +3,8 @@ import re
 from typing import List
 from src.models.schemas import Entity, Relationship
 from src.utils.logger import setup_logger
+from neo4j import GraphDatabase
+
 
 logger = setup_logger(__name__)
 
@@ -38,8 +40,6 @@ def save_graph_layer5(
     logger.info("=" * 60)
     logger.info("LAYER 5: Saving Knowledge Graph to Neo4j")
     logger.info("=" * 60)
-
-    from neo4j import GraphDatabase
 
     uri      = os.environ["NEO4J_URI"]
     username = os.environ["NEO4J_USERNAME"]
@@ -136,7 +136,6 @@ def get_scene_graph(scene_id: str) -> dict:
     Retrieves the full graph for a scene — called by NestJS backend.
     Returns nodes and edges in a format ready for the frontend.
     """
-    from neo4j import GraphDatabase
 
     uri      = os.environ["NEO4J_URI"]
     username = os.environ["NEO4J_USERNAME"]
