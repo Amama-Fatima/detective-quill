@@ -5,24 +5,32 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+  // Base: no rounding, monospace, tight uppercase tracking — stamped label feel
+  "inline-flex items-center justify-center rounded-none border px-2 py-0.5 text-[10px] font-bold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring aria-invalid:border-destructive transition-colors overflow-hidden tracking-[0.18em] uppercase font-mono",
   {
     variants: {
       variant: {
+        // Solid dark — official stamp, authority mark (Author, Active, …)
         default:
-          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+          "border-foreground bg-foreground text-background [a&]:hover:bg-foreground/85 [a&]:hover:border-foreground/85",
+
+        // Hollow with border — typewritten field label (Beta Reader, Pending, …)
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+          "border-foreground/40 bg-transparent text-foreground/70 [a&]:hover:border-foreground/60 [a&]:hover:text-foreground",
+
+        // Red ink — something went wrong or must be noticed (Revoked, Closed, …)
         destructive:
-          "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "border-[#8B1A1A] bg-transparent text-[#8B1A1A] dark:border-[#c97070] dark:text-[#c97070] [a&]:hover:bg-[#8B1A1A]/10",
+
+        // Dashed faint border — faded, unconfirmed, ghost stamp (Unverified, …)
         outline:
-          "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+          "border-dashed border-foreground/25 bg-transparent text-foreground/45 [a&]:hover:border-foreground/40 [a&]:hover:text-foreground/60",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 function Badge({

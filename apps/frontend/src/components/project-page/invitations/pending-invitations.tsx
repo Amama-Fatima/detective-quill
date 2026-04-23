@@ -1,17 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "../../ui/button";
 import { deleteInvitation } from "@/lib/backend-calls/invitations";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 import { Invitation } from "@detective-quill/shared-types";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
-import { MailIcon } from "@/components/icons/mail-icon";
-import { ClockIcon } from "@/components/icons/clock-icon";
-import { DeleteIcon } from "@/components/icons/delete-icon";
-import { NoMailIcon } from "@/components/icons/no-mail-icon";
-import Image from "next/image";
 
 const PendingInvitations = ({ projectId }: { projectId: string }) => {
   const [deleting, setDeleting] = useState(false);
@@ -24,19 +18,16 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
     try {
       setDeleting(true);
       await deleteInvitation(invitation.invite_code, projectId, accessToken!);
-
       setInvitations(
-        invitations.filter((inv) => inv.email != invitation.email),
+        invitations.filter((inv) => inv.email !== invitation.email),
       );
-
-      const updatedNotAllowedEmails = notAllowedEmails.filter(
-        (email) => email !== invitation.email,
+      setNotAllowedEmails(
+        notAllowedEmails.filter((e) => e !== invitation.email),
       );
-      setNotAllowedEmails(updatedNotAllowedEmails);
-      toast.success("Invitation deleted successfully");
+      toast.success("Invitation revoked");
     } catch (error) {
-      console.error("Failed to delete invitation:", error);
-      toast.error("Failed to delete invitation. Please try again.");
+      console.error("Failed to revoke invitation:", error);
+      toast.error("Failed to revoke invitation. Please try again.");
     } finally {
       setDeleting(false);
     }
@@ -44,83 +35,104 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
 
   return (
     <div>
-      {/*
-        ── invitation.svg ────────────────────────────────────────────────────
-        Placed beside the "Pending Invitations" heading — a small envelope
-        illustration that matches the section's content at a glance.
-      */}
-      <div className="mb-5 flex items-center justify-between border-b border-border/70 pb-4">
-        <div className="flex items-center gap-2">
-          <Image
-            src="/invitation.svg"
-            alt=""
-            aria-hidden
-            width={24}
-            height={24}
-            className="opacity-50 shrink-0"
-          />
-          <h4 className="mystery-title text-xl font-bold">
-            Pending Invitations
-          </h4>
-        </div>
-        <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
-          {invitations.length}
+      {/* Section header */}
+      <div className="mb-5 flex items-baseline justify-between border-b border-border/60 pb-3">
+        <h4 className="mystery-title text-lg uppercase tracking-widest">
+          Awaiting Response
+        </h4>
+        <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground/50">
+          {invitations.length} outstanding
         </span>
       </div>
 
       {invitations.length > 0 ? (
-        <ul className="space-y-3">
+        <ul className="space-y-2">
           {invitations.map((invitation) => (
             <li
               key={invitation.invite_code}
-              className="flex items-center justify-between gap-4 rounded-md border border-border/70 bg-background/70 px-4 py-3"
+              className="
+                flex items-center justify-between gap-4
+                border border-border/50 bg-card
+                px-4 py-3
+              "
             >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="rounded-full bg-primary/10 p-2 text-primary">
-                  <MailIcon />
-                </div>
+              <div className="flex items-center gap-3 min-w-0">
+                {/* Hand-drawn envelope shape */}
+                <EnvelopeIcon />
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-foreground">
+                  <p className="truncate text-sm font-medium text-foreground font-mono">
                     {invitation.email}
                   </p>
-                  <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-                    <ClockIcon size={16} />
-                    Awaiting response
+                  <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-muted-foreground/50 mt-0.5">
+                    Dispatch pending
                   </p>
                 </div>
               </div>
 
-              <Button
-                variant="ghost"
-                className="cursor-pointer rounded-md transition-colors hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed"
+              <button
                 disabled={deleting}
                 onClick={() => handleDeleteInvitation(invitation)}
+                className="
+                  shrink-0 font-mono text-[9px] tracking-[0.18em] uppercase
+                  border border-border/50 px-2.5 py-1 rounded-none
+                  text-muted-foreground/60
+                  hover:border-[#8B1A1A]/60 hover:text-[#8B1A1A]
+                  disabled:opacity-30 disabled:cursor-not-allowed
+                  transition-colors
+                "
               >
-                <DeleteIcon />
-              </Button>
+                Revoke
+              </button>
             </li>
           ))}
         </ul>
       ) : (
-        /*
-          ── invitation.svg in empty state ─────────────────────────────────
-          When there are no pending invitations, show the envelope illustration
-          instead of (or alongside) the NoMailIcon — more evocative than a
-          generic icon.
-        */
-        <div className="flex min-h-28 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/70 bg-background/60 text-muted-foreground">
-          <Image
-            src="/invitation.svg"
-            alt="No pending invitations"
-            width={40}
-            height={40}
-            className="opacity-30"
-          />
-          <span className="noir-text text-sm">No pending invitations.</span>
+        <div
+          className="
+            flex items-center justify-center gap-3
+            border border-dashed border-border/50
+            min-h-24 rounded-none
+          "
+        >
+          <EnvelopeIcon faded />
+          <span className="noir-text text-sm text-muted-foreground/50 font-mono tracking-wider uppercase text-[11px]">
+            No dispatches outstanding
+          </span>
         </div>
       )}
     </div>
   );
 };
+
+// ── Envelope SVG ───────────────────────────────────────────────────────────────
+function EnvelopeIcon({ faded = false }: { faded?: boolean }) {
+  return (
+    <svg
+      width="28"
+      height="20"
+      viewBox="0 0 28 20"
+      fill="none"
+      aria-hidden
+      className={`shrink-0 ${faded ? "opacity-20" : "opacity-60"}`}
+    >
+      {/* envelope body */}
+      <rect
+        x="0.75"
+        y="0.75"
+        width="26.5"
+        height="18.5"
+        stroke="#8B8070"
+        strokeWidth="1.5"
+      />
+      {/* flap fold */}
+      <polyline
+        points="0.75,0.75 14,11 27.25,0.75"
+        stroke="#8B8070"
+        strokeWidth="1.5"
+        fill="none"
+      />
+    </svg>
+  );
+}
 
 export default PendingInvitations;
