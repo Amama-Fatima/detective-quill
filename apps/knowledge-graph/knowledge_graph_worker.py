@@ -4,11 +4,12 @@ import sys
 import traceback
 import time
 
+from src.config import settings
 from src.utils.logger import setup_logger
 from src.pipeline.layer5_graph import save_graph_layer5
 
 
-from .modal_app import app, image, secrets
+from modal_app import app, image, secrets
 
 @app.cls(
     image=image,
@@ -30,8 +31,8 @@ class KnowledgeGraphWorker:
         self.logger = setup_logger(__name__)
         self.logger.info("Container started - loading models...")
 
-        self.logger.info("Loading spaCy model...")
-        self.nlp = spacy.load("en_core_web_lg")
+        self.logger.info(f"Loading spaCy model: {settings.SPACY_MODEL}...")
+        self.nlp = spacy.load(settings.SPACY_MODEL)
         self.nlp.add_pipe("coreferee")
         self.logger.info("spaCy loaded")
 
@@ -45,8 +46,8 @@ class KnowledgeGraphWorker:
         self.logger.info("Pipeline ready")
 
     @modal.method()
-    def process_job(self, job_id: str, scene_text: str, user_id: str) -> dict:
-        self.logger.info(f"Processing job {job_id}")
+    def process_job(self, job_id: str, scene_text: str, user_id: str, fs_node_id: str) -> dict:
+        self.logger.info(f"Processing job {job_id} for fs_node {fs_node_id}")
         self.logger.info(f"Scene length: {len(scene_text)} characters")
         start_time = time.time()
 
@@ -56,7 +57,7 @@ class KnowledgeGraphWorker:
 
             self.logger.info("Starting Layer 5: saving graph to Neo4j...")
             graph_result = save_graph_layer5(
-                scene_id=job_id,
+                scene_id=fs_node_id,
                 user_id=user_id,
                 scene_text=scene_text,
                 resolved_text=result.resolved_text,

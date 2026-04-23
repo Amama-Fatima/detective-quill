@@ -1,13 +1,15 @@
 import modal
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
+from src.config import settings
 
 app = modal.App("detective-quill-knowledge-graph")
 
-POLL_INTERVAL_SECONDS = max(1, int(os.environ.get("QUEUE_POLL_INTERVAL_SECONDS", "5")))
-MAX_JOBS_PER_POLL = max(1, int(os.environ.get("MAX_JOBS_PER_POLL", "10")))
+SPACY_MODEL_VERSION = "3.5.0"
+SPACY_MODEL_WHEEL = (
+    "https://github.com/explosion/spacy-models/releases/download/"
+    f"{settings.SPACY_MODEL}-{SPACY_MODEL_VERSION}/"
+    f"{settings.SPACY_MODEL}-{SPACY_MODEL_VERSION}-py3-none-any.whl"
+)
 
 # these installations happen every time container builds
 image = (
@@ -25,14 +27,14 @@ image = (
         "pydantic==1.10.13",
         "supabase==1.2.0", 
         "neo4j==5.14.0",  
+        "python-dotenv"
     ])
-    .pip_install([
-        "https://github.com/explosion/spacy-models/releases/download/"
-        "en_core_web_lg-3.5.0/en_core_web_lg-3.5.0-py3-none-any.whl"
-    ])
+    .pip_install([SPACY_MODEL_WHEEL])
     .pip_install(["coreferee==1.4.1"])
     .run_commands("python -m coreferee install en")
     .add_local_dir("src", remote_path="/root/src") # mount local src/ at /root/src/ in the container
+    .add_local_file("knowledge_graph_worker.py", remote_path="/root/knowledge_graph_worker.py")
+    .add_local_file("modal_app.py", remote_path="/root/modal_app.py")
 )
 
 secrets = [

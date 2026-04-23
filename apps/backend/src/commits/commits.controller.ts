@@ -24,11 +24,12 @@ export class CommitsController {
   ) {
     const userId = req.user.id;
 
-    this.queueService.sendCreateCommitJob({
+    await this.queueService.sendCreateCommitJob({
       projectId,
       userId,
       createCommitDto,
     });
+    console.log(`Enqueued commit creation job for project`);
 
     return {
       success: true,
@@ -48,7 +49,7 @@ export class CommitsController {
       deletedSnapshotsCount: number;
     }>
   > {
-    this.queueService.sendRevertCommitJob({
+    await this.queueService.sendRevertCommitJob({
       projectId,
       commitId,
     });

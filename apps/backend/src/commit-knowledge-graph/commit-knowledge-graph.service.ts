@@ -100,6 +100,7 @@ export class CommitKnowledgeGraphService {
           user_id: userId,
           commit_id: commitId,
           project_id: projectId,
+          fs_node_id: snapshot.fs_node_id,
         });
         enqueued++;
       } catch (err) {

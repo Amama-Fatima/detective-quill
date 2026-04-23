@@ -1,5 +1,6 @@
 from typing import List
 import spacy
+from src.config import settings
 from src.models.schemas import Entity, Relationship, PipelineResult, PipelineMetadata
 from src.pipeline.layer1_spacy import extract_entities_layer1
 from src.pipeline.layer2_postprocess import postprocess_entities_layer2
@@ -16,7 +17,7 @@ class NarrativeAnalysisPipeline:
         if nlp is not None:
             self.nlp = nlp
         else:
-            self.nlp = spacy.load("en_core_web_lg")
+            self.nlp = spacy.load(settings.SPACY_MODEL)
 
     def process_scene(self, scene_text: str, verbose: bool = True) -> PipelineResult:
 

@@ -4,45 +4,51 @@ import { QueueService } from "./queue.service";
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: "RABBITMQ_NLP_SERVICE",
-        transport: Transport.RMQ,
-        options: {
-          urls: [
-            process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
-          ],
-          queue: "scene_analysis_queue",
-          queueOptions: {
-            durable: true,
+        useFactory: () => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [
+              process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
+            ],
+            queue: "scene_analysis_queue",
+            queueOptions: {
+              durable: true,
+            },
           },
-        },
+        }),
       },
       {
         name: "RABBITMQ_COMMITS_SERVICE",
-        transport: Transport.RMQ,
-        options: {
-          urls: [
-            process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
-          ],
-          queue: "commit_jobs_queue",
-          queueOptions: {
-            durable: true,
+        useFactory: () => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [
+              process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
+            ],
+            queue: "commit_jobs_queue",
+            queueOptions: {
+              durable: true,
+            },
           },
-        },
+        }),
       },
       {
         name: "RABBITMQ_EMAIL_SERVICE",
-        transport: Transport.RMQ,
-        options: {
-          urls: [
-            process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
-          ],
-          queue: "invite_email_queue",
-          queueOptions: {
-            durable: true,
+        useFactory: () => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [
+              process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672",
+            ],
+            queue: "invite_email_queue",
+            queueOptions: {
+              durable: true,
+            },
           },
-        },
+        }),
       },
     ]),
   ],

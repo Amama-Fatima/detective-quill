@@ -1,6 +1,6 @@
-import os
 import re
 from typing import List
+from src.config import settings
 from src.models.schemas import Entity, Relationship
 from src.utils.logger import setup_logger
 from neo4j import GraphDatabase
@@ -17,6 +17,16 @@ TYPE_LABEL_MAP = {
     "NORP":   "Group",
 }
 DEFAULT_LABEL = "Entity"
+
+
+def _get_neo4j_driver():
+    if not settings.NEO4J_URI or not settings.NEO4J_USERNAME or not settings.NEO4J_PASSWORD:
+        raise ValueError("Missing Neo4j config. Set NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD.")
+
+    return GraphDatabase.driver(
+        settings.NEO4J_URI,
+        auth=(settings.NEO4J_USERNAME, settings.NEO4J_PASSWORD),
+    )
 
 
 def _get_node_label(entity_type: str) -> str:
@@ -41,11 +51,7 @@ def save_graph_layer5(
     logger.info("LAYER 5: Saving Knowledge Graph to Neo4j")
     logger.info("=" * 60)
 
-    uri      = os.environ["NEO4J_URI"]
-    username = os.environ["NEO4J_USERNAME"]
-    password = os.environ["NEO4J_PASSWORD"]
-
-    driver = GraphDatabase.driver(uri, auth=(username, password))
+    driver = _get_neo4j_driver()
 
     try:
         with driver.session() as session:
@@ -137,11 +143,7 @@ def get_scene_graph(scene_id: str) -> dict:
     Returns nodes and edges in a format ready for the frontend.
     """
 
-    uri      = os.environ["NEO4J_URI"]
-    username = os.environ["NEO4J_USERNAME"]
-    password = os.environ["NEO4J_PASSWORD"]
-
-    driver = GraphDatabase.driver(uri, auth=(username, password))
+    driver = _get_neo4j_driver()
 
     try:
         with driver.session() as session:

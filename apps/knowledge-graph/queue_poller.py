@@ -1,27 +1,29 @@
 import modal
-import os
 import pika
 import json
 
 
 from src.config import settings
 from src.utils.logger import setup_logger
-from .knowledge_graph_worker import KnowledgeGraphWorker
-from .modal_app import app, image, secrets, POLL_INTERVAL_SECONDS, MAX_JOBS_PER_POLL
+from knowledge_graph_worker import KnowledgeGraphWorker
+from modal_app import app, image, secrets
 
 
 # this decorator makes the model trigger this function periodically based on the schedule defined
 @app.function(
     image=image,
     secrets=secrets,
-    schedule=modal.Period(seconds=POLL_INTERVAL_SECONDS),
+    schedule=modal.Period(seconds=settings.QUEUE_POLL_INTERVAL_SECONDS),
     timeout=1800,
 )
 def poll_queue():
 
     logger = setup_logger(__name__)
 
-    rabbitmq_url = os.environ["CLOUDAMQP_URL"]
+    if not settings.CLOUDAMQP_URL:
+        raise ValueError("Missing CLOUDAMQP_URL (or RABBITMQ_URL) in environment")
+
+    rabbitmq_url = settings.CLOUDAMQP_URL
 
     logger.info("Connecting to CloudAMQP...")
     params = pika.URLParameters(rabbitmq_url)
@@ -41,7 +43,7 @@ def poll_queue():
         worker = KnowledgeGraphWorker()
         processed = 0
 
-        while processed < MAX_JOBS_PER_POLL:
+        while processed < settings.MAX_JOBS_PER_POLL:
             method_frame, properties, body = channel.basic_get(
                 queue=settings.SCENE_ANALYSIS_QUEUE,
                 auto_ack=False
@@ -66,6 +68,7 @@ def poll_queue():
                 job_id = message["job_id"]
                 scene_text = message["scene_text"]
                 user_id = message.get("user_id", "")
+                fs_node_id = message.get("fs_node_id", job_id)
             except (json.JSONDecodeError, KeyError) as e:
                 logger.error(f"Invalid message format: {e}")
                 channel.basic_nack(delivery_tag=delivery_tag, requeue=False)
@@ -77,7 +80,8 @@ def poll_queue():
                 output = worker.process_job.remote(
                     job_id=job_id,
                     scene_text=scene_text,
-                    user_id=user_id
+                    user_id=user_id,
+                    fs_node_id=fs_node_id,
                 )
 
                 channel.basic_publish(

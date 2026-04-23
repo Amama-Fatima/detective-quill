@@ -3,6 +3,7 @@ import { ClientProxy } from "@nestjs/microservices";
 import * as amqp from "amqplib";
 import { once } from "events";
 import { EmailSendingJobData } from "@detective-quill/shared-types";
+import { firstValueFrom } from "rxjs";
 import {
   type SceneAnalysisJobData,
   type CreateCommitJobData,
@@ -105,12 +106,14 @@ export class QueueService implements OnModuleDestroy {
     }
   }
 
-  sendInviteEmailsJob(jobData: EmailSendingJobData) {
+  async sendInviteEmailsJob(jobData: EmailSendingJobData): Promise<void> {
     try {
-      this.emailRabbitClient.emit("invite_email_job", {
-        ...jobData,
-        timestamp: new Date().toISOString(),
-      });
+      await firstValueFrom(
+        this.emailRabbitClient.emit("invite_email_job", {
+          ...jobData,
+          timestamp: new Date().toISOString(),
+        }),
+      );
     } catch (error) {
       console.error("Failed to queue invite emails job:", error);
       throw error;
@@ -129,6 +132,7 @@ export class QueueService implements OnModuleDestroy {
       user_id: jobData.user_id,
       commit_id: jobData.commit_id,
       project_id: jobData.project_id,
+      fs_node_id: jobData.fs_node_id,
       timestamp: new Date().toISOString(),
     };
 
@@ -169,24 +173,29 @@ export class QueueService implements OnModuleDestroy {
     }
   }
 
-  sendCreateCommitJob(jobData: CreateCommitJobData) {
+  async sendCreateCommitJob(jobData: CreateCommitJobData): Promise<void> {
     try {
-      this.commitRabbitClient.emit("commit_create_job", {
-        ...jobData,
-        timestamp: new Date().toISOString(),
-      });
+      await firstValueFrom(
+        this.commitRabbitClient.emit("commit_create_job", {
+          ...jobData,
+          timestamp: new Date().toISOString(),
+        }),
+      );
+      console.log(`Enqueued commit creation job for project`);
     } catch (error) {
       console.error("Failed to queue create commit job:", error);
       throw error;
     }
   }
 
-  sendRevertCommitJob(jobData: RevertCommitJobData) {
+  async sendRevertCommitJob(jobData: RevertCommitJobData): Promise<void> {
     try {
-      this.commitRabbitClient.emit("commit_revert_job", {
-        ...jobData,
-        timestamp: new Date().toISOString(),
-      });
+      await firstValueFrom(
+        this.commitRabbitClient.emit("commit_revert_job", {
+          ...jobData,
+          timestamp: new Date().toISOString(),
+        }),
+      );
     } catch (error) {
       console.error("Failed to queue revert commit job:", error);
       throw error;
