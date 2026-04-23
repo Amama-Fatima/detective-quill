@@ -7,7 +7,10 @@ import { ConfigService } from "@nestjs/config";
 // todo: add retry mechanism in here
 @Controller()
 export class EmailConsumer {
-  constructor(private workerEmailService: WorkerEmailService, private configService: ConfigService) {}
+  constructor(
+    private workerEmailService: WorkerEmailService,
+    private configService: ConfigService,
+  ) {}
 
   @EventPattern("invite_email_job")
   async handleInviteEmail(@Payload() data: EmailSendingJobData) {
@@ -24,7 +27,7 @@ export class EmailConsumer {
           inviterName,
           projectTitle,
           inviteCode,
-          projectId
+          projectId,
         );
 
         if (!ok) {

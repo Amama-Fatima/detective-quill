@@ -24,33 +24,33 @@ interface ApiResponse<T> {
 }
 
 @Controller("nlp-analysis")
+@UseGuards(AuthGuard)
 export class NlpAnalysisController {
   constructor(private readonly nlpAnalysisService: NlpAnalysisService) {}
 
-  @Post("submit")
-  @UseGuards(AuthGuard)
-  async submitAnalysis(
-    @Body() submitAnalysisDto: SubmitAnalysisDto,
-    @Request() req,
-  ): Promise<ApiResponse<AnalysisResponseDto>> {
-    const data = await this.nlpAnalysisService.submitJob(
-      submitAnalysisDto,
-      req.user.id,
-    );
-    return { success: true, data };
-  }
+  // @Post("submit")
+  // async submitAnalysis(
+  //   @Body() submitAnalysisDto: SubmitAnalysisDto,
+  //   @Request() req,
+  // ): Promise<ApiResponse<AnalysisResponseDto>> {
+  //   const data = await this.nlpAnalysisService.submitJob(
+  //     submitAnalysisDto,
+  //     req.user.id,
+  //   );
+  //   return { success: true, data };
+  // }
 
-  @Post("submit-test")
-  async submitTestAnalysis(
-    @Body() submitAnalysisDto: SubmitAnalysisDto,
-  ): Promise<ApiResponse<AnalysisResponseDto>> {
-    const testUserId = "84a08a1c-ed1e-4a42-9fed-9736b63c4ad7";
-    const data = await this.nlpAnalysisService.submitJob(
-      submitAnalysisDto,
-      testUserId,
-    );
-    return { success: true, data };
-  }
+  // @Post("submit-test")
+  // async submitTestAnalysis(
+  //   @Body() submitAnalysisDto: SubmitAnalysisDto,
+  // ): Promise<ApiResponse<AnalysisResponseDto>> {
+  //   const testUserId = "84a08a1c-ed1e-4a42-9fed-9736b63c4ad7";
+  //   const data = await this.nlpAnalysisService.submitJob(
+  //     submitAnalysisDto,
+  //     testUserId,
+  //   );
+  //   return { success: true, data };
+  // }
 
   @Get("status/:jobId")
   @UseGuards(AuthGuard)

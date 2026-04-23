@@ -17,7 +17,7 @@ import { ProjectsService } from "./projects.service";
 import {
   CreateProjectDto,
   UpdateProjectDto,
-} from "./validation/project.validation";
+} from "./dto/project.dto";
 import { AuthGuard } from "../auth/auth.guard";
 import {
   Project,

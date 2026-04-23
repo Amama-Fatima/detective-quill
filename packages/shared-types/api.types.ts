@@ -19,7 +19,9 @@ export type ContributionType = Database["public"]["Enums"]["contribution_type"];
 export type GameStats = Database["public"]["Tables"]["game_stats"]["Row"];
 export type Badge = Database["public"]["Tables"]["badges"]["Row"];
 export type Event = Database["public"]["Tables"]["events"]["Row"];
-
+export type NlpEntity = Database["public"]["Tables"]["nlp_entities"]["Row"];
+export type NlpRelationship =
+  Database["public"]["Tables"]["nlp_relationships"]["Row"];
 // todo: consider using pick and omit to create types instead of creating new ones
 
 export interface ApiResponse<T = any> {
@@ -318,3 +320,25 @@ export type GamificationSummary = {
   stats: GameStats | null;
   earnedBadges: Badge[];
 };
+
+export type Entity = Omit<
+  NlpEntity,
+  "created_at" | "updated_at" | "id" | "job_id"
+>;
+
+export type Relationship = Omit<
+  NlpRelationship,
+  "created_at" | "updated_at" | "id" | "job_id"
+>;
+
+export interface PipelineMetadata {
+  num_entities: number;
+  num_relationships: number;
+  num_raw_entities: number;
+}
+
+export interface PipelineResult {
+  entities: Entity[];
+  relationships: Relationship[];
+  metadata: PipelineMetadata;
+}

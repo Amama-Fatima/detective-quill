@@ -1,8 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsIn,
-} from "class-validator";
+import { IsString, IsNotEmpty, IsIn } from "class-validator";
 import {
   CreateBlueprintDto as ICreateBlueprintDto,
   UpdateBlueprintDto as IUpdateBlueprintDto,
@@ -12,20 +8,20 @@ import {
 export class CreateBlueprintDto implements ICreateBlueprintDto {
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @IsString()
   @IsNotEmpty()
-  project_id: string;
+  project_id!: string;
 
   @IsString()
   @IsNotEmpty()
   @IsIn(["character", "timeline", "item", "location"])
-  type: BlueprintType;
+  type!: BlueprintType;
 }
 
 export class UpdateBlueprintDto implements IUpdateBlueprintDto {
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 }

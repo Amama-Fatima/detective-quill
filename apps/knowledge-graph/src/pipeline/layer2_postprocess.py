@@ -1,9 +1,30 @@
+import re
 from typing import List
 from src.models.schemas import Entity
 from src.config import settings
 from src.utils.logger import setup_logger
 
+# Honorific titles to strip before name comparison
+_TITLE_RE = re.compile(
+    r'\b(mr|mrs|ms|miss|dr|prof|sir|lord|lady|det|sgt|cpl|insp)\.?\s*',
+    re.IGNORECASE,
+)
+# Any remaining punctuation after title stripping
+_PUNCT_RE = re.compile(r"[^\w\s]")
+
 logger = setup_logger(__name__)
+
+# Single-word strings that spaCy commonly mislabels as ORG in fiction:
+# greetings, interjections, genericised brand names, etc.
+FICTION_FALSE_ORG_WORDS = {
+    # greetings / interjections / dialogue fillers
+    'hullo', 'hello', 'hi', 'hey', 'goodbye', 'bye', 'yes', 'no',
+    'ok', 'okay', 'sure', 'right', 'well', 'oh', 'ah', 'aye', 'nope',
+    'darling', 'dear', 'love', 'sir', 'madam', 'miss', 'mister',
+    # genericised brand / household names not useful as entities
+    'thermos', 'kleenex', 'hoover', 'jello',
+}
+
 
 class EntityPostProcessor:
     def __init__(self):
@@ -24,14 +45,20 @@ class EntityPostProcessor:
         }
 
     def normalize_name(self, name: str) -> str:
-        return name.lower().strip()
-    
+        """Lowercase, strip honorific titles and punctuation, collapse whitespace."""
+        name = _TITLE_RE.sub('', name)
+        name = _PUNCT_RE.sub('', name)
+        return ' '.join(name.lower().split())
+
     def is_substring_match(self, short_name: str, long_name: str) -> bool:
-        
-        short = self.normalize_name(short_name)
-        long = self.normalize_name(long_name)
-    
-        return short in long.split() or short == long
+        short_tokens = set(self.normalize_name(short_name).split())
+        long_tokens  = set(self.normalize_name(long_name).split())
+        # Match if every token in the shorter name appears in the longer one
+        # e.g. {"maloney"} ⊆ {"mary", "maloney"}  →  True
+        #      {"mrs", "maloney"} → after title strip → {"maloney"} ⊆ {"mary","maloney"} → True
+        if not short_tokens:
+            return False
+        return short_tokens <= long_tokens
     
     def merge_duplicate_entities(self, entities: List[Entity]) -> List[Entity]:
         
@@ -103,10 +130,28 @@ class EntityPostProcessor:
         return entities
 
 
+    def remove_false_positives(self, entities: List[Entity]) -> List[Entity]:
+        result = []
+        for entity in entities:
+            tokens = entity.name.split()
+            if (
+                entity.type == 'ORG'
+                and len(tokens) == 1
+                and entity.name.lower() in FICTION_FALSE_ORG_WORDS
+            ):
+                logger.debug(f"  Removed false-positive ORG: '{entity.name}'")
+                continue
+            result.append(entity)
+        return result
+
     def process(self, entities: List[Entity], verbose: bool = True) -> List[Entity]:
         if verbose:
             logger.info(f"  Input: {len(entities)} raw entities")
-        
+
+        entities = self.remove_false_positives(entities)
+        if verbose:
+            logger.info(f"  After false-positive removal: {len(entities)} entities")
+
         entities = self.filter_entity_types(entities)
         if verbose:
             logger.info(f"  After filtering: {len(entities)} entities")

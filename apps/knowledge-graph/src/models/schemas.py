@@ -15,6 +15,7 @@ class Relationship(BaseModel):
     relation_type: str
     description: str
     confidence: float = 0.9
+    when: Optional[str] = None  # time expression e.g. "10 minutes to 5", "after noon"
 
 
 class PipelineMetadata(BaseModel):

@@ -21,7 +21,7 @@ export const NAV_ITEMS = [
   {
     id: "visualization",
     label: "Graph Visuals",
-    href: `/workspace/123/visualization`,
+    href: `/workspace/123/knowledge-graph`,
     icon: GraphIcon,
     description: "Visual story analysis",
   },
