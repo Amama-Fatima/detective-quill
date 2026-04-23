@@ -1,7 +1,16 @@
+import re
 from typing import List
 from src.models.schemas import Entity
 from src.config import settings
 from src.utils.logger import setup_logger
+
+# Honorific titles to strip before name comparison
+_TITLE_RE = re.compile(
+    r'\b(mr|mrs|ms|miss|dr|prof|sir|lord|lady|det|sgt|cpl|insp)\.?\s*',
+    re.IGNORECASE,
+)
+# Any remaining punctuation after title stripping
+_PUNCT_RE = re.compile(r"[^\w\s]")
 
 logger = setup_logger(__name__)
 
@@ -36,14 +45,20 @@ class EntityPostProcessor:
         }
 
     def normalize_name(self, name: str) -> str:
-        return name.lower().strip()
-    
+        """Lowercase, strip honorific titles and punctuation, collapse whitespace."""
+        name = _TITLE_RE.sub('', name)
+        name = _PUNCT_RE.sub('', name)
+        return ' '.join(name.lower().split())
+
     def is_substring_match(self, short_name: str, long_name: str) -> bool:
-        
-        short = self.normalize_name(short_name)
-        long = self.normalize_name(long_name)
-    
-        return short in long.split() or short == long
+        short_tokens = set(self.normalize_name(short_name).split())
+        long_tokens  = set(self.normalize_name(long_name).split())
+        # Match if every token in the shorter name appears in the longer one
+        # e.g. {"maloney"} ⊆ {"mary", "maloney"}  →  True
+        #      {"mrs", "maloney"} → after title strip → {"maloney"} ⊆ {"mary","maloney"} → True
+        if not short_tokens:
+            return False
+        return short_tokens <= long_tokens
     
     def merge_duplicate_entities(self, entities: List[Entity]) -> List[Entity]:
         

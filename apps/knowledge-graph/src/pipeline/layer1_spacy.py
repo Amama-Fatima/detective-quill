@@ -53,7 +53,11 @@ def _resolve_coreferences(doc) -> str:
 
 
         primary_is_proper = any(doc[i].pos_ == "PROPN" for i in best_mention)
-        if not primary_is_proper:
+        primary_is_role_noun = any(
+            doc[i].pos_ == "NOUN" and doc[i].lemma_.lower() in PERSON_ROLE_NOUNS
+            for i in best_mention
+        )
+        if not primary_is_proper and not primary_is_role_noun:
             continue
 
         for mention in chain:
