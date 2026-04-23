@@ -183,7 +183,7 @@ export default function WorkspaceMainBody({
           </div>
         </section>
 
-        <section className="space-y-8">
+        <section className="space-y-8 rounded-lg border border-border/70 bg-card/85 p-5 shadow-sm md:p-6">
           <MembersTable
             isOwner={isOwner}
             initialMembers={members}

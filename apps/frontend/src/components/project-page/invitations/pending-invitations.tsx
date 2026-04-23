@@ -42,7 +42,7 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
   };
 
   return (
-    <div className="rounded-lg border border-border/70 bg-card/85 p-5 shadow-sm md:p-6">
+    <div>
       <div className="mb-5 flex items-center justify-between border-b border-border/70 pb-4">
         <h4 className="mystery-title text-xl font-bold">Pending Invitations</h4>
         <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">

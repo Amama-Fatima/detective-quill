@@ -83,14 +83,12 @@ const MembersTable = ({
   }
 
   return (
-    <div className="rounded-lg border border-border/70 bg-card/85 p-5 shadow-sm md:p-6">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 pb-4">
-        <div className="flex items-center gap-3">
-          <h2 className="mystery-title text-2xl font-bold">Members</h2>
-          <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
-            {members.length}
-          </span>
-        </div>
+    <div>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/70">
+        <h4 className="mystery-title text-2xl font-bold">Members</h4>
+        <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
+          {members.length}
+        </span>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border/70 bg-background/70">
@@ -100,7 +98,7 @@ const MembersTable = ({
               <TableHeader className="p-2">
                 <TableRow className="bg-muted/40">
                   <TableHead className="text-base font-semibold">
-                    Member
+                    Members
                   </TableHead>
                   <TableHead className="text-base font-semibold">
                     Role
