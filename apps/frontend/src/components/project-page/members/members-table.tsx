@@ -19,6 +19,7 @@ import { ProjectMember } from "@detective-quill/shared-types";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 import { useMembers } from "@/hooks/use-members";
+import Image from "next/image";
 
 const MembersTable = ({
   isOwner,
@@ -63,11 +64,23 @@ const MembersTable = ({
 
   if (members.length === 0) {
     return (
-      <Card className="rounded-lg border border-border/70 bg-gradient-to-br from-card to-background py-16 text-center shadow-sm">
+      /*
+        ── book.svg ────────────────────────────────────────────────────────────
+        Shown prominently in the empty state instead of the generic UserPlus
+        icon. A closed red book fits perfectly — no beta readers yet means the
+        book is still unread.
+      */
+      <Card className="rounded-md border border-border/70 bg-linear-to-br from-card to-background py-16 text-center shadow-sm">
         <CardContent>
           <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="rounded-full border border-border/60 bg-primary/10 p-8 text-center">
-              <UserPlus className="h-12 w-12 text-primary" />
+            <div className="relative rounded-full border border-border/60 bg-primary/10 p-8 text-center">
+              <Image
+                src="/book.svg"
+                alt="No beta readers yet"
+                width={48}
+                height={48}
+                className="opacity-80"
+              />
             </div>
             <div className="space-y-2">
               <h3 className="mystery-title text-2xl">No Beta Readers Added</h3>
@@ -84,14 +97,34 @@ const MembersTable = ({
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/70">
-        <h4 className="mystery-title text-2xl font-bold">Members</h4>
-        <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
-          {members.length}
-        </span>
+      {/*
+        ── crime-scene.svg ───────────────────────────────────────────────────
+        Ghosted into the top-right of the Members section header. Gives the
+        table a sense of "evidence being catalogued" — fits the case-file
+        aesthetic without being distracting.
+      */}
+      <div className="relative mb-5">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 hidden sm:block"
+          style={{ width: 56, height: 56, opacity: 0.12 }}
+        >
+          <Image
+            src="/crime-scene.svg"
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/70">
+          <h4 className="mystery-title text-2xl font-bold">Members</h4>
+          <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
+            {members.length}
+          </span>
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border/70 bg-background/70">
+      <div className="overflow-hidden rounded-md border border-border/70 bg-background/70">
         {members.length > 0 && (
           <div className="overflow-x-auto">
             <Table>

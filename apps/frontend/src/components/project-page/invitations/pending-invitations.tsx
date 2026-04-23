@@ -11,6 +11,7 @@ import { MailIcon } from "@/components/icons/mail-icon";
 import { ClockIcon } from "@/components/icons/clock-icon";
 import { DeleteIcon } from "@/components/icons/delete-icon";
 import { NoMailIcon } from "@/components/icons/no-mail-icon";
+import Image from "next/image";
 
 const PendingInvitations = ({ projectId }: { projectId: string }) => {
   const [deleting, setDeleting] = useState(false);
@@ -43,8 +44,25 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
 
   return (
     <div>
+      {/*
+        ── invitation.svg ────────────────────────────────────────────────────
+        Placed beside the "Pending Invitations" heading — a small envelope
+        illustration that matches the section's content at a glance.
+      */}
       <div className="mb-5 flex items-center justify-between border-b border-border/70 pb-4">
-        <h4 className="mystery-title text-xl font-bold">Pending Invitations</h4>
+        <div className="flex items-center gap-2">
+          <Image
+            src="/invitation.svg"
+            alt=""
+            aria-hidden
+            width={24}
+            height={24}
+            className="opacity-50 shrink-0"
+          />
+          <h4 className="mystery-title text-xl font-bold">
+            Pending Invitations
+          </h4>
+        </div>
         <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
           {invitations.length}
         </span>
@@ -55,7 +73,7 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
           {invitations.map((invitation) => (
             <li
               key={invitation.invite_code}
-              className="flex items-center justify-between gap-4 rounded-lg border border-border/70 bg-background/70 px-4 py-3"
+              className="flex items-center justify-between gap-4 rounded-md border border-border/70 bg-background/70 px-4 py-3"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <div className="rounded-full bg-primary/10 p-2 text-primary">
@@ -84,9 +102,21 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
           ))}
         </ul>
       ) : (
-        <div className="flex min-h-28 items-center justify-center gap-2 rounded-xl border border-dashed border-border/70 bg-background/60 text-muted-foreground">
-          <NoMailIcon />
-          <span className="noir-text">No pending invitations.</span>
+        /*
+          ── invitation.svg in empty state ─────────────────────────────────
+          When there are no pending invitations, show the envelope illustration
+          instead of (or alongside) the NoMailIcon — more evocative than a
+          generic icon.
+        */
+        <div className="flex min-h-28 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/70 bg-background/60 text-muted-foreground">
+          <Image
+            src="/invitation.svg"
+            alt="No pending invitations"
+            width={40}
+            height={40}
+            className="opacity-30"
+          />
+          <span className="noir-text text-sm">No pending invitations.</span>
         </div>
       )}
     </div>
