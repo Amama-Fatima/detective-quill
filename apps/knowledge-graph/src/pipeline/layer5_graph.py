@@ -127,13 +127,15 @@ def _create_relationship(tx, rel: Relationship, scene_id: str):
         MERGE (a)-[r:{rel_type}]->(b)
         SET r.description = $description,
             r.confidence  = $confidence,
-            r.scene_id    = $scene_id
+            r.scene_id    = $scene_id,
+            r.when        = $when
         """,
         source=rel.source,
         target=rel.target,
         description=rel.description,
         confidence=rel.confidence,
         scene_id=scene_id,
+        when=rel.when,
     )
 
 

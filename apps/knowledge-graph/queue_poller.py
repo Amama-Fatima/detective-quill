@@ -76,6 +76,10 @@ def poll_queue():
 
             logger.info(f"Picked up job {job_id} from queue")
 
+            # Acknowledge before long-running processing to avoid redelivery if
+            # the RabbitMQ connection drops while waiting on remote execution.
+            channel.basic_ack(delivery_tag=delivery_tag)
+
             try:
                 output = worker.process_job.remote(
                     job_id=job_id,
@@ -94,13 +98,13 @@ def poll_queue():
                     )
                 )
 
-                channel.basic_ack(delivery_tag=delivery_tag)
                 processed += 1
                 logger.info(f"Published result for job {job_id} to results queue")
                 logger.info(f"Done. Job {job_id} status: {output['status']}")
             except Exception as e:
                 logger.error(f"Failed processing/publishing for job {job_id}: {e}", exc_info=True)
-                channel.basic_nack(delivery_tag=delivery_tag, requeue=True)
+                # The message was already acked intentionally (at-most-once mode),
+                # so do not nack/requeue here.
 
         if processed > 0:
             logger.info(f"Processed {processed} job(s) in this polling cycle")

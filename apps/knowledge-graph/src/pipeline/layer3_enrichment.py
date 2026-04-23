@@ -1,6 +1,6 @@
 import re
 import json
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from src.models.schemas import Entity, Relationship
 from src.models.llm_loader import get_llm_loader
@@ -15,7 +15,7 @@ def _format_entity_list(entities: List[Entity]) -> str:
     return "\n".join(f"- {e.name} (type: {e.type})" for e in entities)
 
 
-def _match_name(name: str, entities: List[Entity]) -> str | None:
+def _match_name(name: str, entities: List[Entity]) -> Optional[str]:
     """Fuzzy-match an LLM-returned name back to a canonical entity name."""
     nl = name.lower().strip()
     for e in entities:
@@ -61,19 +61,36 @@ Output ONLY this JSON (no other text):
     {{"name": "<exact name from list above>", "role": "<detective|suspect|victim|witness|object|location|other>", "description": "<what the scene says about them>", "attributes": {{}}}}
   ],
   "relationships": [
-    {{"source": "<entity name>", "target": "<entity name>", "type": "<snake_case_verb>", "description": "<brief evidence from scene>"}}
+    {{"source": "<entity name>", "target": "<entity name>", "type": "<snake_case_verb>", "description": "<brief evidence from scene>", "when": "<time if mentioned, else null>"}},
+    {{"source": "<entity name>", "target": "<entity name>", "type": "<snake_case_verb>", "description": "<brief evidence from scene>", "when": "<time if mentioned, else null>"}}
   ]
 }}
 
+Time extraction rules:
+- Extract time expressions as they appear: "10 minutes to 5", "after noon", "5 PM", "at midnight", etc.
+- Include only if the time is explicitly mentioned in the scene for that interaction
+- Set "when" to null if no specific time is mentioned for that relationship
+- Extract time for only crime related relationships, not for general interactions
+
+Extract MEANINGFUL relationships between entities. Multiple MEANINGFUL relationships are acceptable.
+
+IMPORTANT — Relationship consolidation:
+If multiple interactions between the same pair represent variations of the same action
+(e.g., "serves", "pours", "makes_drink" are all serving), combine them into ONE relationship.
+Use the most general/canonical verb and include all variations in the description.
+Example: type="serve", description="serves him drinks: makes, pours, and serves throughout the scene"
+Do NOT output separate relationships for minor variations of the same core action.
+
 Relationship priority — check in order, use the first tier that applies:
 TIER 1 (crime/violence — always extract if present): murder, kill, attack, stab, hit, strangle, shoot, threaten, confront, accuse, assault, fight
-TIER 2 (interpersonal — extract if clearly shown): love, hate, marry, kiss, greet, wait_for, serve, help, trust, suspect, argue, comfort, betray
+TIER 2 (interpersonal — extract if clearly shown): love, hate, marry, kiss, greet, wait_for, serve, help, trust, suspect, argue, comfort, betray, threaten, found_her_behavior_weird, found_him_eerie
 TIER 3 (situational — use as fallback, but ALWAYS extract something if characters interact): talk_to, drink_with, sit_with, live_with, know, prepare_for, share_space_with
+Other than these types of interactions do not include any other relationships which seem insignificant.
 
-Rule: if two characters interact in any way, include a relationship — use Tier 3 at minimum. Only omit a pair if they share no connection in this scene."""
+Rule: if two characters interact in any way, include a relationship — use Tier 3 at minimum. Extract ONLY meaningful pairs one or more. Only extract relationship if it is truly meaningful."""
 
         logger.info(f"Batch LLM call: {len(entities)} entities")
-        response = self.llm_loader.generate(prompt, max_tokens=1200)
+        response = self.llm_loader.generate(prompt, max_tokens=2000)
         logger.debug(f"Batch LLM response (first 600 chars):\n{response[:600]}")
 
         return self._parse(response, entities)
@@ -136,6 +153,9 @@ Rule: if two characters interact in any way, include a relationship — use Tier
                 continue
 
             rel_type = (item.get('type') or 'related_to').strip() or 'related_to'
+            when = item.get('when')
+            if when and isinstance(when, str):
+                when = when.strip() or None
 
             relationships.append(Relationship(
                 source=source,
@@ -143,8 +163,10 @@ Rule: if two characters interact in any way, include a relationship — use Tier
                 relation_type=rel_type,
                 description=item.get('description', ''),
                 confidence=0.9,
+                when=when,
             ))
-            logger.debug(f"  Relationship: {source} --[{rel_type}]--> {target}")
+            time_str = f" @ {when}" if when else ""
+            logger.debug(f"  Relationship: {source} --[{rel_type}]--> {target}{time_str}")
 
         relationships = _deduplicate_relationships(relationships)
         logger.info(f"Parsed: {len(enriched)} entities, {len(relationships)} relationships")
