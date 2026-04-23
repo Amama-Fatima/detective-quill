@@ -7,6 +7,38 @@ from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
+# Nouns that refer to a person even when no name is given (e.g. "her husband")
+PERSON_ROLE_NOUNS = {
+    'husband', 'wife', 'man', 'woman', 'boy', 'girl',
+    'father', 'mother', 'brother', 'sister', 'son', 'daughter',
+    'detective', 'officer', 'inspector', 'sergeant', 'constable',
+    'suspect', 'victim', 'witness', 'murderer', 'killer', 'criminal',
+    'stranger', 'visitor', 'patient', 'doctor', 'nurse', 'guard',
+    'partner', 'colleague', 'friend',
+}
+
+
+def _extract_character_references(doc) -> List[RawEntity]:
+    """Find noun chunks whose head is a person-role noun (e.g. 'her husband').
+    Returns one RawEntity per unique role noun so unnamed characters get a node."""
+    found = []
+    seen_lemmas: set = set()
+
+    for chunk in doc.noun_chunks:
+        head = chunk.root
+        lemma = head.lemma_.lower()
+        if lemma in PERSON_ROLE_NOUNS and lemma not in seen_lemmas:
+            seen_lemmas.add(lemma)
+            # Use just the head noun as the canonical name ("husband" not "her husband")
+            found.append(RawEntity(
+                text=head.text,
+                label='PERSON',
+                start=head.idx,
+                end=head.idx + len(head.text),
+            ))
+
+    return found
+
 
 def _resolve_coreferences(doc) -> str:
     if not doc._.coref_chains:
@@ -103,6 +135,16 @@ class SpacyEntityExtractor:
                 end=ent.end_char
             )
             raw_entities.append(raw_entity)
+
+        # Add unnamed characters that spaCy NER misses (e.g. "her husband")
+        unnamed = _extract_character_references(doc)
+        if unnamed:
+            # Avoid duplicating names already found by NER
+            ner_names = {e.text.lower() for e in raw_entities if e.label == 'PERSON'}
+            for u in unnamed:
+                if u.text.lower() not in ner_names:
+                    raw_entities.append(u)
+                    logger.debug(f"  Added unnamed character reference: '{u.text}'")
 
         logger.debug(f"Extracted {len(raw_entities)} raw entities from text.")
         return raw_entities, resolved_text

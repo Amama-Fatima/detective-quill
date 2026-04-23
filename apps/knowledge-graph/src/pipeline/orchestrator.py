@@ -4,8 +4,7 @@ from src.config import settings
 from src.models.schemas import Entity, Relationship, PipelineResult, PipelineMetadata
 from src.pipeline.layer1_spacy import extract_entities_layer1
 from src.pipeline.layer2_postprocess import postprocess_entities_layer2
-from src.pipeline.layer3_enrichment import enrich_entities_layer3
-from src.pipeline.layer4_relationships import extract_relationships_layer4
+from src.pipeline.layer3_enrichment import enrich_and_extract_batch
 from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -27,7 +26,7 @@ class NarrativeAnalysisPipeline:
             logger.info("=" * 60)
 
         if verbose:
-            logger.info("\n[1/4] Extracting entities with spaCy...")
+            logger.info("\n[1/3] Extracting entities with spaCy...")
 
         raw_entities, resolved_text = extract_entities_layer1(scene_text, nlp=self.nlp)
         num_raw_entities = len(raw_entities)
@@ -41,7 +40,7 @@ class NarrativeAnalysisPipeline:
             logger.info(f"✓ Found {num_raw_entities} raw entities")
 
         if verbose:
-            logger.info("\n[2/4] Post-processing entities...")
+            logger.info("\n[2/3] Post-processing entities...")
 
         clean_entities = postprocess_entities_layer2(raw_entities)
 
@@ -51,20 +50,12 @@ class NarrativeAnalysisPipeline:
                 logger.info(f"  - {e.name} ({e.type})")
 
         if verbose:
-            logger.info("\n[3/4] Enriching entities with LLM...")
+            logger.info("\n[3/3] Batch LLM: enriching entities + extracting relationships...")
 
-        enriched_entities = enrich_entities_layer3(clean_entities, resolved_text)
-
-        if verbose:
-            logger.info(f"Enriched {len(enriched_entities)} entities")
+        enriched_entities, relationships = enrich_and_extract_batch(clean_entities, resolved_text)
 
         if verbose:
-            logger.info("\n[4/4] Extracting relationships with LLM...")
-
-        relationships = extract_relationships_layer4(enriched_entities, resolved_text, nlp=self.nlp)
-
-        if verbose:
-            logger.info(f"Found {len(relationships)} relationships")
+            logger.info(f"Enriched {len(enriched_entities)} entities, found {len(relationships)} relationships")
 
         metadata = PipelineMetadata(
             num_entities=len(enriched_entities),

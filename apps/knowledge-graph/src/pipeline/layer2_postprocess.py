@@ -5,6 +5,18 @@ from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
+# Single-word strings that spaCy commonly mislabels as ORG in fiction:
+# greetings, interjections, genericised brand names, etc.
+FICTION_FALSE_ORG_WORDS = {
+    # greetings / interjections / dialogue fillers
+    'hullo', 'hello', 'hi', 'hey', 'goodbye', 'bye', 'yes', 'no',
+    'ok', 'okay', 'sure', 'right', 'well', 'oh', 'ah', 'aye', 'nope',
+    'darling', 'dear', 'love', 'sir', 'madam', 'miss', 'mister',
+    # genericised brand / household names not useful as entities
+    'thermos', 'kleenex', 'hoover', 'jello',
+}
+
+
 class EntityPostProcessor:
     def __init__(self):
         self.keep_types = {
@@ -103,10 +115,28 @@ class EntityPostProcessor:
         return entities
 
 
+    def remove_false_positives(self, entities: List[Entity]) -> List[Entity]:
+        result = []
+        for entity in entities:
+            tokens = entity.name.split()
+            if (
+                entity.type == 'ORG'
+                and len(tokens) == 1
+                and entity.name.lower() in FICTION_FALSE_ORG_WORDS
+            ):
+                logger.debug(f"  Removed false-positive ORG: '{entity.name}'")
+                continue
+            result.append(entity)
+        return result
+
     def process(self, entities: List[Entity], verbose: bool = True) -> List[Entity]:
         if verbose:
             logger.info(f"  Input: {len(entities)} raw entities")
-        
+
+        entities = self.remove_false_positives(entities)
+        if verbose:
+            logger.info(f"  After false-positive removal: {len(entities)} entities")
+
         entities = self.filter_entity_types(entities)
         if verbose:
             logger.info(f"  After filtering: {len(entities)} entities")
