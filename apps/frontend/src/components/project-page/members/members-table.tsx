@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProjectMember } from "@detective-quill/shared-types";
-import { Card, CardContent } from "@/components/ui/card";
 import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store";
 import { useMembers } from "@/hooks/use-members";
 import RemoveMemberDialog from "./remove-member-dialog";
@@ -57,57 +55,48 @@ const MembersTable = ({
       .slice(0, 2)
       .toUpperCase();
 
-  // ── Empty state ─────────────────────────────────────────────────────────────
+  // ── Empty state ────────────────────────────────────────────────────────────
   if (members.length === 0) {
     return (
       <div>
         <SectionHeader title="Persons of Interest" count={0} />
-        <div
-          className="
-            flex flex-col items-center justify-center gap-3
-            border border-dashed border-border/60
-            py-16 text-center
-          "
-        >
-          {/* simple open-book SVG mark */}
+        <div className="flex flex-col items-center justify-center gap-4 border border-dashed border-border/60 py-16 text-center">
           <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
+            width="40"
+            height="40"
+            viewBox="0 0 40 40"
             fill="none"
             aria-hidden
           >
             <rect
               x="1"
-              y="6"
-              width="15"
-              height="24"
-              rx="0"
+              y="7"
+              width="17"
+              height="26"
               stroke="currentColor"
-              strokeWidth="1"
+              strokeWidth="1.2"
               className="text-muted-foreground/30"
             />
             <rect
-              x="20"
-              y="6"
-              width="15"
-              height="24"
-              rx="0"
+              x="22"
+              y="7"
+              width="17"
+              height="26"
               stroke="currentColor"
-              strokeWidth="1"
+              strokeWidth="1.2"
               className="text-muted-foreground/30"
             />
             <line
-              x1="18"
-              y1="6"
-              x2="18"
-              y2="30"
+              x1="20"
+              y1="7"
+              x2="20"
+              y2="33"
               stroke="currentColor"
-              strokeWidth="1"
+              strokeWidth="1.2"
               className="text-muted-foreground/30"
             />
           </svg>
-          <p className="mystery-title text-lg text-foreground/60">
+          <p className="mystery-title text-xl text-muted-foreground">
             No persons on file
           </p>
           <p className="noir-text text-sm text-muted-foreground max-w-xs">
@@ -119,7 +108,7 @@ const MembersTable = ({
     );
   }
 
-  // ── Dossier grid ─────────────────────────────────────────────────────────────
+  // ── Dossier grid ──────────────────────────────────────────────────────────
   return (
     <div>
       <SectionHeader title="Persons of Interest" count={members.length} />
@@ -134,8 +123,13 @@ const MembersTable = ({
               key={member.user_id}
               className={`
                 relative flex flex-col gap-3 p-4
-                border border-border/60 bg-card
-                ${isAuthor ? "border-t-2 border-t-[#8B1A1A]" : ""}
+                border bg-card
+                ${
+                  isAuthor
+                    ? "border-t-2 border-t-primary border-x-border border-b-border"
+                    : "border-border"
+                }
+                hover:bg-accent/20 transition-colors
               `}
             >
               {/* Paperclip mark */}
@@ -144,12 +138,12 @@ const MembersTable = ({
                 className={`
                   absolute -top-[7px] right-5 w-3 h-5
                   border-2 rounded-t-full border-b-0
-                  ${isAuthor ? "border-[#8B1A1A]" : "border-muted-foreground/40"}
+                  ${isAuthor ? "border-primary" : "border-muted-foreground/35"}
                 `}
               />
 
               {/* File number */}
-              <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-muted-foreground/50">
+              <span className="case-file text-xs text-muted-foreground">
                 File #{String(index + 1).padStart(3, "0")}
               </span>
 
@@ -157,7 +151,7 @@ const MembersTable = ({
               <Avatar
                 className={`
                   h-12 w-12 rounded-none border
-                  ${isAuthor ? "border-[#8B1A1A]/40" : "border-border/50"}
+                  ${isAuthor ? "border-primary/50" : "border-border/60"}
                 `}
               >
                 <AvatarImage
@@ -172,7 +166,7 @@ const MembersTable = ({
                     rounded-none font-mono text-sm font-bold
                     ${
                       isAuthor
-                        ? "bg-[#8B1A1A]/10 text-[#8B1A1A]"
+                        ? "bg-primary/10 text-primary"
                         : "bg-muted text-muted-foreground"
                     }
                   `}
@@ -183,10 +177,10 @@ const MembersTable = ({
 
               {/* Name + email */}
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold leading-tight text-foreground">
+                <p className="truncate text-sm font-semibold leading-tight text-foreground font-sans">
                   {member.full_name}
                 </p>
-                <p className="truncate font-mono text-[10px] text-muted-foreground mt-0.5">
+                <p className="truncate case-file text-xs text-muted-foreground mt-0.5 normal-case tracking-normal">
                   {member.email}
                 </p>
               </div>
@@ -196,9 +190,9 @@ const MembersTable = ({
                 {isAuthor ? "Author" : "Beta Reader"}
               </Badge>
 
-              {/* Divider + remove */}
+              {/* Footer: role label + remove */}
               <div className="mt-auto border-t border-border/40 pt-2 flex items-center justify-between">
-                <span className="font-mono text-[9px] tracking-[0.14em] uppercase text-muted-foreground/40">
+                <span className="case-file text-xs text-muted-foreground/60">
                   {isAuthor ? "Case Lead" : "Informant"}
                 </span>
                 {canRemove && (
@@ -207,10 +201,10 @@ const MembersTable = ({
                     onClick={() => handleRemoveMember(member)}
                     aria-label={`Remove ${member.full_name}`}
                     className="
-                      font-mono text-[9px] tracking-[0.14em] uppercase
-                      text-muted-foreground/50 border border-border/40
-                      px-1.5 py-0.5 rounded-none
-                      hover:border-[#8B1A1A]/60 hover:text-[#8B1A1A]
+                      case-file text-xs
+                      text-muted-foreground border border-border/50
+                      px-2 py-0.5
+                      hover:border-destructive hover:text-destructive
                       disabled:opacity-30 disabled:cursor-not-allowed
                       transition-colors
                     "
@@ -235,14 +229,11 @@ const MembersTable = ({
   );
 };
 
-// ── Shared section header ──────────────────────────────────────────────────────
 function SectionHeader({ title, count }: { title: string; count: number }) {
   return (
     <div className="mb-5 flex items-baseline justify-between border-b border-border/60 pb-3">
-      <h4 className="mystery-title text-lg uppercase tracking-widest">
-        {title}
-      </h4>
-      <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground/50">
+      <h4 className="mystery-title text-xl text-foreground">{title}</h4>
+      <span className="case-file text-xs text-muted-foreground">
         {count} on file
       </span>
     </div>

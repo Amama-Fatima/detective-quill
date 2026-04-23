@@ -1,9 +1,10 @@
+"use client";
+
 import ProjectRow from "./project-row";
 import { useSearchParams } from "next/navigation";
 import { tab_message } from "@/constants/project-constants";
 import NoProjectCard from "./no-project-card";
 import { Project } from "@detective-quill/shared-types";
-import { CornerOrnamentIcon } from "@/components/icons/corner-ornament-icon";
 
 interface ProjectsDisplayProps {
   projects: Project[];
@@ -13,7 +14,8 @@ export default function ProjectsDisplay({ projects }: ProjectsDisplayProps) {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
   const tabMeta = tab_message.find((m) => m.tab === tab);
-  const title = tabMeta?.title ?? "Projects";
+
+  const title = tabMeta?.title ?? "Investigations";
   const description =
     tabMeta?.description ??
     "The detective's desk is empty. Time to start a new investigation!";
@@ -23,48 +25,67 @@ export default function ProjectsDisplay({ projects }: ProjectsDisplayProps) {
   }
 
   return (
-    <div className="relative w-full border border-border rounded-sm overflow-hidden bg-card shadow-md">
-      {/* Corner ornaments — sit on top of the border on all four corners */}
-      <CornerOrnamentIcon className="pointer-events-none absolute left-1 top-1 z-10 h-10 w-10 text-border/70" />
-      <CornerOrnamentIcon className="pointer-events-none absolute right-1 top-1 z-10 h-10 w-10 rotate-90 text-border/70" />
-      <CornerOrnamentIcon className="pointer-events-none absolute left-1 bottom-1 z-10 h-10 w-10 -rotate-90 text-border/70" />
-      <CornerOrnamentIcon className="pointer-events-none absolute right-1 bottom-1 z-10 h-10 w-10 rotate-180 text-border/70" />
-
-      {/* Table Header */}
-      <div className="grid grid-cols-[80px_1fr_120px_100px_80px_160px_110px] gap-0 border-b border-border bg-muted/40 px-4 py-2">
-        <span className="case-file text-[0.65rem] uppercase tracking-widest text-muted-foreground font-semibold">
-          Case #
+    <div className="relative w-full">
+      {/* ── Cabinet label ── */}
+      <div className="mb-3 flex items-baseline justify-between px-0.5">
+        <h2 className="mystery-title text-lg text-foreground">{title}</h2>
+        <span className="case-file text-xs text-muted-foreground">
+          {projects.length} {projects.length === 1 ? "file" : "files"} on record
         </span>
-        <span className="case-file text-[0.65rem] uppercase tracking-widest text-muted-foreground font-semibold">
-          Title &amp; Summary
-        </span>
-        <span className="case-file text-[0.65rem] uppercase tracking-widest text-muted-foreground font-semibold">
-          Status
-        </span>
-        <span className="case-file text-[0.65rem] uppercase tracking-widest text-muted-foreground font-semibold">
-          Length
-        </span>
-        <span className="case-file text-[0.65rem] uppercase tracking-widest text-muted-foreground font-semibold">
-          Last Entry
-        </span>
-        <span className="sr-only">Actions</span>
       </div>
 
-      {/* Table Rows */}
-      <div className="divide-y divide-border/60">
-        {projects.map((project, index) => (
-          <ProjectRow key={project.id} project={project} index={index + 1} />
-        ))}
-      </div>
+      {/* ── Cabinet frame ── */}
+      <div className="relative border border-border bg-card overflow-hidden">
+        {/* Corner ornaments — ✦ using foreground/border tokens */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-2 top-2 font-mono text-xs leading-none text-border z-10 select-none"
+        >
+          ✦
+        </span>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-2 top-2 font-mono text-xs leading-none text-border z-10 select-none"
+        >
+          ✦
+        </span>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-2 bottom-9 font-mono text-xs leading-none text-border z-10 select-none"
+        >
+          ✦
+        </span>
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-2 bottom-9 font-mono text-xs leading-none text-border z-10 select-none"
+        >
+          ✦
+        </span>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between border-t border-border bg-muted/20 px-4 py-2">
-        <span className="case-file text-[0.65rem] text-muted-foreground uppercase tracking-widest">
-          Showing {projects.length} of {projects.length}
-        </span>
-        <span className="case-file text-[0.65rem] text-muted-foreground uppercase tracking-widest italic">
-          Detective&apos;s Quill
-        </span>
+        {/* ── Column header ── */}
+        <div className="grid grid-cols-[76px_1fr_140px] border-b border-border bg-muted">
+          <div className="pl-5 py-2.5 border-r border-border/40">
+            <span className="case-file text-xs text-muted-foreground">
+              File #
+            </span>
+          </div>
+          <div className="pl-5 py-2.5 border-r border-border/40">
+            <span className="case-file text-xs text-muted-foreground">
+              Title &amp; Summary
+            </span>
+          </div>
+          <div className="px-5 py-2.5">
+            <span className="case-file text-xs text-muted-foreground">
+              Status
+            </span>
+          </div>
+        </div>
+
+        <div>
+          {projects.map((project, index) => (
+            <ProjectRow key={project.id} project={project} index={index + 1} />
+          ))}
+        </div>
       </div>
     </div>
   );

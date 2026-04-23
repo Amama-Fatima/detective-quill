@@ -1,30 +1,29 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-
 import { cn } from "@/lib/utils/utils";
 
 const badgeVariants = cva(
-  // Base: no rounding, monospace, tight uppercase tracking — stamped label feel
-  "inline-flex items-center justify-center rounded-none border px-2 py-0.5 text-[10px] font-bold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring aria-invalid:border-destructive transition-colors overflow-hidden tracking-[0.18em] uppercase font-mono",
+  // Base: sharp corners, mono font, uppercase — stamped label feel
+  "inline-flex items-center justify-center rounded-none border px-2.5 py-0.5 text-xs font-bold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3.5 gap-1.5 [&>svg]:pointer-events-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring aria-invalid:border-destructive transition-colors overflow-hidden tracking-[0.16em] uppercase font-mono",
   {
     variants: {
       variant: {
-        // Solid dark — official stamp, authority mark (Author, Active, …)
+        // Solid primary — authority stamp (Author, Active)
         default:
-          "border-foreground bg-foreground text-background [a&]:hover:bg-foreground/85 [a&]:hover:border-foreground/85",
+          "border-primary bg-primary text-primary-foreground [a&]:hover:bg-primary/85",
 
-        // Hollow with border — typewritten field label (Beta Reader, Pending, …)
+        // Hollow — typewritten field label (Beta Reader, Pending)
         secondary:
-          "border-foreground/40 bg-transparent text-foreground/70 [a&]:hover:border-foreground/60 [a&]:hover:text-foreground",
+          "border-muted-foreground/50 bg-transparent text-secondary-foreground [a&]:hover:border-foreground/70 [a&]:hover:text-foreground",
 
-        // Red ink — something went wrong or must be noticed (Revoked, Closed, …)
+        // Destructive — red ink (Revoked, Closed, Suspect)
         destructive:
-          "border-[#8B1A1A] bg-transparent text-[#8B1A1A] dark:border-[#c97070] dark:text-[#c97070] [a&]:hover:bg-[#8B1A1A]/10",
+          "border-destructive bg-transparent text-destructive [a&]:hover:bg-destructive/10",
 
-        // Dashed faint border — faded, unconfirmed, ghost stamp (Unverified, …)
+        // Outline — faded ghost stamp (Unverified, Unknown)
         outline:
-          "border-dashed border-foreground/25 bg-transparent text-foreground/45 [a&]:hover:border-foreground/40 [a&]:hover:text-foreground/60",
+          "border-dashed border-border bg-transparent text-muted-foreground [a&]:hover:border-muted-foreground [a&]:hover:text-foreground",
       },
     },
     defaultVariants: {
@@ -41,7 +40,6 @@ function Badge({
 }: React.ComponentProps<"span"> &
   VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "span";
-
   return (
     <Comp
       data-slot="badge"

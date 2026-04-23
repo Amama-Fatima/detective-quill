@@ -1,118 +1,110 @@
+"use client";
+
 import Link from "next/link";
 import { Project } from "@detective-quill/shared-types";
-import { Badge } from "../ui/badge";
-import { getStatusColor, getStatusIcon } from "@/lib/utils/project-utils";
-import { CaseFileIcon } from "@/components/icons/case-file-icon";
-import { ClockIcon } from "../icons/clock-icon";
+import { Badge } from "@/components/ui/badge";
 import { formatDate } from "date-fns";
-import { ChevronRight } from "lucide-react";
 
 interface ProjectRowProps {
   project: Project;
   index: number;
 }
 
+function getStatusVariant(
+  status: string,
+): "default" | "secondary" | "destructive" | "outline" {
+  switch (status) {
+    case "active":
+      return "default"; // solid primary — navy stamp
+    case "completed":
+      return "secondary"; // hollow border
+    case "archived":
+      return "outline"; // faded dashed
+    default:
+      return "outline";
+  }
+}
+
+// Left tab accent colour — uses CSS variables where possible
+function getTabClass(status: string) {
+  switch (status) {
+    case "active":
+      return "bg-primary";
+    case "completed":
+      return "bg-chart-4"; // oklch(62% 0.08 155) — muted green
+    case "archived":
+      return "bg-muted-foreground/40";
+    default:
+      return "bg-border";
+  }
+}
+
 export default function ProjectRow({ project, index }: ProjectRowProps) {
   const formattedUpdatedAt = project.updated_at
     ? formatDate(new Date(project.updated_at), "MMM d, yyyy")
-    : "Unknown date";
+    : "Unknown";
 
   const caseNumber = String(index).padStart(3, "0");
+  const chapterCount = (project as any).chapter_count;
 
   return (
-    <div className="group grid grid-cols-[80px_1fr_120px_100px_80px_160px_110px] gap-0 items-center px-4 py-3 hover:bg-muted/30 transition-colors duration-150 cursor-pointer">
-      {/* Case Number */}
-      <div className="flex flex-col gap-0.5">
-        <span className="case-file text-[0.6rem] uppercase tracking-widest text-muted-foreground">
-          Case #
+    <div className="group relative flex items-stretch border-b border-border/50 last:border-b-0 hover:bg-accent/30 transition-colors duration-100">
+      {/* ── Coloured left tab ── */}
+      <div
+        className={`w-1.5 shrink-0 transition-all duration-150 group-hover:w-2 ${getTabClass(project.status)}`}
+      />
+
+      {/* ── File number ── */}
+      <div className="flex flex-col justify-center gap-0.5 px-4 py-4 min-w-[76px] border-r border-border/40">
+        <span className="case-file text-[11px] text-muted-foreground">
+          File
         </span>
-        <span className="case-file text-sm font-semibold text-foreground">
+        <span className="font-mono text-xl font-bold leading-none text-foreground">
           {caseNumber}
         </span>
       </div>
 
-      {/* Title & Summary */}
-      <div className="flex items-center gap-3 min-w-0 pr-4">
-        <div className="shrink-0 p-1.5 rounded-sm bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
-          <CaseFileIcon className="h-4 w-4" />
-        </div>
-        <div className="min-w-0">
-          <Link
-            href={`/workspace/${project.id}`}
-            className="font-serif text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1"
-          >
-            {project.title}
-          </Link>
-          <p className="noir-text text-[0.75rem] text-muted-foreground italic line-clamp-1 mt-0.5">
-            {project.description || "No case summary available..."}
-          </p>
-        </div>
-      </div>
-
-      {/* Status */}
-      <div>
-        <Badge
-          className={`text-[0.65rem] case-file px-2 py-0.5 ${getStatusColor(project.status)}`}
-        >
-          {getStatusIcon(project.status)}
-          <span className="ml-1">{project.status.toUpperCase()}</span>
-        </Badge>
-      </div>
-
-      {/* Suspects — placeholder avatars if no suspect data */}
-      {/* <div className="flex items-center -space-x-2">
-        {(project as any).suspects?.slice(0, 3).map((s: any, i: number) => (
-          <div
-            key={i}
-            className="h-6 w-6 rounded-full border-2 border-card bg-muted overflow-hidden"
-            title={s.name}
-          >
-            {s.avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={s.avatar}
-                alt={s.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="h-full w-full bg-primary/20 flex items-center justify-center">
-                <span className="text-[0.5rem] font-bold text-primary">
-                  {s.name?.[0] ?? "?"}
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
-        {(project as any).suspects?.length > 3 && (
-          <div className="h-6 w-6 rounded-full border-2 border-card bg-muted flex items-center justify-center">
-            <span className="text-[0.5rem] text-muted-foreground font-semibold">
-              +{(project as any).suspects.length - 3}
-            </span>
-          </div>
-        )}
-      </div> */}
-
-      {/* Length (chapters) */}
-      <div className="case-file text-sm text-muted-foreground">
-        {(project as any).chapter_count != null
-          ? `${(project as any).chapter_count} ch.`
-          : "—"}
-      </div>
-
-      {/* Last Entry */}
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground noir-text">
-        <ClockIcon size={12} />
-        <span>{formattedUpdatedAt}</span>
-      </div>
-
-      {/* Open File */}
-      <div className="flex items-center justify-end">
+      {/* ── Title + description + meta ── */}
+      <div className="flex-1 min-w-0 py-4 px-5 border-r border-border/40">
         <Link
           href={`/workspace/${project.id}`}
-          className="case-file flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors font-semibold tracking-wide"
+          className="mystery-title text-base leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-1"
+        >
+          {project.title}
+        </Link>
+        <p className="noir-text text-sm text-muted-foreground italic mt-1 line-clamp-1">
+          {project.description || "No case summary available."}
+        </p>
+        <div className="mt-2 flex items-center gap-3">
+          {chapterCount != null && (
+            <span className="case-file text-xs text-muted-foreground">
+              {chapterCount} ch.
+            </span>
+          )}
+          <span className="case-file text-xs text-muted-foreground">
+            · Updated {formattedUpdatedAt}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Status + action ── */}
+      <div className="flex flex-col items-end justify-center gap-3 px-5 py-4 shrink-0 min-w-[140px]">
+        <Badge variant={getStatusVariant(project.status)}>
+          {project.status}
+        </Badge>
+
+        <Link
+          href={`/workspace/${project.id}`}
+          className="
+            case-file text-xs
+            border border-border px-3 py-1
+            text-foreground/70
+            hover:border-primary hover:text-primary
+            transition-colors inline-flex items-center gap-2
+          "
         >
           Open File
-          <ChevronRight className="h-3.5 w-3.5" />
+          <span className="text-sm leading-none">→</span>
         </Link>
       </div>
     </div>

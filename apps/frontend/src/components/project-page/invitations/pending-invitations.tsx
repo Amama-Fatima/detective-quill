@@ -37,10 +37,10 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
     <div>
       {/* Section header */}
       <div className="mb-5 flex items-baseline justify-between border-b border-border/60 pb-3">
-        <h4 className="mystery-title text-lg uppercase tracking-widest">
+        <h4 className="mystery-title text-xl text-foreground">
           Awaiting Response
         </h4>
-        <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground/50">
+        <span className="case-file text-xs text-muted-foreground">
           {invitations.length} outstanding
         </span>
       </div>
@@ -50,20 +50,15 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
           {invitations.map((invitation) => (
             <li
               key={invitation.invite_code}
-              className="
-                flex items-center justify-between gap-4
-                border border-border/50 bg-card
-                px-4 py-3
-              "
+              className="flex items-center justify-between gap-4 border border-border/50 bg-card px-4 py-3 hover:bg-accent/20 transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
-                {/* Hand-drawn envelope shape */}
                 <EnvelopeIcon />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground font-mono">
                     {invitation.email}
                   </p>
-                  <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-muted-foreground/50 mt-0.5">
+                  <p className="case-file text-xs text-muted-foreground mt-0.5">
                     Dispatch pending
                   </p>
                 </div>
@@ -73,10 +68,10 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
                 disabled={deleting}
                 onClick={() => handleDeleteInvitation(invitation)}
                 className="
-                  shrink-0 font-mono text-[9px] tracking-[0.18em] uppercase
-                  border border-border/50 px-2.5 py-1 rounded-none
-                  text-muted-foreground/60
-                  hover:border-[#8B1A1A]/60 hover:text-[#8B1A1A]
+                  shrink-0 case-file text-xs
+                  border border-border/60 px-3 py-1
+                  text-muted-foreground
+                  hover:border-destructive hover:text-destructive
                   disabled:opacity-30 disabled:cursor-not-allowed
                   transition-colors
                 "
@@ -87,15 +82,9 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
           ))}
         </ul>
       ) : (
-        <div
-          className="
-            flex items-center justify-center gap-3
-            border border-dashed border-border/50
-            min-h-24 rounded-none
-          "
-        >
+        <div className="flex items-center justify-center gap-3 border border-dashed border-border/50 min-h-24">
           <EnvelopeIcon faded />
-          <span className="noir-text text-sm text-muted-foreground/50 font-mono tracking-wider uppercase text-[11px]">
+          <span className="case-file text-xs text-muted-foreground">
             No dispatches outstanding
           </span>
         </div>
@@ -104,7 +93,6 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
   );
 };
 
-// ── Envelope SVG ───────────────────────────────────────────────────────────────
 function EnvelopeIcon({ faded = false }: { faded?: boolean }) {
   return (
     <svg
@@ -113,21 +101,19 @@ function EnvelopeIcon({ faded = false }: { faded?: boolean }) {
       viewBox="0 0 28 20"
       fill="none"
       aria-hidden
-      className={`shrink-0 ${faded ? "opacity-20" : "opacity-60"}`}
+      className={`shrink-0 text-muted-foreground ${faded ? "opacity-20" : "opacity-50"}`}
     >
-      {/* envelope body */}
       <rect
         x="0.75"
         y="0.75"
         width="26.5"
         height="18.5"
-        stroke="#8B8070"
+        stroke="currentColor"
         strokeWidth="1.5"
       />
-      {/* flap fold */}
       <polyline
         points="0.75,0.75 14,11 27.25,0.75"
-        stroke="#8B8070"
+        stroke="currentColor"
         strokeWidth="1.5"
         fill="none"
       />
