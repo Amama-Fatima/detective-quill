@@ -1,11 +1,9 @@
 import modal
-import pika
 import json
 
 
 from src.config import settings
 from src.utils.logger import setup_logger
-from knowledge_graph_worker import KnowledgeGraphWorker
 from modal_app import app, image, secrets
 
 
@@ -17,6 +15,8 @@ from modal_app import app, image, secrets
     timeout=1800,
 )
 def poll_queue():
+    import pika
+    from knowledge_graph_worker import KnowledgeGraphWorker
 
     logger = setup_logger(__name__)
 

@@ -3,7 +3,6 @@ import json
 from typing import List, Tuple, Optional
 
 from src.models.schemas import Entity, Relationship
-from src.models.llm_loader import get_llm_loader
 from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -39,6 +38,8 @@ def _deduplicate_relationships(rels: List[Relationship]) -> List[Relationship]:
 class BatchLLMProcessor:
 
     def __init__(self):
+        from src.models.llm_loader import get_llm_loader
+
         self.llm_loader = get_llm_loader()
 
     def process_batch(

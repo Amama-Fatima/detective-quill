@@ -1,5 +1,3 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from typing import Optional
 
 from src.config import settings
@@ -26,6 +24,9 @@ class LLMModelLoader:
             self._load_model()
 
     def _load_model(self):
+        import torch
+        from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+
         logger.info("=" * 60)
         logger.info("Loading LLM Model")
         logger.info("=" * 60)
@@ -101,6 +102,8 @@ class LLMModelLoader:
         return self._device
 
     def generate(self, prompt: str, max_tokens: int = 512) -> str:
+        import torch
+
         formatted_prompt = (
             "<|im_start|>system\n"
             "You are an expert literary analyst. "
