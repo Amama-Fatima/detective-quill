@@ -18,6 +18,7 @@ async function bootstrap() {
       urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
       queue: "invite_email_queue",
       queueOptions: { durable: true },
+      noAck: true,
     },
   });
 
@@ -27,7 +28,7 @@ async function bootstrap() {
       urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
       queue: "commit_jobs_queue",
       queueOptions: { durable: true },
-      noAck: false,
+      noAck: true,
     },
   });
 
