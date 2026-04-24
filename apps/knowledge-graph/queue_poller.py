@@ -6,6 +6,10 @@ from src.config import settings
 from src.utils.logger import setup_logger
 from modal_app import app, image, secrets
 
+import pika
+from knowledge_graph_worker import KnowledgeGraphWorker
+
+logger = setup_logger(__name__)
 
 # this decorator makes the model trigger this function periodically based on the schedule defined
 @app.function(
@@ -15,10 +19,8 @@ from modal_app import app, image, secrets
     timeout=1800,
 )
 def poll_queue():
-    import pika
-    from knowledge_graph_worker import KnowledgeGraphWorker
 
-    logger = setup_logger(__name__)
+
 
     if not settings.CLOUDAMQP_URL:
         raise ValueError("Missing CLOUDAMQP_URL (or RABBITMQ_URL) in environment")

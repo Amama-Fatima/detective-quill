@@ -125,7 +125,7 @@ class EntityPostProcessor:
                 continue
             
             if entity.type == 'GPE' and len(entity.name.split()) <= 2:
-                entity.attributes['uncertain_type'] = True
+                entity.type = "uncertain_location"
         
         return entities
 

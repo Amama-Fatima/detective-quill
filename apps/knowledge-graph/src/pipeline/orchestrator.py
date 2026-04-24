@@ -1,6 +1,5 @@
-from typing import List
 from src.config import settings
-from src.models.schemas import Entity, Relationship, PipelineResult, PipelineMetadata
+from src.models.schemas import PipelineResult, PipelineMetadata
 from src.pipeline.layer1_spacy import extract_entities_layer1
 from src.pipeline.layer2_postprocess import postprocess_entities_layer2
 from src.pipeline.layer3_enrichment import enrich_and_extract_batch
@@ -33,7 +32,7 @@ class NarrativeAnalysisPipeline:
         num_raw_entities = len(raw_entities)
 
         if resolved_text != scene_text and verbose:
-            logger.info(f"✓ Coreference resolution applied")
+            logger.info(f"Coreference resolution applied")
             logger.info(f"  Original: {scene_text}")
             logger.info(f"  Resolved: {resolved_text}")
 

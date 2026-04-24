@@ -85,8 +85,7 @@ def _create_scene(tx, scene_id, user_id, scene_text):
         """
         MERGE (s:Scene {scene_id: $scene_id})
         SET s.user_id       = $user_id,
-            s.scene_text    = $scene_text,
-            s.resolved_text = $resolved_text
+            s.scene_text    = $scene_text
         """,
         scene_id=scene_id,
         user_id=user_id,
@@ -100,7 +99,6 @@ def _create_entity(tx, entity: Entity, scene_id: str):
         f"""
         MERGE (e:{label} {{name: $name}})
         SET e.type        = $type,
-            e.description = $description,
             e.role        = $role
         WITH e
         MATCH (s:Scene {{scene_id: $scene_id}})
@@ -109,8 +107,7 @@ def _create_entity(tx, entity: Entity, scene_id: str):
         """,
         name=entity.name,
         type=entity.type,
-        description=entity.attributes.get("description"),
-        role=entity.attributes.get("role"),
+        role=entity.role,
         mentions=entity.mentions,
         scene_id=scene_id,
     )
@@ -123,15 +120,11 @@ def _create_relationship(tx, rel: Relationship, scene_id: str):
         MATCH (a {{name: $source}})
         MATCH (b {{name: $target}})
         MERGE (a)-[r:{rel_type}]->(b)
-        SET r.description = $description,
-            r.confidence  = $confidence,
-            r.scene_id    = $scene_id,
+        SET r.scene_id    = $scene_id,
             r.when        = $when
         """,
         source=rel.source,
         target=rel.target,
-        description=rel.description,
-        confidence=rel.confidence,
         scene_id=scene_id,
         when=rel.when,
     )

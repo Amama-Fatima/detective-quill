@@ -7,15 +7,12 @@ from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
-VALID_ROLES = {'detective', 'suspect', 'victim', 'witness', 'object', 'location', 'other'}
-
 
 def _format_entity_list(entities: List[Entity]) -> str:
     return "\n".join(f"- {e.name} (type: {e.type})" for e in entities)
 
 
 def _match_name(name: str, entities: List[Entity]) -> Optional[str]:
-    """Fuzzy-match an LLM-returned name back to a canonical entity name."""
     nl = name.lower().strip()
     for e in entities:
         cn = e.name.lower()
@@ -50,45 +47,28 @@ class BatchLLMProcessor:
 
         entity_list_str = _format_entity_list(entities)
 
-        prompt = f"""Scene:
-\"\"\"{scene_text[:1500]}\"\"\"
+        prompt = f"""<scene>
+{scene_text[:1500]}
+</scene>
 
-Detected entities:
-{entity_list_str}
+Entities: {entity_list_str}
 
-Output ONLY this JSON (no other text):
+Respond with ONLY valid JSON. No explanation, no markdown.
+
 {{
   "entities": [
-    {{"name": "<exact name from list above>", "role": "<detective|suspect|victim|witness|object|location|other>", "description": "<what the scene says about them>", "attributes": {{}}}}
+    {{"name": "<exact name>", "role": "<detective|suspect|victim|witness|object|location|or any human relation e.g. wife, son, neighbor>"}}
   ],
   "relationships": [
-    {{"source": "<entity name>", "target": "<entity name>", "type": "<snake_case_verb>", "description": "<brief evidence from scene>", "when": "<time if mentioned, else null>"}},
-    {{"source": "<entity name>", "target": "<entity name>", "type": "<snake_case_verb>", "description": "<brief evidence from scene>", "when": "<time if mentioned, else null>"}}
+    {{"source": "<name>", "target": "<name>", "relation_type": "<snake_case_verb>", "when": "<time or null>"}}
   ]
 }}
 
-Time extraction rules:
-- Extract time expressions as they appear: "10 minutes to 5", "after noon", "5 PM", "at midnight", etc.
-- Include only if the time is explicitly mentioned in the scene for that interaction
-- Set "when" to null if no specific time is mentioned for that relationship
-- Extract time for only crime related relationships, not for general interactions
-
-Extract MEANINGFUL relationships between entities. Multiple MEANINGFUL relationships are acceptable.
-
-IMPORTANT — Relationship consolidation:
-If multiple interactions between the same pair represent variations of the same action
-(e.g., "serves", "pours", "makes_drink" are all serving), combine them into ONE relationship.
-Use the most general/canonical verb and include all variations in the description.
-Example: type="serve", description="serves him drinks: makes, pours, and serves throughout the scene"
-Do NOT output separate relationships for minor variations of the same core action.
-
-Relationship priority — check in order, use the first tier that applies:
-TIER 1 (crime/violence — always extract if present): murder, kill, attack, stab, hit, strangle, shoot, threaten, confront, accuse, assault, fight
-TIER 2 (interpersonal — extract if clearly shown): love, hate, marry, kiss, greet, wait_for, serve, help, trust, suspect, argue, comfort, betray, threaten, found_her_behavior_weird, found_him_eerie
-TIER 3 (situational — use as fallback, but ALWAYS extract something if characters interact): talk_to, drink_with, sit_with, live_with, know, prepare_for, share_space_with
-Other than these types of interactions do not include any other relationships which seem insignificant.
-
-Rule: if two characters interact in any way, include a relationship — use Tier 3 at minimum. Extract ONLY meaningful pairs one or more. Only extract relationship if it is truly meaningful."""
+Rules:
+- Extract 1–3 relationships only between entities that clearly interact
+- Priority: crime/violence (stab, murder, fight, hit) > interpersonal (comfort, betray, threaten, help, marry) > situational (talk_to, sit_with)
+- If no interaction exists between entities, omit the relationship entirely
+- "when": exact time string only if explicitly stated for a crime-related interaction, else null"""
 
         logger.info(f"Batch LLM call: {len(entities)} entities")
         response = self.llm_loader.generate(prompt, max_tokens=2000)
@@ -127,14 +107,8 @@ Rule: if two characters interact in any way, include a relationship — use Tier
                 continue
 
             role = item.get('role', 'other')
-            if role not in VALID_ROLES:
-                role = 'other'
+            entity_map[canonical].role = role
 
-            entity_map[canonical].attributes = {
-                'description': item.get('description', ''),
-                'role': role,
-                **{k: v for k, v in item.get('attributes', {}).items()},
-            }
             logger.debug(f"  Enriched '{canonical}' — role: {role}")
 
         enriched = list(entity_map.values())
@@ -153,7 +127,7 @@ Rule: if two characters interact in any way, include a relationship — use Tier
                 )
                 continue
 
-            rel_type = (item.get('type') or 'related_to').strip() or 'related_to'
+            rel_type = (item.get('relation_type') or 'related_to').strip() or 'related_to'
             when = item.get('when')
             if when and isinstance(when, str):
                 when = when.strip() or None
@@ -162,8 +136,6 @@ Rule: if two characters interact in any way, include a relationship — use Tier
                 source=source,
                 target=target,
                 relation_type=rel_type,
-                description=item.get('description', ''),
-                confidence=0.9,
                 when=when,
             ))
             time_str = f" @ {when}" if when else ""
@@ -188,7 +160,7 @@ def enrich_and_extract_batch(
 
     logger.info(f"Layer 3+4 complete: {len(enriched_entities)} entities, {len(relationships)} relationships")
     for e in enriched_entities:
-        logger.debug(f"  {e.name} ({e.type}) — role: {e.attributes.get('role', '—')}")
+        logger.debug(f"  {e.name} ({e.type}) — role: {e.role}")
     for r in relationships:
         logger.debug(f"  {r.source} --[{r.relation_type}]--> {r.target}")
 
