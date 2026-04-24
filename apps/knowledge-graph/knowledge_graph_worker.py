@@ -61,7 +61,6 @@ class KnowledgeGraphWorker:
                 scene_id=fs_node_id,
                 user_id=user_id,
                 scene_text=scene_text,
-                resolved_text=result.resolved_text,
                 entities=result.entities,
                 relationships=result.relationships,
             )

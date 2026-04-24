@@ -11,6 +11,9 @@ BLOCKED_KEYWORDS = (
     "DELETE",
     "MERGE",
     "SET",
+    "REMOVE",
+    "DROP",
+    "DETACH",
 )
 
 

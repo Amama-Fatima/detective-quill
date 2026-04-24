@@ -43,7 +43,6 @@ def save_graph_layer5(
     scene_id: str,
     user_id: str,
     scene_text: str,
-    resolved_text: str,
     entities: List[Entity],
     relationships: List[Relationship],
 ) -> dict:
@@ -55,7 +54,7 @@ def save_graph_layer5(
 
     try:
         with driver.session() as session:
-            session.execute_write(_create_scene, scene_id, user_id, scene_text, resolved_text)
+            session.execute_write(_create_scene, scene_id, user_id, scene_text)
             logger.info(f"Created Scene node: {scene_id}")
 
             for entity in entities:
@@ -81,7 +80,7 @@ def save_graph_layer5(
     }
 
 
-def _create_scene(tx, scene_id, user_id, scene_text, resolved_text):
+def _create_scene(tx, scene_id, user_id, scene_text):
     tx.run(
         """
         MERGE (s:Scene {scene_id: $scene_id})
@@ -92,7 +91,6 @@ def _create_scene(tx, scene_id, user_id, scene_text, resolved_text):
         scene_id=scene_id,
         user_id=user_id,
         scene_text=scene_text,
-        resolved_text=resolved_text,
     )
 
 
@@ -139,71 +137,66 @@ def _create_relationship(tx, rel: Relationship, scene_id: str):
     )
 
 
-def get_scene_graph(scene_id: str) -> dict:
-    """
-    Retrieves the full graph for a scene — called by NestJS backend.
-    Returns nodes and edges in a format ready for the frontend.
-    """
+# def get_scene_graph(scene_id: str) -> dict:
+#     driver = _get_neo4j_driver()
 
-    driver = _get_neo4j_driver()
-
-    try:
-        with driver.session() as session:
-            result = session.execute_read(_fetch_scene_graph, scene_id)
-        return result
-    finally:
-        driver.close()
+#     try:
+#         with driver.session() as session:
+#             result = session.execute_read(_fetch_scene_graph, scene_id)
+#         return result
+#     finally:
+#         driver.close()
 
 
-def _fetch_scene_graph(tx, scene_id: str) -> dict:
-    records = tx.run(
-        """
-        MATCH (e)-[r:APPEARS_IN]->(s:Scene {scene_id: $scene_id})
-        OPTIONAL MATCH (e)-[rel]->(e2)
-        WHERE NOT type(rel) = 'APPEARS_IN'
-          AND (e2)-[:APPEARS_IN]->(s)
-        RETURN 
-            e.name        AS source_name,
-            labels(e)[0]  AS source_label,
-            e.role        AS source_role,
-            e2.name       AS target_name,
-            labels(e2)[0] AS target_label,
-            type(rel)     AS rel_type,
-            rel.description AS rel_description,
-            rel.confidence  AS rel_confidence
-        """,
-        scene_id=scene_id,
-    )
+# def _fetch_scene_graph(tx, scene_id: str) -> dict:
+#     records = tx.run(
+#         """
+#         MATCH (e)-[r:APPEARS_IN]->(s:Scene {scene_id: $scene_id})
+#         OPTIONAL MATCH (e)-[rel]->(e2)
+#         WHERE NOT type(rel) = 'APPEARS_IN'
+#           AND (e2)-[:APPEARS_IN]->(s)
+#         RETURN 
+#             e.name        AS source_name,
+#             labels(e)[0]  AS source_label,
+#             e.role        AS source_role,
+#             e2.name       AS target_name,
+#             labels(e2)[0] AS target_label,
+#             type(rel)     AS rel_type,
+#             rel.description AS rel_description,
+#             rel.confidence  AS rel_confidence
+#         """,
+#         scene_id=scene_id,
+#     )
 
-    nodes = {}
-    edges = []
+#     nodes = {}
+#     edges = []
 
-    for record in records:
-        src = record["source_name"]
-        if src and src not in nodes:
-            nodes[src] = {
-                "id":    src,
-                "label": record["source_label"],
-                "role":  record["source_role"],
-            }
+#     for record in records:
+#         src = record["source_name"]
+#         if src and src not in nodes:
+#             nodes[src] = {
+#                 "id":    src,
+#                 "label": record["source_label"],
+#                 "role":  record["source_role"],
+#             }
 
-        tgt = record["target_name"]
-        if tgt:
-            if tgt not in nodes:
-                nodes[tgt] = {
-                    "id":    tgt,
-                    "label": record["target_label"],
-                    "role":  None,
-                }
-            edges.append({
-                "source":      src,
-                "target":      tgt,
-                "type":        record["rel_type"],
-                "description": record["rel_description"],
-                "confidence":  record["rel_confidence"],
-            })
+#         tgt = record["target_name"]
+#         if tgt:
+#             if tgt not in nodes:
+#                 nodes[tgt] = {
+#                     "id":    tgt,
+#                     "label": record["target_label"],
+#                     "role":  None,
+#                 }
+#             edges.append({
+#                 "source":      src,
+#                 "target":      tgt,
+#                 "type":        record["rel_type"],
+#                 "description": record["rel_description"],
+#                 "confidence":  record["rel_confidence"],
+#             })
 
-    return {
-        "nodes": list(nodes.values()),
-        "edges": edges,
-    }
+#     return {
+#         "nodes": list(nodes.values()),
+#         "edges": edges,
+#     }
