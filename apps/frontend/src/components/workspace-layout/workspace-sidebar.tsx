@@ -8,6 +8,7 @@ import {
   LayoutDashboardIcon,
   FolderOpenIcon,
 } from "lucide-react";
+import Image from "next/image";
 
 interface WorkspaceSidebarProps {
   projectId: string;
@@ -50,20 +51,31 @@ export default function WorkspaceSidebar({
       `}
     >
       {/* ── Brand ── */}
-      <div className="relative flex items-center px-6 py-7 border-b border-primary-foreground/10 min-h-[80px]">
+      <div
+        className={`relative flex items-center px-6 py-7 border-b border-primary/10 min-h-20 ${collapsed ? "bg-primary" : "bg-primary-foreground"}`}
+      >
         <Link href="/" className="block overflow-hidden">
           {collapsed ? (
-            <span className="font-playfair-display text-[20px] font-bold text-primary-foreground/90 leading-none">
-              Q
-            </span>
+            <Image
+              src="/quill.svg"
+              alt="Detective's Quill Logo"
+              fill
+              sizes="180px"
+              className="object-cover object-center"
+            />
           ) : (
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.2em] text-primary-foreground/35 mb-1.5 uppercase">
-                Detective&apos;s Quill
-              </p>
-              <p className="font-playfair-display text-[18px] font-bold text-primary-foreground/90 leading-snug whitespace-nowrap">
+            <div className="flex flex-col  justify-between">
+              <Image
+                src="/logo.png"
+                alt="Detective's Quill Logo"
+                fill
+                sizes="180px"
+                className="object-cover object-center"
+              />
+              {/* hello */}
+              {/* <p className="font-playfair-display text-[18px] font-bold text-primary-foreground/90 leading-snug whitespace-nowrap">
                 The Writer&apos;s Studio
-              </p>
+              </p> */}
             </div>
           )}
         </Link>
