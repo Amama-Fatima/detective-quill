@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Project } from "@detective-quill/shared-types";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "date-fns";
 
 interface ProjectRowProps {
@@ -10,30 +9,43 @@ interface ProjectRowProps {
   index: number;
 }
 
-function getStatusVariant(
-  status: string,
-): "default" | "secondary" | "destructive" | "outline" {
+function getStatusStyles(status: string) {
   switch (status) {
     case "active":
-      return "default"; // solid primary — navy stamp
+      return {
+        dot: "bg-primary-foreground",
+        text: "text-primary-foreground",
+        bg: "bg-primary",
+      };
     case "completed":
-      return "secondary"; // hollow border
+      return {
+        dot: "bg-primary-foreground",
+        text: "text-primary-foreground",
+        bg: "bg-chart-4",
+      };
     case "archived":
-      return "outline"; // faded dashed
+      return {
+        dot: "bg-muted-foreground",
+        text: "text-muted-foreground",
+        bg: "bg-muted border border-border",
+      };
     default:
-      return "outline";
+      return {
+        dot: "bg-border",
+        text: "text-muted-foreground",
+        bg: "bg-muted border border-border",
+      };
   }
 }
 
-// Left tab accent colour — uses CSS variables where possible
 function getTabClass(status: string) {
   switch (status) {
     case "active":
       return "bg-primary";
     case "completed":
-      return "bg-chart-4"; // oklch(62% 0.08 155) — muted green
+      return "bg-chart-4";
     case "archived":
-      return "bg-muted-foreground/40";
+      return "bg-muted-foreground/50";
     default:
       return "bg-border";
   }
@@ -46,65 +58,77 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
 
   const caseNumber = String(index).padStart(3, "0");
   const chapterCount = (project as any).chapter_count;
+  const status = getStatusStyles(project.status);
 
   return (
-    <div className="group relative flex items-stretch border-b border-border/50 last:border-b-0 hover:bg-accent/30 transition-colors duration-100">
-      {/* ── Coloured left tab ── */}
+    <div className="group relative grid grid-cols-[72px_1fr_152px] items-stretch border-b border-border/50 last:border-b-0 hover:bg-accent/20 transition-colors duration-100">
+      {/* Coloured left tab */}
       <div
-        className={`w-1.5 shrink-0 transition-all duration-150 group-hover:w-2 ${getTabClass(project.status)}`}
+        className={`absolute left-0 top-0 bottom-0 w-[3px] transition-all duration-150 group-hover:w-[4px] ${getTabClass(project.status)}`}
       />
 
-      {/* ── File number ── */}
-      <div className="flex flex-col justify-center gap-0.5 px-4 py-4 min-w-[76px] border-r border-border/40">
-        <span className="case-file text-[11px] text-muted-foreground">
-          File
+      {/* File number — demoted, supporting role */}
+      <div className="flex flex-col justify-center pl-5 pr-3 py-4 border-r border-border/40">
+        <span className="case-file text-[9px] tracking-[0.14em] text-muted-foreground/60 leading-none mb-1">
+          FILE
         </span>
-        <span className="font-mono text-xl font-bold leading-none text-foreground">
+        <span className="font-mono text-[12px] font-semibold leading-none text-muted-foreground group-hover:text-foreground/80 transition-colors">
           {caseNumber}
         </span>
       </div>
 
-      {/* ── Title + description + meta ── */}
-      <div className="flex-1 min-w-0 py-4 px-5 border-r border-border/40">
+      {/* Title + description + meta */}
+      <div className="min-w-0 py-4 px-5 border-r border-border/40">
         <Link
           href={`/workspace/${project.id}`}
-          className="mystery-title text-base leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-1"
+          className="font-playfair-display text-[20px] font-bold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-1 block"
         >
           {project.title}
         </Link>
-        <p className="noir-text text-sm text-muted-foreground italic mt-1 line-clamp-1">
+        <p className="noir-text text-[13px] text-muted-foreground italic mt-0.5 line-clamp-1">
           {project.description || "No case summary available."}
         </p>
-        <div className="mt-2 flex items-center gap-3">
+        <div className="mt-2 flex items-center gap-2">
           {chapterCount != null && (
-            <span className="case-file text-xs text-muted-foreground">
-              {chapterCount} ch.
-            </span>
+            <>
+              <span className="case-file text-[10px] text-muted-foreground">
+                {chapterCount} ch.
+              </span>
+              <span className="case-file text-[10px] text-border">·</span>
+            </>
           )}
-          <span className="case-file text-xs text-muted-foreground">
-            · Updated {formattedUpdatedAt}
+          <span className="case-file text-[10px] text-muted-foreground">
+            Updated {formattedUpdatedAt}
           </span>
         </div>
       </div>
 
-      {/* ── Status + action ── */}
-      <div className="flex flex-col items-end justify-center gap-3 px-5 py-4 shrink-0 min-w-[140px]">
-        <Badge variant={getStatusVariant(project.status)}>
-          {project.status}
-        </Badge>
+      {/* Status + action */}
+      <div className="flex flex-col items-start justify-center gap-2.5 px-4 py-4">
+        {/* Solid filled badge using prominent palette colors */}
+        <div
+          className={`inline-flex items-center gap-1.5 px-2.5 py-[5px] ${status.bg}`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${status.dot}`} />
+          <span
+            className={`case-file text-[10px] tracking-[0.12em] uppercase font-semibold ${status.text}`}
+          >
+            {project.status}
+          </span>
+        </div>
 
         <Link
           href={`/workspace/${project.id}`}
           className="
-            case-file text-xs
-            border border-border px-3 py-1
-            text-foreground/70
-            hover:border-primary hover:text-primary
-            transition-colors inline-flex items-center gap-2
+            case-file text-[10px] tracking-[0.08em]
+            border border-border/70 px-3 py-[5px]
+            text-muted-foreground
+            hover:border-primary hover:text-primary hover:bg-primary/5
+            transition-colors inline-flex items-center gap-1.5
           "
         >
           Open File
-          <span className="text-sm leading-none">→</span>
+          <span className="text-[12px] leading-none">→</span>
         </Link>
       </div>
     </div>

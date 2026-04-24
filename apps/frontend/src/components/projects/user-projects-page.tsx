@@ -170,7 +170,7 @@ export default function UserProjectsPage({
             </div>
 
             {/* Stats mini-panel */}
-            <div className="w-full border border-border bg-card mt-1">
+            {/* <div className="w-full border border-border bg-card mt-1">
               {[
                 { label: "Active", count: activeProjects.length },
                 { label: "Completed", count: completedProjects.length },
@@ -190,7 +190,7 @@ export default function UserProjectsPage({
                   </span>
                 </div>
               ))}
-            </div>
+            </div> */}
           </aside>
 
           {/* ── RIGHT: Tabs + project list ── */}

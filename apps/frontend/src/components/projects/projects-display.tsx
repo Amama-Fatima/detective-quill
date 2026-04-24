@@ -28,55 +28,34 @@ export default function ProjectsDisplay({ projects }: ProjectsDisplayProps) {
     <div className="relative w-full">
       {/* ── Cabinet label ── */}
       <div className="mb-3 flex items-baseline justify-between px-0.5">
-        <h2 className="mystery-title text-lg text-foreground">{title}</h2>
-        <span className="case-file text-xs text-muted-foreground">
+        <h2 className="font-playfair-display text-lg font-bold text-foreground tracking-[-0.01em]">
+          {title}
+        </h2>
+        <span className="case-file text-[11px] text-muted-foreground">
           {projects.length} {projects.length === 1 ? "file" : "files"} on record
         </span>
       </div>
 
       {/* ── Cabinet frame ── */}
       <div className="relative border border-border bg-card overflow-hidden">
-        {/* Corner ornaments — ✦ using foreground/border tokens */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-2 top-2 font-mono text-xs leading-none text-border z-10 select-none"
-        >
-          ✦
-        </span>
-        <span
-          aria-hidden
-          className="pointer-events-none absolute right-2 top-2 font-mono text-xs leading-none text-border z-10 select-none"
-        >
-          ✦
-        </span>
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-2 bottom-9 font-mono text-xs leading-none text-border z-10 select-none"
-        >
-          ✦
-        </span>
-        <span
-          aria-hidden
-          className="pointer-events-none absolute right-2 bottom-9 font-mono text-xs leading-none text-border z-10 select-none"
-        >
-          ✦
-        </span>
-
-        {/* ── Column header ── */}
-        <div className="grid grid-cols-[76px_1fr_140px] border-b border-border bg-muted">
-          <div className="pl-5 py-2.5 border-r border-border/40">
-            <span className="case-file text-xs text-muted-foreground">
+        {/* ── Column headers ── */}
+        <div className="grid grid-cols-[72px_1fr_152px] border-b-2 border-border bg-muted/80">
+          <div className="pl-5 py-3 border-r border-border/50">
+            <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground">
               File #
             </span>
           </div>
-          <div className="pl-5 py-2.5 border-r border-border/40">
-            <span className="case-file text-xs text-muted-foreground">
+          <div className="pl-5 py-3 border-r border-border/50">
+            <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground">
               Title &amp; Summary
             </span>
           </div>
-          <div className="px-5 py-2.5">
-            <span className="case-file text-xs text-muted-foreground">
+          <div className="px-5 py-3 flex items-center justify-between">
+            <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground">
               Status
+            </span>
+            <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground pr-1">
+              Action
             </span>
           </div>
         </div>
