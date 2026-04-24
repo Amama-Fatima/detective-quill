@@ -71,7 +71,7 @@ Rules:
 - "when": exact time string only if explicitly stated for a crime-related interaction, else null"""
 
         logger.info(f"Batch LLM call: {len(entities)} entities")
-        response = self.llm_loader.generate(prompt, max_tokens=2000)
+        response = self.llm_loader.generate(prompt, max_tokens=512)
         logger.debug(f"Batch LLM response (first 600 chars):\n{response[:600]}")
 
         return self._parse(response, entities)

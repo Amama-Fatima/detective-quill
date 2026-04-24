@@ -35,17 +35,9 @@ export default function KnowledgeGraphClient({
   if (fileId == null || fileId === "") {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-background rounded-lg p-8 text-center">
-        <p className="text-sm tracking-[0.25em] uppercase text-muted-foreground font-serif">
+        <h2 className="noir-text font-bold uppercase text-primary text-[1rem] ">
           Select a file to view its knowledge graph
-        </p>
-        <p className="text-xs text-muted-foreground mt-2 max-w-sm">
-          Navigate to a file from the workspace or version control and open its
-          graph, or use a URL like{" "}
-          <code className="text-foreground/80">
-            /workspace/[project]/knowledge-graph/[fileId]
-          </code>
-          .
-        </p>
+        </h2>
       </div>
     );
   }

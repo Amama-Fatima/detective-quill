@@ -123,6 +123,7 @@ class LLMModelLoader:
                 do_sample=False,          # greedy decoding — deterministic, faster, better for JSON
                 repetition_penalty=1.1,
                 pad_token_id=self._tokenizer.eos_token_id,
+                eos_token_id=self._tokenizer.eos_token_id,
             )
 
         generated_tokens = outputs[0][inputs['input_ids'].shape[1]:]
