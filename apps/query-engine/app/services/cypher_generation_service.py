@@ -2,7 +2,7 @@ from neo4j import GraphDatabase
 
 from app.core.config import settings
 from app.core.logging import get_logger
-from app.core.prompts import CYPHER_PROMPT_TEMPLATE
+from app.core.prompts import CYPHER_PROMPT_TEMPLATE, GRAPH_CYPHER_EXAMPLES_BLOCK, GRAPH_SCHEMA_TEXT
 from app.services.cypher_utils import ensure_limit_clause, extract_cypher
 from app.services.cypher_validation_service import validate_cypher_query
 from app.services.modal_llm import ModalQwenLLM
@@ -25,31 +25,6 @@ class CypherGenerationService:
         )
         self._cypher_prompt = PromptTemplate.from_template(CYPHER_PROMPT_TEMPLATE)
         self._llm = ModalQwenLLM(timeout_seconds=settings.modal_timeout_seconds)
-        self._schema_text = self._build_schema()
-
-    def _build_schema(self) -> str:
-            schema = """
-        Node labels:
-        - Character(name, type, role)
-        - Location(name)
-        - Item(name)
-        - Scene(scene_id, scene_text)
-
-        Core structure:
-        - Scene is the central node.
-        - All entities connect to Scene via APPEARS_IN.
-
-        Relationships:
-        - Relationships between entities are dynamic and extracted from text.
-        - Any verb or action may become a relationship type (e.g., KILLED, BETRAYED, ESCAPED_WITH, DISCOVERED, etc.)
-
-        Rules:
-        - Do NOT assume fixed relationship types.
-        - Use relationship types exactly as they appear in the graph.
-        - If unsure, use generic pattern (a)-[r]-(b)
-        - Always prioritize APPEARS_IN when connecting entities to Scene.
-        """
-            return schema
 
     def _build_prompt(self, question: str, query_type: QueryClassifier) -> str:
 
@@ -79,9 +54,10 @@ class CypherGenerationService:
         """
 
             return base.format(
-                schema=self._schema_text + "\n\n" + extra,
+                schema=GRAPH_SCHEMA_TEXT+ "\n\n" + extra,
                 question=question,
                 limit=settings.cypher_result_limit,
+                GRAPH_CYPHER_EXAMPLES_BLOCK=GRAPH_CYPHER_EXAMPLES_BLOCK,
             )
 
     def _normalize_output(self, output: str) -> str:

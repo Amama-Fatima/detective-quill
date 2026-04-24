@@ -17,6 +17,31 @@ GRAPH_CYPHER_EXAMPLES_BLOCK = "\n\n".join(
     f"Question: {example['question']}\nCypher: {example['cypher']}"
     for example in GRAPH_CYPHER_EXAMPLES
 )
+
+
+GRAPH_SCHEMA_TEXT = """
+Node labels:
+- Character(name, type, role)
+- Location(name)
+- Item(name)
+- Scene(scene_id, scene_text)
+
+Core structure:
+- Scene is the central node.
+- All entities connect to Scene via APPEARS_IN.
+
+Relationships:
+- Relationships between entities are dynamic and extracted from text.
+- Any verb or action may become a relationship type (e.g., KILLED, BETRAYED, ESCAPED_WITH, DISCOVERED, etc.)
+
+Rules:
+- Do NOT assume fixed relationship types.
+- Use relationship types exactly as they appear in the graph.
+- If unsure, use generic pattern (a)-[r]-(b)
+- Always prioritize APPEARS_IN when connecting entities to Scene.
+"""
+
+
 CYPHER_PROMPT_TEMPLATE = """You are an expert Cypher query generator for a Neo4j Graph RAG system.
 
 Your job is to convert natural language questions into valid Cypher queries.

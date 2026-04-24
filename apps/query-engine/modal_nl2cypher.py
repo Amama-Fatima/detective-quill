@@ -42,9 +42,6 @@ def _extract_cypher(text: str) -> str:
     image=image,
     cpu=2,
     timeout=180,
-    # -----------------------------
-    # ✅ MOUNT VOLUME (ADDED)
-    # -----------------------------
     volumes={"/model_cache": volume},
 )
 class NL2CypherModel:
@@ -56,9 +53,6 @@ class NL2CypherModel:
 
         self._cache = {}
 
-        # -----------------------------
-        # ✅ USE PERSISTENT CACHE DIR
-        # -----------------------------
         self._tokenizer = AutoTokenizer.from_pretrained(
             MODEL_ID,
             cache_dir="/model_cache"
@@ -113,13 +107,14 @@ class NL2CypherModel:
 
 
 @app.local_entrypoint()
-def main(question: str = "Find all commits by user Alice", schema: str = "") -> None:
-    from app.core.prompts import CYPHER_PROMPT_TEMPLATE
+def main(question: str = "Find all interactions between Mary Maloney and Patrick Maloney") -> None:
+    from app.core.prompts import CYPHER_PROMPT_TEMPLATE, GRAPH_CYPHER_EXAMPLES_BLOCK, GRAPH_SCHEMA_TEXT
 
     prompt = CYPHER_PROMPT_TEMPLATE.format(
-        schema=schema,
+        schema=GRAPH_SCHEMA_TEXT + "\n\n",
         question=question,
-        limit=20
+        limit=10,
+        GRAPH_CYPHER_EXAMPLES_BLOCK=GRAPH_CYPHER_EXAMPLES_BLOCK,
     )
 
     print(NL2CypherModel().generate.remote(prompt))
