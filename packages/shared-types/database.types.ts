@@ -745,6 +745,7 @@ export type Database = {
           job_id: string;
           mentions: string[] | null;
           name: string;
+          role: string | null;
           type: string;
         };
         Insert: {
@@ -755,6 +756,7 @@ export type Database = {
           job_id: string;
           mentions?: string[] | null;
           name: string;
+          role?: string | null;
           type: string;
         };
         Update: {
@@ -765,6 +767,7 @@ export type Database = {
           job_id?: string;
           mentions?: string[] | null;
           name?: string;
+          role?: string | null;
           type?: string;
         };
         Relationships: [
