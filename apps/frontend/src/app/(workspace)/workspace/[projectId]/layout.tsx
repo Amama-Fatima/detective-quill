@@ -5,6 +5,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 import WorkspaceHeader from "@/components/workspace-layout/workspace-header";
+import WorkspaceSidebarShell from "@/components/workspace-layout/workspace-sidebar-shell";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { verifyMembership } from "@/lib/supabase-calls/members";
 import { WorkspaceContextProvider } from "@/context/workspace-context";
@@ -26,16 +27,14 @@ export async function generateMetadata({
   const { projectId } = await params;
   const { title, error } = await fetchProjectTitle(projectId);
   if (error || !title) {
-    return {
-      title: "Workspace",
-      description: "Project workspace",
-    };
+    return { title: "Workspace", description: "Project workspace" };
   }
   return {
     title: `${title} - Workspace`,
     description: `Workspace for project ${title}`,
   };
 }
+
 const WorkspaceLayout = async ({
   params,
   children,
@@ -43,14 +42,10 @@ const WorkspaceLayout = async ({
   const { projectId } = await params;
 
   const user = await getUserFromCookie();
-
-  if (!user || !user.sub) {
-    redirect("/auth/sign-in");
-  }
+  if (!user || !user.sub) redirect("/auth/sign-in");
 
   const supabase = await createSupabaseServerClient();
 
-  // Running both in parallel
   const [{ title, error }, isMember, { isActive, author_id }, activeBranchId] =
     await Promise.all([
       fetchProjectTitle(projectId),
@@ -59,13 +54,10 @@ const WorkspaceLayout = async ({
       fetchActiveBranchId(supabase, projectId),
     ]);
 
-  if (error || !title) {
+  if (error || !title)
     return <ErrorMsg message="Failed to load project data." />;
-  }
-
-  if (!isMember) {
+  if (!isMember)
     return <ErrorMsg message="You don't have access to this project." />;
-  }
 
   const isOwner = author_id === user.sub;
 
@@ -76,12 +68,13 @@ const WorkspaceLayout = async ({
       isOwner={isOwner}
       isActive={isActive}
     >
-      <div>
-        <div className="sticky top-0 z-50">
-          <WorkspaceHeader projectId={projectId} projectTitle={title} />
-        </div>
-        <main className="mt-14 md:mt-27 lg:mt-17">{children}</main>
-      </div>
+      <WorkspaceSidebarShell projectId={projectId}>
+        {/* Top bar — shows project title + mobile hamburger */}
+        {/* <WorkspaceHeader projectId={projectId} projectTitle={title} /> */}
+
+        {/* Page content — push down by header height */}
+        <main className="flex-1">{children}</main>
+      </WorkspaceSidebarShell>
     </WorkspaceContextProvider>
   );
 };
