@@ -9,6 +9,7 @@ import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 import { BlueprintIcon } from "@/components/icons/blueprint-icon";
 import { useWorkspaceContext } from "@/context/workspace-context";
+import PolaroidStack from "@/components/blueprint/polaroid-stack";
 
 interface BlueprintPageProps {
   params: Promise<{
@@ -64,15 +65,16 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
               <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                 <BlueprintIcon />
               </div>
-              <div>
+              <div className="flex flex-col gap-3">
                 <h1 className="mystery-title text-4xl mb-2">Blueprints</h1>
                 <p className="text-muted-foreground noir-text">
                   Manage and organize your reusable design components and
                   templates
                 </p>
+                <CreateBlueprintBtns projectId={projectId} />
               </div>
             </div>
-            <CreateBlueprintBtns projectId={projectId} />
+            <PolaroidStack />
           </div>
         </div>
       </div>

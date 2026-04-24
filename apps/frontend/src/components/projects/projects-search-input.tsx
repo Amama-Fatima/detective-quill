@@ -10,19 +10,23 @@ interface ProjectsSearchInputProps {
 export default function ProjectsSearchInput({
   value,
   onChange,
-  placeholder = "Search your projects...",
+  placeholder = "Search case files…",
 }: ProjectsSearchInputProps) {
   return (
-    <div className="relative z-10 flex items-center gap-3">
-      <div className="relative border rounded-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-        <Input
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-64 bg-card/50 pl-10"
-        />
-      </div>
+    <div className="relative">
+      <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+      <Input
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="
+          w-60 pl-9 py-2.5
+          bg-card border border-border
+          case-file text-[12px] tracking-[0.06em] placeholder:text-muted-foreground/60
+          focus-visible:ring-0 focus-visible:border-primary
+          transition-colors duration-150
+        "
+      />
     </div>
   );
 }
