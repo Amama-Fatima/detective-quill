@@ -23,7 +23,7 @@ const WorkspaceHeader = ({ projectId, projectTitle }: WorkspaceHeaderProps) => {
   }));
 
   return (
-    <header className="sticky top-0 z-50 h-14 flex items-center border-b border-border bg-card/80 backdrop-blur-sm bg-pink-300">
+    <header className="sticky top-0 z-50 h-14 flex items-center border-b border-border bg-card/80 backdrop-blur-sm">
       <div className="flex w-full items-center justify-between px-5">
         {/* Mobile: logo (hidden on md+ since sidebar shows it) */}
         <Link href="/" className="shrink-0 md:hidden">

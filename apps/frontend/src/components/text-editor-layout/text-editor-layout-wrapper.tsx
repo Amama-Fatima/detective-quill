@@ -31,7 +31,7 @@ export default function TextEditorLayoutWrapper({
   const showHeader = focusMode === "NORMAL";
 
   return (
-    <div className="flex h-screen bg-pink-400 pl-6">
+    <div className="flex h-screen pl-6">
       {showSidebar && (
         <TextEditorSidebar
           projectName={project.title}
