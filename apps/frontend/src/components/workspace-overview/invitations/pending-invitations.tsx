@@ -6,6 +6,7 @@ import { useBetaReaderEmailsStore } from "@/stores/use-beta-reader-emails-store"
 import { Invitation } from "@detective-quill/shared-types";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import { EnvelopeIcon } from "@/components/icons/envelope-icon";
 
 const PendingInvitations = ({ projectId }: { projectId: string }) => {
   const [deleting, setDeleting] = useState(false);
@@ -88,33 +89,5 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
     </div>
   );
 };
-
-function EnvelopeIcon({ faded = false }: { faded?: boolean }) {
-  return (
-    <svg
-      width="28"
-      height="20"
-      viewBox="0 0 28 20"
-      fill="none"
-      aria-hidden
-      className={`shrink-0 text-muted-foreground ${faded ? "opacity-20" : "opacity-50"}`}
-    >
-      <rect
-        x="0.75"
-        y="0.75"
-        width="26.5"
-        height="18.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <polyline
-        points="0.75,0.75 14,11 27.25,0.75"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        fill="none"
-      />
-    </svg>
-  );
-}
 
 export default PendingInvitations;

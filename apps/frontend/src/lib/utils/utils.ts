@@ -1,4 +1,5 @@
 import { FocusMode } from "@/stores/use-focus-mode-store";
+import { ProjectMember } from "@detective-quill/shared-types/api";
 import { clsx, type ClassValue } from "clsx";
 
 import { twMerge } from "tailwind-merge";
