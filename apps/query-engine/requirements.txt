@@ -4,3 +4,4 @@ pydantic==2.11.7
 pydantic-settings==2.10.1
 neo4j>=5.14.0,<6.0.0
 modal>=0.64.0,<1.0.0
+supabase>=2.7.4,<3.0.0

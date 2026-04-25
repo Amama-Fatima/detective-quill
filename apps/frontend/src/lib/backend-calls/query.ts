@@ -6,6 +6,8 @@ const QUERY_ENGINE_API_PREFIX =
 
 export interface QueryEngineRequest {
   question: string;
+  fs_node_id: string;
+  project_id: string;
 }
 
 export interface QueryEngineResponse {
@@ -22,15 +24,23 @@ interface QueryEngineErrorResponse {
 
 export async function queryGraph(
   question: string,
+  fsNodeId: string,
+  projectId: string,
 ): Promise<QueryEngineResponse> {
   const response = await fetch(
-    `${QUERY_ENGINE_BASE_URL}${QUERY_ENGINE_API_PREFIX}/query`,
+    `${QUERY_ENGINE_BASE_URL}${QUERY_ENGINE_API_PREFIX}/query/${encodeURIComponent(fsNodeId)}`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ question } satisfies QueryEngineRequest),
+      body: JSON.stringify(
+        {
+          question,
+          fs_node_id: fsNodeId,
+          project_id: projectId,
+        } satisfies QueryEngineRequest,
+      ),
     },
   );
 
@@ -45,7 +55,6 @@ export async function queryGraph(
         detail = errorBody.detail;
       }
     } catch {
-      // Ignore JSON parse errors and keep the fallback error message.
     }
 
     throw new Error(detail);

@@ -5,7 +5,11 @@ import {
 } from "@/lib/backend-calls/query";
 
 type UseTextQueryReturn = {
-  runQuery: (question: string) => Promise<string[]>;
+  runQuery: (
+    question: string,
+    fsNodeId: string,
+    projectId: string,
+  ) => Promise<string[]>;
   isLoading: boolean;
   error: string | null;
   response: QueryEngineResponse | null;
@@ -17,11 +21,27 @@ const formatResultRecord = (record: Record<string, unknown>): string => {
 
 export const useTextQuery = (): UseTextQueryReturn => {
   const queryMutation = useMutation({
-    mutationFn: (question: string) => queryGraph(question),
+    mutationFn: ({
+      question,
+      fsNodeId,
+      projectId,
+    }: {
+      question: string;
+      fsNodeId: string;
+      projectId: string;
+    }) => queryGraph(question, fsNodeId, projectId),
   });
 
-  const runQuery = async (question: string): Promise<string[]> => {
-    const response = await queryMutation.mutateAsync(question);
+  const runQuery = async (
+    question: string,
+    fsNodeId: string,
+    projectId: string,
+  ): Promise<string[]> => {
+    const response = await queryMutation.mutateAsync({
+      question,
+      fsNodeId,
+      projectId,
+    });
     if (!response.data?.length) {
       return response.message ? [response.message] : [];
     }

@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     use_modal_nl2cypher: bool = True
     modal_app_name: str = "detective-quill-nl2cypher"
     modal_model_class_name: str = "NL2CypherModel"
+    supabase_url: str = ""
+    supabase_service_role_key: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -6,8 +6,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { QueryInput } from "@/components/query-manuscript/query-input";
 import { QueryResults } from "@/components/query-manuscript/query-results";
 import { useTextQuery } from "@/hooks/use-text-query";
+import { useParams } from "next/navigation";
 
 export const QueryPanel = () => {
+  const params = useParams();
+  const fsNodeId = params.nodeId as string;
+  const projectId = params.projectId as string;
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<string[]>([]);
   const { runQuery, isLoading, error } = useTextQuery();
@@ -19,8 +23,13 @@ export const QueryPanel = () => {
       return;
     }
 
+    if (!fsNodeId || !projectId) {
+      setResults([]);
+      return;
+    }
+
     setResults([]);
-    const nextResults = await runQuery(normalizedQuery);
+    const nextResults = await runQuery(normalizedQuery, fsNodeId, projectId);
     setResults(nextResults);
   };
 

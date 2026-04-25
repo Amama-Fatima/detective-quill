@@ -20,8 +20,6 @@ GRAPH_CYPHER_EXAMPLES = [
         {
             "question": "In which scene do Character A and Character B first interact?",
             "cypher": (
-                # No relationships needed — frontend will sort/filter scene_ids by its own ordering logic
-                # (file depth, created_at, sort order, etc.) to determine which is "first"
                 f"MATCH (a:Character {{name: 'Character A'}})-[:APPEARS_IN]->(s:Scene)<-[:APPEARS_IN]-(b:Character {{name: 'Character B'}}) "
                 f"RETURN s.scene_id AS scene_id, s.scene_text AS scene_text "
                 f"LIMIT 20"
@@ -94,6 +92,14 @@ Entity-to-entity relationships:
 - Always return type(r) AS relationship when fetching entity-to-entity relationships.
 """
 
+CONTEXT_USAGE_INSTRUCTIONS = """
+CONTEXT USAGE:\n"
+    "- Use ENTITY RELATIONSHIP CONTEXT only as grounding hints.\n"
+    "- When ENTITY RELATIONSHIP CONTEXT is provided, use the exact relation_type words and directions from the context in Cypher.\n"
+    "- Never invent relationships that are not present in the graph.\n"
+    "- Prefer relationship directions/types present in context when relevant to the user question.
+"""
+
 
 CYPHER_PROMPT_TEMPLATE = """You are an expert Cypher query generator for a Neo4j Graph RAG system.
 Convert the user question into a single valid Cypher query.
@@ -119,6 +125,13 @@ RULES:
    - Aggregated: collect(s.scene_id) AS scene_ids
 8. Always end with LIMIT {limit}. Use exactly {limit}, not any other number.
 9. Return named fields (e.g. c.name AS name) rather than whole nodes where possible.
+
+SCENE SCOPE CONSTRAINT:
+{scene_scope_instructions}
+
+{entity_relationship_context_block}
+
+{context_usage_block}
  
 FEW-SHOT EXAMPLES:
 {examples_block}
