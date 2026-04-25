@@ -122,10 +122,10 @@ export default function WorkspaceMainBody({
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 py-10 space-y-0">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b-2 border-primary">
           <div className="flex-1 min-w-0">
-            <p className="font-mono text-[9px] tracking-[0.24em] uppercase text-muted-foreground/50 mb-3">
+            <p className="font-mono text-[9px] tracking-[0.24em] uppercase text-muted-foreground/65 mb-3">
               Case Workspace — Overview
             </p>
-            <h1 className="font-playfair-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.02] tracking-[-0.025em] text-primary mb-4">
+            <h1 className="font-playfair-display italic text-[clamp(32px,5vw,56px)] font-bold leading-[1.02] tracking-[-0.025em] text-primary mb-4">
               {project.title}
             </h1>
             <p className="noir-text text-[15px] leading-[1.8] text-foreground/65 max-w-xl">
@@ -134,7 +134,6 @@ export default function WorkspaceMainBody({
             </p>
           </div>
 
-          {/* Right: Lottie illustration */}
           <div className="shrink-0 self-center sm:self-end">
             <DotLottieReact
               src="/notes.lottie"
@@ -147,7 +146,7 @@ export default function WorkspaceMainBody({
         <div className="border-b border-border">
           <div className="flex flex-wrap">
             <div className="flex flex-col gap-2 px-6 py-5 border-r border-border/60 min-w-32.5">
-              <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/45">
+              <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/65">
                 Status
               </span>
               <StatusChip status={project.status} />
@@ -158,7 +157,7 @@ export default function WorkspaceMainBody({
                 key={label}
                 className={`flex flex-col gap-2 px-6 py-5 min-w-27.5 ${i < stats.length - 1 ? "border-r border-border/60" : ""}`}
               >
-                <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/45">
+                <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/65">
                   {label}
                 </span>
                 <span className="font-playfair-display text-[15px] font-bold text-primary leading-none">
@@ -171,9 +170,6 @@ export default function WorkspaceMainBody({
 
         {isOwner && (
           <div className="flex flex-wrap items-center gap-3 py-5 border-b border-border/60">
-            <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/40 mr-1">
-              Actions
-            </span>
             <ChangeStateDropDown
               projectId={project.id}
               status={project.status}
@@ -189,17 +185,6 @@ export default function WorkspaceMainBody({
         )}
 
         <div className="pt-8 space-y-4">
-          <div className="flex items-center gap-4">
-            <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-muted-foreground/50 shrink-0">
-              Case Personnel
-            </span>
-            <div className="flex-1 border-t border-border/50" />
-            <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-muted-foreground/35 shrink-0">
-              {members.length} {members.length === 1 ? "member" : "members"} on
-              file
-            </span>
-          </div>
-
           <MembersTable
             isOwner={isOwner}
             initialMembers={members}

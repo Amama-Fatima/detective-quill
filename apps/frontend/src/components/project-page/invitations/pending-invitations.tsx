@@ -35,14 +35,10 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
 
   return (
     <div>
-      {/* Section header */}
       <div className="mb-5 flex items-baseline justify-between border-b border-border/60 pb-3">
-        <h4 className="mystery-title text-xl text-foreground">
-          Awaiting Response
+        <h4 className="font-playfair-display italic text-xl text-foreground">
+          Pending Invitations
         </h4>
-        <span className="case-file text-xs text-muted-foreground">
-          {invitations.length} outstanding
-        </span>
       </div>
 
       {invitations.length > 0 ? (

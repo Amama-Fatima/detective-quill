@@ -41,7 +41,7 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.025] bg-[radial-gradient(oklch(24%_0.022_245)_1px,transparent_1px)] bg-[size:28px_28px]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.025] bg-[radial-gradient(oklch(24%_0.022_245)_1px,transparent_1px)] bg-size-[28px_28px]" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 py-10 space-y-0">
         {/* ── Hero — mirrors overview page ── */}
@@ -50,7 +50,7 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
             <p className="font-mono text-[9px] tracking-[0.24em] uppercase text-muted-foreground/50 mb-3">
               Case Workspace — Blueprints
             </p>
-            <h1 className="font-playfair-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.02] tracking-[-0.025em] text-primary mb-4">
+            <h1 className="font-playfair-display text-[clamp(32px,5vw,56px)] font-bold leading-[1.02] tracking-[-0.025em] text-primary mb-4 italic">
               Blueprints
             </h1>
             <p className="noir-text text-[15px] leading-[1.8] text-foreground/65 max-w-xl mb-6">
