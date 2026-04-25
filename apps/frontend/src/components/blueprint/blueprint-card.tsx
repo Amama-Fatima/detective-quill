@@ -1,11 +1,9 @@
-// blueprint-card.tsx
 "use client";
 
 import { Blueprint } from "@detective-quill/shared-types/api";
 import Link from "next/dist/client/link";
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { getBlueprintTypeColor } from "@/lib/utils/blueprint-utils";
 import { DeleteBlueprintButton } from "./btns/delete-blueprint-btn";
 
 interface BlueprintCardProps {
@@ -17,6 +15,106 @@ interface BlueprintCardProps {
   loading: boolean;
 }
 
+// ── Silhouettes ────────────────────────────────────────────────
+function CharacterSilhouette() {
+  return (
+    <div className="polaroid-silhouette">
+      <div className="sil-head" />
+      <div className="sil-body" />
+    </div>
+  );
+}
+
+function ItemSilhouette() {
+  // A magnifying glass — fits the detective theme perfectly for "items / evidence"
+  return (
+    <svg
+      className="polaroid-silhouette-svg"
+      viewBox="0 0 80 90"
+      fill="#1a1512"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Lens circle */}
+      <circle
+        cx="34"
+        cy="34"
+        r="22"
+        fill="none"
+        stroke="#1a1512"
+        strokeWidth="9"
+      />
+      {/* Handle */}
+      <line
+        x1="50"
+        y1="50"
+        x2="72"
+        y2="78"
+        stroke="#1a1512"
+        strokeWidth="9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function LocationSilhouette() {
+  // City skyline silhouette
+  return (
+    <svg
+      className="polaroid-silhouette-svg skyline"
+      style={{ width: "100%", bottom: 0, left: 0, transform: "none" }}
+      viewBox="0 0 130 80"
+      fill="#1a1512"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Buildings from left to right */}
+      <rect x="0" y="45" width="18" height="35" />
+      <rect x="5" y="30" width="8" height="15" />
+      <rect x="20" y="25" width="22" height="55" />
+      <rect x="27" y="15" width="8" height="10" />
+      <rect x="29" y="8" width="4" height="7" /> {/* antenna */}
+      <rect x="44" y="38" width="16" height="42" />
+      <rect x="62" y="18" width="26" height="62" />
+      <rect x="70" y="8" width="10" height="10" />
+      <rect x="74" y="2" width="2" height="6" /> {/* antenna */}
+      <rect x="90" y="32" width="20" height="48" />
+      <rect x="112" y="42" width="18" height="38" />
+      <rect x="118" y="28" width="6" height="14" />
+      {/* Ground line */}
+      <rect x="0" y="78" width="130" height="4" />
+    </svg>
+  );
+}
+
+function PolaroidPhoto({
+  type,
+  projectId,
+  blueprintId,
+}: {
+  type: string;
+  projectId: string;
+  blueprintId: string;
+}) {
+  const silhouette =
+    type === "character" ? (
+      <CharacterSilhouette />
+    ) : type === "location" ? (
+      <LocationSilhouette />
+    ) : (
+      <ItemSilhouette />
+    );
+
+  return (
+    <Link
+      href={`/workspace/${projectId}/blueprint/${blueprintId}?type=${type}`}
+      className="block"
+    >
+      <div className="polaroid-photo">{silhouette}</div>
+    </Link>
+  );
+}
+
+// ── Card ──────────────────────────────────────────────────────
 const BlueprintCard = ({
   blueprint,
   projectId,
@@ -38,13 +136,11 @@ const BlueprintCard = ({
       },
       { threshold: 0.1 },
     );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
+    if (cardRef.current) observer.observe(cardRef.current);
     return () => observer.disconnect();
   }, []);
+
+  const rotate = blueprint.id.charCodeAt(0) % 2 === 0 ? 2 : -2;
 
   return (
     <>
@@ -99,13 +195,13 @@ const BlueprintCard = ({
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.1'/%3E%3C/svg%3E");
         }
 
+        /* Character silhouette */
         .polaroid-silhouette {
           position: absolute;
           bottom: 0;
           left: 50%;
           transform: translateX(-50%);
         }
-
         .sil-head {
           width: 34px;
           height: 34px;
@@ -113,13 +209,31 @@ const BlueprintCard = ({
           background: #1a1512;
           margin: 0 auto;
         }
-
         .sil-body {
           width: 58px;
           height: 44px;
           background: #1a1512;
           border-radius: 29px 29px 0 0;
           margin-top: -5px;
+        }
+
+        /* Item / location SVG silhouettes */
+        .polaroid-silhouette-svg {
+          position: absolute;
+          bottom: 8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 80px;
+          height: auto;
+          opacity: 0.92;
+        }
+
+        /* Location skyline — wider */
+        .polaroid-silhouette-svg.skyline {
+          width: 100%;
+          bottom: 0;
+          left: 0;
+          transform: none;
         }
 
         .polaroid-label {
@@ -141,15 +255,6 @@ const BlueprintCard = ({
           overflow: hidden;
         }
 
-        .polaroid-label-type {
-          font-size: 11px;
-          opacity: 0.7;
-          margin-top: 2px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          font-family: 'Special Elite', monospace;
-        }
-
         .polaroid-delete-btn {
           position: absolute;
           top: 6px;
@@ -158,7 +263,6 @@ const BlueprintCard = ({
           opacity: 0;
           transition: opacity 0.2s;
         }
-
         .polaroid-card-wrap:hover .polaroid-delete-btn {
           opacity: 1;
         }
@@ -178,30 +282,20 @@ const BlueprintCard = ({
               boxShadow: "4px 10px 24px rgba(0,0,0,0.30)",
               transition: { duration: 0.22, ease: "easeOut" },
             }}
-            style={{ rotate: blueprint.id.charCodeAt(0) % 2 === 0 ? 2 : -2 }}
+            style={{ rotate }}
           >
-            {/* Evidence strip — shows blueprint type */}
             <div className="polaroid-evidence-strip">{blueprint.type}</div>
 
-            {/* Photo area with silhouette */}
-            <Link
-              href={`/workspace/${projectId}/blueprint/${blueprint.id}?type=${blueprint.type}`}
-              className="block"
-            >
-              <div className="polaroid-photo">
-                <div className="polaroid-silhouette">
-                  <div className="sil-head" />
-                  <div className="sil-body" />
-                </div>
-              </div>
-            </Link>
+            <PolaroidPhoto
+              type={blueprint.type}
+              projectId={projectId}
+              blueprintId={blueprint.id}
+            />
 
-            {/* Label area */}
             <div className="polaroid-label">
               <div className="polaroid-label-title">{blueprint.title}</div>
             </div>
 
-            {/* Delete button — top-right, appears on hover */}
             {isOwner && isActive && (
               <div className="polaroid-delete-btn">
                 <DeleteBlueprintButton
@@ -213,7 +307,7 @@ const BlueprintCard = ({
             )}
           </motion.div>
         ) : (
-          <div className="w-37.5 h-55 bg-muted/20 rounded animate-pulse" />
+          <div className="w-37.5 h-55 bg-muted/20 animate-pulse" />
         )}
       </div>
     </>

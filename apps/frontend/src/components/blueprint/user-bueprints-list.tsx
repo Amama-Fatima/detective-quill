@@ -1,4 +1,3 @@
-// user-blueprints-list.tsx
 "use client";
 
 import { Blueprint } from "@detective-quill/shared-types/api";
@@ -18,7 +17,6 @@ export const UserBlueprintsList = ({
   projectId,
 }: UserBlueprintsListProps) => {
   const [blueprints, setBlueprints] = useState<Blueprint[]>(initialBlueprints);
-
   const { deleteMutation } = useBlueprints();
   const loading = deleteMutation.isPending;
 
@@ -31,38 +29,36 @@ export const UserBlueprintsList = ({
 
   if (blueprints.length === 0) {
     return (
-      <div className="text-center py-16 border-2 border-muted bg-gradient-to-br from-card/70 to-chart-5/30">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="rounded-full bg-primary/10 p-8">
-            <FileText className="h-12 w-12 text-primary" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="mystery-title text-2xl">No Blueprints</h3>
-            <p className="text-muted-foreground noir-text max-w-md">
-              You haven't created any blueprints yet. Create a blueprint to
-              start organizing your thoughts and story elements!
-            </p>
-          </div>
+      <div className="flex flex-col items-center justify-center gap-4 py-16 border border-border/60 border-dashed bg-muted/20">
+        <div className="p-6 border border-border/50 bg-card">
+          <FileText className="h-8 w-8 text-primary/40" />
+        </div>
+        <div className="text-center space-y-1.5">
+          <h3 className="font-playfair-display text-[18px] font-bold text-primary">
+            No Blueprints Yet
+          </h3>
+          <p className="noir-text text-[14px] text-muted-foreground max-w-sm">
+            Create a blueprint to start organising your story structures,
+            character sheets, and scene templates.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-8">
-        {blueprints.map((blueprint) => (
-          <BlueprintCard
-            key={blueprint.id}
-            blueprint={blueprint}
-            projectId={projectId}
-            isOwner={isOwner}
-            isActive={isActive}
-            onDelete={onDelete}
-            loading={loading}
-          />
-        ))}
-      </div>
+    <div className="flex flex-wrap gap-6">
+      {blueprints.map((blueprint) => (
+        <BlueprintCard
+          key={blueprint.id}
+          blueprint={blueprint}
+          projectId={projectId}
+          isOwner={isOwner}
+          isActive={isActive}
+          onDelete={onDelete}
+          loading={loading}
+        />
+      ))}
     </div>
   );
 };
