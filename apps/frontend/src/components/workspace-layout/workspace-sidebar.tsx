@@ -28,13 +28,6 @@ export default function WorkspaceSidebar({
   const overviewHref = `/workspace/${projectId}`;
 
   const navItems = [
-    {
-      id: "overview",
-      label: "Overview",
-      href: overviewHref,
-      icon: LayoutDashboardIcon,
-      description: "Project at a glance",
-    },
     ...NAV_ITEMS.map((item) => ({
       ...item,
       href: item.href.replace("123", projectId),
@@ -50,14 +43,13 @@ export default function WorkspaceSidebar({
         ${collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
       `}
     >
-      {/* ── Brand ── */}
       <div
-        className={`relative flex items-center px-6 py-7 border-b border-primary/10 min-h-20 ${collapsed ? "bg-primary" : "bg-primary-foreground"}`}
+        className={`relative flex items-center px-6 py-7 border-b border-primary/10 min-h-20 bg-primary`}
       >
         <Link href="/" className="block overflow-hidden">
           {collapsed ? (
             <Image
-              src="/quill.svg"
+              src="/quill-1.png"
               alt="Detective's Quill Logo"
               fill
               sizes="180px"
@@ -66,16 +58,12 @@ export default function WorkspaceSidebar({
           ) : (
             <div className="flex flex-col  justify-between">
               <Image
-                src="/logo.png"
+                src="/inverted-logo.png"
                 alt="Detective's Quill Logo"
                 fill
                 sizes="180px"
                 className="object-cover object-center"
               />
-              {/* hello */}
-              {/* <p className="font-playfair-display text-[18px] font-bold text-primary-foreground/90 leading-snug whitespace-nowrap">
-                The Writer&apos;s Studio
-              </p> */}
             </div>
           )}
         </Link>
@@ -125,7 +113,7 @@ export default function WorkspaceSidebar({
                 }
               `}
             >
-              <Icon className="h-[17px] w-[17px] shrink-0 opacity-80" />
+              <Icon className="h-4.25 w-4.25 shrink-0 opacity-80" />
 
               {!collapsed && (
                 <span className="flex flex-col gap-1.5 overflow-hidden">
@@ -140,7 +128,6 @@ export default function WorkspaceSidebar({
                 </span>
               )}
 
-              {/* Collapsed tooltip */}
               {collapsed && (
                 <div
                   className="
@@ -161,14 +148,13 @@ export default function WorkspaceSidebar({
         })}
       </nav>
 
-      {/* ── Back to projects ── */}
       <div className="px-4 py-6 border-t border-primary-foreground/10">
         <Link
           href="/projects"
           title={collapsed ? "All Projects" : undefined}
           className="group relative flex items-center gap-4 px-3 py-3.5 text-primary-foreground/35 hover:text-primary-foreground/70 transition-colors duration-150"
         >
-          <FolderOpenIcon className="h-[17px] w-[17px] shrink-0" />
+          <FolderOpenIcon className="h-4.25 w-4.25 shrink-0" />
           {!collapsed && (
             <span className="font-mono text-[10px] tracking-[0.12em] uppercase whitespace-nowrap">
               All Projects
