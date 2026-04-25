@@ -19,7 +19,11 @@ class Settings(BaseSettings):
     modal_app_name: str = "detective-quill-nl2cypher"
     modal_model_class_name: str = "NL2CypherModel"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 
 settings = Settings()

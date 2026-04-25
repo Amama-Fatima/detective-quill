@@ -1,16 +1,73 @@
 GRAPH_CYPHER_EXAMPLES = [
-    {
-        "question": "Give me all interactions between Character A and Character B",
-        "cypher": "MATCH (a:Character {name: 'Character A'})-[r]-(b:Character {name: 'Character B'}) RETURN a, r, b LIMIT 50",
-    },
-    {
-        "question": "Which scenes mention Item X?",
-        "cypher": "MATCH (i:Item {name: 'Item X'})-[:APPEARS_IN]->(s:Scene) RETURN s LIMIT 50",
-    },
-    {
-        "question": "When did Character A appear in scenes with Location B?",
-        "cypher": "MATCH (c:Character {name: 'Character A'})-[:APPEARS_IN]->(s:Scene)<-[:APPEARS_IN]-(l:Location {name: 'Location B'}) RETURN c, s, l LIMIT 50",
-    },
+        {
+            "question": "Find all interactions between Character A and Character B",
+            "cypher": (
+                f"MATCH (a:Character {{name: 'Character A'}})-[r]-(b:Character {{name: 'Character B'}}) "
+                f"OPTIONAL MATCH (a)-[:APPEARS_IN]->(s:Scene)<-[:APPEARS_IN]-(b) "
+                f"RETURN a.name AS a, type(r) AS relationship, b.name AS b, collect(s.scene_id) AS scene_ids "
+                f"LIMIT 20"
+            ),
+        },
+        {
+            "question": "What did Character A do to Character B?",
+            "cypher": (
+                f"MATCH (a:Character {{name: 'Character A'}})-[r]-(b:Character {{name: 'Character B'}}) "
+                f"OPTIONAL MATCH (a)-[:APPEARS_IN]->(s:Scene)<-[:APPEARS_IN]-(b) "
+                f"RETURN a.name AS a, type(r) AS relationship, b.name AS b, collect(s.scene_id) AS scene_ids "
+                f"LIMIT 20"
+            ),
+        },
+        {
+            "question": "In which scene do Character A and Character B first interact?",
+            "cypher": (
+                # No relationships needed — frontend will sort/filter scene_ids by its own ordering logic
+                # (file depth, created_at, sort order, etc.) to determine which is "first"
+                f"MATCH (a:Character {{name: 'Character A'}})-[:APPEARS_IN]->(s:Scene)<-[:APPEARS_IN]-(b:Character {{name: 'Character B'}}) "
+                f"RETURN s.scene_id AS scene_id, s.scene_text AS scene_text "
+                f"LIMIT 20"
+            ),
+        },
+        {
+            "question": "Which scenes do Character A and Character B share?",
+            "cypher": (
+                f"MATCH (a:Character {{name: 'Character A'}})-[:APPEARS_IN]->(s:Scene)<-[:APPEARS_IN]-(b:Character {{name: 'Character B'}}) "
+                f"RETURN s.scene_id AS scene_id, s.scene_text AS scene_text "
+                f"LIMIT 20"
+            ),
+        },
+        {
+            "question": "Which scenes mention Item X?",
+            "cypher": (
+                f"MATCH (i:Item {{name: 'Item X'}})-[:APPEARS_IN]->(s:Scene) "
+                f"RETURN s.scene_id AS scene_id, s.scene_text AS scene_text "
+                f"LIMIT 20"
+            ),
+        },
+        {
+            "question": "When did Character A appear in scenes with Location B?",
+            "cypher": (
+                f"MATCH (c:Character {{name: 'Character A'}})-[:APPEARS_IN]->(s:Scene)<-[:APPEARS_IN]-(l:Location {{name: 'Location B'}}) "
+                f"RETURN c.name AS character, l.name AS location, collect(s.scene_id) AS scene_ids "
+                f"LIMIT 20"
+            ),
+        },
+        {
+            "question": "Which characters appear in scenes with Location X?",
+            "cypher": (
+                f"MATCH (c:Character)-[:APPEARS_IN]->(s:Scene)<-[:APPEARS_IN]-(l:Location {{name: 'Location X'}}) "
+                f"RETURN c.name AS character, collect(s.scene_id) AS scene_ids "
+                f"LIMIT 20"
+            ),
+        },
+        {
+            "question": "Who is Character A?",
+            "cypher": (
+                f"MATCH (c:Character {{name: 'Character A'}}) "
+                f"OPTIONAL MATCH (c)-[:APPEARS_IN]->(s:Scene) "
+                f"RETURN c.name AS name, c.role AS role, c.type AS type, collect(s.scene_id) AS scene_ids "
+                f"LIMIT 20"
+            ),
+        },
 ]
 
 GRAPH_CYPHER_EXAMPLES_BLOCK = "\n\n".join(
@@ -28,93 +85,45 @@ Node labels:
 
 Core structure:
 - Scene is the central node.
-- All entities connect to Scene via APPEARS_IN.
+- All entities connect to Scene via: (Entity)-[:APPEARS_IN]->(Scene)
 
-Relationships:
-- Relationships between entities are dynamic and extracted from text.
-- Any verb or action may become a relationship type (e.g., KILLED, BETRAYED, ESCAPED_WITH, DISCOVERED, etc.)
-
-Rules:
-- Do NOT assume fixed relationship types.
-- Use relationship types exactly as they appear in the graph.
-- If unsure, use generic pattern (a)-[r]-(b)
-- Always prioritize APPEARS_IN when connecting entities to Scene.
+Entity-to-entity relationships:
+- Relationships between entities are dynamic (e.g., KILLED, BETRAYED, ESCAPED_WITH, DISCOVERED).
+- NEVER assume fixed relationship types — use them exactly as they appear in the graph.
+- When relationship type is unknown, use the generic pattern: (a)-[r]-(b)
+- Always return type(r) AS relationship when fetching entity-to-entity relationships.
 """
 
 
 CYPHER_PROMPT_TEMPLATE = """You are an expert Cypher query generator for a Neo4j Graph RAG system.
-
-Your job is to convert natural language questions into valid Cypher queries.
-
----
+Convert the user question into a single valid Cypher query.
+ 
 GRAPH SCHEMA:
 {schema}
----
-GRAPH DESIGN RULES (VERY IMPORTANT):
-1. This is a Scene-centric knowledge graph.
-   - Scene is the central node.
-   - All entities (Character, Location, Item) connect to Scene via:
-     (Entity)-[:APPEARS_IN]->(Scene)
-
-2. Relationships between entities are DYNAMIC.
-   - Any verb/action may appear as a relationship type.
-   - Examples: KILLED, BETRAYED, HELPED, ESCAPED_WITH, DISCOVERED, etc.
-   - DO NOT assume fixed relationship lists.
-
-3. There is NO predefined ontology of relationship types.
-   - Use relationship types exactly as they appear in the graph.
-   - If unknown, use generic pattern (a)-[r]-(b)
----
-
-STRICT RULES:
-1. Return ONLY ONE Cypher query.
-2. Do NOT include explanations, markdown, or extra text.
-3. Use ONLY read-only Cypher:
-   MATCH, OPTIONAL MATCH, RETURN, WHERE, ORDER BY, LIMIT
-
-4. NEVER use:
-   CREATE, DELETE, MERGE, SET, REMOVE, DROP, CALL db.*, LOAD CSV
-
-5. NEVER invent relationship types not present in the graph.
-
-6. Prefer simple queries over complex ones.
-
-7. Always include LIMIT {limit} unless sorting requires ordering first.
-
----
-
-QUERY INTENT GUIDELINES:
-- If question asks about interactions between characters:
-  Use:
-  (a:Character)-[r]-(b:Character)
-
-- If question asks about events or what happened:
-  Always consider Scene via:
-  (Entity)-[:APPEARS_IN]->(Scene)
-
-- If question asks “when” or timeline:
-  Use r.when if available:
-  ORDER BY r.when
-
-- If question asks about items or mentions:
-  Use generic traversal unless schema explicitly shows pattern.
-
----
-
-SAFETY RULES:
-- If unsure, prefer:
-  MATCH (a)-[r]-(b)
-- Do NOT hallucinate relationship names.
-- Do NOT assume missing schema elements.
----
-
+ 
+RULES:
+1. Output ONLY the Cypher query — no explanations, no markdown, no extra text.
+2. Use ONLY: MATCH, OPTIONAL MATCH, RETURN, WHERE, ORDER BY, LIMIT
+3. NEVER use: CREATE, DELETE, MERGE, SET, REMOVE, DROP, CALL db.*, LOAD CSV
+4. NEVER invent relationship types. When unknown, use (a)-[r]-(b).
+5. For interaction/relationship questions between two entities:
+   - Use: MATCH (a)-[r]-(b) to capture the relationship
+   - Always return type(r) AS relationship in the RETURN clause
+   - Use OPTIONAL MATCH to also fetch shared scenes
+6. For "first", "earliest", or "initial" scene questions between two entities:
+   - Do NOT fetch relationships — use only APPEARS_IN to find shared scenes
+   - Return each scene individually (scene_id, scene_text) so the caller can sort them
+   - Do NOT use collect() — return one row per scene
+7. Always include scene_id(s) in RETURN:
+   - Shared scenes (individual rows): s.scene_id AS scene_id
+   - Aggregated: collect(s.scene_id) AS scene_ids
+8. Always end with LIMIT {limit}. Use exactly {limit}, not any other number.
+9. Return named fields (e.g. c.name AS name) rather than whole nodes where possible.
+ 
 FEW-SHOT EXAMPLES:
-{GRAPH_CYPHER_EXAMPLES_BLOCK}
----
+{examples_block}
+ 
 USER QUESTION:
 {question}
-
----
-OUTPUT FORMAT:
-Cypher:
-"""
+ 
+MATCH"""
