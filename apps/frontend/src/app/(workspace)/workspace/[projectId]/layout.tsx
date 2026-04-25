@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import React from "react";
 import type { Metadata } from "next";
 import { getUserFromCookie } from "@/lib/utils/get-user";
-import WorkspaceHeader from "@/components/workspace-layout/workspace-header";
 import WorkspaceSidebarShell from "@/components/workspace-layout/workspace-sidebar-shell";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { verifyMembership } from "@/lib/supabase-calls/members";
@@ -69,10 +68,6 @@ const WorkspaceLayout = async ({
       isActive={isActive}
     >
       <WorkspaceSidebarShell projectId={projectId}>
-        {/* Top bar — shows project title + mobile hamburger */}
-        {/* <WorkspaceHeader projectId={projectId} projectTitle={title} /> */}
-
-        {/* Page content — push down by header height */}
         <main className="flex-1">{children}</main>
       </WorkspaceSidebarShell>
     </WorkspaceContextProvider>

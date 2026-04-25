@@ -9,7 +9,7 @@ import { useMembers } from "@/hooks/use-members";
 import RemoveMemberDialog from "./remove-member-dialog";
 import NoMembers from "./no-members";
 
-const MembersTable = ({
+const ProjectMembers = ({
   isOwner,
   initialMembers,
   projectId,
@@ -61,7 +61,7 @@ const MembersTable = ({
   }
 
   return (
-    <div>
+    <div className="pt-8 space-y-4">
       <div className="mb-5 flex items-baseline justify-between border-b border-border/60 pb-3">
         <h4 className="font-playfair-display italic text-xl text-foreground">
           Project Members
@@ -178,4 +178,4 @@ const MembersTable = ({
   );
 };
 
-export default MembersTable;
+export default ProjectMembers;
