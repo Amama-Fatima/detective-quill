@@ -31,7 +31,7 @@ export default function TextEditorLayoutWrapper({
   const showHeader = focusMode === "NORMAL";
 
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen bg-pink-400 pl-6">
       {showSidebar && (
         <TextEditorSidebar
           projectName={project.title}
@@ -40,7 +40,7 @@ export default function TextEditorLayoutWrapper({
         />
       )}
 
-      <main className="flex-1 flex flex-col min-w-0 ">
+      <main className="flex-1 flex flex-col min-w-0">
         {showHeader && (
           <TextEditorHeaderBar
             sidebarOpen={sidebarOpen}

@@ -24,13 +24,13 @@ export default function TextEditorSidebar({
   return (
     <aside
       className={cn(
-        "m-3 flex h-full w-80 flex-col overflow-hidden rounded-2xl border border-border/70 shadow-sm transition-all duration-300",
+        "m-3 flex w-80 flex-col overflow-hidden rounded-2xl border border-border/70 shadow-sm transition-all duration-300",
         solidBackground ? "bg-card" : "bg-sidebar",
       )}
     >
       <div
         className={cn(
-          "border-b border-border/70 px-4 py-3 bg-background/50"
+          "border-b border-border/70 px-4 py-3 bg-background/50",
           // solidBackground ? "bg-background" : "bg-background/",
         )}
       >
