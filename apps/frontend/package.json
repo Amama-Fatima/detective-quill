@@ -15,6 +15,7 @@
     "@defensestation/blocknote-comments": "^1.0.2",
     "@detective-quill/shared-types": "workspace:*",
     "@hookform/resolvers": "^5.2.1",
+    "@lottiefiles/dotlottie-react": "^0.19.0",
     "@neo4j-nvl/base": "^1.1.0",
     "@neo4j-nvl/interaction-handlers": "^1.1.0",
     "@neo4j-nvl/react": "^1.1.0",

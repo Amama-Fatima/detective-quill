@@ -8,6 +8,7 @@ import { findNodeById } from "@/lib/utils/file-tree-utils";
 import { useWorkspaceContext } from "@/context/workspace-context";
 import { CaseFileIcon } from "../icons/case-file-icon";
 import NodeActionsDropdown from "./node-actions-dropdown";
+import Image from "next/image";
 
 const TreeItem = ({
   element,
@@ -103,8 +104,8 @@ const TreeItem = ({
         className="flex w-full min-w-0 items-center justify-between cursor-pointer overflow-hidden"
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <CaseFileIcon />
-          <span className="min-w-0 flex-1 truncate">{element.name}</span>
+          <Image src="/scroll.png" alt="Quill File" width={35} height={35} />
+          <span className="min-w-0 flex-1 truncate text-md">{element.name}</span>
           {node?.word_count && node.word_count > 0 && (
             <span className="shrink-0 text-xs text-muted-foreground">
               {node.word_count} words

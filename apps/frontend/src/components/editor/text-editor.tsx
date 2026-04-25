@@ -5,7 +5,6 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-  Trash2,
   Save,
   Check,
   Edit3,
@@ -13,13 +12,12 @@ import {
   Minimize,
   Focus,
   MessageSquare,
-  GitCommitHorizontal,
+  CircleHelp,
 } from "lucide-react";
 import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
@@ -48,6 +46,8 @@ export type TextEditorProps = {
   value?: string;
   showComments?: boolean;
   onToggleComments?: () => void;
+  showQueryPanel?: boolean;
+  onToggleQueryPanel?: () => void;
   commentCount?: number;
   editorRef?: React.RefObject<BlockNoteEditorRef | null>;
   projectId: string;
@@ -59,6 +59,8 @@ const TextEditor = ({
   value = "",
   showComments = false,
   onToggleComments = () => {},
+  showQueryPanel = false,
+  onToggleQueryPanel = () => {},
   commentCount = 0,
   editorRef,
   projectId,
@@ -201,6 +203,25 @@ const TextEditor = ({
               </TooltipTrigger>
               <TooltipContent>
                 {showComments ? "Hide comments" : "Show comments"}
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggleQueryPanel}
+                  className={cn(
+                    "transition-colors cursor-pointer",
+                    showQueryPanel && "bg-primary/10 text-background",
+                  )}
+                >
+                  <CircleHelp className="h-4 w-4 text-background" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showQueryPanel ? "Hide query panel" : "Show query panel"}
               </TooltipContent>
             </Tooltip>
 

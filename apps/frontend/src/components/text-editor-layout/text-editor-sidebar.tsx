@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils/utils";
 import FileTree from "../file-tree/file-tree";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
 import { FolderTree } from "lucide-react";
+import Image from "next/image";
 
 interface TextEditorSidebarProps {
   projectName: string;
@@ -36,8 +37,8 @@ export default function TextEditorSidebar({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FolderTree className="h-4 w-4 text-primary" />
-            <h1 className="truncate text-sm font-semibold text-foreground">
+            <Image src="/quill-writing.png" alt="Quill Writing" width={70} height={100} />
+            <h1 className="truncate text-lg font-semibold text-foreground">
               {projectName}
             </h1>
           </div>
