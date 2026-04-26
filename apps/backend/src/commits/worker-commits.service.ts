@@ -84,8 +84,8 @@ export class WorkerCommitsService {
       ];
       const { enqueued } =
         await this.commitKnowledgeGraphService.enqueueCommitKnowledgeGraphJobs(
-          commit.id,
           projectId,
+          commit.id,
           userId,
           changedFileFsNodeIds,
         );
@@ -100,7 +100,6 @@ export class WorkerCommitsService {
         `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
       );
     }
-
 
     console.log("commit created");
     const added = changed.added.map((n) => n.fs_node_id);

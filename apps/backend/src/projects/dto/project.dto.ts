@@ -14,7 +14,7 @@ export class CreateProjectDto implements ICreateProjectDto {
   @IsString()
   @IsNotEmpty()
   @Length(1, 255)
-  title: string;
+  title!: string;
 
   @IsString()
   @IsOptional()

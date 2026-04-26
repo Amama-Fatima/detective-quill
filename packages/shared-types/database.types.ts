@@ -14,6 +14,68 @@ export type Database = {
   };
   public: {
     Tables: {
+      badge_criteria: {
+        Row: {
+          badge_id: number;
+          created_at: string;
+          id: string;
+          metric_key: string;
+          operator: string;
+          threshold: number;
+        };
+        Insert: {
+          badge_id: number;
+          created_at?: string;
+          id?: string;
+          metric_key: string;
+          operator: string;
+          threshold: number;
+        };
+        Update: {
+          badge_id?: number;
+          created_at?: string;
+          id?: string;
+          metric_key?: string;
+          operator?: string;
+          threshold?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "badge_criteria_badge_id_fkey";
+            columns: ["badge_id"];
+            isOneToOne: false;
+            referencedRelation: "badges";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      badges: {
+        Row: {
+          code: string;
+          created_at: string;
+          description: string | null;
+          icon: string | null;
+          id: number;
+          name: string;
+        };
+        Insert: {
+          code: string;
+          created_at?: string;
+          description?: string | null;
+          icon?: string | null;
+          id?: number;
+          name: string;
+        };
+        Update: {
+          code?: string;
+          created_at?: string;
+          description?: string | null;
+          icon?: string | null;
+          id?: number;
+          name?: string;
+        };
+        Relationships: [];
+      };
       blue_prints: {
         Row: {
           created_at: string;
@@ -93,6 +155,7 @@ export type Database = {
       branches: {
         Row: {
           created_at: string;
+          current_word_count: number;
           head_commit_id: string | null;
           id: string;
           is_active: boolean;
@@ -103,6 +166,7 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
+          current_word_count?: number;
           head_commit_id?: string | null;
           id?: string;
           is_active?: boolean;
@@ -113,6 +177,7 @@ export type Database = {
         };
         Update: {
           created_at?: string;
+          current_word_count?: number;
           head_commit_id?: string | null;
           id?: string;
           is_active?: boolean;
@@ -212,54 +277,6 @@ export type Database = {
             columns: ["fs_node_id"];
             isOneToOne: false;
             referencedRelation: "project_root_nodes";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      commit_knowledge_graphs: {
-        Row: {
-          commit_id: string;
-          commit_snapshot_id: string;
-          completed_at: string | null;
-          created_at: string;
-          error_message: string | null;
-          id: string;
-          job_id: string;
-          status: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Insert: {
-          commit_id: string;
-          commit_snapshot_id: string;
-          completed_at?: string | null;
-          created_at?: string;
-          error_message?: string | null;
-          id?: string;
-          job_id: string;
-          status?: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Update: {
-          commit_id?: string;
-          commit_snapshot_id?: string;
-          completed_at?: string | null;
-          created_at?: string;
-          error_message?: string | null;
-          id?: string;
-          job_id?: string;
-          status?: Database["public"]["Enums"]["commit_kg_status"];
-        };
-        Relationships: [
-          {
-            foreignKeyName: "commit_knowledge_graphs_commit_id_fkey";
-            columns: ["commit_id"];
-            isOneToOne: false;
-            referencedRelation: "commits";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "commit_knowledge_graphs_commit_snapshot_id_fkey";
-            columns: ["commit_snapshot_id"];
-            isOneToOne: false;
-            referencedRelation: "commit_snapshots";
             referencedColumns: ["id"];
           },
         ];
@@ -409,6 +426,47 @@ export type Database = {
           },
         ];
       };
+      events: {
+        Row: {
+          created_at: string;
+          event_type: string;
+          id: string;
+          metadata: Json;
+          source_id: string | null;
+          source_table: string | null;
+          user_id: string;
+          xp: number;
+        };
+        Insert: {
+          created_at?: string;
+          event_type: string;
+          id?: string;
+          metadata: Json;
+          source_id?: string | null;
+          source_table?: string | null;
+          user_id?: string;
+          xp: number;
+        };
+        Update: {
+          created_at?: string;
+          event_type?: string;
+          id?: string;
+          metadata?: Json;
+          source_id?: string | null;
+          source_table?: string | null;
+          user_id?: string;
+          xp?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "events_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["user_id"];
+          },
+        ];
+      };
       fs_nodes: {
         Row: {
           branch_id: string | null;
@@ -417,7 +475,6 @@ export type Database = {
           depth: number | null;
           description: string | null;
           file_extension: string;
-          global_sequence: number | null;
           id: string;
           last_committed_at: string | null;
           name: string;
@@ -436,7 +493,6 @@ export type Database = {
           depth?: number | null;
           description?: string | null;
           file_extension?: string;
-          global_sequence?: number | null;
           id?: string;
           last_committed_at?: string | null;
           name: string;
@@ -455,7 +511,6 @@ export type Database = {
           depth?: number | null;
           description?: string | null;
           file_extension?: string;
-          global_sequence?: number | null;
           id?: string;
           last_committed_at?: string | null;
           name?: string;
@@ -505,6 +560,44 @@ export type Database = {
           },
         ];
       };
+      game_stats: {
+        Row: {
+          created_at: string;
+          id: string;
+          projects_created: number;
+          projects_invited_to: number;
+          total_xp: number;
+          user_id: string;
+          words_written: number;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          projects_created?: number;
+          projects_invited_to?: number;
+          total_xp?: number;
+          user_id?: string;
+          words_written?: number;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          projects_created?: number;
+          projects_invited_to?: number;
+          total_xp?: number;
+          user_id?: string;
+          words_written?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_stats_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["user_id"];
+          },
+        ];
+      };
       invitations: {
         Row: {
           created_at: string;
@@ -536,11 +629,13 @@ export type Database = {
       };
       nlp_analysis_jobs: {
         Row: {
+          commit_id: string | null;
           completed_at: string | null;
           created_at: string | null;
           current_stage: string | null;
           entity_count: number | null;
           error_message: string | null;
+          fs_node_id: string | null;
           job_id: string;
           neo4j_graph_id: string | null;
           processing_time: string | null;
@@ -548,17 +643,20 @@ export type Database = {
           relationship_count: number | null;
           result_data: Json | null;
           scene_text: string;
+          snapshot_id: string | null;
           started_at: string | null;
           status: string;
           updated_at: string | null;
           user_id: string;
         };
         Insert: {
+          commit_id?: string | null;
           completed_at?: string | null;
           created_at?: string | null;
           current_stage?: string | null;
           entity_count?: number | null;
           error_message?: string | null;
+          fs_node_id?: string | null;
           job_id?: string;
           neo4j_graph_id?: string | null;
           processing_time?: string | null;
@@ -566,17 +664,20 @@ export type Database = {
           relationship_count?: number | null;
           result_data?: Json | null;
           scene_text: string;
+          snapshot_id?: string | null;
           started_at?: string | null;
           status?: string;
           updated_at?: string | null;
           user_id: string;
         };
         Update: {
+          commit_id?: string | null;
           completed_at?: string | null;
           created_at?: string | null;
           current_stage?: string | null;
           entity_count?: number | null;
           error_message?: string | null;
+          fs_node_id?: string | null;
           job_id?: string;
           neo4j_graph_id?: string | null;
           processing_time?: string | null;
@@ -584,12 +685,48 @@ export type Database = {
           relationship_count?: number | null;
           result_data?: Json | null;
           scene_text?: string;
+          snapshot_id?: string | null;
           started_at?: string | null;
           status?: string;
           updated_at?: string | null;
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "nlp_analysis_jobs_commit_id_fkey";
+            columns: ["commit_id"];
+            isOneToOne: false;
+            referencedRelation: "commits";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "nlp_analysis_jobs_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "fs_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "nlp_analysis_jobs_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "project_file_tree";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "nlp_analysis_jobs_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "project_root_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "nlp_analysis_jobs_snapshot_id_fkey";
+            columns: ["snapshot_id"];
+            isOneToOne: false;
+            referencedRelation: "commit_snapshots";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "nlp_analysis_jobs_user_id_fkey";
             columns: ["user_id"];
@@ -603,6 +740,7 @@ export type Database = {
         Row: {
           attributes: Json | null;
           created_at: string | null;
+          description: string | null;
           id: string;
           job_id: string;
           mentions: string[] | null;
@@ -612,6 +750,7 @@ export type Database = {
         Insert: {
           attributes?: Json | null;
           created_at?: string | null;
+          description?: string | null;
           id?: string;
           job_id: string;
           mentions?: string[] | null;
@@ -621,6 +760,7 @@ export type Database = {
         Update: {
           attributes?: Json | null;
           created_at?: string | null;
+          description?: string | null;
           id?: string;
           job_id?: string;
           mentions?: string[] | null;
@@ -780,6 +920,42 @@ export type Database = {
           },
         ];
       };
+      user_badges: {
+        Row: {
+          badge_id: number;
+          created_at: string;
+          id: number;
+          user_id: string;
+        };
+        Insert: {
+          badge_id: number;
+          created_at?: string;
+          id?: number;
+          user_id: string;
+        };
+        Update: {
+          badge_id?: number;
+          created_at?: string;
+          id?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_bages_badge_id_fkey";
+            columns: ["badge_id"];
+            isOneToOne: false;
+            referencedRelation: "badges";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_bages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["user_id"];
+          },
+        ];
+      };
       user_contributions: {
         Row: {
           contribution_date: string;
@@ -828,7 +1004,6 @@ export type Database = {
           depth: number | null;
           description: string | null;
           file_extension: string | null;
-          global_sequence: number | null;
           id: string | null;
           name: string | null;
           node_type: Database["public"]["Enums"]["node_type"] | null;
@@ -887,7 +1062,6 @@ export type Database = {
           depth: number | null;
           description: string | null;
           file_extension: string | null;
-          global_sequence: number | null;
           id: string | null;
           name: string | null;
           node_type: Database["public"]["Enums"]["node_type"] | null;
@@ -960,10 +1134,6 @@ export type Database = {
           date: string;
           total_score: number;
         }[];
-      };
-      recalculate_global_sequences: {
-        Args: { target_project_id: string };
-        Returns: undefined;
       };
     };
     Enums: {

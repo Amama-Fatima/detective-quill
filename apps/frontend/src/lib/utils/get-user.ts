@@ -18,6 +18,31 @@ const PROJECT_REF = process.env
   .split(".")[0];
 
 const COOKIE_PREFIX = `sb-${PROJECT_REF}-auth-token`;
+const AUTH_COOKIE_REGEX = new RegExp(
+  `^${COOKIE_PREFIX.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}(?:\\.(\\d+))?$`,
+);
+
+function decodeMaybeBase64Session(cookieValue: string): SupabaseSession {
+  const normalizedValue = cookieValue.startsWith("\"") && cookieValue.endsWith("\"")
+    ? cookieValue.slice(1, -1)
+    : cookieValue;
+
+  const decodeBase64Utf8 = (value: string) => {
+    const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+    return Buffer.from(padded, "base64").toString("utf-8");
+  };
+
+  if (normalizedValue.startsWith("base64-")) {
+    return JSON.parse(decodeBase64Utf8(normalizedValue.substring(7)));
+  }
+
+  try {
+    return JSON.parse(normalizedValue);
+  } catch {
+    return JSON.parse(decodeBase64Utf8(normalizedValue));
+  }
+}
 
 export const getUserFromCookie = cache(
   async (): Promise<SupabaseJwtPayload | null> => {
@@ -26,13 +51,20 @@ export const getUserFromCookie = cache(
 
     const tokenChunks = cookieStore
       .getAll()
-      .filter((c) => c.name.startsWith(COOKIE_PREFIX))
-      .sort((a, b) => {
-        const aIndex = Number(a.name.split(".").pop());
-        const bIndex = Number(b.name.split(".").pop());
-        return aIndex - bIndex;
+      .map((cookie) => {
+        const match = cookie.name.match(AUTH_COOKIE_REGEX);
+        if (!match) {
+          return null;
+        }
+
+        return {
+          index: match[1] ? Number(match[1]) : 0,
+          value: decodeURIComponent(cookie.value),
+        };
       })
-      .map((c) => c.value);
+      .filter((chunk): chunk is { index: number; value: string } => Boolean(chunk))
+      .sort((a, b) => a.index - b.index)
+      .map((chunk) => chunk.value);
 
     if (tokenChunks.length === 0) {
       console.timeEnd("getUserFromCookie-cached");
@@ -42,12 +74,7 @@ export const getUserFromCookie = cache(
     let cookieValue = tokenChunks.join("");
 
     try {
-      if (cookieValue.startsWith("base64-")) {
-        cookieValue = cookieValue.substring(7);
-      }
-
-      const sessionJson = Buffer.from(cookieValue, "base64").toString("utf-8");
-      const session: SupabaseSession = JSON.parse(sessionJson);
+      const session: SupabaseSession = decodeMaybeBase64Session(cookieValue);
 
       const decoded = jwtDecode<SupabaseJwtPayload>(session.access_token);
 

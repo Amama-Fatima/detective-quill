@@ -4,21 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
-import {
-  FileText,
-  Loader2,
-  Plus,
-  FolderPlus,
-  Folder,
-  FolderOpen,
-  Search,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { FileText, Loader2, Folder, FolderOpen, Search } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { Tree } from "../magicui/file-tree";
 import CreateNodeDialog from "./dialogs/create-node-dialog";
@@ -33,6 +19,7 @@ import TreeItem from "./tree-item";
 import { findNodeById } from "@/lib/utils/file-tree-utils";
 import CreateCommitDialog from "./dialogs/create-commit-dialog";
 import { useWorkspaceContext } from "@/context/workspace-context";
+import NewFileDropdown from "./new-file-dropdown";
 
 interface FileTreeProps {
   initialNodes: FsNodeTreeResponse[];
@@ -41,12 +28,17 @@ interface FileTreeProps {
   fileLinkBasePath?: string;
 }
 
-const FileTree = ({ initialNodes, projectId, fileLinkBasePath = "text-editor" }: FileTreeProps) => {
+const FileTree = ({
+  initialNodes,
+  projectId,
+  fileLinkBasePath = "text-editor",
+}: FileTreeProps) => {
   const { activeBranchId, isOwner, isActive } = useWorkspaceContext();
   const [commitDialogOpen, setCommitDialogOpen] = useState(false);
   const params = useParams();
+  const isKnowledgeGraph = fileLinkBasePath === "knowledge-graph";
   const selectedNodeId =
-    (fileLinkBasePath === "knowledge-graph"
+    (isKnowledgeGraph
       ? (params.fileId as string)
       : (params.nodeId as string)) ?? undefined;
 
@@ -149,45 +141,24 @@ const FileTree = ({ initialNodes, projectId, fileLinkBasePath = "text-editor" }:
     <div className="flex flex-col">
       <div className="p-3 border-b bg-card/20">
         <div className="flex gap-2 mb-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          {!isKnowledgeGraph && (
+            <>
+              <NewFileDropdown
+                disabled={!isOwner || !isActive}
+                onCreateFile={() => openCreateDialog("file")}
+                onCreateFolder={() => openCreateDialog("folder")}
+              />
+
               <Button
                 size="sm"
-                className="flex-1 gap-2 cursor-pointer"
-                disabled={!isOwner || !isActive}
+                className="cursor-pointer"
+                disabled={!isOwner || !isActive || !activeBranchId}
+                onClick={() => setCommitDialogOpen(true)}
               >
-                <Plus className="h-4 w-4" />
-                New
+                Commit changes
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem
-                onClick={() => openCreateDialog("file")}
-                className="cursor-pointer"
-                disabled={!isOwner || !isActive}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                New File
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => openCreateDialog("folder")}
-                className="cursor-pointer"
-                disabled={!isOwner || !isActive}
-              >
-                <FolderPlus className="h-4 w-4 mr-2" />
-                New Folder
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button
-            size="sm"
-            className="cursor-pointer"
-            disabled={!isOwner || !isActive || !activeBranchId}
-            onClick={() => setCommitDialogOpen(true)}
-          >
-            Commit changes
-          </Button>
+            </>
+          )}
 
           <Button
             variant="outline"

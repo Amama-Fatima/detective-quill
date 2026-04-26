@@ -1,16 +1,22 @@
-import { IsString, IsNotEmpty, IsArray, ArrayNotEmpty, IsEmail } from "class-validator";
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  ArrayNotEmpty,
+  IsEmail,
+} from "class-validator";
 
 export class EmailSendingApiRequestDto {
   @IsString()
   @IsNotEmpty()
-  projectId: string;
+  projectId!: string;
 
   @IsArray()
   @ArrayNotEmpty()
   @IsEmail({}, { each: true })
-  emails: string[];
+  emails!: string[];
 
   @IsString()
   @IsNotEmpty()
-  inviterName: string;
+  inviterName!: string;
 }

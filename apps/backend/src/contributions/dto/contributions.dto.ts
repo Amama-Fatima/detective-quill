@@ -10,7 +10,7 @@ import {
 
 export class CreateContributionDto {
   @IsIn(["save", "commit"])
-  contribution_type: "save" | "commit";
+  contribution_type!: "save" | "commit";
 
   @IsOptional()
   @IsUUID()
@@ -25,10 +25,10 @@ export class GetMonthlyContributionsQueryDto {
   @IsInt()
   @Min(2000)
   @Max(2100)
-  year: number;
+  year!: number;
 
   @IsInt()
   @Min(1)
   @Max(12)
-  month: number;
+  month!: number;
 }

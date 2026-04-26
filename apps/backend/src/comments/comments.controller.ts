@@ -19,7 +19,7 @@ import { MembersService } from "src/members/members.service";
 import {
   CreateCommentDto,
   UpdateCommentDto,
-} from "./validation/comment.validation";
+} from "./dto/comment.dto";
 import { AuthGuard } from "../auth/auth.guard";
 import {
   CommentResponse,

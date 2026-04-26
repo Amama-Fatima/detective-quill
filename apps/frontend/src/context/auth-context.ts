@@ -18,6 +18,18 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function decodeBase64Utf8(value: string): string {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
 // Helper to get session from cookie (client-side)
 function getSessionFromCookie(): Session | null {
   try {
@@ -25,27 +37,59 @@ function getSessionFromCookie(): Session | null {
       .NEXT_PUBLIC_SUPABASE_URL!.replace("https://", "")
       .split(".")[0];
     const COOKIE_PREFIX = `sb-${PROJECT_REF}-auth-token`;
+    const AUTH_COOKIE_REGEX = new RegExp(
+      `^${escapeRegExp(COOKIE_PREFIX)}(?:\\.(\\d+))?$`,
+    );
 
     const cookies = document.cookie.split(";");
     const tokenChunks = cookies
-      .filter((c) => c.trim().startsWith(COOKIE_PREFIX))
-      .sort((a, b) => {
-        const aIndex = Number(a.split("=")[0].split(".").pop());
-        const bIndex = Number(b.split("=")[0].split(".").pop());
-        return aIndex - bIndex;
+      .map((cookie) => {
+        const trimmedCookie = cookie.trim();
+        const separatorIndex = trimmedCookie.indexOf("=");
+
+        if (separatorIndex === -1) {
+          return null;
+        }
+
+        const name = trimmedCookie.slice(0, separatorIndex);
+        const value = trimmedCookie.slice(separatorIndex + 1);
+        const match = name.match(AUTH_COOKIE_REGEX);
+
+        if (!match) {
+          return null;
+        }
+
+        return {
+          index: match[1] ? Number(match[1]) : 0,
+          value: decodeURIComponent(value),
+        };
       })
-      .map((c) => c.split("=")[1]);
+      .filter((chunk): chunk is { index: number; value: string } =>
+        Boolean(chunk),
+      )
+      .sort((a, b) => {
+        return a.index - b.index;
+      })
+      .map((chunk) => chunk.value);
 
     if (tokenChunks.length === 0) return null;
 
     let cookieValue = tokenChunks.join("");
-
-    if (cookieValue.startsWith("base64-")) {
-      cookieValue = cookieValue.substring(7);
+    if (cookieValue.startsWith('"') && cookieValue.endsWith('"')) {
+      cookieValue = cookieValue.slice(1, -1);
     }
 
-    const sessionJson = atob(cookieValue);
-    return JSON.parse(sessionJson);
+    if (cookieValue.startsWith("base64-")) {
+      const sessionJson = decodeBase64Utf8(cookieValue.substring(7));
+      return JSON.parse(sessionJson);
+    }
+
+    try {
+      return JSON.parse(cookieValue);
+    } catch {
+      const sessionJson = decodeBase64Utf8(cookieValue);
+      return JSON.parse(sessionJson);
+    }
   } catch (err) {
     console.error("Error reading session from cookie:", err);
     return null;

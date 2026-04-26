@@ -8,7 +8,6 @@ import { ProjectsModule } from "./projects/projects.module";
 import { FsNodesModule } from "./fs-nodes/fs-nodes.module";
 import { BlueprintsModule } from "./blueprints/blueprints.module";
 import { BlueprintCardsModule } from "./blueprint_cards/blueprint_cards.module";
-import { ClientsModule, Transport } from "@nestjs/microservices";
 import { CommentsModule } from "./comments/comments.module";
 import { MembersModule } from "./members/members.module";
 import { InvitationsModule } from "./invitations/invitations.module";
@@ -17,6 +16,7 @@ import { QueueModule } from "./queue/queue.module";
 import { NlpAnalysisModule } from "./nlp-analysis/nlp-analysis.module";
 import { CommitsModule } from "./commits/commits.module";
 import { ContributionsModule } from "./contributions/contributions.module";
+import { BadgesNStatsModule } from "./badges_n_stats/badges_n_stats.module";
 
 @Module({
   controllers: [AppController],
@@ -38,6 +38,7 @@ import { ContributionsModule } from "./contributions/contributions.module";
     QueueModule,
     CommitsModule,
     ContributionsModule,
+    BadgesNStatsModule,
     NlpAnalysisModule,
   ],
 })
