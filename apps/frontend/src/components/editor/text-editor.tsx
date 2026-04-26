@@ -13,7 +13,6 @@ import {
   Minimize,
   Focus,
   MessageSquare,
-  GitCommitHorizontal,
 } from "lucide-react";
 import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {
@@ -236,7 +235,7 @@ const TextEditor = ({
         </div>
 
         {/* Editor Content */}
-        <div className="flex-1">
+        <div className="flex-1 min-h-0">
           <BlockNoteEditor
             ref={effectiveEditorRef}
             initialContent={internal}
