@@ -9,7 +9,7 @@ import {
 export class CreateBranchDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsOptional()
@@ -21,7 +21,7 @@ export class CreateBranchDto {
 
   @IsUUID()
   @IsNotEmpty()
-  parent_commit_id: string;
+  parent_commit_id!: string;
 }
 
 export class UpdateBranchDto {

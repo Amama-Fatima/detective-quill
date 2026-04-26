@@ -5,7 +5,6 @@ import {
   ApiResponse,
   UpdateFileContentDto,
   UpdateNodeMetadataDto,
-  Project,
   EditorWorkspaceResponse,
 } from "@detective-quill/shared-types";
 

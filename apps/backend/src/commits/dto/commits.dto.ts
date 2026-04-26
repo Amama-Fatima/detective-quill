@@ -1,18 +1,13 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsUUID,
-} from "class-validator";
+import { IsString, IsNotEmpty, IsOptional, IsUUID } from "class-validator";
 
 export class CreateCommitDto {
   @IsString()
   @IsNotEmpty()
-  message: string;
+  message!: string;
 
   @IsUUID()
   @IsNotEmpty()
-  branch_id: string;
+  branch_id!: string;
 
   // @IsUUID()
   // @IsOptional()

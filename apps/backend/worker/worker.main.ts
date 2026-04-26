@@ -6,6 +6,10 @@ import * as path from "path";
 import express from "express";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+console.log("Loaded environment variables:", {
+  RABBITMQ_URL: process.env.RABBITMQ_URL,
+  WORKER_PORT: process.env.WORKER_PORT,
+});
 
 async function bootstrap() {
   const emailWorkerApp = await NestFactory.createMicroservice(WorkerModule, {
@@ -14,6 +18,7 @@ async function bootstrap() {
       urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
       queue: "invite_email_queue",
       queueOptions: { durable: true },
+      noAck: true,
     },
   });
 
@@ -23,6 +28,7 @@ async function bootstrap() {
       urls: [process.env.RABBITMQ_URL || "amqp://guest:guest@localhost:5672"],
       queue: "commit_jobs_queue",
       queueOptions: { durable: true },
+      noAck: true,
     },
   });
 

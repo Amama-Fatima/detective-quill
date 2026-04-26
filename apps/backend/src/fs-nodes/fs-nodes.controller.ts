@@ -14,7 +14,7 @@ import {
   CreateFsNodeDto,
   UpdateFileContentDto,
   UpdateNodeMetadataDto,
-} from "./validation/fs-nodes.validation";
+} from "./dto/fs-nodes.dto";
 import { AuthGuard } from "../auth/auth.guard";
 import {
   FsNode,

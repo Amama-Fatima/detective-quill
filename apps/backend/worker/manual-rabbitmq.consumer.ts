@@ -13,6 +13,7 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
     private nlpAnalysisService: WorkerNlpAnalysisService,
   ) {}
 
+  // todo: using config service to access env is good practice, change the other places in the code to do the same
   async onModuleInit() {
     const rabbitmqUrl =
       this.configService.get<string>("RABBITMQ_URL") ||
@@ -39,16 +40,16 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
           { noAck: false },
         );
 
-        console.log("✓ Listening on scene_analysis_results_queue");
+        console.log("Listening on scene_analysis_results_queue");
       },
     });
 
     this.connection.on("connect", () => {
-      console.log("✓ Connected to RabbitMQ for NLP consumer");
+      console.log("Connected to RabbitMQ for NLP consumer");
     });
 
     this.connection.on("disconnect", (err: any) => {
-      console.error("✗ Disconnected from RabbitMQ:", err);
+      console.error("Disconnected from RabbitMQ:", err);
     });
   }
 
@@ -69,9 +70,9 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
           processingTime: processing_time ?? undefined,
         });
 
-        console.log(`✓ Saved knowledge graph for job ${job_id}`);
-        console.log(`  - Entities: ${result.metadata.num_entities}`);
-        console.log(`  - Relationships: ${result.metadata.num_relationships}`);
+        console.log(`Saved knowledge graph for job ${job_id}`);
+        console.log(` Entities: ${result.metadata.num_entities}`);
+        console.log(` Relationships: ${result.metadata.num_relationships}`);
       } else {
         console.error(`✗ Job ${job_id} failed: ${error}`);
         await this.nlpAnalysisService.markJobAsFailed(

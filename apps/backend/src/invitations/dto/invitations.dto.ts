@@ -2,13 +2,13 @@ import { IsNotEmpty, IsUUID } from "class-validator";
 
 export class DeleteInvitationDto {
   @IsUUID()
-  projectId: string;
+  projectId!: string;
 }
 
 export class RespondToInvitationDto {
   @IsUUID()
-  projectId: string;
+  projectId!: string;
 
   @IsNotEmpty()
-  response: "accept" | "reject";
+  response!: "accept" | "reject";
 }

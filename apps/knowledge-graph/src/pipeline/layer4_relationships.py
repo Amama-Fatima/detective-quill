@@ -55,20 +55,36 @@ class LLMRelationshipExtractor:
 
         logger.debug(f"Analyzing relationship: {entity_a.name} ↔ {entity_b.name}")
 
-        prompt = f"""Scene: "{scene_text}"
+        prompt = f"""Scene:
+\"\"\"{scene_text[:1200]}\"\"\"
 
 A: {entity_a_context}
 B: {entity_b_context}
 
-Does the scene text EXPLICITLY show a relationship between A and B?
-Only use evidence that is a direct quote or clear paraphrase from the scene.
-Do not infer relationships. If uncertain, output null.
+Find the single most significant relationship between A and B.
+
+Check these tiers in order and use the first that applies:
+
+TIER 1 — Crime / violence (always extract if present):
+  murder, kill, attack, stab, hit, strangle, shoot, threaten, confront, accuse, chase, fight, assault
+
+TIER 2 — Interpersonal actions (extract if clearly shown in the scene):
+  love, hate, marry, kiss, greet, wait_for, serve, help, trust, suspect, argue, comfort, betray, protect
+
+TIER 3 — Social / situational (use if nothing stronger applies, but DO extract something):
+  talk_to, drink_with, sit_with, live_with, work_for, know, meet, share_space_with, prepare_for
+
+Rules:
+- If A and B interact in any way, output a relationship — use Tier 3 at minimum
+- Only output null if A and B have absolutely no connection in this scene
+- "type" must be a short snake_case verb phrase
+- "description" must be a brief phrase drawn from the scene text
 
 Output ONLY one of:
-{{"source":"<name>","target":"<name>","type":"<verb>","evidence":"<exact quote from scene>"}}
+{{"source":"<A or B name>","target":"<A or B name>","type":"<snake_case_verb>","description":"<brief scene evidence>"}}
 null"""
 
-        response = self.llm_loader.generate(prompt, max_tokens=60)
+        response = self.llm_loader.generate(prompt, max_tokens=150)
         logger.debug(f"LLM response for {entity_a.name} ↔ {entity_b.name}: {response[:150]}")
 
         try:
@@ -86,21 +102,31 @@ null"""
             else:
                 data = json.loads(response)
 
-            source = data.get('source', '')
-            target = data.get('target', '')
+            source = data.get('source', '').strip()
+            target = data.get('target', '').strip()
 
-            source_match = source.lower().strip() in [entity_a.name.lower(), entity_b.name.lower()]
-            target_match = target.lower().strip() in [entity_a.name.lower(), entity_b.name.lower()]
+            known_names = {entity_a.name.lower(), entity_b.name.lower()}
 
-            if source_match and target_match and source.lower() != target.lower():
+            def _matches(name: str) -> str | None:
+                """Return the canonical entity name if name loosely matches one of the two entities."""
+                nl = name.lower()
+                for canonical in [entity_a.name, entity_b.name]:
+                    if nl == canonical.lower() or nl in canonical.lower() or canonical.lower() in nl:
+                        return canonical
+                return None
+
+            source_canonical = _matches(source)
+            target_canonical = _matches(target)
+
+            if source_canonical and target_canonical and source_canonical != target_canonical:
                 relationship = Relationship(
-                    source=source,
-                    target=target,
+                    source=source_canonical,
+                    target=target_canonical,
                     relation_type=data.get('type', 'unknown'),
-                    description=data.get('evidence', ''),
+                    description=data.get('description', data.get('evidence', '')),
                     confidence=0.9
                 )
-                logger.debug(f"  Found: {source} --[{data.get('type')}]--> {target}")
+                logger.debug(f"  Found: {source_canonical} --[{data.get('type')}]--> {target_canonical}")
                 return [relationship]
 
             return []
