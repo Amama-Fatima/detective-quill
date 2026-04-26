@@ -17,7 +17,7 @@ query_cache = modal.Dict.from_name("nl2cypher-query-cache", create_if_missing=Tr
 image = modal.Image.debian_slim(python_version="3.10").pip_install(
     "torch==2.4.1",
     "transformers==4.44.2",
-    "accelerate>=0.33.0"
+    "accelerate>=0.33.0",
 )
 
 app = modal.App(APP_NAME)
@@ -139,40 +139,50 @@ class NL2CypherModel:
         return cypher
 
 
-def _execute_cypher_query(cypher: str):
-    from neo4j import GraphDatabase
+# def _execute_cypher_query(cypher: str):
+#     from neo4j import GraphDatabase
 
-    from app.core.config import settings
+#     from app.core.config import settings
 
-    driver = GraphDatabase.driver(
-        settings.neo4j_uri,
-        auth=(settings.neo4j_user, settings.neo4j_password),
-    )
-    try:
-        with driver.session() as session:
-            result = session.run(cypher)
-            return result.data()
-    finally:
-        driver.close()
+#     driver = GraphDatabase.driver(
+#         settings.neo4j_uri,
+#         auth=(settings.neo4j_user, settings.neo4j_password),
+#     )
+#     try:
+#         with driver.session() as session:
+#             result = session.run(cypher)
+#             return result.data()
+#     finally:
+#         driver.close()
 
 
 @app.local_entrypoint()
-def main(question: str = "Find all interactions between Mary Maloney and Patrick Maloney") -> None:
-    from app.core.prompts import CYPHER_PROMPT_TEMPLATE, GRAPH_CYPHER_EXAMPLES_BLOCK, GRAPH_SCHEMA_TEXT
+def main(
+    question: str = "Find all interactions between Mary Maloney and Patrick Maloney",
+    fs_node_id: str = "5476b888-5792-49c2-b6da-716c93e47a58",
+    project_id: str = "70f04ca0-9f56-4423-9d63-0298096cb4d3",
+) -> None:
+    import asyncio
 
-    prompt = CYPHER_PROMPT_TEMPLATE.format(
-        schema=GRAPH_SCHEMA_TEXT,
+    from app.services.graph_rag_service import graph_rag_service
+    from app.services.nlp_context_service import nlp_context_service
+
+    context = nlp_context_service.fetch_context_for_fs_node(
+        fs_node_id=fs_node_id,
         question=question,
-        limit=10,
-        examples_block=GRAPH_CYPHER_EXAMPLES_BLOCK,
+        project_id=project_id,
     )
 
-    cypher = NL2CypherModel().generate.remote(prompt)
+    result = asyncio.run(graph_rag_service.query(question, context=context))
 
-    print("\nExtracted Cypher:\n")
-    print(cypher)
-
-    answer = _execute_cypher_query(cypher)
-
-    print("\nQuery Result:\n")
-    print(answer)
+    print("\nDirect Answer:\n")
+    print(result.answer)
+    print("\nSupporting Job IDs:\n")
+    print(result.supporting_job_ids)
+    print("\nEntities Passed To LLM:\n")
+    print([entity.name for entity in result.entities])
+    print("\nRelationships Passed To LLM:\n")
+    print([
+        f"{relationship.source} --[{relationship.relation_type}]--> {relationship.target}"
+        for relationship in result.relationships
+    ])

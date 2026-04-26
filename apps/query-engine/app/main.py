@@ -13,14 +13,12 @@ app = FastAPI(title=settings.app_name)
 
 @app.on_event("startup")
 async def startup_event() -> None:
-    """Initialize connections on startup."""
     logger.info("Starting up Query Engine...")
     await Neo4jConnection.connect()
 
 
 @app.on_event("shutdown")
 async def shutdown_event() -> None:
-    """Close connections on shutdown."""
     logger.info("Shutting down Query Engine...")
     await Neo4jConnection.close()
 
@@ -29,7 +27,6 @@ async def shutdown_event() -> None:
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
-
-app.include_router(api_router, prefix=settings.api_v1_prefix)
+app.include_router(api_router)
 
 logger.info("Query engine initialized")

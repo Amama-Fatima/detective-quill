@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from neo4j import AsyncSession
 from app.core.neo4j import Neo4jConnection
 from app.core.logging import get_logger

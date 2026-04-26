@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from neo4j import GraphDatabase
 
 from app.core.config import settings

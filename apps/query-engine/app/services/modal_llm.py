@@ -1,5 +1,7 @@
 """Custom wrapper around the Modal Qwen NL -> Cypher deployment."""
 
+from __future__ import annotations
+
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 import modal

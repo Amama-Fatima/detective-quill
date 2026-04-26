@@ -140,3 +140,34 @@ USER QUESTION:
 {question}
  
 MATCH"""
+
+ANSWER_PROMPT_TEMPLATE = """You are an expert assistant analyzing entities and relationships in a narrative work.
+
+Your task: answer the user's question using ONLY the structured data below, then return a single valid JSON object.
+
+ENTITIES:
+{entities_text}
+
+RELATIONSHIPS:
+{relationships_text}
+
+USER QUESTION:
+{question}
+
+INSTRUCTIONS:
+1. Base your answer strictly on the entities and relationships above. Do not infer, assume, or hallucinate anything not explicitly stated.
+2. If the data is insufficient to answer, set "answer" to: "This information is not available in the current context."
+3. Keep "answer" to one direct, concise sentence.
+4. "supporting_job_ids": include only job_ids that directly evidence the answer. If none apply, return [].
+5. "exact_entities": include only entity names explicitly present in the context that support the answer. Do not rename or paraphrase.
+6. "exact_relationships": include only relationship types explicitly present in the context that support the answer. Do not rename or paraphrase.
+7. For questions about interactions between multiple entities, only include a job_id if ALL entities and the relevant relationship are present in that job.
+
+Return ONLY a valid JSON object — no explanation, no markdown, no preamble:
+
+{{
+  "answer": "<one sentence>",
+  "supporting_job_ids": ["<job_id>"],
+  "exact_entities": ["<entity_name>"],
+  "exact_relationships": ["<relationship_type>"]
+}}"""

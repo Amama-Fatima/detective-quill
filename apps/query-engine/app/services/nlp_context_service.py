@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from app.core.logging import get_logger
 from app.core.supabase import get_supabase_client
 from app.schemas.query import EntityContext
@@ -19,7 +21,7 @@ class NlpContextService:
         client = get_supabase_client()
         response = (
             client.table("nlp_analysis_jobs")
-            .select("job_id,id")
+            .select("job_id")
             .eq("fs_node_id", fs_node_id)
             .order("created_at", desc=True)
             .limit(1)
@@ -30,7 +32,7 @@ class NlpContextService:
         if not rows:
             return None
 
-        job_id = rows[0].get("job_id") or rows[0].get("id")
+        job_id = rows[0].get("job_id")
         return str(job_id) if job_id is not None else None
 
     def _fetch_file_fs_node_ids(
@@ -73,7 +75,7 @@ class NlpContextService:
         client = get_supabase_client()
         response = (
             client.table("nlp_analysis_jobs")
-            .select("job_id,id")
+            .select("job_id")
             .in_("fs_node_id", fs_node_ids)
             .execute()
         )
@@ -82,7 +84,7 @@ class NlpContextService:
         job_ids: list[str] = []
         seen: set[str] = set()
         for row in rows:
-            raw_job_id = row.get("job_id") or row.get("id")
+            raw_job_id = row.get("job_id")
             if raw_job_id is None:
                 continue
 
@@ -99,7 +101,7 @@ class NlpContextService:
         client = get_supabase_client()
         response = (
             client.table("nlp_entities")
-            .select("name,mentions")
+            .select("job_id,name,mentions")
             .eq("job_id", job_id)
             .execute()
         )
@@ -117,7 +119,11 @@ class NlpContextService:
                 mentions = [str(raw_mentions)]
 
             entities.append(
-                EntityContext(name=str(row.get("name", "")), mentions=mentions)
+                EntityContext(
+                    job_id=str(row.get("job_id")) if row.get("job_id") is not None else None,
+                    name=str(row.get("name", "")),
+                    mentions=mentions,
+                )
             )
 
         return entities
@@ -129,7 +135,7 @@ class NlpContextService:
         client = get_supabase_client()
         response = (
             client.table("nlp_entities")
-            .select("name,mentions")
+            .select("job_id,name,mentions")
             .in_("job_id", job_ids)
             .execute()
         )
@@ -147,7 +153,11 @@ class NlpContextService:
                 mentions = [str(raw_mentions)]
 
             entities.append(
-                EntityContext(name=str(row.get("name", "")), mentions=mentions)
+                EntityContext(
+                    job_id=str(row.get("job_id")) if row.get("job_id") is not None else None,
+                    name=str(row.get("name", "")),
+                    mentions=mentions,
+                )
             )
 
         return entities
@@ -156,7 +166,7 @@ class NlpContextService:
         client = get_supabase_client()
         response = (
             client.table("nlp_relationships")
-            .select("source,target,relation_type")
+            .select("job_id,source,target,relation_type")
             .eq("job_id", job_id)
             .execute()
         )
@@ -166,6 +176,7 @@ class NlpContextService:
         for row in rows:
             relationships.append(
                 RelationshipContext(
+                    job_id=str(row.get("job_id")) if row.get("job_id") is not None else None,
                     source=str(row.get("source", "")),
                     target=str(row.get("target", "")),
                     relation_type=str(row.get("relation_type", "")),
@@ -183,7 +194,7 @@ class NlpContextService:
         client = get_supabase_client()
         response = (
             client.table("nlp_relationships")
-            .select("source,target,relation_type")
+            .select("job_id,source,target,relation_type")
             .in_("job_id", job_ids)
             .execute()
         )
@@ -193,6 +204,7 @@ class NlpContextService:
         for row in rows:
             relationships.append(
                 RelationshipContext(
+                    job_id=str(row.get("job_id")) if row.get("job_id") is not None else None,
                     source=str(row.get("source", "")),
                     target=str(row.get("target", "")),
                     relation_type=str(row.get("relation_type", "")),
@@ -267,6 +279,11 @@ class NlpContextService:
             logger.exception("Failed to fetch NLP context for job_ids=%s", job_ids)
             raise RuntimeError("Failed to fetch NLP entities and relationships") from exc
 
+
+        print(f"Fetched {len(entities)} entities and {len(relationships)} relationships for job_ids={job_ids}")
+        print(f"is file scoped question: {is_file_scoped_question}")
+        print(f"entities: {entities}")
+        print(f"relationships: {relationships}")
         return GraphContext(
             fs_node_id=fs_node_id,
             project_id=project_id,

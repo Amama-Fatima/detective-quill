@@ -1,4 +1,7 @@
-from typing import Any
+from __future__ import annotations
+
+from dataclasses import dataclass, field as dataclass_field
+from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -9,11 +12,13 @@ class QueryRequest(BaseModel):
 
 
 class EntityContext(BaseModel):
+    job_id: Optional[str] = None
     name: str
-    mentions: list[str] = Field(default_factory=list)
+    mentions: List[str] = Field(default_factory=list)
 
 
 class RelationshipContext(BaseModel):
+    job_id: Optional[str] = None
     source: str
     target: str
     relation_type: str
@@ -21,21 +26,34 @@ class RelationshipContext(BaseModel):
 
 class GraphContext(BaseModel):
     fs_node_id: str
-    project_id: str | None = None
-    active_branch_id: str | None = None
+    project_id: Optional[str] = None
+    active_branch_id: Optional[str] = None
     is_file_scoped: bool = False
-    job_id: str | None = None
-    entities: list[EntityContext] = Field(default_factory=list)
-    relationships: list[RelationshipContext] = Field(default_factory=list)
+    job_id: Optional[str] = None
+    entities: List[EntityContext] = Field(default_factory=list)
+    relationships: List[RelationshipContext] = Field(default_factory=list)
+
+class SupportingEvidence(BaseModel):
+    job_id: str
+    resolved_text: Optional[str] = None
+    fs_node_id: Optional[str] = None
 
 
-class QueryResponse(BaseModel):
+class QueryResult(BaseModel):
     status: str
-    message: str
     question: str
-    fs_node_id: str
-    job_id: str | None = None
-    entities: list[EntityContext] = Field(default_factory=list)
-    relationships: list[RelationshipContext] = Field(default_factory=list)
-    cypher: str | None = None
-    data: list[dict[str, Any]] = Field(default_factory=list)
+    answer: Optional[str] = None
+    supporting_ids_and_text: List[SupportingEvidence] = Field(default_factory=list)
+    entities: List[EntityContext] = Field(default_factory=list)
+    relationships: List[RelationshipContext] = Field(default_factory=list)
+    exact_entities: List[str] = Field(default_factory=list)
+    exact_relationships: List[str] = Field(default_factory=list)
+    # cypher: Optional[str] = None
+
+
+@dataclass
+class AnswerGenerationResult:
+    answer: str
+    supporting_job_ids: list[str] = dataclass_field(default_factory=list)
+    exact_entities: list[str] = dataclass_field(default_factory=list)
+    exact_relationships: list[str] = dataclass_field(default_factory=list)
