@@ -1,5 +1,5 @@
 import React from "react";
-import TextEditor from "./text-editor-error";
+import TextEditorError from "./text-editor-error";
 import { getEditorWorkspaceData } from "@/lib/supabase-calls/editor-workspace";
 import TextEditorLayoutWrapper from "./text-editor-layout-wrapper";
 import { createSupabaseServerClient } from "@/supabase/server-client";
@@ -40,7 +40,7 @@ export default async function TextEditorLayout({
   } catch (error) {
     console.error("Workspace layout error:", error);
     return (
-      <TextEditor
+      <TextEditorError
         error={error instanceof Error ? error.message : "Unknown error"}
       />
     );

@@ -1,19 +1,15 @@
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { redirect } from "next/navigation";
-import CreateBlueprintBtns from "@/components/blueprint/btns/create-blueprint-btns";
 import { getProjectBlueprints } from "@/lib/supabase-calls/blueprint";
 import { UserBlueprintsList } from "@/components/blueprint/user-bueprints-list";
 import ErrorMsg from "@/components/error-msg";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
 import { getUserFromCookie } from "@/lib/utils/get-user";
-import { BlueprintIcon } from "@/components/icons/blueprint-icon";
-import { useWorkspaceContext } from "@/context/workspace-context";
+import BlueprintHeader from "@/components/blueprint/blueprint-header";
 
 interface BlueprintPageProps {
-  params: Promise<{
-    projectId: string;
-  }>;
+  params: Promise<{ projectId: string }>;
 }
 
 export async function generateMetadata({
@@ -23,12 +19,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { projectId } = await params;
   const { title, error } = await fetchProjectTitle(projectId);
-  if (error || !title) {
-    return {
-      title: "Blueprints",
-      description: "Project Blueprints page",
-    };
-  }
+  if (error || !title)
+    return { title: "Blueprints", description: "Project Blueprints page" };
   return {
     title: `${title} - Blueprints`,
     description: `Blueprints page for project ${title}`,
@@ -40,45 +32,35 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
   const supabase = await createSupabaseServerClient();
 
   const user = await getUserFromCookie();
-
-  if (!user) {
-    redirect("/auth/sign-in");
-  }
+  if (!user) redirect("/auth/sign-in");
 
   const { blueprints, error } = await getProjectBlueprints(projectId, supabase);
+  if (error) return <ErrorMsg message="Failed to load blueprints" />;
 
-  if (error) {
-    return <ErrorMsg message="Failed to load blueprints" />;
-  }
+  const count = blueprints?.length ?? 0;
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,oklch(24%_0.022_245)_1px,transparent_1px),linear-gradient(to_bottom,oklch(24%_0.022_245)_1px,transparent_1px)] [background-size:28px_28px]" />
-      <div className="pointer-events-none absolute -right-20 top-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
-      <div className="pointer-events-none absolute -left-16 bottom-24 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+    <div className="relative min-h-screen bg-background overflow-hidden">
+      <div className="pointer-events-none absolute top-[35%] right-[-30px] w-[100px] h-[100px] rounded-full bg-secondary-foreground opacity-25 z-[1]" />
+      <div className="pointer-events-none absolute bottom-[20%] left-[-20px] w-[130px] h-[130px] rounded-full bg-secondary-foreground opacity-20 z-[1]" />
 
-      <div className="relative z-10 border-b border-border bg-muted/90 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-wrap items-center justify-between mb-6 gap-6">
-            <div className="flex items-center space-x-4">
-              <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                <BlueprintIcon />
-              </div>
-              <div>
-                <h1 className="mystery-title text-4xl mb-2">Blueprints</h1>
-                <p className="text-muted-foreground noir-text">
-                  Manage and organize your reusable design components and
-                  templates
-                </p>
-              </div>
-            </div>
-            <CreateBlueprintBtns projectId={projectId} />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.025] bg-[radial-gradient(oklch(24%_0.022_245)_1px,transparent_1px)] bg-size-[28px_28px]" />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 py-10 space-y-0">
+        <BlueprintHeader projectId={projectId} />
+
+        <div className="pt-8">
+          <div className="flex items-center gap-4 mb-6">
+            <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-muted-foreground/50 shrink-0">
+              All Blueprints
+            </span>
+            <div className="flex-1 border-t border-border/50" />
+            <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-muted-foreground/35 shrink-0">
+              {count} {count === 1 ? "file" : "files"} on record
+            </span>
           </div>
+          <UserBlueprintsList blueprints={blueprints} projectId={projectId} />
         </div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <UserBlueprintsList blueprints={blueprints} projectId={projectId} />
       </div>
     </div>
   );

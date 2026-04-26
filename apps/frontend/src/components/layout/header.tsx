@@ -28,7 +28,6 @@ export default async function Header() {
           </Link>
         </div>
 
-        {/* Navigation - Desktop */}
         <nav className="hidden items-center gap-9 md:flex">
           {loggedIn && (
             <Link
@@ -41,7 +40,7 @@ export default async function Header() {
 
           {loggedIn && (
             <Link
-              href="/cases"
+              href="/projects"
               className="noir-text text-[1.1rem] text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
             >
               Projects
@@ -49,12 +48,10 @@ export default async function Header() {
           )}
         </nav>
 
-        {/* Auth Buttons */}
         <div className="flex items-center">
           <AuthButtons />
         </div>
 
-        {/* Mobile Navigation */}
         <div className="md:hidden">
           <MobileNav />
         </div>
@@ -63,7 +60,6 @@ export default async function Header() {
   );
 }
 
-// Mobile Navigation Component
 function MobileNav() {
   return (
     <div className="flex items-center space-x-4">
@@ -76,7 +72,7 @@ function MobileNav() {
         </Link>
 
         <Link
-          href="/cases"
+          href="/projects"
           className="text-sm text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
         >
           Projects

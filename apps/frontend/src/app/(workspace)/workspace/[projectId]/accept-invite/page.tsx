@@ -1,4 +1,4 @@
-import AcceptRejectProject from "@/components/project-page/invitations/accept-reject-project";
+import AcceptRejectProject from "@/components/workspace-overview/invitations/accept-reject-project";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 import { createSupabaseServerClient } from "@/supabase/server-client";

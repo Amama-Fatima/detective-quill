@@ -48,46 +48,33 @@ export default function Canvas({
 
   const [isDirty, setIsDirty] = useState(false);
 
-  // Warn user if they try to refresh/close the tab when there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isOwner) {
-        if (!isDirty) {
-          return;
-        }
-      }
+      if (isOwner && !isDirty) return;
       e.preventDefault();
       return "";
     };
-
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty, isOwner]);
 
   // @ts-ignore
   const onNodeChanges = (changes: any) => {
-    setNodes((nds) => {
-      const updated = applyNodeChanges(changes, nds);
-      return updated;
-    });
+    setNodes((nds) => applyNodeChanges(changes, nds));
     setIsDirty(true);
   };
 
-  const nodeTypes = {
-    card: CanvasCardNode,
-  };
+  const nodeTypes = { card: CanvasCardNode };
 
   const handleSave = async () => {
     const success = await onSave();
-    if (success) {
-      setIsDirty(false);
-    }
+    if (success) setIsDirty(false);
   };
 
   return (
-    <div className="w-full h-[85vh] flex flex-col">
-      {/* Top Bar */}
-      <div className="flex bg-secondary justify-between m-2 rounded-lg items-center px-4 py-2 border border-secondary-foreground">
+    // h-full fills the 100dvh parent; flex-col so top bar + flow share the space
+    <div className="w-full h-full flex flex-col">
+      <div className="flex shrink-0 justify-between items-center px-8 py-2 border-b border-border bg-secondary">
         <EditableBlueprintName
           initialName={blueprintName}
           type={type}
@@ -95,7 +82,7 @@ export default function Canvas({
           isOwner={isOwner}
           isActive={isActive}
         />
-        <div className="flex gap-1">
+        <div className="flex gap-2">
           <Button
             className="cursor-pointer bg-primary hover:bg-primary/90 shadow-md disabled:cursor-not-allowed disabled:opacity-50"
             onClick={handleSave}
@@ -109,26 +96,33 @@ export default function Canvas({
               setIsDirty(true);
             }}
             disabled={!isOwner || !isActive}
-            className="text-left cursor-pointer bg-primary hover:bg-primary/90 shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer bg-primary hover:bg-primary/90 shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           >
-            + Add Card{" "}
+            + Add Card
           </Button>
         </div>
       </div>
 
-      <ReactFlow
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodeChanges}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
-        fitView={false}
-      >
-        <MiniMap />
-        <Controls />
-        <Background variant={"dots" as any} gap={12} size={2} color="#593e04" />
-      </ReactFlow>
+      {/* ── React Flow — takes all remaining height ── */}
+      <div className="flex-1 min-h-0">
+        <ReactFlow
+          nodes={nodes}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodeChanges}
+          defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+          fitView={false}
+          style={{ width: "100%", height: "100%" }}
+        >
+          <MiniMap />
+          <Controls />
+          <Background
+            variant={"dots" as any}
+            gap={12}
+            size={2}
+            color="#593e04"
+          />
+        </ReactFlow>
+      </div>
     </div>
   );
 }
-
-//todo: use useCallbacks where needed

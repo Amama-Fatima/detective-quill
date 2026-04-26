@@ -104,4 +104,9 @@ export class BranchesController {
       message: "Active branch switched successfully",
     };
   }
+
+  @Get(":projectId/branches-tree")
+  async getBranchesTree(@Param("projectId") projectId: string) {
+    return this.branchesService.getBranchesWithParent(projectId);
+  }
 }

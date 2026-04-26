@@ -24,7 +24,7 @@ const RecentProjects = ({ projects }: RecentProjectsProps) => {
         <CardDescription className="noir-text text-md flex items-center gap-1 justify-between">
           Pick up where you left off in your latest active cases
 
-          <Link href="/cases" className="font-bold font-playfair-display text-primary hover:underline block">
+          <Link href="/projects" className="font-bold font-playfair-display text-primary hover:underline block">
             See All Projects
           </Link>
         </CardDescription>

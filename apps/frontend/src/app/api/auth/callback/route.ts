@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
 
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/cases"; // Default to cases instead of root
+  const next = searchParams.get("next") ?? "/projects"; // Default to cases instead of root
 
   if (code) {
     const supabase = await createSupabaseServerClient();
