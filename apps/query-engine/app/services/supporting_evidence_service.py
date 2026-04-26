@@ -27,7 +27,7 @@ class SupportingEvidenceService:
         client = get_supabase_client()
         response = (
             client.table("nlp_analysis_jobs")
-            .select("job_id,fs_node_id,resolved_text")
+            .select("job_id,fs_node_id,scene_text")
             .in_("job_id", normalized_job_ids)
             .execute()
         )
@@ -48,7 +48,7 @@ class SupportingEvidenceService:
                 continue
 
             fs_node_id = row.get("fs_node_id")
-            resolved_text = row.get("resolved_text")
+            resolved_text = row.get("scene_text")
             evidence.append(
                 SupportingEvidence(
                     job_id=job_id,

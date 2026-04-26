@@ -129,12 +129,6 @@ class AnswerGenerationService:
         supporting_job_ids = self._normalize_string_list(
             payload.get("supporting_job_ids") if payload else []
         )
-        exact_entities = self._normalize_string_list(
-            payload.get("exact_entities") if payload else []
-        )
-        exact_relationships = self._normalize_string_list(
-            payload.get("exact_relationships") if payload else []
-        )
         available_job_ids = self._available_job_ids(entities, relationships)
         supporting_job_ids = [
             job_id for job_id in supporting_job_ids if job_id in available_job_ids
@@ -144,15 +138,11 @@ class AnswerGenerationService:
             return AnswerGenerationResult(
                 answer=answer,
                 supporting_job_ids=supporting_job_ids,
-                exact_entities=exact_entities,
-                exact_relationships=exact_relationships,
             )
 
         return AnswerGenerationResult(
             answer=output.strip(),
             supporting_job_ids=supporting_job_ids,
-            exact_entities=exact_entities,
-            exact_relationships=exact_relationships,
         )
 
     async def generate_answer(

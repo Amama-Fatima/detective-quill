@@ -39,15 +39,13 @@ class SupportingEvidence(BaseModel):
     fs_node_id: Optional[str] = None
 
 
-class QueryResult(BaseModel):
+class QueryResponse(BaseModel):
     status: str
     question: str
     answer: Optional[str] = None
     supporting_ids_and_text: List[SupportingEvidence] = Field(default_factory=list)
     entities: List[EntityContext] = Field(default_factory=list)
     relationships: List[RelationshipContext] = Field(default_factory=list)
-    exact_entities: List[str] = Field(default_factory=list)
-    exact_relationships: List[str] = Field(default_factory=list)
     # cypher: Optional[str] = None
 
 
@@ -55,5 +53,11 @@ class QueryResult(BaseModel):
 class AnswerGenerationResult:
     answer: str
     supporting_job_ids: list[str] = dataclass_field(default_factory=list)
-    exact_entities: list[str] = dataclass_field(default_factory=list)
-    exact_relationships: list[str] = dataclass_field(default_factory=list)
+
+
+@dataclass
+class QueryResult:
+    answer: str
+    supporting_job_ids: list[str]
+    entities: list[EntityContext]
+    relationships: list[RelationshipContext]

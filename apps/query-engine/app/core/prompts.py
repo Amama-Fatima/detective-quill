@@ -141,33 +141,34 @@ USER QUESTION:
  
 MATCH"""
 
-ANSWER_PROMPT_TEMPLATE = """You are an expert assistant analyzing entities and relationships in a narrative work.
 
-Your task: answer the user's question using ONLY the structured data below, then return a single valid JSON object.
+ANSWER_PROMPT_TEMPLATE = """You are an expert assistant analyzing relationships and entities in a narrative work.
 
-ENTITIES:
+Based on the following entities and their relationships, answer the user's question directly.
+Use one to three sentences, and include all possible interactions or relationship types that are relevant to the question.
+
+ENTITIES FOUND:
 {entities_text}
 
-RELATIONSHIPS:
+RELATIONSHIPS BETWEEN ENTITIES:
 {relationships_text}
+
+RULES:
+1. Answer ONLY based on the entities and relationships provided above.
+2. Do NOT invent or assume relationships not listed.
+3. If the information needed to answer the question is not present in the provided data, clearly state: "This information is not available in the current context."
+4. Provide direct, concise answers without unnecessary elaboration.
+5. When multiple entities are involved, clearly reference them by name.
+6. If a relationship appears to be missing or incomplete, acknowledge this in your answer.
+7. Every entity line includes a job_id and every relationship line includes a job_id.
+8. Return ONLY a valid JSON object with this exact shape:
+    {{"answer": "<string>", "supporting_job_ids": ["<job_id_1>", "<job_id_2>"]}}
+9. supporting_job_ids must include only job IDs that directly support the answer.
+10. For interaction questions between multiple entities, include job IDs where each entitiy exist and the relevant relationship exists.
+11. If no job ID supports the answer, return an empty list for supporting_job_ids.
+12. The answer field should be one to three sentences which answers the user's question as directly as possible. Do not include extra information. Do not repeat the question in the answer.
 
 USER QUESTION:
 {question}
 
-INSTRUCTIONS:
-1. Base your answer strictly on the entities and relationships above. Do not infer, assume, or hallucinate anything not explicitly stated.
-2. If the data is insufficient to answer, set "answer" to: "This information is not available in the current context."
-3. Keep "answer" to one direct, concise sentence.
-4. "supporting_job_ids": include only job_ids that directly evidence the answer. If none apply, return [].
-5. "exact_entities": include only entity names explicitly present in the context that support the answer. Do not rename or paraphrase.
-6. "exact_relationships": include only relationship types explicitly present in the context that support the answer. Do not rename or paraphrase.
-7. For questions about interactions between multiple entities, only include a job_id if ALL entities and the relevant relationship are present in that job.
-
-Return ONLY a valid JSON object — no explanation, no markdown, no preamble:
-
-{{
-  "answer": "<one sentence>",
-  "supporting_job_ids": ["<job_id>"],
-  "exact_entities": ["<entity_name>"],
-  "exact_relationships": ["<relationship_type>"]
-}}"""
+JSON RESPONSE:"""

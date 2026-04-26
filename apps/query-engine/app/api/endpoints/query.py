@@ -5,7 +5,7 @@ from app.core.logging import get_logger
 from app.schemas.query import (
     EntityContext,
     QueryRequest,
-    QueryResult,
+    QueryResponse,
     RelationshipContext,
 )
 from app.services.graph_rag_service import graph_rag_service
@@ -16,8 +16,8 @@ router = APIRouter(tags=["query"])
 logger = get_logger(__name__)
 
 
-@router.post("/query", response_model=QueryResult)
-async def query_graph(payload: QueryRequest) -> QueryResult:
+@router.post("/query", response_model=QueryResponse)
+async def query_graph(payload: QueryRequest) -> QueryResponse:
     logger.info("Received query request: %s", payload.question)
 
     if payload.fs_node_id is None or payload.fs_node_id.strip() == "":
@@ -50,7 +50,7 @@ async def query_graph(payload: QueryRequest) -> QueryResult:
         result.supporting_job_ids
     )
 
-    return QueryResult(
+    return QueryResponse(
         status="ok",
         question=payload.question,
         answer=result.answer,
@@ -72,6 +72,4 @@ async def query_graph(payload: QueryRequest) -> QueryResult:
             )
             for relationship in result.relationships
         ],
-        exact_entities=result.exact_entities,
-        exact_relationships=result.exact_relationships,
     )

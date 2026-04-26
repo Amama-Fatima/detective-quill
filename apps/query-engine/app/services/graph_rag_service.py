@@ -47,8 +47,6 @@ class GraphRAGService:
         return QueryResult(
             answer=answer_result.answer,
             supporting_job_ids=answer_result.supporting_job_ids,
-            exact_entities=answer_result.exact_entities,
-            exact_relationships=answer_result.exact_relationships,
             entities=entities,
             relationships=relationships,
         )
