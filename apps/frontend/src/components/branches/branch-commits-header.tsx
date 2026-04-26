@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { History } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import type { Branch } from "@detective-quill/shared-types";
 import UpdateBranchForm from "@/components/branches/update-branch-form";
 
@@ -17,35 +17,50 @@ export default function BranchCommitsHeader({
   const [branchName, setBranchName] = useState(branch.name);
 
   return (
-    <div className="mb-8 px-14 border-b border-border bg-muted/90 backdrop-blur-sm">
-      <div className="px-2 py-8 sm:px-6">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center space-x-4">
-            <div className="rounded-xl border border-primary/20 bg-primary/10 p-4">
-              <History className="h-8 w-8 text-primary" />
-            </div>
-            <div>
-              <h1 className="mystery-title mb-2 text-4xl">Branch History</h1>
-              <p className="noir-text text-muted-foreground">
-                Commits for branch:
-                <span className="text-background bg-foreground uppercase font-playfair-display text-sm md:text-lg ml-2 px-2 py-1 rounded">
-                  {" "}
-                  {branchName}
-                </span>
-              </p>
-            </div>
-          </div>
+    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b-2 border-primary">
+      <div className="flex-1 min-w-0">
+        <p className="font-mono text-[9px] tracking-[0.24em] uppercase text-muted-foreground/50 mb-3">
+          Case Workspace — Branch History
+        </p>
 
-          <div className="shrink-0">
-            <UpdateBranchForm
-              projectId={projectId}
-              branch={branch}
-              onBranchUpdated={(updatedBranch) =>
-                setBranchName(updatedBranch.name)
-              }
-            />
-          </div>
+        {/* Branch name as the italic title, same scale as overview/blueprints */}
+        <h1 className="font-playfair-display italic text-[clamp(32px,5vw,56px)] font-bold leading-[1.02] tracking-[-0.025em] text-primary mb-3">
+          {branchName}
+        </h1>
+
+        {/* Status badges */}
+        <div className="flex flex-wrap items-center gap-2 mb-5">
+          {branch.is_default && (
+            <span className="case-file text-[10px] tracking-[0.12em] uppercase px-2.5 py-1 border border-border/60 text-muted-foreground bg-muted/40">
+              Default
+            </span>
+          )}
+          {branch.is_active && (
+            <span className="case-file text-[10px] tracking-[0.12em] uppercase px-2.5 py-1 bg-primary text-primary-foreground">
+              Active
+            </span>
+          )}
         </div>
+
+        <p className="noir-text text-[15px] leading-[1.8] text-foreground/65 max-w-xl mb-6">
+          A complete record of all commits filed under this branch. Each entry
+          represents a saved state of the manuscript.
+        </p>
+
+        <UpdateBranchForm
+          projectId={projectId}
+          branch={branch}
+          onBranchUpdated={(updatedBranch) => setBranchName(updatedBranch.name)}
+        />
+      </div>
+
+      <div className="shrink-0 flex flex-col items-center gap-4 self-center sm:self-end">
+        <DotLottieReact
+          src="/branches.lottie"
+          loop
+          autoplay
+          style={{ width: 140, height: 140 }}
+        />
       </div>
     </div>
   );
