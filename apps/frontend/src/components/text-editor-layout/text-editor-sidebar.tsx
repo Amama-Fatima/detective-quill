@@ -2,7 +2,6 @@ import React from "react";
 import { cn } from "@/lib/utils/utils";
 import FileTree from "../file-tree/file-tree";
 import { FsNodeTreeResponse } from "@detective-quill/shared-types";
-import { FolderTree } from "lucide-react";
 import Image from "next/image";
 
 interface TextEditorSidebarProps {
@@ -26,13 +25,12 @@ export default function TextEditorSidebar({
     <aside
       className={cn(
         "m-3 flex h-full w-80 flex-col overflow-hidden rounded-2xl border border-border/70 shadow-sm transition-all duration-300",
-        solidBackground ? "bg-card" : "bg-sidebar",
+        solidBackground ? "bg-primary/90 backdrop-blur-sm" : "bg-primary/90 backdrop-blur-sm",
       )}
     >
       <div
         className={cn(
-          "border-b border-border/70 px-4 py-3 bg-background/50"
-          // solidBackground ? "bg-background" : "bg-background/",
+          "border-b border-border/70 px-4 py-3 bg-background"
         )}
       >
         <div className="flex items-center justify-between">

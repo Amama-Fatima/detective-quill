@@ -33,6 +33,35 @@ class SupportingEvidenceService:
         )
         rows = response.data or []
 
+        normalized_fs_node_ids: list[str] = []
+        seen_fs_node_ids: set[str] = set()
+        for row in rows:
+            raw_fs_node_id = row.get("fs_node_id")
+            if raw_fs_node_id is None:
+                continue
+
+            fs_node_id = str(raw_fs_node_id).strip()
+            if not fs_node_id or fs_node_id in seen_fs_node_ids:
+                continue
+
+            seen_fs_node_ids.add(fs_node_id)
+            normalized_fs_node_ids.append(fs_node_id)
+
+        fs_node_names_by_id: dict[str, str] = {}
+        if normalized_fs_node_ids:
+            fs_nodes_response = (
+                client.table("fs_nodes")
+                .select("id,name")
+                .in_("id", normalized_fs_node_ids)
+                .execute()
+            )
+            fs_nodes_rows = fs_nodes_response.data or []
+            fs_node_names_by_id = {
+                str(row.get("id")): str(row.get("name"))
+                for row in fs_nodes_rows
+                if row.get("id") is not None and row.get("name") is not None
+            }
+
         rows_by_job_id = {
             str(row.get("job_id")): row
             for row in rows
@@ -48,11 +77,19 @@ class SupportingEvidenceService:
                 continue
 
             fs_node_id = row.get("fs_node_id")
+            normalized_fs_node_id = (
+                str(fs_node_id).strip() if fs_node_id is not None else None
+            )
             resolved_text = row.get("scene_text")
             evidence.append(
                 SupportingEvidence(
                     job_id=job_id,
-                    fs_node_id=str(fs_node_id) if fs_node_id is not None else None,
+                    fs_node_id=normalized_fs_node_id,
+                    fs_node_name=(
+                        fs_node_names_by_id.get(normalized_fs_node_id)
+                        if normalized_fs_node_id
+                        else None
+                    ),
                     resolved_text=(
                         str(resolved_text) if resolved_text is not None else None
                     ),

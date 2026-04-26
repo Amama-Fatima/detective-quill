@@ -41,8 +41,8 @@ export default function NodeActionsDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
           size="icon"
+          variant="secondary"
           className={triggerClassName}
           onClick={(e) => {
             e.stopPropagation();

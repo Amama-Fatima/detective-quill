@@ -14,6 +14,21 @@ PERSON_ROLE_NOUNS = {
     'partner', 'colleague', 'friend',
 }
 
+# Common high-signal object nouns that are especially useful in detective fiction.
+ITEM_NOUNS = {
+    'knife', 'dagger', 'blade', 'gun', 'pistol', 'revolver', 'rifle', 'bullet', 'bullets', 'rope',
+    'letter', 'note', 'envelope', 'photograph', 'photo', 'picture', 'diary', 'journal', 'will', 'telegram',
+    'report', 'clue', 'evidence', 'newspaper', 'receipt', 'pass', 'ticket',
+    'ring', 'watch', 'key', 'keys', 'wallet', 'purse', 'handkerchief', 'glove', 'gloves',
+    'cigarette', 'cigarettes', 'lighter', 'locket', 'brooch', 'book', 'address book', 'notebook',
+    'box', 'package', 'parcel', 'bag', 'coat', 'shoes', 'boot', 'boots', 'umbrella', 'stick', 'cane',
+}
+
+ITEM_PHRASES = {
+    'suicide note', 'handwritten letter', 'bloody knife', 'kitchen knife', 'calling card',
+    'love letter', 'sealed envelope', 'murder weapon', 'broken glass', 'fingerprint card', 'leg of lamb'
+}
+
 LOCATION_NOUNS = {
 "room", "bedroom", "bathroom", "kitchen", "hall", "hallway",
 "living room", "basement", "attic", "office", "lab", "garage",
@@ -110,6 +125,34 @@ def _extract_location_references(doc) -> List[RawEntity]:
         found.append(RawEntity(
             text=text,
             label="FAC",
+            start=chunk.start_char,
+            end=chunk.end_char,
+        ))
+
+    return found
+
+
+def _extract_item_references(doc) -> List[RawEntity]:
+    found = []
+    seen_spans: set = set()
+
+    for chunk in doc.noun_chunks:
+        head = chunk.root
+        head_lemma = head.lemma_.lower()
+        chunk_lemma_text = " ".join(tok.lemma_.lower() for tok in chunk if tok.is_alpha)
+
+        if head_lemma not in ITEM_NOUNS and chunk_lemma_text not in ITEM_NOUNS and chunk_lemma_text not in ITEM_PHRASES:
+            continue
+
+        text = chunk.text.strip()
+        key = text.lower()
+        if key in seen_spans:
+            continue
+
+        seen_spans.add(key)
+        found.append(RawEntity(
+            text=text,
+            label="PRODUCT",
             start=chunk.start_char,
             end=chunk.end_char,
         ))
@@ -237,6 +280,17 @@ class SpacyEntityExtractor:
                 if loc.text.lower() not in existing_loc_names:
                     raw_entities.append(loc)
                     logger.debug(f"  Added location reference: '{loc.text}'")
+
+        # Add high-signal detective-story items such as knives, letters, keys, etc.
+        item_refs = _extract_item_references(doc)
+        if item_refs:
+            existing_item_names = {
+                e.text.lower() for e in raw_entities if e.label == "PRODUCT"
+            }
+            for item in item_refs:
+                if item.text.lower() not in existing_item_names:
+                    raw_entities.append(item)
+                    logger.debug(f"  Added item reference: '{item.text}'")
 
         logger.debug(f"Extracted {len(raw_entities)} raw entities from text.")
         return raw_entities, resolved_text

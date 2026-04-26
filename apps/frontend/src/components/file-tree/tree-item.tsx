@@ -48,7 +48,7 @@ const TreeItem = ({
         <TreeFolder
           value={element.id}
           element={element.name}
-          className="px-2 py-1"
+          className="px-2 py-1 text-background"
         >
           {element.children?.map((child) => (
             <TreeItem
@@ -104,10 +104,10 @@ const TreeItem = ({
         className="flex w-full min-w-0 items-center justify-between cursor-pointer overflow-hidden"
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <Image src="/scroll.png" alt="Quill File" width={35} height={35} />
-          <span className="min-w-0 flex-1 truncate text-md">{element.name}</span>
+          <Image src="/paper.png" alt="Quill File" width={35} height={35} />
+          <span className="min-w-0 flex-1 truncate text-md text-background">{element.name}</span>
           {node?.word_count && node.word_count > 0 && (
-            <span className="shrink-0 text-xs text-muted-foreground">
+            <span className="shrink-0 text-xs text-background/70">
               {node.word_count} words
             </span>
           )}
@@ -120,7 +120,7 @@ const TreeItem = ({
           onRenameNode={onRenameNode}
           onMoveNode={onMoveNode}
           onDeleteNode={onDeleteNode}
-          triggerClassName="h-5 w-5 shrink-0 cursor-pointer"
+          triggerClassName="h-5 w-5 shrink-0 cursor-pointer ml-3"
         />
       </div>
     </File>

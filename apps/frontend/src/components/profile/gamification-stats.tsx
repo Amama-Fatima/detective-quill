@@ -150,7 +150,7 @@ export const GamificationStats = () => {
             />
             <p className="mystery-title text-primary">Gamification</p>
           </span>
-          <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+          <span className="rounded-full border border-primary/30 bg-chart-5/30 px-2 py-0.5 text-sm font-medium text-primary">
             {earnedCount}/{badges.length} earned
           </span>
         </CardTitle>

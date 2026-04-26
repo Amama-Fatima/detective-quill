@@ -3,20 +3,17 @@ import {
   queryGraph,
   type QueryEngineResponse,
 } from "@/lib/backend-calls/query";
+import { toast } from "sonner";
 
 type UseTextQueryReturn = {
   runQuery: (
     question: string,
     fsNodeId: string,
     projectId: string,
-  ) => Promise<string[]>;
+  ) => Promise<QueryEngineResponse>;
   isLoading: boolean;
   error: string | null;
   response: QueryEngineResponse | null;
-};
-
-const formatResultRecord = (record: Record<string, unknown>): string => {
-  return JSON.stringify(record);
 };
 
 export const useTextQuery = (): UseTextQueryReturn => {
@@ -30,23 +27,22 @@ export const useTextQuery = (): UseTextQueryReturn => {
       fsNodeId: string;
       projectId: string;
     }) => queryGraph(question, fsNodeId, projectId),
+    onError: (error) => {
+      console.error("Error running query:", error);
+      toast.error("Error running query. Please try again.");
+    },
   });
 
   const runQuery = async (
     question: string,
     fsNodeId: string,
     projectId: string,
-  ): Promise<string[]> => {
-    const response = await queryMutation.mutateAsync({
+  ): Promise<QueryEngineResponse> => {
+    return queryMutation.mutateAsync({
       question,
       fsNodeId,
       projectId,
     });
-    if (!response.data?.length) {
-      return response.message ? [response.message] : [];
-    }
-
-    return response.data.map(formatResultRecord);
   };
 
   return {

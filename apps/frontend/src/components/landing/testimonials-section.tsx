@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {  testimonials } from "./shared";
+import { testimonials } from "./shared";
 import { OrnamentDivider } from "@/components/icons/ornament-divider";
 import { StarIcon } from "@/components/icons/star-icon";
 import Image from "next/image";
@@ -24,8 +24,47 @@ export default function TestimonialsSection() {
   const activeTestimonial = testimonials[activeIndex];
 
   return (
-    <section className="bg-background px-6 py-[100px] md:px-12">
-      <div className="mx-auto max-w-[1100px]">
+    <section className="bg-background px-6 py-[100px] md:px-12 relative overflow-hidden">
+
+      {/* Linear gradient — stronger bottom-left accent */}
+      <div
+        className="absolute -bottom-24 -left-90 pointer-events-none h-107.5 w-160 rounded-full"
+        style={{
+          background:
+            "linear-gradient(315deg, oklch(88% 0.035 235 / 0.58) 0%, oklch(92% 0.018 240 / 0.34) 42%, transparent 80%)",
+        }}
+      />
+
+      {/* Broad directional wash to tie both corners together */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(180deg, oklch(97% 0.007 245 / 0) 0%, oklch(93% 0.012 245 / 0.36) 52%, oklch(97% 0.007 245 / 0) 100%)",
+        }}
+      />
+
+      {/* Small circles — top-left cluster */}
+      <div className="absolute top-[12%] left-[6%] w-[14px] h-[14px] rounded-full border border-border opacity-100 pointer-events-none" />
+      <div className="absolute top-[18%] left-[10%] w-[8px] h-[8px] rounded-full bg-muted-foreground opacity-50 pointer-events-none" />
+      <div className="absolute top-[8%] left-[14%] w-[10px] h-[10px] rounded-full border border-border opacity-100 pointer-events-none" />
+
+      {/* Small circles — bottom-right cluster */}
+      <div className="absolute bottom-[16%] right-[7%] w-[16px] h-[16px] rounded-full border border-border opacity-100 pointer-events-none" />
+      <div className="absolute bottom-[10%] right-[13%] w-[9px] h-[9px] rounded-full bg-muted-foreground opacity-50 pointer-events-none" />
+      <div className="absolute bottom-[22%] right-[11%] w-[11px] h-[11px] rounded-full border border-border opacity-100 pointer-events-none" />
+
+      {/* Dot grid — very subtle */}
+      <div
+        className="absolute inset-0 opacity-[0.025] pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(oklch(24% 0.022 245) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+
+      <div className="mx-auto max-w-[1100px] relative z-[2]">
         <div className="mb-16 text-center">
           <div className="mb-4 font-serif text-md uppercase tracking-[0.14em] text-muted-foreground">
             Testimonials

@@ -140,8 +140,8 @@ const FileTree = ({
 
   return (
     <div className="flex flex-col">
-      <div className="p-3 border-b bg-card/20">
-        <div className="flex gap-2 mb-3">
+      <div className="p-3 border border-border bg-sidebar">
+        <div className="flex gap-2">
           {!isKnowledgeGraph && (
             <>
               <NewFileDropdown
@@ -178,7 +178,7 @@ const FileTree = ({
           <SearchInput
             nodes={nodes}
             onResultSelect={handleSearchSelect}
-            className="mb-2"
+            className="my-2"
           />
         )}
       </div>

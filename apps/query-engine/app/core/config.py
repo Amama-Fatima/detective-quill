@@ -14,12 +14,16 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.0
     graph_top_k: int = 30
     cypher_result_limit: int = 20
-    modal_timeout_seconds: int = 30
+    modal_timeout_seconds: int = 100
     use_modal_nl2cypher: bool = True
     modal_app_name: str = "detective-quill-nl2cypher"
     modal_model_class_name: str = "NL2CypherModel"
     supabase_url: str = ""
     supabase_service_role_key: str = ""
+    cors_allow_origins: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
 
     model_config = SettingsConfigDict(
         env_file=".env",

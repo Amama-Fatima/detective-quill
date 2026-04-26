@@ -39,7 +39,7 @@ export default function NewFileDropdown({
           className="cursor-pointer"
           disabled={disabled}
         >
-          <Image src="/scroll.png" alt="Quill File" width={24} height={24} />
+          <Image src="/paper.png" alt="Quill File" width={24} height={24} />
           New File
         </DropdownMenuItem>
         <DropdownMenuItem

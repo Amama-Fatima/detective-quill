@@ -34,9 +34,10 @@ class GraphContext(BaseModel):
     relationships: List[RelationshipContext] = Field(default_factory=list)
 
 class SupportingEvidence(BaseModel):
-    job_id: str
+    job_id: Optional[str] = None
     resolved_text: Optional[str] = None
     fs_node_id: Optional[str] = None
+    fs_node_name: Optional[str] = None
 
 
 class QueryResponse(BaseModel):
