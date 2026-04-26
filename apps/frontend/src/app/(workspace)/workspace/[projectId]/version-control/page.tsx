@@ -21,8 +21,8 @@ export default async function VersionControlPage({
   return (
     <VersionControlClient
       projectId={projectId}
-      branches={branches ?? []}
-      error={error}
+      initialBranches={branches ?? []}
+      // error={error}
     />
   );
 }

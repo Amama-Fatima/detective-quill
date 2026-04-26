@@ -23,7 +23,8 @@ export class BranchesService {
       .insert({
         ...createBranchDto,
         project_id: projectId,
-        head_commit_id: createBranchDto.parent_commit_id, // Auto-set
+        head_commit_id: createBranchDto.parent_commit_id,
+        parent_branch_id: createBranchDto.parent_branch_id ?? null,
       })
       .select("*")
       .single();

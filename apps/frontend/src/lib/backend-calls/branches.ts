@@ -88,3 +88,14 @@ export async function switchActiveBranch(
     method: "POST",
   });
 }
+
+export async function getBranchesByProject(
+  projectId: string,
+  accessToken: string,
+): Promise<Branch[]> {
+  const response = await makeAuthenticatedRequest<Branch[]>(
+    `/${projectId}/branches`,
+    accessToken,
+  );
+  return response.data ?? [];
+}

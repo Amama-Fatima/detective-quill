@@ -24,7 +24,6 @@ export default function WorkspaceSidebarShell({
         />
       </div>
 
-      {/* Content shifts with sidebar */}
       <div
         data-collapsed={collapsed ? "true" : "false"}
         className={[

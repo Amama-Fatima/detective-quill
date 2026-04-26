@@ -6,40 +6,45 @@ import { VersionControlIcon } from "@/components/icons/version-control-icon";
 
 export const NAV_ITEMS = [
   {
-      id: "overview",
-      label: "Overview",
-      href: `/workspace/123`,
-      icon: LayoutDashboardIcon,
-      description: "Project at a glance",
+    id: "overview",
+    label: "Overview",
+    href: `/workspace/123`,
+    icon: LayoutDashboardIcon,
+    svgSrc: "/overview.svg",
+    description: "Project at a glance",
   },
   {
     id: "blueprint",
     label: "Blueprints",
     href: `/workspace/123/blueprint`,
-    icon: BlueprintIcon,
-    description: "Story structure & planning",
+    icon: null,
+    svgSrc: "/blueprint.svg",
+    description: "Structure & planning",
   },
   {
     id: "text-editor",
     label: "Manuscript",
     href: `/workspace/123/text-editor`,
-    icon: CaseFileIcon,
+    icon: null,
+    svgSrc: "/manuscript.svg",
     description: "Writing & editing",
   },
   {
     id: "visualization",
     label: "Graph Visuals",
     href: `/workspace/123/knowledge-graph`,
-    icon: GraphIcon,
+    icon: null,
+    svgSrc: "/knowledge-graph.svg",
     description: "Visual story analysis",
   },
   {
     id: "version-control",
     label: "History",
     href: `/workspace/123/version-control`,
-    icon: VersionControlIcon,
-    description: "Commit history & version control",
-  }
+    icon: null,
+    svgSrc: "/version-control.svg",
+    description: "Commit history & branches",
+  },
 ];
 
 export const tab_message = [

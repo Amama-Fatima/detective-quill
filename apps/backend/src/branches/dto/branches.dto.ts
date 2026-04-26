@@ -22,6 +22,10 @@ export class CreateBranchDto {
   @IsUUID()
   @IsNotEmpty()
   parent_commit_id!: string;
+
+  @IsOptional()
+  @IsUUID()
+  parent_branch_id?: string | null;
 }
 
 export class UpdateBranchDto {

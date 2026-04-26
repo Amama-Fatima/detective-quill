@@ -44,6 +44,7 @@ const CreateNewBranchForm = ({
   const defaultBranch = branches.find((b) => b.is_default);
   const baseBranch = activeBranch ?? defaultBranch ?? branches[0];
   const parentCommitId = baseBranch?.head_commit_id ?? null;
+  const parentBranchId = baseBranch?.id ?? null;
 
   const form = useForm<CreateBranchFormValues>({
     resolver: zodResolver(createBranchSchema),
@@ -59,7 +60,7 @@ const CreateNewBranchForm = ({
 
   const onSubmit = (values: CreateBranchFormValues) => {
     if (!parentCommitId) return;
-    createBranchMutation.mutate({ values, parentCommitId });
+    createBranchMutation.mutate({ values, parentCommitId, parentBranchId });
     form.reset();
     onOpenChange(false);
   };
