@@ -1,15 +1,18 @@
-import Link from "next/link";
+"use client";
+
 import { Plus } from "lucide-react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 interface VersionControlHeaderProps {
   projectId: string;
   branchCount: number;
+  onNewBranch: () => void;
 }
 
 export default function VersionControlHeader({
   projectId,
   branchCount,
+  onNewBranch,
 }: VersionControlHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b-2 border-primary">
@@ -25,13 +28,13 @@ export default function VersionControlHeader({
           timelines, preserve alternate narratives, and keep your manuscript
           history intact.
         </p>
-        <Link
-          href={`/workspace/${projectId}/version-control/new-branch`}
-          className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-playfair-display text-[15px] tracking-[0.02em] px-7 py-2.5 shadow-[0_4px_20px_oklch(24%_0.022_245/0.22)] hover:-translate-y-0.5 hover:bg-secondary-foreground transition-all duration-200"
+        <button
+          onClick={onNewBranch}
+          className="inline-flex rounded-md items-center gap-2 bg-primary text-primary-foreground font-playfair-display text-[15px] tracking-[0.02em] px-7 py-2.5 shadow-[0_4px_20px_oklch(24%_0.022_245/0.22)] hover:-translate-y-0.5 hover:bg-secondary-foreground transition-all duration-200"
         >
           <Plus className="h-4 w-4" />
           Open New Branch
-        </Link>
+        </button>
       </div>
 
       <div className="shrink-0 flex flex-col items-center gap-4 self-center sm:self-end">

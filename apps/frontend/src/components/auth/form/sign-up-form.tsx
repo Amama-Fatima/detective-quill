@@ -53,7 +53,7 @@ export function SignUpForm() {
             avatar_url: "",
             username: formData.email.split("@")[0],
           },
-          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/cases`,
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/projects`,
         },
       });
 

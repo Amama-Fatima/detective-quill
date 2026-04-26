@@ -41,6 +41,9 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
+      <div className="pointer-events-none absolute top-[35%] right-[-30px] w-[100px] h-[100px] rounded-full bg-secondary-foreground opacity-25 z-[1]" />
+      <div className="pointer-events-none absolute bottom-[20%] left-[-20px] w-[130px] h-[130px] rounded-full bg-secondary-foreground opacity-20 z-[1]" />
+
       <div className="pointer-events-none absolute inset-0 opacity-[0.025] bg-[radial-gradient(oklch(24%_0.022_245)_1px,transparent_1px)] bg-size-[28px_28px]" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 py-10 space-y-0">

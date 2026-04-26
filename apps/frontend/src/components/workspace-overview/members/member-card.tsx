@@ -29,7 +29,7 @@ export default function MemberCard({
   return (
     <div
       className={`
-        relative flex flex-col gap-3 p-4
+        relative flex flex-col gap-3 p-4 rounded-md
         border bg-card
         ${
           isAuthor

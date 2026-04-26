@@ -1,5 +1,6 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Project } from "@detective-quill/shared-types";
+import WritingLottie from "../blueprint/writing-lottie";
 
 interface WorkspaceHeaderProps {
   project: Project;
@@ -20,13 +21,8 @@ export default function WorkspaceOverviewHeader({ project }: WorkspaceHeaderProp
             "This section provides an overview and notes for the ongoing project."}
         </p>
       </div>
-      <div className="shrink-0 self-center sm:self-end">
-        <DotLottieReact
-          src="/notes.lottie"
-          loop
-          autoplay
-          style={{ width: 140, height: 140 }}
-        />
+      <div className="shrink-0 flex flex-col items-center gap-4 self-center sm:self-end">
+              <WritingLottie />
       </div>
     </div>
   );

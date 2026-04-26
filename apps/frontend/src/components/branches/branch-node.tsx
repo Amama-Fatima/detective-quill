@@ -5,13 +5,17 @@ import { Button } from "@/components/ui/button";
 import type { Branch } from "@detective-quill/shared-types";
 import { CornerOrnamentIcon } from "../icons/corner-ornament-icon";
 
+type BranchWithParent = Branch & { parent_branch_id: string | null };
+
 interface BranchNodeProps {
-  branch: Branch;
+  branch: BranchWithParent;
   projectId: string;
   index: number;
   isLast: boolean;
   isSwitching: boolean;
   onSwitch: (branchId: string) => void;
+  depth: number;
+  hasChildren: boolean;
 }
 
 export default function BranchNode({
@@ -21,17 +25,22 @@ export default function BranchNode({
   isLast,
   isSwitching,
   onSwitch,
+  depth,
+  hasChildren,
 }: BranchNodeProps) {
   const isActive = branch.is_active;
   const isDefault = branch.is_default;
+  const isRoot = depth === 0;
 
   return (
     <div className="flex gap-0">
       {/* ── Git track column ── */}
       <div className="flex flex-col items-center w-10 shrink-0">
-        {/* Connector line above node (hidden for first) */}
+        {/* Line above node */}
         <div
-          className={`w-px flex-none transition-colors duration-500 ${index === 0 ? "h-0" : "h-6"} ${isActive ? "bg-primary" : "bg-border/60"}`}
+          className={`w-px flex-none ${isRoot && index === 0 ? "h-3" : "h-6"} ${
+            isActive ? "bg-primary" : "bg-border/60"
+          }`}
         />
 
         {/* Node dot */}
@@ -51,13 +60,17 @@ export default function BranchNode({
             <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" />
           )}
           <div
-            className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-primary-foreground" : "bg-muted-foreground/50"}`}
+            className={`w-1.5 h-1.5 rounded-full ${
+              isActive ? "bg-primary-foreground" : "bg-muted-foreground/50"
+            }`}
           />
         </div>
 
-        {/* Connector line below node (hidden for last) */}
+        {/* Line below node — continues if not last or has children */}
         <div
-          className={`w-px flex-1 min-h-6 transition-colors duration-500 ${isLast ? "opacity-0" : ""} ${isActive ? "bg-primary/40" : "bg-border/40"}`}
+          className={`w-px flex-1 min-h-6 transition-colors duration-500 ${
+            isLast && !hasChildren ? "opacity-0" : ""
+          } ${isActive ? "bg-primary/40" : "bg-border/40"}`}
         />
       </div>
 
@@ -80,9 +93,8 @@ export default function BranchNode({
 
           <div className="px-5 py-4 flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
-              {/* Branch index label */}
               <p className="case-file text-[10px] text-muted-foreground/60 mb-1 tracking-[0.1em]">
-                Branch #{String(index + 1).padStart(3, "0")}
+                {isRoot ? "Root" : `Depth ${depth}`} · Branch #{String(index + 1).padStart(3, "0")}
               </p>
 
               <Link
@@ -95,7 +107,6 @@ export default function BranchNode({
               </Link>
             </div>
 
-            {/* Badges + action */}
             <div className="flex items-center gap-2 shrink-0">
               {isDefault && (
                 <span className="case-file text-[10px] tracking-[0.1em] uppercase px-2.5 py-1 border border-border/60 text-muted-foreground bg-muted/40">

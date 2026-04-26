@@ -9,6 +9,7 @@ export type FsNode = Database["public"]["Tables"]["fs_nodes"]["Row"];
 export type Invitation = Database["public"]["Tables"]["invitations"]["Row"];
 export type Comment = Database["public"]["Tables"]["comments"]["Row"];
 export type Branch = Database["public"]["Tables"]["branches"]["Row"];
+export type BranchWithParent = Branch & { parent_branch_id: string | null };
 export type Commit = Database["public"]["Tables"]["commits"]["Row"];
 export type CommitSnapshot =
   Database["public"]["Tables"]["commit_snapshots"]["Row"];

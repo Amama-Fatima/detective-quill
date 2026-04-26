@@ -33,7 +33,7 @@ export default function ProjectsTabs({
   return (
     <Tabs value={filter} onValueChange={(v) => onFilterChange(v as FilterOption)}>
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between mb-6">
-        <TabsList className="bg-card border border-border h-auto p-0 gap-0">
+        <TabsList className="bg-card border border-border h-auto p-0 gap-0 rounded-md overflow-hidden">
           {TAB_OPTIONS.map((tab, i, arr) => (
             <TabsTrigger
               key={tab}

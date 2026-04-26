@@ -192,4 +192,51 @@ export class BranchesService {
       headCommitId: targetBranch.head_commit_id,
     };
   }
+
+  async getBranchesWithParent(projectId: string) {
+    const supabase = this.supabaseService.client;
+
+    const { data: branches, error: branchError } = await supabase
+      .from("branches")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: true });
+
+    if (branchError) {
+      throw new Error(`Failed to fetch branches: ${branchError.message}`);
+    }
+
+    if (!branches || branches.length === 0) return [];
+
+    const parentCommitIds = branches
+      .map((b) => b.parent_commit_id)
+      .filter(Boolean) as string[];
+
+    if (parentCommitIds.length === 0) {
+      return branches.map((b) => ({ ...b, parent_branch_id: null }));
+    }
+
+    const { data: commits, error: commitError } = await supabase
+      .from("commits")
+      .select("id, branch_id")
+      .in("id", parentCommitIds);
+
+    if (commitError) {
+      throw new Error(`Failed to fetch parent commits: ${commitError.message}`);
+    }
+
+    const commitToBranch = new Map<string, string>();
+    for (const commit of commits ?? []) {
+      if (commit.branch_id) {
+        commitToBranch.set(commit.id, commit.branch_id);
+      }
+    }
+
+    return branches.map((b) => ({
+      ...b,
+      parent_branch_id: b.parent_commit_id
+        ? (commitToBranch.get(b.parent_commit_id) ?? null)
+        : null,
+    }));
+  }
 }

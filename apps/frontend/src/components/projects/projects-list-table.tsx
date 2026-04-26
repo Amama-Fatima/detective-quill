@@ -35,11 +35,11 @@ export default function ProjectsListTable({ projects }: ProjectsListTableProps) 
         </span>
       </div>
 
-      <div className="relative border border-border bg-card overflow-hidden">
+      <div className="relative border border-border bg-card overflow-hidden rounded-md">
         <div className="grid grid-cols-[72px_1fr_152px] border-b-2 border-border bg-muted/80">
-          <div className="pl-5 py-3 border-r border-border/50">
+          <div className="pl-2 py-3 border-r border-border/50">
             <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground">
-              Project #
+              Project
             </span>
           </div>
           <div className="pl-5 py-3 border-r border-border/50">
