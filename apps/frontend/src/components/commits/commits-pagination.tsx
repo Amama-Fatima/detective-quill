@@ -22,17 +22,14 @@ export default function CommitsPagination({
 }: CommitsPaginationProps) {
   return (
     <div className="flex items-center justify-between mt-10 pt-6 border-t border-border/60">
-      {/* Left: case-file style count */}
       <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-muted-foreground/50">
         Entries {startIndex + 1}–{endIndex} of {total}
       </p>
 
-      {/* Center: page stamp */}
       <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] uppercase text-muted-foreground/35">
         Page {page} of {totalPages}
       </span>
 
-      {/* Right: prev / next */}
       <div className="flex items-center gap-2">
         <Button
           variant="outline"

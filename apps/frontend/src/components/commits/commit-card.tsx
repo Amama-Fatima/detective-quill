@@ -1,4 +1,3 @@
-// components/commits/commit-card.tsx
 "use client";
 
 import { Commit } from "@detective-quill/shared-types";
@@ -25,7 +24,6 @@ export default function CommitCard({
   const commitBranchId = branchId ?? commit.branch_id;
   const commitHref = `/workspace/${projectId}/version-control/${commitBranchId}/${commit.id}`;
 
-  // Short commit ID — first 7 chars like git
   const shortId = commit.id?.slice(0, 7).toUpperCase() ?? "UNKNOWN";
 
   const isInherited =
@@ -44,7 +42,6 @@ export default function CommitCard({
       `}
       aria-disabled={isInherited}
     >
-      {/* Corner ornaments */}
       <div className="pointer-events-none absolute left-0 top-1 text-border/40">
         <CornerOrnamentIcon className="h-8 w-8 translate-x-0.5 -translate-y-0.5" />
       </div>
@@ -52,7 +49,6 @@ export default function CommitCard({
         <CornerOrnamentIcon className="h-8 w-8 -translate-x-0.5 translate-y-0.5 rotate-180" />
       </div>
 
-      {/* Top strip — commit hash + timestamp */}
       <div className="flex items-center justify-between px-5 py-2 border-b border-border/50 bg-muted/30">
         <div className="flex items-center gap-2">
           <GitCommit className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
@@ -62,20 +58,18 @@ export default function CommitCard({
         </div>
         <div className="flex items-center gap-3">
           {formattedTime && (
-            <span className="font-mono text-[10px] tracking-[0.1em] text-muted-foreground/45 uppercase hidden sm:block">
+            <span className="font-mono text-[10px] tracking-widest text-muted-foreground/45 uppercase hidden sm:block">
               {formattedTime}
             </span>
           )}
-          <span className="case-file text-[10px] tracking-[0.1em] text-muted-foreground/55">
+          <span className="case-file text-[10px] tracking-widest text-muted-foreground/55">
             {formattedDate}
           </span>
         </div>
       </div>
 
-      {/* Main body */}
       <div className="px-5 py-4">
         {isInherited ? (
-          /* ── Inherited / sealed state ── */
           <div className="flex items-start gap-3">
             <div className="shrink-0 mt-0.5">
               <GitBranch className="h-4 w-4 text-muted-foreground/40" />
@@ -95,21 +89,17 @@ export default function CommitCard({
             </div>
           </div>
         ) : (
-          /* ── Active commit ── */
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              {/* Commit message — the "case note" */}
               <p className="font-playfair-display italic text-[17px] leading-snug text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors duration-150">
                 {commit.message || "No message"}
               </p>
 
-              {/* Time ago — subtle */}
               <p className="noir-text text-[13px] text-muted-foreground/60">
                 {timeAgo}
               </p>
             </div>
 
-            {/* Arrow — only visible on hover */}
             <div className="shrink-0 self-center opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-200">
               <ArrowRight className="h-4 w-4 text-primary" />
             </div>

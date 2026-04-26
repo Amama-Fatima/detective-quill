@@ -31,7 +31,6 @@ export default function CommitsPaginatedList({
 
   return (
     <div>
-      {/* Section label matching blueprint/version-control pattern */}
       <div className="flex items-center gap-4 mb-8">
         <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-muted-foreground/50 shrink-0">
           Commit Log
@@ -42,28 +41,22 @@ export default function CommitsPaginatedList({
         </span>
       </div>
 
-      {/* Timeline commit list */}
       <div className="flex gap-0">
-        {/* Git track column */}
         <div className="flex flex-col items-center w-10 shrink-0 pt-1">
           <div className="w-px flex-1 bg-border/40" />
         </div>
 
-        {/* Commits */}
         <ul className="flex-1 space-y-0 pb-2">
           {paginatedCommits.map((commit, index) => {
             const globalIndex = startIndex + index;
             return (
               <li key={commit.id} className="flex gap-0">
-                {/* Node dot — sits on the track */}
                 <div className="flex flex-col items-center w-0 shrink-0 relative">
                   <div className="-translate-x-5 mt-5 w-2.5 h-2.5 rounded-full border-2 border-border/70 bg-background shrink-0 z-10" />
                 </div>
 
-                {/* Card */}
                 <div className="flex-1 pb-4 pl-5">
-                  {/* Global sequence number above card */}
-                  <p className="case-file text-[10px] text-muted-foreground/50 tracking-[0.1em] mb-1">
+                  <p className="case-file text-[10px] text-muted-foreground/50 tracking-widest mb-1">
                     Entry #{String(globalIndex + 1).padStart(3, "0")}
                   </p>
                   <CommitCard
