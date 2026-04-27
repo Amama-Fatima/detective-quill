@@ -18,14 +18,13 @@ export default function KnowledgeGraphLayoutWrapper({
   projectId,
 }: KnowledgeGraphLayoutWrapperProps) {
   return (
-    <div className="flex h-full w-full min-h-0">
+    <div className="flex h-full w-full min-h-0 p-4">
       <div className="pt-10 self-stretch flex flex-col">
         <TextEditorSidebar
           projectName={project.title}
           nodes={initialNodes}
           projectId={projectId}
           fileLinkBasePath="knowledge-graph"
-          // solidBackground={true}
         />
       </div>
       <main className="flex-1 flex flex-col min-w-0 overflow-auto">

@@ -140,7 +140,7 @@ const FileTree = ({
 
   return (
     <div className="flex flex-col">
-      <div className="p-3 border border-border bg-sidebar">
+      <div className="p-3 border border-border bg-background rounded-lg">
         <div className="flex gap-2">
           {!isKnowledgeGraph && (
             <>
@@ -241,6 +241,7 @@ const FileTree = ({
                 nodes={nodes}
                 hoveredFolder={hoveredFolder}
                 setHoveredFolder={setHoveredFolder}
+                isKnowledgeGraph={isKnowledgeGraph}
               />
             ))}
           </Tree>

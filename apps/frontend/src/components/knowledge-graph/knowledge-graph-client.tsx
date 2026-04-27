@@ -34,8 +34,8 @@ export default function KnowledgeGraphClient({
 
   if (fileId == null || fileId === "") {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center bg-background rounded-lg p-8 text-center">
-        <h2 className="noir-text font-bold uppercase text-primary text-[1rem] ">
+      <div className="w-full h-full flex flex-col items-center justify-center rounded-lg p-8 text-center">
+        <h2 className="noir-text font-bold capitalize text-primary text-[1.1rem] ">
           Select a file to view its knowledge graph
         </h2>
       </div>

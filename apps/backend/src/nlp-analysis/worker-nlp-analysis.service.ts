@@ -41,6 +41,7 @@ console.log(`Saving analysis result for job ${jobId}...`);
       type: entity.type,
       mentions: entity.mentions ?? [],
       role: entity.role ?? null,
+      description: entity.description ?? null,
     }));
 
     if (entities.length > 0) {

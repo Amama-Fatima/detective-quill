@@ -10,7 +10,6 @@ interface TextEditorSidebarProps {
   projectId: string;
   /** Base path for file links, e.g. "text-editor" or "knowledge-graph". Default "text-editor". */
   fileLinkBasePath?: string;
-  /** Use solid background (e.g. on knowledge-graph page). Default false. */
   solidBackground?: boolean;
 }
 
@@ -25,12 +24,12 @@ export default function TextEditorSidebar({
     <aside
       className={cn(
         "m-3 flex h-full w-80 flex-col overflow-hidden rounded-2xl border border-border/70 shadow-sm transition-all duration-300",
-        solidBackground ? "bg-primary/90 backdrop-blur-sm" : "bg-primary/90 backdrop-blur-sm",
+        solidBackground ? "bg-sidebar backdrop-blur-sm" : "bg-sidebar backdrop-blur-sm",
       )}
     >
       <div
         className={cn(
-          "border-b border-border/70 px-4 py-3 bg-background/50",
+          "border-b border-border/70 px-4 py-3 bg-sidebar-primary-foreground",
           // solidBackground ? "bg-background" : "bg-background/",
         )}
       >
