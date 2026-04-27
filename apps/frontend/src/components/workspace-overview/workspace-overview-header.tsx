@@ -1,4 +1,3 @@
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Project } from "@detective-quill/shared-types";
 import WritingLottie from "../blueprint/writing-lottie";
 
@@ -19,7 +18,7 @@ export default function WorkspaceOverviewHeader({ project }: WorkspaceHeaderProp
         </p>
       </div>
       <div className="shrink-0 flex flex-col items-center gap-4 self-center sm:self-end">
-              <WritingLottie />
+        <WritingLottie />
       </div>
     </div>
   );

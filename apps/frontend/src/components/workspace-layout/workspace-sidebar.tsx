@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/constants/project-constants";
 import {
   ChevronLeftIcon,
-  LayoutDashboardIcon,
   FolderOpenIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -68,7 +67,6 @@ export default function WorkspaceSidebar({
           )}
         </Link>
 
-        {/* Collapse toggle */}
         <button
           onClick={() => onCollapsedChange(!collapsed)}
           className="
@@ -113,15 +111,23 @@ export default function WorkspaceSidebar({
                 }
               `}
             >
-              <Icon className="h-4.25 w-4.25 shrink-0 opacity-80" />
+              {item.svgSrc ? (
+                <Image
+                  src={item.svgSrc}
+                  alt={item.label}
+                  width={23}
+                  height={23}
+                  className="shrink-0 opacity-80 invert"
+                />
+              ) : item.icon ? (
+                <item.icon className="h-4.25 w-4.25 shrink-0 opacity-80" />
+              ) : null}
 
               {!collapsed && (
                 <span className="flex flex-col gap-1.5 overflow-hidden">
-                  {/* Label — Crimson Text (serif), softer weight */}
                   <span className="font-serif text-[14px] font-normal leading-none whitespace-nowrap tracking-wide">
                     {item.label}
                   </span>
-                  {/* Description — Geist Mono, very faint */}
                   <span className="font-mono text-[10px] leading-none text-primary-foreground/35 whitespace-nowrap tracking-[0.06em]">
                     {item.description}
                   </span>

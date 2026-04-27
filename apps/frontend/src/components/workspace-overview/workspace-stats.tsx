@@ -31,9 +31,9 @@ export default function WorkspaceStats({
   ];
 
   return (
-    <div className="border-b border-border">
-      <div className="flex flex-wrap">
-        <div className="flex flex-col gap-2 px-6 py-5 border-r border-border/60 min-w-32.5">
+    <div className="py-6">
+      <div className="inline-flex rounded-xl border border-border overflow-hidden">
+        <div className="flex flex-col gap-2 px-6 py-4 bg-accent/20 border-r border-border">
           <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/65">
             Status
           </span>
@@ -42,7 +42,9 @@ export default function WorkspaceStats({
         {stats.map(({ label, value }, i) => (
           <div
             key={label}
-            className={`flex flex-col gap-2 px-6 py-5 min-w-27.5 ${i < stats.length - 1 ? "border-r border-border/60" : ""}`}
+            className={`flex flex-col gap-2 px-6 py-4 bg-accent/20 ${
+              i < stats.length - 1 ? "border-r border-border" : ""
+            }`}
           >
             <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/65">
               {label}

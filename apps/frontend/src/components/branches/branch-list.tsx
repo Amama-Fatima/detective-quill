@@ -96,16 +96,6 @@ export default function BranchList({ projectId, branches }: BranchListProps) {
 
   return (
     <div className="pt-8">
-      <div className="flex items-center gap-4 mb-8">
-        <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-muted-foreground/50 shrink-0">
-          Branch Tree
-        </span>
-        <div className="flex-1 border-t border-border/50" />
-        <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-muted-foreground/35 shrink-0">
-          {branches.length} {branches.length === 1 ? "branch" : "branches"} on record
-        </span>
-      </div>
-
       <div className="max-w-3xl">
         <BranchTree
           nodes={tree}

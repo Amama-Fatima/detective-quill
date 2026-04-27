@@ -23,6 +23,34 @@ export class BranchesController {
     private readonly projectsService: ProjectsService,
   ) {}
 
+  @Get()
+  async getBranchesByProject(
+    @Param("projectId") projectId: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<Branch[]>> {
+    await this.projectsService.verifyProjectOwnership(projectId, req.user.id);
+    const data = await this.branchesService.getBranchesByProject(projectId);
+    return {
+      success: true,
+      data,
+      message: "Branches fetched successfully",
+    };
+  }
+
+  @Get("tree")
+  async getBranchesTree(
+    @Param("projectId") projectId: string,
+    @Request() req: any,
+  ): Promise<ApiResponse<Branch[]>> {
+    await this.projectsService.verifyProjectOwnership(projectId, req.user.id);
+    const data = await this.branchesService.getBranchesWithParent(projectId);
+    return {
+      success: true,
+      data,
+      message: "Branch tree fetched successfully",
+    };
+  }
+
   @Post()
   async createBranch(
     @Param("projectId") projectId: string,
@@ -30,7 +58,6 @@ export class BranchesController {
     @Request() req: any,
   ): Promise<ApiResponse<Branch>> {
     await this.projectsService.verifyProjectOwnership(projectId, req.user.id);
-
     const data = await this.branchesService.createBranch(
       createBranchDto,
       projectId,
@@ -45,20 +72,15 @@ export class BranchesController {
   @Put(":branchId")
   async updateBranch(
     @Param("projectId") projectId: string,
-
     @Param("branchId") branchId: string,
     @Body() updateBranchDto: UpdateBranchDto,
     @Request() req: any,
   ): Promise<ApiResponse<Branch>> {
-    console.log("Updating branch with ID:", branchId, "Data:", updateBranchDto);
-    console.log("User ID from request:", req.user.id);
     await this.projectsService.verifyProjectOwnership(projectId, req.user.id);
-
     const data = await this.branchesService.updateBranch(
       branchId,
       updateBranchDto,
     );
-
     return {
       success: true,
       data,
@@ -85,28 +107,17 @@ export class BranchesController {
     @Param("projectId") projectId: string,
     @Param("branchId") branchId: string,
     @Request() req: any,
-  ): Promise<
-    ApiResponse<{
-      branch: Branch;
-      headCommitId: string | null;
-    }>
-  > {
+  ): Promise<ApiResponse<{ branch: Branch; headCommitId: string | null }>> {
     const userId = req.user.id;
     const data = await this.branchesService.switchActiveBranch(
       projectId,
       branchId,
       userId,
     );
-
     return {
       success: true,
       data,
       message: "Active branch switched successfully",
     };
-  }
-
-  @Get(":projectId/branches-tree")
-  async getBranchesTree(@Param("projectId") projectId: string) {
-    return this.branchesService.getBranchesWithParent(projectId);
   }
 }

@@ -77,10 +77,9 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
         </div>
       </div>
 
-      {/* Status + action */}
       <div className="flex flex-col items-start justify-center gap-2.5 px-4 py-4">
         <div
-          className={`inline-flex items-center gap-1.5 px-2.5 py-[5px] ${status.bg}`}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1.25 ${status.bg}`}
         >
           <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${status.dot}`} />
           <span

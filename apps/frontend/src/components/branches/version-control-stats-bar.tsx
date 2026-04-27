@@ -17,17 +17,19 @@ export default function VersionControlStatsBar({
   ];
 
   return (
-    <div className="border-b border-border">
-      <div className="flex flex-wrap">
+    <div className="py-6">
+      <div className="inline-flex rounded-xl border border-border overflow-hidden">
         {stats.map(({ label, value }, i) => (
           <div
             key={label}
-            className={`flex flex-col gap-2 px-6 py-5 min-w-[130px] ${i < stats.length - 1 ? "border-r border-border/60" : ""}`}
+            className={`flex flex-col gap-2 px-6 py-4 bg-accent/20 ${
+              i < stats.length - 1 ? "border-r border-border" : ""
+            }`}
           >
             <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/45">
               {label}
             </span>
-            <span className="font-playfair-display text-[15px] font-bold text-primary leading-none truncate max-w-[160px]">
+            <span className="font-playfair-display text-[15px] font-bold text-primary leading-none">
               {value}
             </span>
           </div>

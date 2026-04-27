@@ -22,18 +22,22 @@ export function useBranch({ projectId }: UseBranchParams) {
     mutationFn: async ({
       values,
       parentCommitId,
+      parentBranchId,  
     }: {
       values: CreateBranchFormValues;
       parentCommitId: string;
+      parentBranchId: string | null;
     }) => {
       const dto: CreateBranchDto = {
         name: values.name,
         is_default: values.is_default,
         parent_commit_id: parentCommitId,
+        parent_branch_id: parentBranchId,
       };
       return await createBranch(projectId, dto, accessToken);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["branches", projectId] });
       toast.success(`Branch created successfully`);
     },
     onError: (error: Error) => {

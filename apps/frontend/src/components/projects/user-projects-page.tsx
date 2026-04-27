@@ -60,7 +60,7 @@ export default function UserProjectsPage({
         className="
           pointer-events-none
           absolute bottom-0 left-0
-          w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] lg:w-[340px] lg:h-[340px]
+          w-55 h-55 sm:w-70 sm:h-70 lg:w-85 lg:h-85
           rounded-full
           bg-gradient-to-br from-border/40 to-accent/85
           opacity-50
