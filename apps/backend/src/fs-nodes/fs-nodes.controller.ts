@@ -96,6 +96,8 @@ export class FsNodesController {
     return { success: true, data };
   }
 
+
+
   @Patch(":id/content")
   async updateContent(
     @Param("id") id: string,

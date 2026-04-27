@@ -251,13 +251,9 @@ export class FsNodesService {
     const { data: node, error } = await supabase
       .from("fs_nodes")
       .select(
-        `
-        *,
-        projects!inner(author_id)
-      `,
+        ` *  `,
       )
       .eq("id", nodeId)
-      .eq("projects.author_id", userId)
       .single();
 
     if (error || !node) {

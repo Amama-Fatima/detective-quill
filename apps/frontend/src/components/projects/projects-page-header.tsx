@@ -12,7 +12,7 @@ export default function ProjectsPageHeader({ onNewCase }: PageHeaderProps) {
         <div className="flex flex-wrap items-center justify-between gap-5">
           <div>
             <h1 className="font-playfair-display text-[clamp(26px,4vw,40px)] font-bold leading-none tracking-[-0.02em] text-primary">
-              My Investigations
+              My Projects
             </h1>
           </div>
           <Button

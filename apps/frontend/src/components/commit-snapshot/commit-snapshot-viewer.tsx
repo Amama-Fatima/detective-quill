@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { CalendarIcon } from "../icons/calendar-icon";
 import RevertCommitDialog from "@/components/commit-snapshot/revert-commit-dialog";
+import { useWorkspaceContext } from "@/context/workspace-context";
 
 interface CommitSnapshotViewerProps {
   commit: Commit;
@@ -46,8 +47,10 @@ export default function CommitSnapshotViewer({
   const isActiveBranch =
     !!activeBranchId && !!commitBranchId && activeBranchId === commitBranchId;
 
+  const { isOwner, isActive: isProjectActive } = useWorkspaceContext();
+
   return (
-    <div className="flex h-screen w-full bg-background">
+    <div className="flex h-screen w-full bg-background px-4">
       {/* Sidebar with file tree */}
       {isSidebarVisible && (
         <aside className="w-80 border-r bg-sidebar flex flex-col shadow-sm m-2 rounded-sm border">
@@ -78,13 +81,14 @@ export default function CommitSnapshotViewer({
                 </div>
               </div>
             </div>
-
-            <RevertCommitDialog
-              projectId={projectId}
-              commitId={commit.id}
-              isActiveBranch={isActiveBranch}
-              historyPath={historyPath}
-            />
+            {isProjectActive && isOwner && (
+              <RevertCommitDialog
+                projectId={projectId}
+                commitId={commit.id}
+                isActiveBranch={isActiveBranch}
+                historyPath={historyPath}
+              />
+            )}
             <div className="mt-2 px-2 py-1 border border-dashed bg-foreground text-background rounded text-sm font-medium case-file w-fit">
               Read-only snapshot
             </div>

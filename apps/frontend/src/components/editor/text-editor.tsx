@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
 import { useFocusMode } from "@/hooks/text-editor/use-focus-mode";
-import { useWorkspaceContext } from "@/context/workspace-context";
 import type { BlockNoteEditorRef } from "./block-note-editor";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useContentManager } from "@/hooks/text-editor/use-content-manager";
@@ -66,8 +65,6 @@ const TextEditor = ({
   projectId,
   nodeId,
 }: TextEditorProps) => {
-  const { isActive, isOwner } = useWorkspaceContext();
-  const disabledCondition = !isActive || !isOwner;
   const {
     focusMode,
     isFullscreen,
@@ -76,18 +73,9 @@ const TextEditor = ({
     exitFocusMode,
   } = useFocusMode();
 
-  const { saveFileMutation, deleteFileMutation } = useFileOperations({
+  const { saveFileMutation } = useFileOperations({
     nodeId,
   });
-  const isDeleting = deleteFileMutation.isPending;
-
-  const router = useRouter();
-
-  const handleDelete = async () => {
-    await deleteFileMutation.mutateAsync();
-    router.push(`/workspace/${projectId}/text-editor`);
-    return true;
-  };
 
   const { content, isDirty, updateContent, saveContent, isSaving } =
     useContentManager({

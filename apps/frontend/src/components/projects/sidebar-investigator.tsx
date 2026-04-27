@@ -8,7 +8,7 @@ export default function SidebarInvestigator() {
       </div>
       <div className="w-full border-t border-border pt-4">
         <p className="case-file text-[13px] text-foreground tracking-[0.12em] text-center leading-relaxed">
-          ACTIVE INVESTIGATOR
+          DETECTIVE ON DUTY
         </p>
         <p className="noir-text text-sm text-center text-muted-foreground mt-1 italic">
           &ldquo;Every story starts

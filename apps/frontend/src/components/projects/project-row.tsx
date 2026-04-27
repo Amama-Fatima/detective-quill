@@ -21,7 +21,7 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
   return (
     <div className="group relative grid grid-cols-[72px_1fr_152px] items-stretch border-b border-border last:border-b-0 hover:bg-accent/20 transition-colors duration-100 hover:border-l hover:border-l-primary">
       <div className="flex flex-col justify-center pl-5 pr-3 py-4 border-r border-border/40">
-        <span className="case-file text-[9px] tracking-[0.14em] text-muted-foreground/60 leading-none mb-1">
+        <span className="case-file text-[9px] tracking-[0.14em] text-foreground/80 leading-none mb-1">
           Project
         </span>
         <span className="font-mono text-[12px] font-semibold leading-none text-muted-foreground group-hover:text-foreground/80 transition-colors">
