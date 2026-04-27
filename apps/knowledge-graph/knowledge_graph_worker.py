@@ -1,4 +1,3 @@
-import spacy
 import modal
 import sys
 import traceback
@@ -6,8 +5,6 @@ import time
 
 from src.config import settings
 from src.utils.logger import setup_logger
-from src.pipeline.layer5_graph import save_graph_layer5
-
 
 from modal_app import app, image, secrets
 
@@ -28,6 +25,11 @@ class KnowledgeGraphWorker:
         
         sys.path.insert(0, "/root") 
 
+        import spacy
+        from src.models.llm_loader import get_llm_loader
+        from src.pipeline.layer5_graph import save_graph_layer5
+        from src.pipeline.orchestrator import NarrativeAnalysisPipeline
+
         self.logger = setup_logger(__name__)
         self.logger.info("Container started - loading models...")
 
@@ -37,11 +39,10 @@ class KnowledgeGraphWorker:
         self.logger.info("spaCy loaded")
 
         self.logger.info("Loading OpenHermes LLM - this takes a few minutes...")
-        from src.models.llm_loader import get_llm_loader
         self.llm_loader = get_llm_loader()
         self.logger.info("LLM loaded and ready")
 
-        from src.pipeline.orchestrator import NarrativeAnalysisPipeline
+        self._save_graph_layer5 = save_graph_layer5
         self.pipeline = NarrativeAnalysisPipeline(nlp=self.nlp)
         self.logger.info("Pipeline ready")
 
@@ -56,11 +57,10 @@ class KnowledgeGraphWorker:
             self.logger.info(f"Pipeline complete — {len(result.entities)} entities, {len(result.relationships)} relationships")
 
             self.logger.info("Starting Layer 5: saving graph to Neo4j...")
-            graph_result = save_graph_layer5(
+            graph_result = self._save_graph_layer5(
                 scene_id=fs_node_id,
                 user_id=user_id,
                 scene_text=scene_text,
-                resolved_text=result.resolved_text,
                 entities=result.entities,
                 relationships=result.relationships,
             )

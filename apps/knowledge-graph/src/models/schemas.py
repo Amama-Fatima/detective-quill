@@ -6,15 +6,13 @@ class Entity(BaseModel):
     name: str
     type: str
     mentions: List[str] = Field(default_factory=list)
-    attributes: Dict[str, Any] = Field(default_factory=dict)
+    role: Optional[str] = None
 
 
 class Relationship(BaseModel):
     source: str
     target: str
     relation_type: str
-    description: str
-    confidence: float = 0.9
     when: Optional[str] = None  # time expression e.g. "10 minutes to 5", "after noon"
 
 

@@ -5,6 +5,7 @@ import { WorkerNlpAnalysisService } from "src/nlp-analysis/worker-nlp-analysis.s
 
 @Injectable()
 export class ManualRabbitMQConsumer implements OnModuleInit {
+  private static isInitialized = false;
   private connection: any;
   private channelWrapper: any;
 
@@ -15,6 +16,11 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
 
   // todo: using config service to access env is good practice, change the other places in the code to do the same
   async onModuleInit() {
+    if (ManualRabbitMQConsumer.isInitialized) {
+      console.log("Manual RabbitMQ consumer already initialized, skipping...");
+      return;
+    }
+
     const rabbitmqUrl =
       this.configService.get<string>("RABBITMQ_URL") ||
       "amqp://guest:guest@localhost:5672";
@@ -44,6 +50,10 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
       },
     });
 
+    this.channelWrapper.on("error", (err: any) => {
+      console.error("NLP results channel wrapper error:", err);
+    });
+
     this.connection.on("connect", () => {
       console.log("Connected to RabbitMQ for NLP consumer");
     });
@@ -51,6 +61,8 @@ export class ManualRabbitMQConsumer implements OnModuleInit {
     this.connection.on("disconnect", (err: any) => {
       console.error("Disconnected from RabbitMQ:", err);
     });
+
+    ManualRabbitMQConsumer.isInitialized = true;
   }
 
   private async handleMessage(msg: any, channel: any) {

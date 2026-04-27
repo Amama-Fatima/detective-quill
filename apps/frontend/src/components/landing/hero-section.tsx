@@ -48,6 +48,15 @@ export default function HeroSection() {
         "
       />
 
+      {/* Small decorative circles — middle & bottom-right */}
+      <div className="absolute top-[48%] left-[36%] w-[18px] h-[18px] rounded-full border border-border opacity-100 pointer-events-none" />
+      <div className="absolute top-[58%] left-[48%] w-[18px] h-[18px] rounded-full border border-border opacity-100 pointer-events-none" />
+      <div className="absolute top-[15%] left-[28%] w-[10px] h-[10px] rounded-full bg-primary opacity-50 pointer-events-none" />
+        <div className="absolute top-[25%] right-[28%] w-[10px] h-[10px] rounded-full bg-primary opacity-50 pointer-events-none" />
+      <div className="absolute bottom-[22%] right-[20%] w-[22px] h-[22px] rounded-full border border-border opacity-100 pointer-events-none" />
+      <div className="absolute bottom-[14%] right-[32%] w-[12px] h-[12px] rounded-full bg-muted-foreground opacity-50 pointer-events-none" />
+      <div className="absolute bottom-[30%] right-[12%] w-[16px] h-[16px] rounded-full border border-border opacity-100 pointer-events-none" />
+
       <div className="relative z-[2]">
         <div className="inline-flex items-center gap-2 bg-accent rounded-full px-[12px] py-[6px] mb-5 lg:mb-[28px]">
           <CasePinIcon />

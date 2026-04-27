@@ -7,7 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FileText, FolderPlus, Plus } from "lucide-react";
+import { FolderPlus, Plus } from "lucide-react";
+import Image from "next/image";
 
 interface NewFileDropdownProps {
   disabled?: boolean;
@@ -38,7 +39,7 @@ export default function NewFileDropdown({
           className="cursor-pointer"
           disabled={disabled}
         >
-          <FileText className="h-4 w-4 mr-2" />
+          <Image src="/paper.png" alt="Quill File" width={24} height={24} />
           New File
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -46,7 +47,7 @@ export default function NewFileDropdown({
           className="cursor-pointer"
           disabled={disabled}
         >
-          <FolderPlus className="h-4 w-4 mr-2" />
+          <Image src="/new-folder.png" alt="Quill File" width={24} height={24} />
           New Folder
         </DropdownMenuItem>
       </DropdownMenuContent>

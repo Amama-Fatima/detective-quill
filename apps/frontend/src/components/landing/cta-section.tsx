@@ -7,7 +7,7 @@ export default function CtaSection() {
     <section className="relative overflow-hidden bg-primary px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-[100px]">
       <div
         className="absolute inset-0 opacity-[0.04] 
-        bg-[radial-gradient(oklch(96%_0.010_80)_1px,transparent_1px)]
+        bg-[radial-gradient(oklch(96%_0.010_80)_2px,transparent_2px)]
         bg-[length:24px_24px]"
       />
 

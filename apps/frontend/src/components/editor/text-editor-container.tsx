@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import TextEditor from "@/components/editor/text-editor";
 import CommentsPanel from "@/components/comments/comments-panel";
 import NewCommentDialog from "@/components/comments/new-comment-dialog";
+import { QueryPanel } from "@/components/query-manuscript/query-panel";
 import { useFileOperations } from "@/hooks/text-editor/use-file-operations";
 import { useComments } from "@/hooks/use-comments";
 import { useWorkspaceContext } from "@/context/workspace-context";
@@ -18,7 +19,9 @@ export default function TextEditorContainer() {
   const params = useParams();
   const nodeId = params.nodeId as string;
   const projectId = params.projectId as string;
-  const [showComments, setShowComments] = useState(false);
+  const [activeSidePanel, setActiveSidePanel] = useState<
+    "comments" | "query" | null
+  >(null);
   const [showNewCommentDialog, setShowNewCommentDialog] = useState(false);
   const [selectedTextForComment, setSelectedTextForComment] =
     useState<string>("");
@@ -73,15 +76,32 @@ export default function TextEditorContainer() {
     setShowNewCommentDialog(true);
   };
 
+  const showComments = activeSidePanel === "comments";
+  const showQueryPanel = activeSidePanel === "query";
+
+  const toggleCommentsPanel = () => {
+    setActiveSidePanel((currentPanel) =>
+      currentPanel === "comments" ? null : "comments",
+    );
+  };
+
+  const toggleQueryPanel = () => {
+    setActiveSidePanel((currentPanel) =>
+      currentPanel === "query" ? null : "query",
+    );
+  };
+
   // todo: bring the action buttons outside the text editor and into this container
   return (
     <div className="mx-3 flex gap-3 mb-6">
-      <div className={showComments ? "flex-1" : "w-full"}>
+      <div className={activeSidePanel ? "flex-1" : "w-full"}>
         <TextEditor
           fileName={nodeData?.name || ""}
           value={nodeData?.content || ""}
           showComments={showComments}
-          onToggleComments={() => setShowComments(!showComments)}
+          onToggleComments={toggleCommentsPanel}
+          showQueryPanel={showQueryPanel}
+          onToggleQueryPanel={toggleQueryPanel}
           commentCount={stats?.unresolved || 0}
           editorRef={editorRef}
           projectId={projectId}
@@ -106,6 +126,7 @@ export default function TextEditorContainer() {
           </div>
         </div>
       )}
+
       <NewCommentDialog
         open={showNewCommentDialog}
         onOpenChange={setShowNewCommentDialog}
