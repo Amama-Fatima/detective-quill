@@ -12,7 +12,7 @@ function Tabs({
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("flex flex-col gap-2", className)}
+      className={cn("flex flex-col gap-0", className)}
       {...props}
     />
   );
@@ -26,7 +26,10 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
+        // Sharp outer frame — no rounding, no pill
+        "inline-flex w-fit items-stretch",
+        "border border-border bg-muted/40",
+        "p-0 h-auto",
         className,
       )}
       {...props}
@@ -42,7 +45,27 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-secondary-foreground/40 data-[state=active]:ring-1 data-[state=active]:ring-secondary-foreground/25 dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-lg [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // Base — monospace, uppercase, no rounding
+        "relative inline-flex items-center justify-center gap-1.5",
+        "font-mono text-xs font-bold tracking-[0.14em] uppercase",
+        "px-5 py-2.5 h-auto",
+        "border-r border-border last:border-r-0",
+        "bg-transparent text-muted-foreground",
+        "whitespace-nowrap transition-colors duration-100",
+        "select-none outline-none",
+        // Hover
+        "hover:bg-background hover:text-foreground",
+        // Active state — solid top bar accent, background lift
+        "data-[state=active]:bg-background",
+        "data-[state=active]:text-foreground",
+        // The 2px primary top-bar — inset shadow so it doesn't add height
+        "data-[state=active]:shadow-[inset_0_2px_0_0_hsl(var(--primary))]",
+        // Focus ring
+        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset",
+        // Disabled
+        "disabled:pointer-events-none disabled:opacity-40",
+        // SVG icons inside
+        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
         className,
       )}
       {...props}

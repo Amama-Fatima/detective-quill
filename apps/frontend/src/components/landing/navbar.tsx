@@ -41,7 +41,7 @@ export default async function Navbar() {
 
         {isAuthenticated ? (
           <Link
-            href="/cases"
+            href="/projects"
             className="
             bg-foreground
             text-secondary

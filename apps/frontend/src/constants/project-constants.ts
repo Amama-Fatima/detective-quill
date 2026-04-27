@@ -1,9 +1,17 @@
-import { Map, FileText, BarChart3, History } from "lucide-react";
+import { LayoutDashboardIcon } from "lucide-react";
 import { BlueprintIcon } from "@/components/icons/blueprint-icon";
 import { CaseFileIcon } from "@/components/icons/case-file-icon";
 import { GraphIcon } from "@/components/icons/graph-icon";
 import { VersionControlIcon } from "@/components/icons/version-control-icon";
+
 export const NAV_ITEMS = [
+  {
+      id: "overview",
+      label: "Overview",
+      href: `/workspace/123`,
+      icon: LayoutDashboardIcon,
+      description: "Project at a glance",
+  },
   {
     id: "blueprint",
     label: "Blueprints",
@@ -31,7 +39,7 @@ export const NAV_ITEMS = [
     href: `/workspace/123/version-control`,
     icon: VersionControlIcon,
     description: "Commit history & version control",
-  },
+  }
 ];
 
 export const tab_message = [

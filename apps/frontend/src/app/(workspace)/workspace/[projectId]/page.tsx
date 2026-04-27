@@ -1,4 +1,4 @@
-import WorkspaceMainBody from "@/components/project-page/project-workspace-main";
+import WorkspaceMainBody from "@/components/workspace-overview/project-workspace-main";
 import { createSupabaseServerClient } from "@/supabase/server-client";
 import { notFound, redirect } from "next/navigation";
 import React from "react";

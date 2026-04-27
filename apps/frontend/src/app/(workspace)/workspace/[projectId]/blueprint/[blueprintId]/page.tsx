@@ -17,13 +17,8 @@ export async function generateMetadata({}: {}): Promise<Metadata> {
 }
 
 interface CreateBlueprintPageProps {
-  params: Promise<{
-    projectId: string;
-    blueprintId: string;
-  }>;
-  searchParams: Promise<{
-    type: BlueprintType;
-  }>;
+  params: Promise<{ projectId: string; blueprintId: string }>;
+  searchParams: Promise<{ type: BlueprintType }>;
 }
 
 export default async function CreateBlueprintPage({
@@ -35,10 +30,7 @@ export default async function CreateBlueprintPage({
 
   const supabase = await createSupabaseServerClient();
   const user = await getUserFromCookie();
-
-  if (!user) {
-    redirect("/auth/sign-in");
-  }
+  if (!user) redirect("/auth/sign-in");
 
   const userId = user.sub;
 
@@ -47,17 +39,14 @@ export default async function CreateBlueprintPage({
     projectId,
     supabase,
   );
-  if (blueprintError || !blueprint) {
+  if (blueprintError || !blueprint)
     return <ErrorMsg message="Failed to load blueprint data" />;
-  }
+
   const { blueprint_cards, error: cardsError } = await getAllCardsOfBlueprint(
     blueprintId,
     supabase,
   );
-
-  if (cardsError) {
-    return <ErrorMsg message="Failed to load blueprint cards" />;
-  }
+  if (cardsError) return <ErrorMsg message="Failed to load blueprint cards" />;
 
   const { isActive, author_id } = await getProjectStatusAndAuthor(
     String(blueprint.project_id),
@@ -67,7 +56,7 @@ export default async function CreateBlueprintPage({
   const isOwner = author_id === userId;
 
   return (
-    <div>
+    <div className="h-dvh w-full overflow-hidden">
       <Canvas
         blueprintId={blueprintId}
         type={type}

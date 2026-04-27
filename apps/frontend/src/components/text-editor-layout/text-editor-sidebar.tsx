@@ -30,7 +30,8 @@ export default function TextEditorSidebar({
     >
       <div
         className={cn(
-          "border-b border-border/70 px-4 py-3 bg-background"
+          "border-b border-border/70 px-4 py-3 bg-background/50",
+          // solidBackground ? "bg-background" : "bg-background/",
         )}
       >
         <div className="flex items-center justify-between">

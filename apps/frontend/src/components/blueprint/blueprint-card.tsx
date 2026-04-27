@@ -1,13 +1,11 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Blueprint } from "@detective-quill/shared-types/api";
-import Link from "next/dist/client/link";
-import React, { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { getBlueprintTypeColor } from "@/lib/utils/blueprint-utils";
 import { DeleteBlueprintButton } from "./btns/delete-blueprint-btn";
-import { CornerOrnamentIcon } from "../icons/corner-ornament-icon";
-import { TagIcon } from "../icons/tag-icon";
+import PolaroidStyles from "./polaroid/polaroid-styles";
+import PolaroidPhoto from "./polaroid/polaroid-photo";
 
 interface BlueprintCardProps {
   blueprint: Blueprint;
@@ -18,14 +16,14 @@ interface BlueprintCardProps {
   loading: boolean;
 }
 
-const BlueprintCard = ({
+export default function BlueprintCard({
   blueprint,
   projectId,
   isOwner,
   isActive,
   onDelete,
   loading,
-}: BlueprintCardProps) => {
+}: BlueprintCardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef(null);
 
@@ -39,67 +37,57 @@ const BlueprintCard = ({
       },
       { threshold: 0.1 },
     );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
+    if (cardRef.current) observer.observe(cardRef.current);
     return () => observer.disconnect();
   }, []);
 
-  return (
-    <div ref={cardRef}>
-      {isVisible ? (
-        <Card className="min-h-[170px] group hover:shadow-lg hover:-translate-y-2 transition-all duration-200 relative">
-          <div className="pointer-events-none absolute left-0 top-1 text-border/70">
-            <CornerOrnamentIcon className="h-11 w-11 translate-x-0.5 -translate-y-0.5" />
-          </div>
-          <div className="pointer-events-none absolute bottom-1 right-0 text-border/70">
-            <CornerOrnamentIcon className="h-11 w-11 -translate-x-0.5 translate-y-0.5 rotate-180" />
-          </div>
-          <CardHeader className="pb-1">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex justify-between items-center ">
-                  <Link
-                    href={`/workspace/${projectId}/blueprint/${blueprint.id}?type=${blueprint.type}`}
-                    className="block w-full"
-                  >
-                    <CardTitle className="text-lg noir-text font-semibold transition-colors line-clamp-1">
-                      {blueprint.title}
-                    </CardTitle>
-                  </Link>
-                  {isOwner && isActive && (
-                    <DeleteBlueprintButton
-                      blueprintId={blueprint.id}
-                      onDelete={onDelete}
-                      loading={loading}
-                    />
-                  )}{" "}
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div
-              className={`${getBlueprintTypeColor(
-                blueprint.type,
-              )} flex justify-items-center align-middle gap-2 items-center`}
-            >
-              <>
-                <TagIcon size={18} />
-                <p className="case-file text-lg font-medium">
-                  {blueprint.type}
-                </p>
-              </>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="h-[180px] bg-muted/20 rounded-lg animate-pulse" />
-      )}
-    </div>
-  );
-};
+  const rotate = blueprint.id.charCodeAt(0) % 2 === 0 ? 2 : -2;
 
-export default BlueprintCard;
+  return (
+    <>
+      <PolaroidStyles />
+      <div ref={cardRef} className="polaroid-card-wrap">
+        {isVisible ? (
+          <motion.div
+            className="polaroid-card-inner"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={{
+              rotate: 0,
+              y: -10,
+              scale: 1.05,
+              boxShadow: "4px 10px 24px rgba(0,0,0,0.30)",
+              transition: { duration: 0.22, ease: "easeOut" },
+            }}
+            style={{ rotate }}
+          >
+            <div className="polaroid-evidence-strip">{blueprint.type}</div>
+
+            <PolaroidPhoto
+              type={blueprint.type}
+              projectId={projectId}
+              blueprintId={blueprint.id}
+            />
+
+            <div className="polaroid-label">
+              <div className="polaroid-label-title">{blueprint.title}</div>
+            </div>
+
+            {isOwner && isActive && (
+              <div className="polaroid-delete-btn">
+                <DeleteBlueprintButton
+                  blueprintId={blueprint.id}
+                  onDelete={onDelete}
+                  loading={loading}
+                />
+              </div>
+            )}
+          </motion.div>
+        ) : (
+          <div className="w-37.5 h-55 bg-muted/20 animate-pulse" />
+        )}
+      </div>
+    </>
+  );
+}

@@ -108,7 +108,6 @@ export default function TextEditorContainer() {
           nodeId={nodeData?.id || ""}
         />
       </div>
-
       {showComments && (
         <div className="flex h-full w-80 flex-col overflow-hidden border border-border/70 bg-sidebar shadow-sm">
           <div className="shrink-0 border-b border-border/70 p-3">
@@ -124,14 +123,6 @@ export default function TextEditorContainer() {
           </div>
           <div className="flex-1 overflow-hidden bg-sidebar">
             <CommentsPanel />
-          </div>
-        </div>
-      )}
-
-      {showQueryPanel && (
-        <div className="flex h-full w-80 flex-col overflow-hidden border border-border/70 bg-sidebar shadow-sm">
-          <div className="flex-1 overflow-hidden bg-sidebar">
-            <QueryPanel />
           </div>
         </div>
       )}

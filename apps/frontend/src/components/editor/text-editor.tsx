@@ -12,7 +12,7 @@ import {
   Minimize,
   Focus,
   MessageSquare,
-  CircleHelp,
+  GitCommitHorizontal,
 } from "lucide-react";
 import { cn, getContainerClass, getHeaderClass } from "@/lib/utils/utils";
 import {

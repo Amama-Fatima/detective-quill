@@ -42,7 +42,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   return (
-    <div className="flex h-full items-center justify-center ">
+    <div className="flex h-full items-center justify-center">
       <div className="text-center space-y-6 max-w-md">
         <div className="rounded-full bg-sidebar text-background mx-auto h-40 w-40 flex items-center justify-center">
           <div className="h-28 w-28">
