@@ -3,40 +3,14 @@
 import Link from "next/link";
 import { Project } from "@detective-quill/shared-types";
 import { formatDate } from "date-fns";
+import { ClockIcon } from "../icons/clock-icon";
+import { getStatusStyles } from "@/lib/utils/project-utils";
 
 interface ProjectRowProps {
   project: Project;
   index: number;
 }
 
-function getStatusStyles(status: string) {
-  switch (status) {
-    case "active":
-      return {
-        dot: "bg-primary-foreground",
-        text: "text-primary-foreground",
-        bg: "bg-primary",
-      };
-    case "completed":
-      return {
-        dot: "bg-primary-foreground",
-        text: "text-primary-foreground",
-        bg: "bg-chart-4",
-      };
-    case "archived":
-      return {
-        dot: "bg-muted-foreground",
-        text: "text-muted-foreground",
-        bg: "bg-muted border border-border",
-      };
-    default:
-      return {
-        dot: "bg-border",
-        text: "text-muted-foreground",
-        bg: "bg-muted border border-border",
-      };
-  }
-}
 
 function getTabClass(status: string) {
   switch (status) {
@@ -56,28 +30,27 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
     ? formatDate(new Date(project.updated_at), "MMM d, yyyy")
     : "Unknown";
 
-  const caseNumber = String(index).padStart(3, "0");
+  const caseNumber = String(index).padStart(2, "0");
   const chapterCount = (project as any).chapter_count;
   const status = getStatusStyles(project.status);
 
   return (
-    <div className="group relative grid grid-cols-[72px_1fr_152px] items-stretch border-b border-border/50 last:border-b-0 hover:bg-accent/20 transition-colors duration-100">
+    <div className="group relative grid grid-cols-[72px_1fr_152px] items-stretch border-b border-border last:border-b-0 hover:bg-accent/20 transition-colors duration-100 hover:border-l hover:border-l-primary">
       {/* Coloured left tab */}
-      <div
+      {/* <div
         className={`absolute left-0 top-0 bottom-0 w-[3px] transition-all duration-150 group-hover:w-[4px] ${getTabClass(project.status)}`}
-      />
+      /> */}
 
       {/* File number — demoted, supporting role */}
       <div className="flex flex-col justify-center pl-5 pr-3 py-4 border-r border-border/40">
         <span className="case-file text-[9px] tracking-[0.14em] text-muted-foreground/60 leading-none mb-1">
-          FILE
+          Project
         </span>
         <span className="font-mono text-[12px] font-semibold leading-none text-muted-foreground group-hover:text-foreground/80 transition-colors">
           {caseNumber}
         </span>
       </div>
 
-      {/* Title + description + meta */}
       <div className="min-w-0 py-4 px-5 border-r border-border/40">
         <Link
           href={`/workspace/${project.id}`}
@@ -97,6 +70,7 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
               <span className="case-file text-[10px] text-border">·</span>
             </>
           )}
+          <ClockIcon />
           <span className="case-file text-[10px] text-muted-foreground">
             Updated {formattedUpdatedAt}
           </span>
@@ -105,7 +79,6 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
 
       {/* Status + action */}
       <div className="flex flex-col items-start justify-center gap-2.5 px-4 py-4">
-        {/* Solid filled badge using prominent palette colors */}
         <div
           className={`inline-flex items-center gap-1.5 px-2.5 py-[5px] ${status.bg}`}
         >
@@ -121,13 +94,13 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
           href={`/workspace/${project.id}`}
           className="
             case-file text-[10px] tracking-[0.08em]
-            border border-border/70 px-3 py-[5px]
-            text-muted-foreground
+            border border-border px-3 py-[5px]
+            text-foreground
             hover:border-primary hover:text-primary hover:bg-primary/5
             transition-colors inline-flex items-center gap-1.5
           "
         >
-          Open File
+          Open Project
           <span className="text-[12px] leading-none">→</span>
         </Link>
       </div>

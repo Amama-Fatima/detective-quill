@@ -127,6 +127,12 @@ export default function TextEditorContainer() {
         </div>
       )}
 
+      {showQueryPanel && (
+        <div className="flex h-full w-80 flex-col overflow-hidden border border-border/70 bg-sidebar shadow-sm">
+          <QueryPanel />
+        </div>
+      )}
+
       <NewCommentDialog
         open={showNewCommentDialog}
         onOpenChange={setShowNewCommentDialog}

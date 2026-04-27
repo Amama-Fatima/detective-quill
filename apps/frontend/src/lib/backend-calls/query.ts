@@ -63,7 +63,7 @@ export async function queryGraph(
     });
   } catch {
     throw new Error(
-      "Could not reach query engine. Check that the API server is running and CORS is configured for this frontend origin.",
+      "Could not reach query engine.",
     );
   }
 

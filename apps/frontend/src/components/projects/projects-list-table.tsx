@@ -27,7 +27,7 @@ export default function ProjectsListTable({ projects }: ProjectsListTableProps) 
   return (
     <div className="relative w-full">
       <div className="mb-3 flex items-baseline justify-between px-0.5">
-        <h2 className="font-playfair-display text-lg font-bold text-foreground tracking-[-0.01em]">
+        <h2 className="font-playfair-display text-xl font-bold text-foreground">
           {title}
         </h2>
         <span className="case-file text-[11px] text-muted-foreground">
@@ -38,21 +38,18 @@ export default function ProjectsListTable({ projects }: ProjectsListTableProps) 
       <div className="relative border border-border bg-card overflow-hidden rounded-md">
         <div className="grid grid-cols-[72px_1fr_152px] border-b-2 border-border bg-muted/80">
           <div className="pl-2 py-3 border-r border-border/50">
-            <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground">
+            <span className="case-file text-[10px] tracking-[0.14em] text-foreground">
               Project
             </span>
           </div>
           <div className="pl-5 py-3 border-r border-border/50">
-            <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground">
+            <span className="case-file text-[10px] tracking-[0.14em] text-foreground">
               Title &amp; Summary
             </span>
           </div>
           <div className="px-5 py-3 flex items-center justify-between">
-            <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground">
+            <span className="case-file text-[10px] tracking-[0.14em] text-foreground">
               Status
-            </span>
-            <span className="case-file text-[10px] tracking-[0.14em] text-muted-foreground pr-1">
-              Action
             </span>
           </div>
         </div>

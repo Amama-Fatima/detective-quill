@@ -10,9 +10,6 @@ export default function WorkspaceOverviewHeader({ project }: WorkspaceHeaderProp
   return (
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b-2 border-primary">
       <div className="flex-1 min-w-0">
-        <p className="font-mono text-[9px] tracking-[0.24em] uppercase text-muted-foreground/65 mb-3">
-          Case Workspace — Overview
-        </p>
         <h1 className="font-playfair-display italic text-[clamp(32px,5vw,56px)] font-bold leading-[1.02] tracking-[-0.025em] text-primary mb-4">
           {project.title}
         </h1>
