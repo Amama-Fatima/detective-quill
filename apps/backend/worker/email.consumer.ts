@@ -16,6 +16,7 @@ export class EmailConsumer {
   async handleInviteEmail(@Payload() data: EmailSendingJobData) {
     const { projectId, emails, inviterName, projectTitle } = data;
     const failed: string[] = [];
+    console.log(`Received invite email job for project, sending to: ${emails.join(", ")}`);
     for (const email of emails) {
       // generate a random string
       const inviteCode = Math.random().toString(36).substring(2);

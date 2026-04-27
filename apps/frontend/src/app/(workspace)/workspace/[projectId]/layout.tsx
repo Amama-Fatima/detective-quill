@@ -10,6 +10,7 @@ import { verifyMembership } from "@/lib/supabase-calls/members";
 import { WorkspaceContextProvider } from "@/context/workspace-context";
 import { getProjectStatusAndAuthor } from "@/lib/supabase-calls/user-projects";
 import { fetchActiveBranchId } from "@/lib/supabase-calls/editor-workspace";
+import { headers } from "next/headers";
 
 interface ProjectWorkspacePageProps {
   params: Promise<{
@@ -40,6 +41,10 @@ const WorkspaceLayout = async ({
 }: ProjectWorkspacePageProps) => {
   const { projectId } = await params;
 
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const isAcceptInvitePage = pathname.includes("accept-invite");
+
   const user = await getUserFromCookie();
   if (!user || !user.sub) redirect("/auth/sign-in");
 
@@ -55,7 +60,7 @@ const WorkspaceLayout = async ({
 
   if (error || !title)
     return <ErrorMsg message="Failed to load project data." />;
-  if (!isMember)
+  if (!isMember && !isAcceptInvitePage)
     return <ErrorMsg message="You don't have access to this project." />;
 
   const isOwner = author_id === user.sub;
@@ -67,9 +72,13 @@ const WorkspaceLayout = async ({
       isOwner={isOwner}
       isActive={isActive}
     >
-      <WorkspaceSidebarShell projectId={projectId}>
-        <main className="flex-1">{children}</main>
-      </WorkspaceSidebarShell>
+      {!isAcceptInvitePage && (
+        <WorkspaceSidebarShell projectId={projectId}>
+          <main className="flex-1">{children}</main>
+        </WorkspaceSidebarShell>
+      )}
+
+      {isAcceptInvitePage && <main className="flex-1">{children}</main>}
     </WorkspaceContextProvider>
   );
 };

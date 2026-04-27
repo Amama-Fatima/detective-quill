@@ -13,7 +13,7 @@ export default function SidebarInvestigator() {
         <p className="noir-text text-sm text-center text-muted-foreground mt-1 italic">
           &ldquo;Every story starts
           <br />
-          with a single clue.&rdquo;
+          with an empty page.&rdquo;
         </p>
       </div>
     </aside>

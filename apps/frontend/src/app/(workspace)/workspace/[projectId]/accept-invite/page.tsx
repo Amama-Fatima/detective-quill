@@ -63,13 +63,18 @@ export default async function AcceptInvitePage({
 
   // Ensure the email in query matches the authenticated user's email
   if (user?.email !== email) {
+    console.log("not authenticated user email:", user?.email, "does not match invite email:", email);
     // first log user out then redirect to sign-in
     await supabase.auth.signOut();
     redirect(`/auth/sign-in?redirectTo=${encodeURIComponent(callbackUrl)}`);
   }
 
   return (
-    <div>
+    <div className="relative">
+            <div className="pointer-events-none absolute top-[35%] -right-7.5 w-25 h-25 rounded-full bg-accent opacity-50 border border-border/60 z-1" />
+      <div className="pointer-events-none absolute bottom-[20%] -left-5 w-32.5 h-32.5 rounded-full bg-accent opacity-50 border border-border/60 z-1" />
+      <div className="pointer-events-none absolute -bottom-7.5 right-[25%] w-22.5 h-22.5 rounded-full bg-accent opacity-50 border border-border/60 z-1" />
+
       <AcceptRejectProject
         projectId={projectId}
         projectTitle={projectTitle}

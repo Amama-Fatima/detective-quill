@@ -15,10 +15,6 @@ export class CreateBranchDto {
   @IsOptional()
   description?: string;
 
-  @IsBoolean()
-  @IsOptional()
-  is_default?: boolean;
-
   @IsUUID()
   @IsNotEmpty()
   parent_commit_id!: string;

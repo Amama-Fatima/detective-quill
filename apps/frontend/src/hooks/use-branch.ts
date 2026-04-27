@@ -30,7 +30,6 @@ export function useBranch({ projectId }: UseBranchParams) {
     }) => {
       const dto: CreateBranchDto = {
         name: values.name,
-        is_default: values.is_default,
         parent_commit_id: parentCommitId,
         parent_branch_id: parentBranchId,
       };

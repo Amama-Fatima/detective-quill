@@ -74,17 +74,17 @@ export default function CommitCard({
         {isInherited ? (
           <div className="flex items-start gap-3">
             <div className="shrink-0 mt-0.5">
-              <GitBranch className="h-4 w-4 text-muted-foreground/40" />
+              <GitBranch className="h-4 w-4 text-foreground/80" />
             </div>
             <div className="min-w-0">
-              <p className="font-playfair-display italic text-[15px] text-foreground/50 line-clamp-2 mb-2">
+              <p className="font-playfair-display italic text-[15px] text-foreground/90 line-clamp-2 mb-2">
                 {commit.message || "No message"}
               </p>
-              <div className="border border-dashed border-border/50 bg-muted/20 px-3 py-2 mt-2">
-                <p className="case-file text-[10px] tracking-[0.12em] uppercase text-muted-foreground/50 mb-0.5">
+              <div className="border border-dashed border-border/80 bg-muted px-3 py-2 mt-2">
+                <p className="case-file text-[10px] tracking-[0.12em] uppercase text-foreground/80 mb-0.5">
                   Archived Entry
                 </p>
-                <p className="noir-text text-xs text-muted-foreground/50">
+                <p className="noir-text text-xs text-foreground/80">
                   Filed under parent branch. Open parent history to restore.
                 </p>
               </div>

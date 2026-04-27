@@ -18,7 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -50,7 +49,6 @@ const CreateNewBranchForm = ({
     resolver: zodResolver(createBranchSchema),
     defaultValues: {
       name: "",
-      is_default: false,
       description: "",
     },
   });
@@ -137,7 +135,7 @@ const CreateNewBranchForm = ({
                   </FormItem>
                 )}
               />
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="is_default"
                 render={({ field }) => (
@@ -161,7 +159,7 @@ const CreateNewBranchForm = ({
                     </div>
                   </FormItem>
                 )}
-              />
+              /> */}
               <div className="flex gap-3 pt-2">
                 <Button
                   type="button"

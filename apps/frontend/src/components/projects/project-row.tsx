@@ -61,14 +61,14 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
         <Link
           href={`/workspace/${project.id}`}
           className="
-            case-file text-[10px] tracking-[0.08em]
+            case-file text-[13px] tracking-[0.08em]
             border border-border px-3 py-1.25
             text-foreground
             hover:border-primary hover:text-primary hover:bg-primary/5
             transition-colors inline-flex items-center gap-1.5
           "
         >
-          Open Project
+          Open
           <span className="text-[12px] leading-none">→</span>
         </Link>
       </div>

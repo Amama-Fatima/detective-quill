@@ -79,6 +79,38 @@ export class BranchesService {
       throw new NotFoundException(`Branch with ID ${branchId} not found`);
     }
 
+    if (updateBranchDto.is_default === true) {
+      const { data: defaultBranches, error: defaultBranchesError } =
+        await supabase
+          .from("branches")
+          .select("id")
+          .eq("project_id", data.project_id)
+          .eq("is_default", true);
+
+      if (defaultBranchesError) {
+        throw new Error(
+          `Failed to fetch default branches: ${defaultBranchesError.message}`,
+        );
+      }
+
+      const remainingDefaultBranchIds = (defaultBranches ?? [])
+        .map((branch) => branch.id)
+        .filter((id) => id !== branchId);
+
+      if (remainingDefaultBranchIds.length > 0) {
+        const { error: unsetDefaultError } = await supabase
+          .from("branches")
+          .update({ is_default: false })
+          .in("id", remainingDefaultBranchIds);
+
+        if (unsetDefaultError) {
+          throw new Error(
+            `Failed to update other default branches: ${unsetDefaultError.message}`,
+          );
+        }
+      }
+    }
+
     return data;
   }
 

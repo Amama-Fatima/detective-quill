@@ -72,7 +72,6 @@ export const createBranchSchema = z.object({
       /^[a-zA-Z0-9-_\/]+$/,
       "Branch name can only contain letters, numbers, hyphens, underscores, and slashes",
     ),
-  is_default: z.boolean(),
   description: z
     .string()
     .max(255, "Description must be less than 255 characters")

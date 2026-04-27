@@ -64,7 +64,7 @@ const PendingInvitations = ({ projectId }: { projectId: string }) => {
               <button
                 disabled={deleting}
                 onClick={() => handleDeleteInvitation(invitation)}
-                className="
+                className=" cursor-pointer
                   shrink-0 case-file text-xs
                   border border-border/60 px-3 py-1
                   text-muted-foreground

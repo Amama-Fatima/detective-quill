@@ -13,7 +13,6 @@ interface MemberCardProps {
   onRemove: (member: ProjectMember) => void;
 }
 
-
 export default function MemberCard({
   member,
   index,
@@ -36,7 +35,7 @@ export default function MemberCard({
             ? "border-t-2 border-t-primary border-x-border border-b-border"
             : "border-border"
         }
-        hover:bg-accent/20 transition-colors
+        hover:bg-accent/50 transition-colors
       `}
     >
       <div
@@ -89,15 +88,15 @@ export default function MemberCard({
       </Badge>
 
       <div className="mt-auto border-t border-border/40 pt-2 flex items-center justify-between">
-        <span className="case-file text-xs text-muted-foreground/60">
-          {isAuthor ? "Case Lead" : "Informant"}
+        <span className="case-file text-xs text-muted-foreground">
+          {isAuthor ? "Case Lead" : "Contributor"}
         </span>
         {canRemove && (
           <button
             disabled={!isActive || deleting}
             onClick={() => onRemove(member)}
             aria-label={`Remove ${member.full_name}`}
-            className="
+            className=" cursor-pointer
               case-file text-xs
               text-muted-foreground border border-border/50
               px-2 py-0.5
