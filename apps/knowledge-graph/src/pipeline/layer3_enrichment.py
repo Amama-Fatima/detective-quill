@@ -57,7 +57,7 @@ Respond with ONLY valid JSON. No explanation, no markdown.
 
 {{
   "entities": [
-    {{"name": "<exact name>", "role": "<detective|suspect|victim|witness|object|location|or any human relation e.g. wife, son, neighbor>"}}
+    {{"name": "<exact name>", "role": "<detective|suspect|victim|witness|object|location|or any human relation e.g. wife, son, neighbor>,"description": "<freeform text not more than one sentence>"}}
   ],
   "relationships": [
     {{"source": "<name>", "target": "<name>", "relation_type": "<snake_case_verb>", "when": "<time or null>"}}
@@ -68,7 +68,10 @@ Rules:
 - Extract 1–3 relationships only between entities that clearly interact
 - Priority: crime/violence (stab, murder, fight, hit) > interpersonal (comfort, betray, threaten, help, marry) > situational (talk_to, sit_with)
 - If no interaction exists between entities, omit the relationship entirely
-- "when": exact time string only if explicitly stated for a crime-related interaction, else null"""
+- "when": exact time string only if explicitly stated for a crime-related interaction, else null
+- "description": a single sentence that describes that entity
+"""
+
 
         logger.info(f"Batch LLM call: {len(entities)} entities")
         response = self.llm_loader.generate(prompt, max_tokens=512)
@@ -107,13 +110,16 @@ Rules:
                 continue
 
             role = item.get('role', 'other')
+            description = item.get('description', '').strip() or None
             entity_map[canonical].role = role
+            entity_map[canonical].description = description
 
             logger.debug(f"  Enriched '{canonical}' — role: {role}")
 
         enriched = list(entity_map.values())
 
-        # ── Extract relationships ─────────────────────────────────────────────
+
+
         relationships: List[Relationship] = []
 
         for item in data.get('relationships', []):

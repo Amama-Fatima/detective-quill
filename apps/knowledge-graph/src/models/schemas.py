@@ -7,6 +7,7 @@ class Entity(BaseModel):
     type: str
     mentions: List[str] = Field(default_factory=list)
     role: Optional[str] = None
+    description: Optional[str] = None
 
 
 class Relationship(BaseModel):

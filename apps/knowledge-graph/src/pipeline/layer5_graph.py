@@ -99,7 +99,8 @@ def _create_entity(tx, entity: Entity, scene_id: str):
         f"""
         MERGE (e:{label} {{name: $name}})
         SET e.type        = $type,
-            e.role        = $role
+            e.role        = $role,
+            e.description = $description
         WITH e
         MATCH (s:Scene {{scene_id: $scene_id}})
         MERGE (e)-[r:APPEARS_IN]->(s)
@@ -108,6 +109,7 @@ def _create_entity(tx, entity: Entity, scene_id: str):
         name=entity.name,
         type=entity.type,
         role=entity.role,
+        description=entity.description,
         mentions=entity.mentions,
         scene_id=scene_id,
     )
