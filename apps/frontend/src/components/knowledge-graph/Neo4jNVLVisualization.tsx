@@ -5,7 +5,8 @@ import { InteractiveNvlWrapper } from "@neo4j-nvl/react";
 import { NVL } from "@neo4j-nvl/base";
 import { useNeo4jGraphData } from "@/hooks/use-neo4j-graph-data";
 import { useGraphInteraction } from "@/hooks/use-graph-interaction";
-import { getSceneDescriptionPreview, LABEL_COLORS, THEME } from "@/lib/utils/graph-utils";
+import { getSceneDescriptionPreview, THEME } from "@/lib/utils/graph-utils";
+import { getNodeVisualConfig, getEntityType, NODE_TYPE_CONFIGS } from "@/lib/utils/node-type-config";
 import { GraphLegend } from "./graph-legend";
 import { GraphDetailsPanel } from "./graph-details-panel";
 import { Button } from "../ui/button";
@@ -56,36 +57,41 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
   const nodes = useMemo(
     () =>
       rawNodes.map((node) => {
-        const primaryLabel = node.labels[0] || "Entity";
-        const isSceneNode = primaryLabel === "Scene";
-        const color = LABEL_COLORS[primaryLabel] || THEME.muted;
         const isSelected = selectedNodeId === node.id;
+        const entityType = getEntityType(node.labels, node.properties);
+        const isSceneNode = entityType === "Scene";
+        const visual = getNodeVisualConfig(node.labels, node.properties, isSelected);
+        const displayName = NODE_TYPE_CONFIGS[entityType].displayName;
         const tooltipDescription = isSceneNode
           ? getSceneDescriptionPreview(node.properties)
-          : node.properties.description;
+          : (node.properties.description as string | undefined);
 
         return {
           id: node.id,
           label: node.properties.name || node.properties.scene_id || node.id,
-          color,
-          size: isSelected ? 36 : 28,
-          caption: node.properties.name || "",
+          caption: isSceneNode ? (node.properties.scene_id as string) || "" : "",
           properties: node.properties,
           labels: node.labels,
-          borderWidth: isSelected ? 3 : 1,
-          borderColor: isSelected ? THEME.foreground : undefined,
+          color: visual.color,
+          icon: visual.icon,
+          size: visual.size,
+          borderColor: visual.borderColor,
+          borderWidth: visual.borderWidth,
+          captionAlign: visual.captionAlign,
+          captionSize: visual.captionSize,
           tooltip: () => `
-            <div style="font-family: serif; padding: 8px; max-width: 250px;">
-              <div style="font-weight: bold; border-bottom: 1px solid ${THEME.border}; margin-bottom: 6px; padding-bottom: 4px;">
+            <div style="font-family: serif; padding: 8px; max-width: 260px;">
+              <div style="font-weight: bold; border-bottom: 1px solid ${THEME.border}; margin-bottom: 6px; padding-bottom: 4px; color: ${THEME.foreground};">
                 ${node.properties.name || node.properties.scene_id || "Unnamed"}
+              </div>
+              <div style="color: ${visual.color}; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.1em;">
+                ${displayName}
               </div>
               ${
                 isSceneNode
-                  ? `<div><strong>Description:</strong> ${tooltipDescription}</div>`
-                  : `<div><strong>Type:</strong> ${primaryLabel}</div>
-              ${node.properties.role ? `<div><strong>Role:</strong> ${node.properties.role}</div>` : ""}
-              ${node.properties.type ? `<div><strong>Entity Type:</strong> ${node.properties.type}</div>` : ""}
-              ${tooltipDescription ? `<div style="margin-top: 6px;"><strong>Description:</strong><br/>${tooltipDescription}</div>` : ""}`
+                  ? `<div style="color: ${THEME.muted}; font-size: 12px;"><strong>Description:</strong> ${tooltipDescription || "—"}</div>`
+                  : `${node.properties.role ? `<div style="font-size: 12px;"><strong>Role:</strong> ${node.properties.role}</div>` : ""}
+              ${tooltipDescription ? `<div style="margin-top: 6px; font-size: 12px; color: ${THEME.muted};"><strong>Description:</strong><br/>${tooltipDescription}</div>` : ""}`
               }
             </div>
           `,

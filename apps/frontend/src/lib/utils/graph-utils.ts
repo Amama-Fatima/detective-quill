@@ -14,10 +14,14 @@ export const THEME = {
 } as const;
 
 export const LABEL_COLORS: Record<string, string> = {
-	Character: THEME.chart1,
-	Location: THEME.chart3,
-	Organisation: THEME.chart2,
-	Scene: THEME.accent,
+	PERSON:  "#a06830",
+	ORG:     "#4a5a8a",
+	GPE:     "#3d6b4a",
+	LOC:     "#8a6a3a",
+	FAC:     "#6b4a8a",
+	PRODUCT: "#2d7a8a",
+	EVENT:   "#8a3a3a",
+	Scene:   THEME.accent,
 };
 
 export function getSceneDescriptionPreview(
