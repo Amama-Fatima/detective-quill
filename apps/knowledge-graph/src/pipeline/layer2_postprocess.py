@@ -36,7 +36,6 @@ class EntityPostProcessor:
             'FAC',        
             'PRODUCT',     
             'EVENT',       
-                 
         }
 
         self.skip_types = {

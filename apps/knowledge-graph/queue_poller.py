@@ -84,7 +84,7 @@ def poll_queue():
             channel.queue_declare(queue=settings.SCENE_ANALYSIS_QUEUE, durable=True)
             channel.queue_declare(queue=settings.SCENE_ANALYSIS_RESULTS_QUEUE, durable=True)
 
-            method_frame, properties, body = channel.basic_get(
+            method_frame, body = channel.basic_get(
                 queue=settings.SCENE_ANALYSIS_QUEUE,
                 auto_ack=False
             )

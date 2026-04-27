@@ -57,7 +57,7 @@ Respond with ONLY valid JSON. No explanation, no markdown.
 
 {{
   "entities": [
-    {{"name": "<exact name>", "role": "<detective|suspect|victim|witness|object|location|or any human relation e.g. wife, son, neighbor>,"description": "<freeform text not more than one sentence>"}}
+    {{"name": "<exact name>", "role": "<detective|suspect|victim|witness|item|location|character|policeman>,"description": "<freeform text not more than one sentence>"}}
   ],
   "relationships": [
     {{"source": "<name>", "target": "<name>", "relation_type": "<snake_case_verb>", "when": "<time or null>"}}
@@ -65,7 +65,7 @@ Respond with ONLY valid JSON. No explanation, no markdown.
 }}
 
 Rules:
-- Extract 1–3 relationships only between entities that clearly interact
+- Extract 1–3 relationships only between entities that clearly interact. Do NOT extract more than 3 relationships, even if more interactions exist.
 - Priority: crime/violence (stab, murder, fight, hit) > interpersonal (comfort, betray, threaten, help, marry) > situational (talk_to, sit_with)
 - If no interaction exists between entities, omit the relationship entirely
 - "when": exact time string only if explicitly stated for a crime-related interaction, else null

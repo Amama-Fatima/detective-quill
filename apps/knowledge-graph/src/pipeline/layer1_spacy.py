@@ -7,32 +7,24 @@ from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
-# Nouns that refer to a person even when no name is given (e.g. "her husband")
 PERSON_ROLE_NOUNS = {
     'husband', 'wife',
     'father', 'mother', 'brother', 'sister', 'son', 'daughter','officer','sergeant', 'constable', 'visitor', 'patient', 'doctor', 'nurse', 'guard',
     'partner', 'colleague', 'friend',
 }
 
-# Common high-signal object nouns that are especially useful in detective fiction.
 ITEM_NOUNS = {
     'knife', 'dagger', 'blade', 'gun', 'pistol', 'revolver', 'rifle', 'bullet', 'bullets', 'rope',
-    'letter', 'note', 'envelope', 'photograph', 'photo', 'picture', 'diary', 'journal', 'will', 'telegram',
-    'report', 'clue', 'evidence', 'newspaper', 'receipt', 'pass', 'ticket',
-    'ring', 'watch', 'key', 'keys', 'wallet', 'purse', 'handkerchief', 'glove', 'gloves',
-    'cigarette', 'cigarettes', 'lighter', 'locket', 'brooch', 'book', 'address book', 'notebook',
-    'box', 'package', 'parcel', 'bag', 'coat', 'shoes', 'boot', 'boots', 'umbrella', 'stick', 'cane',
+    'letter', 
+     'evidence', 'lanyard',
 }
 
 ITEM_PHRASES = {
-    'suicide note', 'handwritten letter', 'bloody knife', 'kitchen knife', 'calling card',
-    'love letter', 'sealed envelope', 'murder weapon', 'broken glass', 'fingerprint card', 'leg of lamb'
+    'suicide note', 'handwritten letter', 'bloody knife', 'kitchen knife','sealed envelope', 'murder weapon', 'fingerprint card', 'leg of a lamb'
 }
 
 LOCATION_NOUNS = {
-"room", "bedroom", "bathroom", "kitchen", "hall", "hallway",
-"living room", "basement", "attic", "office", "lab", "garage",
-"garden","street", "alley", "apartment", "house", "hotel"
+"room", "office", "lab"
 }
 
 
@@ -63,38 +55,6 @@ def _sentence_has_named_entity(chunk, labels: set) -> bool:
         if ent.label_ in labels and any(tok.pos_ == "PROPN" for tok in ent):
             return True
     return False
-
-
-def _extract_character_references(doc) -> List[RawEntity]:
-    found = []
-    seen_lemmas: set = set()
-
-    for chunk in doc.noun_chunks:
-        head = chunk.root
-        lemma = head.lemma_.lower()
-
-        if lemma not in PERSON_ROLE_NOUNS:
-            continue
-        if lemma in seen_lemmas:
-            continue
-
-        # If this role noun is coref-linked to a named person, keep only the name.
-        if _has_named_alias_in_coref_chain(head):
-            continue
-
-        # Fallback: if same sentence already has a named PERSON, avoid generic role noun.
-        if _sentence_has_named_entity(chunk, {"PERSON"}):
-            continue
-
-        seen_lemmas.add(lemma)
-        found.append(RawEntity(
-            text=head.text,
-            label="PERSON",
-            start=head.idx,
-            end=head.idx + len(head.text),
-        ))
-
-    return found
 
 def _extract_location_references(doc) -> List[RawEntity]:
     found = []
@@ -171,13 +131,8 @@ def _resolve_coreferences(doc) -> str:
         best_mention = chain[chain.most_specific_mention_index]
         primary_text = " ".join(doc[i].text for i in best_mention)
 
-
         primary_is_proper = any(doc[i].pos_ == "PROPN" for i in best_mention)
-        primary_is_role_noun = any(
-            doc[i].pos_ == "NOUN" and doc[i].lemma_.lower() in PERSON_ROLE_NOUNS
-            for i in best_mention
-        )
-        if not primary_is_proper and not primary_is_role_noun:
+        if not primary_is_proper:
             continue
 
         for mention in chain:
@@ -259,16 +214,6 @@ class SpacyEntityExtractor:
                 end=ent.end_char
             )
             raw_entities.append(raw_entity)
-
-        # Add unnamed characters that spaCy NER misses (e.g. "her husband")
-        unnamed = _extract_character_references(doc)
-        if unnamed:
-            # Avoid duplicating names already found by NER
-            ner_names = {e.text.lower() for e in raw_entities if e.label == 'PERSON'}
-            for u in unnamed:
-                if u.text.lower() not in ner_names:
-                    raw_entities.append(u)
-                    logger.debug(f"  Added unnamed character reference: '{u.text}'")
 
         # Add generic locations only when no named location is available
         loc_refs = _extract_location_references(doc)
