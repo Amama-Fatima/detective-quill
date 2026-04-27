@@ -262,7 +262,7 @@ export interface EmailSendingJobData {
 
 export type CreateBranchDto = Pick<
   Branch,
-  "name" | "is_default" | "parent_commit_id" | "parent_branch_id"
+  "name"  | "parent_commit_id" | "parent_branch_id"
 >;
 
 export type UpdateBranchDto = Partial<
