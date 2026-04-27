@@ -4,25 +4,11 @@ import Link from "next/link";
 import { Project } from "@detective-quill/shared-types";
 import { formatDate } from "date-fns";
 import { ClockIcon } from "../icons/clock-icon";
-import { getStatusStyles } from "@/lib/utils/project-utils";
+import StatusChip from "../workspace-overview/status-chip";
 
 interface ProjectRowProps {
   project: Project;
   index: number;
-}
-
-
-function getTabClass(status: string) {
-  switch (status) {
-    case "active":
-      return "bg-primary";
-    case "completed":
-      return "bg-chart-4";
-    case "archived":
-      return "bg-muted-foreground/50";
-    default:
-      return "bg-border";
-  }
 }
 
 export default function ProjectRow({ project, index }: ProjectRowProps) {
@@ -32,16 +18,8 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
 
   const caseNumber = String(index).padStart(2, "0");
   const chapterCount = (project as any).chapter_count;
-  const status = getStatusStyles(project.status);
-
   return (
     <div className="group relative grid grid-cols-[72px_1fr_152px] items-stretch border-b border-border last:border-b-0 hover:bg-accent/20 transition-colors duration-100 hover:border-l hover:border-l-primary">
-      {/* Coloured left tab */}
-      {/* <div
-        className={`absolute left-0 top-0 bottom-0 w-[3px] transition-all duration-150 group-hover:w-[4px] ${getTabClass(project.status)}`}
-      /> */}
-
-      {/* File number — demoted, supporting role */}
       <div className="flex flex-col justify-center pl-5 pr-3 py-4 border-r border-border/40">
         <span className="case-file text-[9px] tracking-[0.14em] text-muted-foreground/60 leading-none mb-1">
           Project
@@ -78,22 +56,13 @@ export default function ProjectRow({ project, index }: ProjectRowProps) {
       </div>
 
       <div className="flex flex-col items-start justify-center gap-2.5 px-4 py-4">
-        <div
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.25 ${status.bg}`}
-        >
-          <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${status.dot}`} />
-          <span
-            className={`case-file text-[10px] tracking-[0.12em] uppercase font-semibold ${status.text}`}
-          >
-            {project.status}
-          </span>
-        </div>
+        <StatusChip status={project.status} />
 
         <Link
           href={`/workspace/${project.id}`}
           className="
             case-file text-[10px] tracking-[0.08em]
-            border border-border px-3 py-[5px]
+            border border-border px-3 py-1.25
             text-foreground
             hover:border-primary hover:text-primary hover:bg-primary/5
             transition-colors inline-flex items-center gap-1.5

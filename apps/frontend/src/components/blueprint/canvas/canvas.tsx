@@ -73,7 +73,7 @@ export default function Canvas({
 
   return (
     // h-full fills the 100dvh parent; flex-col so top bar + flow share the space
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col pl-2">
       <div className="flex shrink-0 justify-between items-center px-8 py-2 border-b border-border bg-secondary">
         <EditableBlueprintName
           initialName={blueprintName}

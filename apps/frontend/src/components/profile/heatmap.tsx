@@ -19,17 +19,10 @@ import {
   monthNames,
   getCellFill,
   weekdayLabels,
+  formatTooltipDate,
 } from "@/lib/utils/heatmap-utils";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Flame, Loader2, Sparkles } from "lucide-react";
-
-function formatTooltipDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 const Heatmap = () => {
   const { getMonthlyContributionsMutation } = useContributions();
@@ -144,41 +137,19 @@ const Heatmap = () => {
 
   return (
     <div className="w-full rounded-2xl border border-border/60 bg-card overflow-hidden shadow-xl">
-      {/* ── TOP BAND ── */}
-      <div className="flex items-center justify-between gap-4 border-b border-border/50 px-6 py-4">
+      <div className="flex items-center justify-between gap-4 border-b border-border px-6 py-4 bg-primary">
         <div className="flex items-center gap-3">
           <Sparkles className="h-5 w-5 text-yellow-400 fill-current" />
-          <span className="mystery-title text-sm font-semibold tracking-widest uppercase text-foreground">
+          <span className="mystery-title text-[16px] font-semibold tracking-widest uppercase text-background">
             Productivity Heatmap
           </span>
-          <span className="rounded-full border border-border/60 bg-chart-5/30 px-2.5 py-0.5 text-[0.8rem] font-medium tracking-wider text-foreground uppercase">
+          <span className="rounded-full border border-border/10 bg-card px-2.5 py-0.5 text-[0.8rem] font-medium tracking-wider text-foreground uppercase">
             {monthNames[selectedMonth - 1]} {year}
           </span>
         </div>
-
-        <Select
-          value={String(selectedMonth)}
-          onValueChange={(v) => setSelectedMonth(Number(v))}
-        >
-          <SelectTrigger className="h-8 w-32 rounded-lg text-xs">
-            <SelectValue placeholder="Month" />
-          </SelectTrigger>
-          <SelectContent>
-            {monthOptions.map((m) => (
-              <SelectItem
-                key={m.value}
-                value={String(m.value)}
-                className="text-xs"
-              >
-                {m.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="flex flex-col lg:flex-row">
-        {/* ── LEFT PANEL ── */}
         <div className="flex flex-col gap-5 border-b border-border/40 bg-sidebar/60 p-6 lg:w-60 lg:shrink-0 lg:border-b-0 lg:border-r">
           <div className="flex flex-col items-center gap-2">
             <div className="h-36 w-36">
@@ -189,7 +160,7 @@ const Heatmap = () => {
                 style={{ width: "100%", height: "100%" }}
               />
             </div>
-            <p className="text-center text-[0.62rem] font-semibold tracking-widest text-muted-foreground uppercase font-playfair-display">
+            <p className="text-center text-[0.8rem] font-semibold tracking-widest text-foreground uppercase font-playfair-display">
               Keep writing, keep growing
             </p>
           </div>
@@ -227,7 +198,7 @@ const Heatmap = () => {
             ].map(({ label, value, icon }) => (
               <div
                 key={label}
-                className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 px-3 py-2.5 transition-colors hover:bg-background/80"
+                className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2.5 transition-colors hover:bg-background/80"
               >
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   {icon}
@@ -242,6 +213,27 @@ const Heatmap = () => {
         </div>
 
         <div className="flex-1 p-6">
+          <div className="mb-5">
+            <Select
+              value={String(selectedMonth)}
+              onValueChange={(v) => setSelectedMonth(Number(v))}
+            >
+              <SelectTrigger className="h-8 w-32 rounded-lg text-xs bg-card">
+                <SelectValue placeholder="Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOptions.map((m) => (
+                  <SelectItem
+                    key={m.value}
+                    value={String(m.value)}
+                    className="text-xs"
+                  >
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           {isPending ? (
             <div className="flex h-full min-h-52 flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -250,7 +242,7 @@ const Heatmap = () => {
               </span>
             </div>
           ) : (
-            <div className="flex h-full flex-col gap-4">
+            <div className="flex h-[85%] flex-col gap-4">
               {/* Weekday headers */}
               <div className="grid grid-cols-7 gap-1.5">
                 {weekdayLabels.map((label) => (
@@ -263,7 +255,6 @@ const Heatmap = () => {
                 ))}
               </div>
 
-              {/* Day cells — show day number inside */}
               <div className="flex-1 space-y-1.5">
                 {grid.map((row, rowIdx) => (
                   <div key={rowIdx} className="grid grid-cols-7 gap-1.5">
@@ -306,7 +297,6 @@ const Heatmap = () => {
                 ))}
               </div>
 
-              {/* Legend */}
               <div className="flex items-center justify-end gap-2 pt-1 text-[0.65rem] text-muted-foreground">
                 <span>Less</span>
                 {activityRateFillClasses.map((cls) => (

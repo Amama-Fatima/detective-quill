@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/constants/project-constants";
-import {
-  ChevronLeftIcon,
-  FolderOpenIcon,
-} from "lucide-react";
+import { ChevronLeftIcon, FolderOpenIcon } from "lucide-react";
 import Image from "next/image";
 
 interface WorkspaceSidebarProps {
@@ -42,6 +39,13 @@ export default function WorkspaceSidebar({
         ${collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}
       `}
     >
+      {!collapsed && (
+        <div>
+          <div className="pointer-events-none absolute bottom-25 z-[-1] -left-25 h-50 w-50 rounded-full border border-primary-foreground/70 opacity-70" />
+          <div className="pointer-events-none absolute bottom-35 z-[-1] -left-17 h-30 w-30 rounded-full border border-primary-foreground/70 opacity-70" />
+        </div>
+      )}
+
       <div
         className={`relative flex items-center px-6 py-7 border-b border-primary/10 min-h-20 bg-primary`}
       >
@@ -71,24 +75,22 @@ export default function WorkspaceSidebar({
           onClick={() => onCollapsedChange(!collapsed)}
           className="
             absolute -right-3 top-1/2 -translate-y-1/2
-            h-6 w-6 flex items-center justify-center
-            bg-primary border border-primary-foreground/20
+            h-8 w-8 flex items-center justify-center
+            bg-primary border border-primary-foreground/60
             text-primary-foreground/50 hover:text-primary-foreground
             transition-colors duration-200
-            shadow-md
+            shadow-md cursor-pointer rounded-full
           "
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <ChevronLeftIcon
-            className={`h-3.5 w-3.5 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
+            className={`h-5 w-5 cursor-pointer transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
           />
         </button>
       </div>
 
-      {/* ── Nav links ── */}
-      <nav className="flex-1 px-4 py-6 flex flex-col gap-0.5 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-1 px-4 py-6 flex flex-col gap-8 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
-          const Icon = item.icon;
           const isActive =
             item.id === "overview"
               ? pathname === overviewHref
@@ -106,8 +108,8 @@ export default function WorkspaceSidebar({
                 transition-colors duration-150
                 ${
                   isActive
-                    ? "bg-primary-foreground/10 text-primary-foreground border-primary-foreground"
-                    : "text-primary-foreground/50 hover:text-primary-foreground/90 hover:bg-primary-foreground/6 border-transparent"
+                    ? "bg-primary-foreground/10 text-background border-primary-foreground"
+                    : "text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/6 border-transparent"
                 }
               `}
             >
@@ -125,10 +127,10 @@ export default function WorkspaceSidebar({
 
               {!collapsed && (
                 <span className="flex flex-col gap-1.5 overflow-hidden">
-                  <span className="font-serif text-[14px] font-normal leading-none whitespace-nowrap tracking-wide">
+                  <span className="font-serif text-[15px] font-normal leading-none whitespace-nowrap tracking-wide">
                     {item.label}
                   </span>
-                  <span className="font-mono text-[10px] leading-none text-primary-foreground/35 whitespace-nowrap tracking-[0.06em]">
+                  <span className="font-mono text-[12px] leading-none text-primary-foreground/85 whitespace-nowrap tracking-[0.06em]">
                     {item.description}
                   </span>
                 </span>
@@ -162,7 +164,7 @@ export default function WorkspaceSidebar({
         >
           <FolderOpenIcon className="h-4.25 w-4.25 shrink-0" />
           {!collapsed && (
-            <span className="font-mono text-[10px] tracking-[0.12em] uppercase whitespace-nowrap">
+            <span className="font-mono text-background text-[16px] tracking-[0.12em] uppercase whitespace-nowrap">
               All Projects
             </span>
           )}

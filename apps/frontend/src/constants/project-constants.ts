@@ -1,8 +1,4 @@
 import { LayoutDashboardIcon } from "lucide-react";
-import { BlueprintIcon } from "@/components/icons/blueprint-icon";
-import { CaseFileIcon } from "@/components/icons/case-file-icon";
-import { GraphIcon } from "@/components/icons/graph-icon";
-import { VersionControlIcon } from "@/components/icons/version-control-icon";
 
 export const NAV_ITEMS = [
   {
@@ -35,7 +31,7 @@ export const NAV_ITEMS = [
     href: `/workspace/123/knowledge-graph`,
     icon: null,
     svgSrc: "/knowledge-graph.svg",
-    description: "Visual story analysis",
+    description: "Visual analysis",
   },
   {
     id: "version-control",
@@ -43,7 +39,7 @@ export const NAV_ITEMS = [
     href: `/workspace/123/version-control`,
     icon: null,
     svgSrc: "/version-control.svg",
-    description: "Commit history & branches",
+    description: "History & branches",
   },
 ];
 

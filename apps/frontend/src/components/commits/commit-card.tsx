@@ -5,6 +5,7 @@ import { formatDistanceToNow, formatDate } from "date-fns";
 import Link from "next/link";
 import { GitCommit, ArrowRight, GitBranch } from "lucide-react";
 import { CornerOrnamentIcon } from "../icons/corner-ornament-icon";
+import { ClockIcon } from "../icons/clock-icon";
 
 interface CommitCardProps {
   commit: Commit;
@@ -33,11 +34,11 @@ export default function CommitCard({
     <div
       className={`
         relative border bg-card overflow-hidden
-        transition-all duration-200
+        transition-all duration-200  hover:border-primary/60 hover:bg-accent/60
         ${
           isInherited
             ? "border-border/40 opacity-60 cursor-not-allowed"
-            : "border-border hover:border-primary/60 hover:bg-accent/5 cursor-pointer group"
+            : "border-border cursor-pointer group"
         }
       `}
       aria-disabled={isInherited}
@@ -49,20 +50,21 @@ export default function CommitCard({
         <CornerOrnamentIcon className="h-8 w-8 -translate-x-0.5 translate-y-0.5 rotate-180" />
       </div>
 
-      <div className="flex items-center justify-between px-5 py-2 border-b border-border/50 bg-muted/30">
+      <div className="flex items-center justify-between px-5 py-2 border-b border-border/50 bg-muted">
         <div className="flex items-center gap-2">
-          <GitCommit className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
-          <span className="font-mono text-[11px] tracking-[0.14em] text-muted-foreground/70 uppercase">
+          <GitCommit className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span className="font-mono text-[12px] tracking-[0.14em] text-foreground uppercase">
             {shortId}
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <ClockIcon />
           {formattedTime && (
-            <span className="font-mono text-[10px] tracking-widest text-muted-foreground/45 uppercase hidden sm:block">
+            <span className="font-mono text-[12px] tracking-widest text-foreground uppercase hidden sm:block">
               {formattedTime}
             </span>
           )}
-          <span className="case-file text-[10px] tracking-widest text-muted-foreground/55">
+          <span className="case-file text-[12px] tracking-widest text-foreground">
             {formattedDate}
           </span>
         </div>

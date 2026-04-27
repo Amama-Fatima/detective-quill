@@ -30,8 +30,12 @@ export default async function ProfilePage() {
     .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary to-border">
+    <div className="min-h-screen">
       <section className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 p-3 lg:grid-cols-[420px_1fr]">
+        <div className="pointer-events-none absolute top-[35%] -right-40 w-25 h-25 rounded-full bg-accent opacity-80 border border-border/60 z-1" />
+        <div className="pointer-events-none absolute top-[20%] -left-40 w-32.5 h-32.5 rounded-full bg-accent opacity-80 border border-border/60 z-1" />
+        <div className="pointer-events-none absolute -bottom-7.5 left-[105%] w-22.5 h-22.5 rounded-full bg-accent opacity-80 border border-border/60 z-1" />
+
         <div className="lg:sticky lg:top-20 lg:self-start">
           <UserProfile />
         </div>

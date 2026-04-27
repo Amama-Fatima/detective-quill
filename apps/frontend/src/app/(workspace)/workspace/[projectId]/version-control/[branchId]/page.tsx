@@ -3,7 +3,7 @@ import { getBranchCommits } from "@/lib/supabase-calls/commits";
 import { getBranchById } from "@/lib/supabase-calls/branches";
 import { notFound } from "next/navigation";
 import type { Commit } from "@detective-quill/shared-types";
-import BranchCommitsHeader from "@/components/branches/branch-commits-header";
+import CommitsHeader from "@/components/commits/commits-header";
 import CommitsStatsBar from "@/components/commits/commits-stats-bar";
 import CommitsPaginatedList from "@/components/commits/commits-paginated-list";
 import NoCommits from "@/components/commits/no-commits";
@@ -32,10 +32,12 @@ export default async function BranchCommitsPage({
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.025] bg-[radial-gradient(oklch(24%_0.022_245)_1px,transparent_1px)] bg-[size:28px_28px]" />
+      <div className="pointer-events-none absolute top-[25%] -right-7.5 w-25 h-25 rounded-full bg-accent opacity-50 border border-border/60 z-1" />
+      <div className="pointer-events-none absolute top-[20%] -left-5 w-32.5 h-32.5 rounded-full bg-accent opacity-50 border border-border/60 z-1" />
+      <div className="pointer-events-none absolute -bottom-7.5 right-[25%] w-22.5 h-22.5 rounded-full bg-accent opacity-50 border border-border/60 z-1" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-10 py-10 space-y-0">
-        <BranchCommitsHeader projectId={projectId} branch={branch} />
+        <CommitsHeader projectId={projectId} branch={branch} />
 
         {!commitsError && commits.length > 0 && (
           <CommitsStatsBar branch={branch} commitCount={commits.length} />

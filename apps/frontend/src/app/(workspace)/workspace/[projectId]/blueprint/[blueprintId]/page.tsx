@@ -56,7 +56,7 @@ export default async function CreateBlueprintPage({
   const isOwner = author_id === userId;
 
   return (
-    <div className="h-dvh w-full overflow-hidden">
+    <div className="h-dvh w-full overflow-hidden p-3">
       <Canvas
         blueprintId={blueprintId}
         type={type}

@@ -34,16 +34,13 @@ export default function BranchNode({
 
   return (
     <div className="flex gap-0">
-      {/* ── Git track column ── */}
       <div className="flex flex-col items-center w-10 shrink-0">
-        {/* Line above node */}
         <div
           className={`w-px flex-none ${isRoot && index === 0 ? "h-3" : "h-6"} ${
             isActive ? "bg-primary" : "bg-border/60"
           }`}
         />
 
-        {/* Node dot */}
         <div
           className={`
             relative z-10 flex items-center justify-center
@@ -66,7 +63,6 @@ export default function BranchNode({
           />
         </div>
 
-        {/* Line below node — continues if not last or has children */}
         <div
           className={`w-px flex-1 min-h-6 transition-colors duration-500 ${
             isLast && !hasChildren ? "opacity-0" : ""
@@ -74,16 +70,14 @@ export default function BranchNode({
         />
       </div>
 
-      {/* ── Branch card ── */}
       <div className="pb-4 flex-1 pt-0.5">
         <div
           className={`
-            relative border bg-card transition-all duration-300
-            hover:bg-accent/10
-            ${isActive ? "border-primary/50 border-l-2" : "border-border"}
+            relative border bg-card transition-all duration-300 rounded-sm
+            hover:bg-accent/60
+            ${isActive ? "border-primary/90 border-l-3" : "border-border"}
           `}
         >
-          {/* Corner ornaments */}
           <div className="pointer-events-none absolute left-0 top-1 text-border/50">
             <CornerOrnamentIcon className="h-8 w-8 translate-x-0.5 -translate-y-0.5" />
           </div>
@@ -93,8 +87,8 @@ export default function BranchNode({
 
           <div className="px-5 py-4 flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <p className="case-file text-[10px] text-muted-foreground/60 mb-1 tracking-[0.1em]">
-                {isRoot ? "Root" : `Depth ${depth}`} · Branch #{String(index + 1).padStart(3, "0")}
+              <p className="case-file text-[13px] text-foreground/60 mb-1 tracking-[0.1em]">
+                {isRoot ? "Root" : `Depth ${depth}`} · Branch #{String(index + 1).padStart(2, "0")}
               </p>
 
               <Link
@@ -109,12 +103,12 @@ export default function BranchNode({
 
             <div className="flex items-center gap-2 shrink-0">
               {isDefault && (
-                <span className="case-file text-[10px] tracking-[0.1em] uppercase px-2.5 py-1 border border-border/60 text-muted-foreground bg-muted/40">
+                <span className="case-file text-[13px] tracking-[0.1em] uppercase px-2.5 py-1 border border-border/60 text-muted-foreground bg-muted/40">
                   Default
                 </span>
               )}
               {isActive ? (
-                <span className="case-file text-[10px] tracking-[0.1em] uppercase px-2.5 py-1 bg-primary text-primary-foreground">
+                <span className="case-file text-[13x] tracking-[0.1em] uppercase px-2.5 py-1 bg-primary text-primary-foreground">
                   Active
                 </span>
               ) : (

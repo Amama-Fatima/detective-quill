@@ -11,8 +11,8 @@ export default function NoBlueprints() {
             No Blueprints Yet
           </h3>
           <p className="noir-text text-[14px] text-muted-foreground max-w-sm">
-            Create a blueprint to start organising your story structures,
-            character sheets, and scene templates.
+            Create a blueprint to start organising your story elements,
+            characters, items and locations.
           </p>
         </div>
       </div>

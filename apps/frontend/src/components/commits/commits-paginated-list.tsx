@@ -32,11 +32,11 @@ export default function CommitsPaginatedList({
   return (
     <div>
       <div className="flex items-center gap-4 mb-8">
-        <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-muted-foreground/50 shrink-0">
+        <span className="font-mono text-[12px] tracking-[0.22em] uppercase text-foreground shrink-0">
           Commit Log
         </span>
         <div className="flex-1 border-t border-border/50" />
-        <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-muted-foreground/35 shrink-0">
+        <span className="font-mono text-[12px] tracking-[0.15em] uppercase text-foreground shrink-0">
           {total} {total === 1 ? "entry" : "entries"} on record
         </span>
       </div>
@@ -56,8 +56,8 @@ export default function CommitsPaginatedList({
                 </div>
 
                 <div className="flex-1 pb-4 pl-5">
-                  <p className="case-file text-[10px] text-muted-foreground/50 tracking-widest mb-1">
-                    Entry #{String(globalIndex + 1).padStart(3, "0")}
+                  <p className="case-file text-[12px] text-muted-foreground tracking-widest mb-1">
+                    Entry #{String(globalIndex + 1).padStart(2, "0")}
                   </p>
                   <CommitCard
                     commit={commit}

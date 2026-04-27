@@ -26,10 +26,10 @@ export default function VersionControlStatsBar({
               i < stats.length - 1 ? "border-r border-border" : ""
             }`}
           >
-            <span className="font-mono text-[8px] tracking-[0.22em] uppercase text-muted-foreground/45">
+            <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-foreground">
               {label}
             </span>
-            <span className="font-playfair-display text-[15px] font-bold text-primary leading-none">
+            <span className="font-playfair-display text-[17px] font-bold text-primary leading-none">
               {value}
             </span>
           </div>

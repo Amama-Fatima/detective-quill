@@ -5,23 +5,20 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import type { Branch } from "@detective-quill/shared-types";
 import UpdateBranchForm from "@/components/branches/update-branch-form";
 
-interface BranchCommitsHeaderProps {
+interface CommitsHeaderProps {
   projectId: string;
   branch: Branch;
 }
 
-export default function BranchCommitsHeader({
+export default function CommitsHeader({
   projectId,
   branch,
-}: BranchCommitsHeaderProps) {
+}: CommitsHeaderProps) {
   const [branchName, setBranchName] = useState(branch.name);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b-2 border-primary">
       <div className="flex-1 min-w-0">
-        <p className="font-mono text-[9px] tracking-[0.24em] uppercase text-muted-foreground/50 mb-3">
-          Case Workspace — Branch History
-        </p>
 
         {/* Branch name as the italic title, same scale as overview/blueprints */}
         <h1 className="font-playfair-display italic text-[clamp(32px,5vw,56px)] font-bold leading-[1.02] tracking-[-0.025em] text-primary mb-3">
@@ -29,20 +26,20 @@ export default function BranchCommitsHeader({
         </h1>
 
         {/* Status badges */}
-        <div className="flex flex-wrap items-center gap-2 mb-5">
+        <div className="flex flex-wrap items-center gap-2 my-6">
           {branch.is_default && (
-            <span className="case-file text-[10px] tracking-[0.12em] uppercase px-2.5 py-1 border border-border/60 text-muted-foreground bg-muted/40">
+            <span className="case-file text-[13px] tracking-[0.12em] uppercase px-2.5 py-1 border border-border/60 text-muted-foreground bg-muted/40">
               Default
             </span>
           )}
           {branch.is_active && (
-            <span className="case-file text-[10px] tracking-[0.12em] uppercase px-2.5 py-1 bg-primary text-primary-foreground">
+            <span className="case-file text-[13px] tracking-[0.12em] uppercase px-2.5 py-1 bg-primary text-primary-foreground">
               Active
             </span>
           )}
         </div>
 
-        <p className="noir-text text-[15px] leading-[1.8] text-foreground/65 max-w-xl mb-6">
+        <p className="noir-text text-[17px] leading-[1.8] text-foreground/85 max-w-xl mb-6">
           A complete record of all commits filed under this branch. Each entry
           represents a saved state of the manuscript.
         </p>

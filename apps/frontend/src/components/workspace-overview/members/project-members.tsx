@@ -38,7 +38,7 @@ export default function ProjectMembers({
   return (
     <div className="pt-8 space-y-4">
       <div className="mb-5 flex items-baseline justify-between border-b border-border/60 pb-3">
-        <h4 className="font-playfair-display italic text-xl text-foreground">
+        <h4 className="font-playfair-display text-xl text-foreground">
           Project Members
         </h4>
       </div>

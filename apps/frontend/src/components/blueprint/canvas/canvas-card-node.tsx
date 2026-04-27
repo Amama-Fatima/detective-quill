@@ -1,12 +1,12 @@
 // todo: use useCallbacks where needed
 
 import { useState, useRef, useEffect } from "react";
-import { NotepadTextDashed, Edit3, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeleteIcon } from "@/components/icons/delete-icon";
 import { EditIcon } from "@/components/icons/edit-icon";
 import { BlueprintTitleIcon } from "@/components/icons/blueprint-title-icon";
+import Image from "next/image";
 
 interface CanvasCardNodeProps {
   id?: string; // DB id or no id for new cards
@@ -41,7 +41,7 @@ export default function CanvasCardNode({
   return (
     <div
       className={`
-      group relative bg-drag-card rounded-xl shadow-sm border-2 w-84 min-h-72
+      group relative bg-accent rounded-xl shadow-sm border-2 w-84 min-h-72
       transition-all duration-200 hover:shadow-lg
       ${isFocused ? "shadow-lg ring-2" : "border-muted-foreground"}
       cursor-grab active:cursor-grabbing
