@@ -157,6 +157,14 @@ export class BadgesNStatsService {
     }
 
     const supabase = this.supabaseService.client;
+    const xpDelta =
+      wordsDelta > 500
+        ? 20
+        : wordsDelta > 100
+          ? 10
+          : wordsDelta > 15 && wordsDelta < 50
+            ? 5
+            : 0;
 
     const { data: currentStats, error: statsFetchError } = await supabase
       .from("game_stats")
@@ -180,6 +188,10 @@ export class BadgesNStatsService {
       throw new Error(
         `Failed to update words written: ${statsUpdateError.message}`,
       );
+    }
+
+    if (xpDelta > 0) {
+      await this.updateTotalXp(userId, xpDelta);
     }
   }
 

@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useParams, useRouter } from "next/navigation";
 import QueryResultLoading from "./query-result-loading";
 import { type QueryEngineResponse } from "@/lib/backend-calls/query";
 
@@ -13,6 +16,10 @@ export const QueryResults = ({
   response,
   isLoading = false,
 }: QueryResultsProps) => {
+  const router = useRouter();
+  const params = useParams();
+  const projectId = params.projectId as string | undefined;
+
   if (isLoading) {
     return <QueryResultLoading />;
   }
@@ -54,9 +61,20 @@ export const QueryResults = ({
           </p>
           <div className="flex flex-col gap-3">
             {supportingEvidence.map((evidence, index) => (
-              <div
+              <button
+                type="button"
                 key={`${evidence.job_id}-${evidence.fs_node_id ?? index}`}
-                className="rounded-lg border border-border/60 bg-card p-3"
+                className="rounded-lg border border-border/60 bg-card p-3 text-left transition-colors hover:bg-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={!projectId || !evidence.fs_node_id}
+                onClick={() => {
+                  if (!projectId || !evidence.fs_node_id) {
+                    return;
+                  }
+
+                  router.push(
+                    `/workspace/${projectId}/text-editor/${evidence.fs_node_id}`,
+                  );
+                }}
               >
                 <p className="mb-1 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
                   File Name
@@ -64,7 +82,7 @@ export const QueryResults = ({
                 <p className="break-all text-lg text-foreground">
                   {evidence.fs_node_name ?? "Not available"}
                 </p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
