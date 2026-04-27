@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/constants/project-constants";
 import {
   ChevronLeftIcon,
-  LayoutDashboardIcon,
   FolderOpenIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -129,7 +128,6 @@ export default function WorkspaceSidebar({
                   <span className="font-serif text-[14px] font-normal leading-none whitespace-nowrap tracking-wide">
                     {item.label}
                   </span>
-                  {/* Description — Geist Mono, very faint */}
                   <span className="font-mono text-[10px] leading-none text-primary-foreground/35 whitespace-nowrap tracking-[0.06em]">
                     {item.description}
                   </span>

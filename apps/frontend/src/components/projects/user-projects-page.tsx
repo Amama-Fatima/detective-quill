@@ -52,11 +52,11 @@ export default function UserProjectsPage({
         className="
           pointer-events-none
           absolute bottom-0 left-0
-          w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] lg:w-[340px] lg:h-[340px]
+          w-55 h-55 sm:w-70 sm:h-70 lg:w-85 lg:h-85
           rounded-full
           bg-secondary-foreground
           opacity-50
-          translate-x-[-80px] -translate-y-[70px] lg:translate-x-[-80px] lg:-translate-y-[-200px]
+          -translate-x-20 -translate-y-17.5 lg:-translate-x-20 lg:-translate-y-[-200px]
         "
       />
       <BackgroundAccents />

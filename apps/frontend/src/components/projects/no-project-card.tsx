@@ -14,7 +14,6 @@ const NoProjectCard = ({
     <div className="relative bg-card flex flex-col items-center justify-center py-20 px-8 rounded-xl border overflow-hidden">
      
 
-      {/* Corner ornaments */}
       <div className="pointer-events-none absolute left-0 top-2 text-border/70">
         <CornerOrnamentIcon className="h-14 w-14 translate-x-0.5 -translate-y-0.5" />
       </div>
@@ -33,7 +32,6 @@ const NoProjectCard = ({
           </div>
         </div>
 
-        {/* Text */}
         <div>
           <div className="text-md noir-text tracking-[0.16em] uppercase text-muted-foreground/60 mb-2">
             — No records found —
