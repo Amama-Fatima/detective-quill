@@ -32,7 +32,7 @@ export default async function Header() {
           {loggedIn && (
             <Link
               href="/profile"
-              className="noir-text text-[1.1rem] text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
+              className="noir-text text-[1.1rem] text-foreground transition-colors duration-200 hover:text-secondary-foreground"
             >
               Profile
             </Link>
@@ -41,7 +41,7 @@ export default async function Header() {
           {loggedIn && (
             <Link
               href="/projects"
-              className="noir-text text-[1.1rem] text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
+              className="noir-text text-[1.1rem] text-foreground transition-colors duration-200 hover:text-secondary-foreground"
             >
               Projects
             </Link>
@@ -66,14 +66,14 @@ function MobileNav() {
       <nav className="flex items-center space-x-4">
         <Link
           href="/profile"
-          className="text-sm text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
+          className="text-sm text-foreground transition-colors duration-200 hover:text-secondary-foreground"
         >
           Profile
         </Link>
 
         <Link
           href="/projects"
-          className="text-sm text-muted-foreground transition-colors duration-200 hover:text-secondary-foreground"
+          className="text-sm text-foreground transition-colors duration-200 hover:text-secondary-foreground"
         >
           Projects
         </Link>

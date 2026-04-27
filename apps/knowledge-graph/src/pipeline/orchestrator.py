@@ -1,7 +1,5 @@
-from typing import List
-import spacy
 from src.config import settings
-from src.models.schemas import Entity, Relationship, PipelineResult, PipelineMetadata
+from src.models.schemas import PipelineResult, PipelineMetadata
 from src.pipeline.layer1_spacy import extract_entities_layer1
 from src.pipeline.layer2_postprocess import postprocess_entities_layer2
 from src.pipeline.layer3_enrichment import enrich_and_extract_batch
@@ -16,6 +14,8 @@ class NarrativeAnalysisPipeline:
         if nlp is not None:
             self.nlp = nlp
         else:
+            import spacy
+
             self.nlp = spacy.load(settings.SPACY_MODEL)
 
     def process_scene(self, scene_text: str, verbose: bool = True) -> PipelineResult:
@@ -32,7 +32,7 @@ class NarrativeAnalysisPipeline:
         num_raw_entities = len(raw_entities)
 
         if resolved_text != scene_text and verbose:
-            logger.info(f"✓ Coreference resolution applied")
+            logger.info(f"Coreference resolution applied")
             logger.info(f"  Original: {scene_text}")
             logger.info(f"  Resolved: {resolved_text}")
 

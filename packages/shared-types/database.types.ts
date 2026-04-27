@@ -757,6 +757,7 @@ export type Database = {
           mentions: string[] | null
           name: string
           role: string | null
+          role: string | null;
           type: string
         }
         Insert: {
@@ -769,6 +770,7 @@ export type Database = {
           mentions?: string[] | null
           name: string
           role?: string | null
+          role?: string | null;
           type: string
         }
         Update: {
@@ -781,6 +783,7 @@ export type Database = {
           mentions?: string[] | null
           name?: string
           role?: string | null
+          role?: string | null;
           type?: string
         }
         Relationships: [

@@ -12,7 +12,7 @@ export class WorkerNlpAnalysisService {
     options?: { processingTime?: string | null },
   ): Promise<void> {
     const supabase = this.adminSupabaseService.client;
-
+console.log(`Saving analysis result for job ${jobId}...`);
     const { error: jobError } = await supabase
       .from("nlp_analysis_jobs")
       .update({
@@ -39,8 +39,8 @@ export class WorkerNlpAnalysisService {
       job_id: jobId,
       name: entity.name,
       type: entity.type,
-      mentions: entity.mentions,
-      attributes: entity.attributes,
+      mentions: entity.mentions ?? [],
+      role: entity.role ?? null,
     }));
 
     if (entities.length > 0) {
@@ -58,8 +58,6 @@ export class WorkerNlpAnalysisService {
       source: rel.source,
       target: rel.target,
       relation_type: rel.relation_type,
-      description: rel.description,
-      confidence: rel.confidence,
     }));
 
     if (relationships.length > 0) {

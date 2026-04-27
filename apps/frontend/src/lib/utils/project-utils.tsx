@@ -25,3 +25,32 @@ export const getStatusIcon = (status: string) => {
       return <Clock className="h-3 w-3" />;
   }
 };
+
+export function getStatusStyles(status: string) {
+  switch (status) {
+    case "active":
+      return {
+        dot: "bg-green-300",
+        text: "text-primary-foreground",
+        bg: "bg-primary",
+      };
+    case "completed":
+      return {
+        dot: "bg-blue-500",
+        text: "text-primary-foreground",
+        bg: "bg-chart-4",
+      };
+    case "archived":
+      return {
+        dot: "bg-muted-foreground",
+        text: "text-muted-foreground",
+        bg: "bg-muted border border-border",
+      };
+    default:
+      return {
+        dot: "bg-border",
+        text: "text-muted-foreground",
+        bg: "bg-muted border border-border",
+      };
+  }
+}

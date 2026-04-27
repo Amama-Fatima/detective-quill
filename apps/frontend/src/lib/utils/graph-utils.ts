@@ -17,9 +17,7 @@ export const LABEL_COLORS: Record<string, string> = {
 	Character: THEME.chart1,
 	Location: THEME.chart3,
 	Organisation: THEME.chart2,
-	Group: THEME.chart5,
 	Scene: THEME.accent,
-	Entity: THEME.muted,
 };
 
 export function getSceneDescriptionPreview(

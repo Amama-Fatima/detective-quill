@@ -2,27 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
 interface PageHeaderProps {
-  totalCount: number;
   onNewCase: () => void;
 }
 
-export default function ProjectsPageHeader({ totalCount, onNewCase }: PageHeaderProps) {
+export default function ProjectsPageHeader({ onNewCase }: PageHeaderProps) {
   return (
-    <header className="relative border-b border-border bg-card/70 backdrop-blur-sm">
+    <header className="relative border-b border-border bg-card/85 backdrop-blur-sm py-5">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-7">
         <div className="flex flex-wrap items-center justify-between gap-5">
           <div>
-            <p className="case-file text-xs text-muted-foreground mb-1 tracking-[0.14em]">
-              Detective&apos;s Quill — Case Registry
-            </p>
             <h1 className="font-playfair-display text-[clamp(26px,4vw,40px)] font-bold leading-none tracking-[-0.02em] text-primary">
               My Investigations
             </h1>
-            <p className="noir-text text-sm text-muted-foreground mt-1.5">
-              {totalCount > 0
-                ? `${totalCount} case ${totalCount === 1 ? "file" : "files"} on record`
-                : "No cases on record yet"}
-            </p>
           </div>
           <Button
             onClick={onNewCase}

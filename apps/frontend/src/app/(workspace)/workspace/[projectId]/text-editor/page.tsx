@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from "@/supabase/server-client";
 import { notFound, redirect } from "next/navigation";
 import { getUserFromCookie } from "@/lib/utils/get-user";
 import ErrorMsg from "@/components/error-msg";
-import { CaseFileIcon } from "@/components/icons/case-file-icon";
+import BookLoadingAnimation from "@/components/editor/book-loading-animation";
 
 export const metadata = {
   title: "Text Editor",
@@ -44,8 +44,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   return (
     <div className="flex h-full items-center justify-center">
       <div className="text-center space-y-6 max-w-md">
-        <div className="rounded-full bg-primary text-background mx-auto h-20 w-20 flex items-center justify-center">
-          <CaseFileIcon size={42} className="block" />
+        <div className="rounded-full bg-sidebar text-background mx-auto h-40 w-40 flex items-center justify-center">
+          <div className="h-28 w-28">
+            <BookLoadingAnimation />
+          </div>
         </div>
 
         <div className="space-y-2">

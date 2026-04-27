@@ -34,10 +34,9 @@ export default function AuthButtons() {
           {user.email?.split("@")[0]}
         </span>
         <Button
-          variant="ghost"
           size="sm"
           onClick={handleSignOut}
-          className="flex items-center space-x-1 px-3 cursor-pointer"
+          className="flex items-center space-x-1 px-4 py-1 cursor-pointer bg-accent text-primary hover:text-accent-foreground hover:bg-accent/60 transition-colors duration-200"
         >
           <LogOut className="h-4 w-4" />
           <span>Sign Out</span>

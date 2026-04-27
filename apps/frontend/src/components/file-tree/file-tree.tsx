@@ -20,6 +20,7 @@ import { findNodeById } from "@/lib/utils/file-tree-utils";
 import CreateCommitDialog from "./dialogs/create-commit-dialog";
 import { useWorkspaceContext } from "@/context/workspace-context";
 import NewFileDropdown from "./new-file-dropdown";
+import Image from "next/image";
 
 interface FileTreeProps {
   initialNodes: FsNodeTreeResponse[];
@@ -139,8 +140,8 @@ const FileTree = ({
 
   return (
     <div className="flex flex-col">
-      <div className="p-3 border-b bg-card/20">
-        <div className="flex gap-2 mb-3">
+      <div className="p-3 border border-border bg-sidebar">
+        <div className="flex gap-2">
           {!isKnowledgeGraph && (
             <>
               <NewFileDropdown
@@ -177,7 +178,7 @@ const FileTree = ({
           <SearchInput
             nodes={nodes}
             onResultSelect={handleSearchSelect}
-            className="mb-2"
+            className="my-2"
           />
         )}
       </div>
@@ -185,7 +186,13 @@ const FileTree = ({
       <div className="flex-1 overflow-hidden">
         {treeElements.length === 0 ? (
           <div className="text-center text-muted-foreground py-8 px-4">
-            <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <Image
+              src="/empty-folder.png"
+              alt="Empty Folder"
+              width={64}
+              height={64}
+              className="mx-auto mb-4"
+            />
             <p className="text-[1rem] noir-text mb-4">
               No files or folders yet
             </p>
@@ -204,8 +211,22 @@ const FileTree = ({
             initialSelectedId={selectedNodeId}
             elements={treeElements}
             indicator={true}
-            openIcon={<FolderOpen className="h-4 w-4" />}
-            closeIcon={<Folder className="h-4 w-4" />}
+            openIcon={
+              <Image
+                src="/open-folder.png"
+                alt="Open Folder"
+                width={35}
+                height={35}
+              />
+            }
+            closeIcon={
+              <Image
+                src="/folder.png"
+                alt="Open Folder"
+                width={25}
+                height={25}
+              />
+            }
           >
             {treeElements.map((element) => (
               <TreeItem

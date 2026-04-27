@@ -9,33 +9,153 @@ logger = setup_logger(__name__)
 
 # Nouns that refer to a person even when no name is given (e.g. "her husband")
 PERSON_ROLE_NOUNS = {
-    'husband', 'wife', 'man', 'woman', 'boy', 'girl',
-    'father', 'mother', 'brother', 'sister', 'son', 'daughter',
-    'detective', 'officer', 'inspector', 'sergeant', 'constable',
-    'suspect', 'victim', 'witness', 'murderer', 'killer', 'criminal',
-    'stranger', 'visitor', 'patient', 'doctor', 'nurse', 'guard',
+    'husband', 'wife',
+    'father', 'mother', 'brother', 'sister', 'son', 'daughter','officer','sergeant', 'constable', 'visitor', 'patient', 'doctor', 'nurse', 'guard',
     'partner', 'colleague', 'friend',
 }
 
+# Common high-signal object nouns that are especially useful in detective fiction.
+ITEM_NOUNS = {
+    'knife', 'dagger', 'blade', 'gun', 'pistol', 'revolver', 'rifle', 'bullet', 'bullets', 'rope',
+    'letter', 'note', 'envelope', 'photograph', 'photo', 'picture', 'diary', 'journal', 'will', 'telegram',
+    'report', 'clue', 'evidence', 'newspaper', 'receipt', 'pass', 'ticket',
+    'ring', 'watch', 'key', 'keys', 'wallet', 'purse', 'handkerchief', 'glove', 'gloves',
+    'cigarette', 'cigarettes', 'lighter', 'locket', 'brooch', 'book', 'address book', 'notebook',
+    'box', 'package', 'parcel', 'bag', 'coat', 'shoes', 'boot', 'boots', 'umbrella', 'stick', 'cane',
+}
+
+ITEM_PHRASES = {
+    'suicide note', 'handwritten letter', 'bloody knife', 'kitchen knife', 'calling card',
+    'love letter', 'sealed envelope', 'murder weapon', 'broken glass', 'fingerprint card', 'leg of lamb'
+}
+
+LOCATION_NOUNS = {
+"room", "bedroom", "bathroom", "kitchen", "hall", "hallway",
+"living room", "basement", "attic", "office", "lab", "garage",
+"garden","street", "alley", "apartment", "house", "hotel"
+}
+
+
+def _token_in_mention(token_i: int, mention) -> bool:
+    return token_i in mention
+
+
+def _has_named_alias_in_coref_chain(token) -> bool:
+    doc = token.doc
+    if not hasattr(doc._, "coref_chains") or not doc._.coref_chains:
+        return False
+
+    for chain in doc._.coref_chains:
+        token_is_in_chain = any(_token_in_mention(token.i, mention) for mention in chain)
+        if not token_is_in_chain:
+            continue
+
+        for mention in chain:
+            if any(doc[i].pos_ == "PROPN" for i in mention):
+                return True
+
+    return False
+
+
+def _sentence_has_named_entity(chunk, labels: set) -> bool:
+    sent = chunk.sent
+    for ent in sent.ents:
+        if ent.label_ in labels and any(tok.pos_ == "PROPN" for tok in ent):
+            return True
+    return False
+
 
 def _extract_character_references(doc) -> List[RawEntity]:
-    """Find noun chunks whose head is a person-role noun (e.g. 'her husband').
-    Returns one RawEntity per unique role noun so unnamed characters get a node."""
     found = []
     seen_lemmas: set = set()
 
     for chunk in doc.noun_chunks:
         head = chunk.root
         lemma = head.lemma_.lower()
-        if lemma in PERSON_ROLE_NOUNS and lemma not in seen_lemmas:
-            seen_lemmas.add(lemma)
-            # Use just the head noun as the canonical name ("husband" not "her husband")
-            found.append(RawEntity(
-                text=head.text,
-                label='PERSON',
-                start=head.idx,
-                end=head.idx + len(head.text),
-            ))
+
+        if lemma not in PERSON_ROLE_NOUNS:
+            continue
+        if lemma in seen_lemmas:
+            continue
+
+        # If this role noun is coref-linked to a named person, keep only the name.
+        if _has_named_alias_in_coref_chain(head):
+            continue
+
+        # Fallback: if same sentence already has a named PERSON, avoid generic role noun.
+        if _sentence_has_named_entity(chunk, {"PERSON"}):
+            continue
+
+        seen_lemmas.add(lemma)
+        found.append(RawEntity(
+            text=head.text,
+            label="PERSON",
+            start=head.idx,
+            end=head.idx + len(head.text),
+        ))
+
+    return found
+
+def _extract_location_references(doc) -> List[RawEntity]:
+    found = []
+    seen_spans: set = set()
+
+    for chunk in doc.noun_chunks:
+        head = chunk.root
+        head_lemma = head.lemma_.lower()
+        chunk_lemma_text = " ".join(tok.lemma_.lower() for tok in chunk if tok.is_alpha)
+
+        if head_lemma not in LOCATION_NOUNS and chunk_lemma_text not in LOCATION_NOUNS:
+            continue
+
+        # If this noun is coref-linked to a named place, keep only the named place.
+        if _has_named_alias_in_coref_chain(head):
+            continue
+
+        # Fallback: if sentence already has a named location, skip generic noun.
+        if _sentence_has_named_entity(chunk, {"FAC", "LOC", "GPE"}):
+            continue
+
+        text = chunk.text.strip()
+        key = text.lower()
+        if key in seen_spans:
+            continue
+
+        seen_spans.add(key)
+        found.append(RawEntity(
+            text=text,
+            label="FAC",
+            start=chunk.start_char,
+            end=chunk.end_char,
+        ))
+
+    return found
+
+
+def _extract_item_references(doc) -> List[RawEntity]:
+    found = []
+    seen_spans: set = set()
+
+    for chunk in doc.noun_chunks:
+        head = chunk.root
+        head_lemma = head.lemma_.lower()
+        chunk_lemma_text = " ".join(tok.lemma_.lower() for tok in chunk if tok.is_alpha)
+
+        if head_lemma not in ITEM_NOUNS and chunk_lemma_text not in ITEM_NOUNS and chunk_lemma_text not in ITEM_PHRASES:
+            continue
+
+        text = chunk.text.strip()
+        key = text.lower()
+        if key in seen_spans:
+            continue
+
+        seen_spans.add(key)
+        found.append(RawEntity(
+            text=text,
+            label="PRODUCT",
+            start=chunk.start_char,
+            end=chunk.end_char,
+        ))
 
     return found
 
@@ -150,6 +270,28 @@ class SpacyEntityExtractor:
                     raw_entities.append(u)
                     logger.debug(f"  Added unnamed character reference: '{u.text}'")
 
+        # Add generic locations only when no named location is available
+        loc_refs = _extract_location_references(doc)
+        if loc_refs:
+            existing_loc_names = {
+                e.text.lower() for e in raw_entities if e.label in {"FAC", "LOC", "GPE"}
+            }
+            for loc in loc_refs:
+                if loc.text.lower() not in existing_loc_names:
+                    raw_entities.append(loc)
+                    logger.debug(f"  Added location reference: '{loc.text}'")
+
+        # Add high-signal detective-story items such as knives, letters, keys, etc.
+        item_refs = _extract_item_references(doc)
+        if item_refs:
+            existing_item_names = {
+                e.text.lower() for e in raw_entities if e.label == "PRODUCT"
+            }
+            for item in item_refs:
+                if item.text.lower() not in existing_item_names:
+                    raw_entities.append(item)
+                    logger.debug(f"  Added item reference: '{item.text}'")
+
         logger.debug(f"Extracted {len(raw_entities)} raw entities from text.")
         return raw_entities, resolved_text
 
@@ -167,7 +309,6 @@ class SpacyEntityExtractor:
                 name=name,
                 type=entity_type,
                 mentions=list(set(mention_texts)),
-                attributes={}
             )
             entities.append(entity)
 

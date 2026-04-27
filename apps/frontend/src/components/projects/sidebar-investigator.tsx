@@ -7,10 +7,10 @@ export default function SidebarInvestigator() {
         <DotLottieReact src="/Mr Detective.lottie" loop autoplay />
       </div>
       <div className="w-full border-t border-border pt-4">
-        <p className="case-file text-[10px] text-muted-foreground tracking-[0.12em] text-center leading-relaxed">
+        <p className="case-file text-[13px] text-foreground tracking-[0.12em] text-center leading-relaxed">
           ACTIVE INVESTIGATOR
         </p>
-        <p className="noir-text text-xs text-center text-muted-foreground mt-1 italic">
+        <p className="noir-text text-sm text-center text-muted-foreground mt-1 italic">
           &ldquo;Every story starts
           <br />
           with a single clue.&rdquo;
