@@ -1,6 +1,6 @@
 <img align="right" src="apps/frontend/public/detective.gif" alt="Detective Quill Animation" width="220" height="200"  />
 
-<p><big><big><big><strong>Detective Quill</strong></big></big></big></p>
+<p><big><big><big><strong>Detective's Quill</strong></big></big></big></p>
 A writing platform built for detective crime fiction writers to manage and develop their stories. It provides structured version control for manuscripts, an AI-generated knowledge graph of story elements, and natural language search across the manuscript.
 
 <br clear="right" />
