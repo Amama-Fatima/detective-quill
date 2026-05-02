@@ -49,7 +49,6 @@ Supabase serves as the primary database. Neo4j stores and serves the knowledge g
 - Zustand (state management)
 - React Query (server state)
 - BlockNote (rich text editor)
-- yjs + y-webrtc (real-time collaborative editing)
 - Neo4j NVL (graph visualization)
 - ShadCN UI
 
