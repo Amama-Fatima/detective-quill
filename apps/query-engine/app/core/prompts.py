@@ -166,7 +166,7 @@ RULES:
 9. supporting_job_ids must include only job IDs that directly support the answer.
 10. For interaction questions between multiple entities, include job IDs where each entitiy exist and the relevant relationship exists.
 11. If no job ID supports the answer, return an empty list for supporting_job_ids.
-12. The answer field should be one to three sentences which answers the user's question as directly as possible. Do not include extra information. Do not repeat the question in the answer.
+12. The answer field should be atleast three sentences which answers the user's question as detailed as possible. If user asks about all interactions, try to cover all interactions in your answer. Do not include extra information. Do not repeat the question in the answer.
 
 USER QUESTION:
 {question}

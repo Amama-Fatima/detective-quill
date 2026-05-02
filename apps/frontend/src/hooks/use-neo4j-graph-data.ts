@@ -56,17 +56,27 @@ export function useNeo4jGraphData(sceneId?: string) {
         }
         const result = await session.run(
           `
-  MATCH (s:Scene {scene_id: $sceneId})
-  
-  // Get all entities that appear in this scene
-  OPTIONAL MATCH (s)<-[:APPEARS_IN]-(entity)
-  
-  // Only match relationships where BOTH nodes appear in this scene
-  OPTIONAL MATCH (entity)-[r]-(otherEntity)
-  WHERE (otherEntity)-[:APPEARS_IN]->(s)
-  
-  // Return the scene, entities, and relationships
-  RETURN s, entity, r, otherEntity
+ MATCH (s:Scene {scene_id: $sceneId})
+          
+          // Get all entities that appear in this scene
+          OPTIONAL MATCH (s)<-[:APPEARS_IN]-(entity)
+          
+          // Get all relationships between entities (CONFRONTED, WORKING_WITH, ESCAPED, etc.)
+          OPTIONAL MATCH (entity)-[r]-(otherEntity)
+          WHERE r IS NOT NULL AND entity IS NOT NULL AND otherEntity IS NOT NULL
+          
+          // Also get relationships from the scene to other nodes (if any)
+          OPTIONAL MATCH (s)-[sceneRel]-(otherNode)
+          
+          // Collect everything
+          WITH COLLECT(DISTINCT s) + COLLECT(DISTINCT entity) + COLLECT(DISTINCT otherEntity) + COLLECT(DISTINCT otherNode) as allNodes,
+               COLLECT(DISTINCT r) + COLLECT(DISTINCT sceneRel) as allRels
+          
+          // Unwind and return all unique paths
+          UNWIND allNodes as node
+          OPTIONAL MATCH (node)-[rel]-(connected)
+          WHERE rel IN allRels
+          RETURN DISTINCT node, rel, connected
 `,
           { sceneId: targetSceneId },
         );
