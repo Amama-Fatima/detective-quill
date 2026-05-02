@@ -6,7 +6,7 @@ export const NAV_ITEMS = [
     label: "Overview",
     href: `/workspace/123`,
     icon: LayoutDashboardIcon,
-    svgSrc: "/overview.svg",
+    svgSrc: "/svg/overview.svg",
     description: "Project at a glance",
   },
   {
@@ -14,7 +14,7 @@ export const NAV_ITEMS = [
     label: "Blueprints",
     href: `/workspace/123/blueprint`,
     icon: null,
-    svgSrc: "/blueprint.svg",
+    svgSrc: "/svg/blueprint.svg",
     description: "Structure & planning",
   },
   {
@@ -22,7 +22,7 @@ export const NAV_ITEMS = [
     label: "Manuscript",
     href: `/workspace/123/text-editor`,
     icon: null,
-    svgSrc: "/manuscript.svg",
+    svgSrc: "/svg/manuscript.svg",
     description: "Writing & editing",
   },
   {
@@ -30,7 +30,7 @@ export const NAV_ITEMS = [
     label: "Graph Visuals",
     href: `/workspace/123/knowledge-graph`,
     icon: null,
-    svgSrc: "/knowledge-graph.svg",
+    svgSrc: "/svg/knowledge-graph.svg",
     description: "Visual analysis",
   },
   {
@@ -38,7 +38,7 @@ export const NAV_ITEMS = [
     label: "History",
     href: `/workspace/123/version-control`,
     icon: null,
-    svgSrc: "/version-control.svg",
+    svgSrc: "/svg/version-control.svg",
     description: "History & branches",
   },
 ];

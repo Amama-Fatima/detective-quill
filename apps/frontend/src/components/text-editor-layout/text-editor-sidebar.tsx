@@ -35,7 +35,7 @@ export default function TextEditorSidebar({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Image src="/quill-writing.png" alt="Quill Writing" width={70} height={100} />
+            <Image src="/png/quill-writing.png" alt="Quill Writing" width={70} height={100} />
             <h1 className="truncate text-lg font-semibold text-foreground">
               {projectName}
             </h1>

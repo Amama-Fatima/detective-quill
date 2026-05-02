@@ -52,7 +52,7 @@ export default function WorkspaceSidebar({
         <Link href="/" className="block overflow-hidden">
           {collapsed ? (
             <Image
-              src="/quill-1.png"
+              src="/png/quill-1.png"
               alt="Detective's Quill Logo"
               fill
               sizes="180px"
@@ -61,7 +61,7 @@ export default function WorkspaceSidebar({
           ) : (
             <div className="flex flex-col  justify-between">
               <Image
-                src="/inverted-logo.png"
+                src="/png/inverted-logo.png"
                 alt="Detective's Quill Logo"
                 fill
                 sizes="180px"

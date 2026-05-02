@@ -187,7 +187,7 @@ const FileTree = ({
         {treeElements.length === 0 ? (
           <div className="text-center text-muted-foreground py-8 px-4">
             <Image
-              src="/empty-folder.png"
+              src="/png/empty-folder.png"
               alt="Empty Folder"
               width={64}
               height={64}
@@ -213,7 +213,7 @@ const FileTree = ({
             indicator={true}
             openIcon={
               <Image
-                src="/open-folder.png"
+                src="/png/open-folder.png"
                 alt="Open Folder"
                 width={35}
                 height={35}
@@ -221,7 +221,7 @@ const FileTree = ({
             }
             closeIcon={
               <Image
-                src="/folder.png"
+                src="/png/folder.png"
                 alt="Open Folder"
                 width={25}
                 height={25}

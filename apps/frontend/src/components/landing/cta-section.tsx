@@ -20,7 +20,7 @@ export default function CtaSection() {
         <div className="flex justify-center">
           <div className="relative h-[96px] w-[104px] overflow-hidden sm:h-[110px] sm:w-[120px] lg:h-[120px] lg:w-[130px]">
             <Image
-              src="/quill-1.png"
+              src="/png/quill-1.png"
               alt="Detective's Quill Logo"
               fill
               sizes="180px"

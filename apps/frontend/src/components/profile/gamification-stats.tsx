@@ -119,7 +119,7 @@ export const GamificationStats = () => {
           <CardTitle className="flex items-center justify-between gap-2 text-base">
             <span className="flex items-center gap-2">
               <Image
-                src="/gamification.svg"
+                src="/svg/gamification.svg"
                 alt="Sparkles Icon"
                 width={20}
                 height={20}
@@ -142,7 +142,7 @@ export const GamificationStats = () => {
         <CardTitle className="flex items-center justify-between gap-2 text-base">
           <span className="flex items-center gap-2">
             <Image
-              src="/gamification.svg"
+              src="/svg/gamification.svg"
               alt="Sparkles Icon"
               width={30}
               height={30}
@@ -205,7 +205,7 @@ export const GamificationStats = () => {
                 </span>
                 {badge.earned ? (
                   <Image
-                    src="/trophy.png"
+                    src="/png/trophy.png"
                     alt="Trophy Icon"
                     width={24}
                     height={24}
@@ -213,7 +213,7 @@ export const GamificationStats = () => {
                   />
                 ) : (
                   <Image
-                    src="/lock.png"
+                    src="/png/lock.png"
                     alt="Lock Icon"
                     width={24}
                     height={24}

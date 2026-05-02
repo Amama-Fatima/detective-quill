@@ -15,7 +15,7 @@ export default function Footer() {
       <div className="flex items-center gap-[10px]">
         <div className="relative h-[46px] w-[148px] overflow-hidden sm:h-[52px] sm:w-[168px] lg:h-[56px] lg:w-[180px]">
           <Image
-            src="/inverted-logo.png"
+            src="/png/inverted-logo.png"
             alt="Detective's Quill Logo"
             fill
             sizes="180px"

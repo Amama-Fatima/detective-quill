@@ -19,7 +19,7 @@ export default async function Header() {
         <div className="relative h-14 w-45 overflow-hidden">
           <Link href="/">
             <Image
-              src="/logo.png"
+              src="/png/logo.png"
               alt="Detective's Quill Logo"
               fill
               sizes="180px"

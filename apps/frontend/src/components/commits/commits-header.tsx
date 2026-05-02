@@ -53,7 +53,7 @@ export default function CommitsHeader({
 
       <div className="shrink-0 flex flex-col items-center gap-4 self-center sm:self-end">
         <DotLottieReact
-          src="/branches.lottie"
+          src="/lottie/branches.lottie"
           loop
           autoplay
           style={{ width: 140, height: 140 }}

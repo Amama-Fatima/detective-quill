@@ -11,7 +11,7 @@ export default async function Navbar() {
       <div className="mx-auto flex h-[68px] w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-12">
         <div className="relative h-[56px] w-[180px] overflow-hidden">
           <Image
-            src="/logo.png"
+            src="/png/logo.png"
             alt="Detective's Quill Logo"
             fill
             sizes="180px"

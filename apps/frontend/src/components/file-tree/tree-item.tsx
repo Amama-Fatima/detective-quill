@@ -109,7 +109,7 @@ const TreeItem = ({
         className="flex w-full min-w-0 items-center justify-between cursor-pointer overflow-hidden"
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <Image src="/paper.png" alt="Quill File" width={35} height={35} />
+          <Image src="/png/paper.png" alt="Quill File" width={35} height={35} />
           <span className="min-w-0 flex-1 truncate text-md text-primary">
             {element.name}
           </span>
