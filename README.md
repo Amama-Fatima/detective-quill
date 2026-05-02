@@ -28,7 +28,7 @@ Detective Quill is a monorepo with a microservices backend. All services live in
 | `apps/knowledge-graph` | Python | Builds and enriches the story knowledge graph |
 | `apps/query-engine` | FastAPI | Translates natural language queries to graph queries |
 
-#### Message Queues
+### Message Queues
 
 The backend publishes jobs to RabbitMQ. Lightweight workers (create commit, send invites, etc.) run as part of the backend process and can consume from a local or cloud RabbitMQ instance without issue.
 
@@ -36,7 +36,7 @@ The NLP pipeline (knowledge-graph and query-engine) is deployed on Modal.com, wh
 
 During local development, you can skip Modal entirely and run the Python services directly on your machine, they will consume from your local RabbitMQ the same way any other local process would.
 
-#### Databases
+### Databases
 Supabase serves as the primary database. Neo4j stores and serves the knowledge graph.
 
 
@@ -154,4 +154,4 @@ uvicorn app.main:app --reload
 
 ### Note: Deploying the AI Microservices
 
-The knowledge-graph pipeline and query-engine are intended to be deployed on Modal.com. Once deployed, configure knowledge graph service to use a cloud-hosted RabbitMQ broker (e.g. CloudAMQP) so that the NestJS backend and the knowledge graph Modal workers share the same broker URL. Update the relevant environment variables in each service to point to the cloud broker instead of localhost.
+The knowledge-graph pipeline and the model for query-engine are intended to be deployed on Modal.com. Once deployed, configure knowledge graph service to use a cloud-hosted RabbitMQ broker (e.g. CloudAMQP) so that the NestJS backend and the knowledge graph Modal workers share the same broker URL. Update the relevant environment variables in each service to point to the cloud broker instead of localhost.
