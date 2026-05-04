@@ -64,13 +64,18 @@ export function SignUpForm() {
       }
 
       if (data.user) {
-        // Check if email confirmation is required
-        if (data.user && !data.session) {
-          setUserEmail(formData.email);
-          setSignupSuccess(true);
-        } else {
-          // User is immediately authenticated (email confirmation disabled)
-        }
+        toast.success(
+          "Account created successfully! Please check your email to confirm your account.",
+        );
+
+        setSignupSuccess(true);
+        setUserEmail(formData.email);
+
+        // Check if email confirmation is required (I have disabled it for now, enable it if needed)
+        // if (data.user && !data.session) {
+        // } else {
+        //   // User is immediately authenticated (email confirmation disabled)
+        // }
       }
     } catch (err) {
       console.error("Error during sign up:", err);
@@ -81,7 +86,7 @@ export function SignUpForm() {
   };
 
   if (signupSuccess) {
-    return <ConfirmEmailInstruction userEmail={userEmail} />;
+    return <ConfirmEmailInstruction />;
   }
 
   return (

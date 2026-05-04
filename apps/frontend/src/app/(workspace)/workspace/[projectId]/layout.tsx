@@ -1,4 +1,5 @@
 import ErrorMsg from "@/components/error-msg";
+import { AppFooter } from "@/components/layout/app-footer";
 import { fetchProjectTitle } from "@/lib/supabase-calls/editor-workspace";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -75,6 +76,7 @@ const WorkspaceLayout = async ({
       {!isAcceptInvitePage && (
         <WorkspaceSidebarShell projectId={projectId}>
           <main className="flex-1">{children}</main>
+          <AppFooter />
         </WorkspaceSidebarShell>
       )}
 

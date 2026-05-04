@@ -4,13 +4,7 @@ import { Button } from "@/components/ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { SignUpFormValues } from "@/lib/schema";
 
-interface ConfirmEmailInstructionProps {
-  userEmail: string;
-}
-
-const ConfirmEmailInstruction = ({
-  userEmail,
-}: ConfirmEmailInstructionProps) => {
+const ConfirmEmailInstruction = ({}) => {
   return (
     <div className="text-center space-y-6 max-w-md mx-auto">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full">
@@ -19,15 +13,15 @@ const ConfirmEmailInstruction = ({
 
       <div className="space-y-2">
         <h3 className="myster-title text-[2rem] font-semibold">
-          Check your email
+          Sign up successful!
         </h3>
-        <p className="noir-text text-[1rem]">
+        {/* <p className="noir-text text-[1rem]">
           We've sent a confirmation link to{" "}
           <span className="font-medium text-gray-900">{userEmail}</span>
-        </p>
+        </p> */}
       </div>
 
-      <div className="bg-card border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left">
+      {/* <div className="bg-card border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left">
         <h4 className="myster-title text-[1rem] font-medium  text-primary mb-2">
           Next steps:
         </h4>
@@ -36,7 +30,7 @@ const ConfirmEmailInstruction = ({
           <li>Click the confirmation link in the email</li>
           <li>You'll be redirected back to sign in</li>
         </ol>
-      </div>
+      </div> */}
     </div>
   );
 };
