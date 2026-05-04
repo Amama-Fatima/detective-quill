@@ -64,10 +64,6 @@ export function SignUpForm() {
       }
 
       if (data.user) {
-        toast.success(
-          "Account created successfully! Please check your email to confirm your account.",
-        );
-
         setSignupSuccess(true);
         setUserEmail(formData.email);
 
