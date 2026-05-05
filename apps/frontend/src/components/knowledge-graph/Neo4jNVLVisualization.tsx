@@ -198,12 +198,15 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
   if (status === "error") {
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-background rounded-lg p-8">
-        <div className="text-4xl mb-4 text-destructive">✕</div>
-        <p className="text-sm tracking-widest uppercase mb-2 text-destructive font-serif">
-          Connection failed
+        {/* <div className="text-4xl mb-4 text-destructive/50">✕</div> */}
+        <p className="text-md tracking-widest uppercase mb-2 text-destructive font-serif">
+          Graph does not exist or failed to load
         </p>
-        <p className="text-xs text-center max-w-sm text-muted-foreground font-mono">
+        {/* <p className="text-xs text-center max-w-sm text-muted-foreground font-mono">
           {errorMsg}
+        </p> */}
+        <p className="mt-2 text-sm text-primary/90 font-mono border border-dashed border-border/40 rounded px-4 py-3 max-w-sm text-center">
+          Note: Knowledge graph creation runs via background workers which are not deployed to keep monthly costs low for us. Set up the project locally to test this feature — see the README for setup instructions.
         </p>
       </div>
     );

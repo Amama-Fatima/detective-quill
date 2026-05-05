@@ -57,12 +57,23 @@ export const QueryPanel = () => {
           onSubmit={handleSearch}
           isLoading={isLoading}
         />
-        {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+        {error && (
+          <p className="mt-2 text-sm text-primary/80 font-mono border border-dashed border-border/40 rounded px-4 py-3">
+            Note: Query manuscript requires an LLM deployed to Modal.com, which
+            is not set up on the deployed version to keep costs low. Set up the
+            project locally to test this feature — see the README for setup
+            instructions.
+          </p>
+        )}
       </div>
 
       <ScrollArea className="h-0 flex-1">
         <div className="p-4 bg-sidebar">
-          <QueryResults query={query} response={response} isLoading={isLoading} />
+          <QueryResults
+            query={query}
+            response={response}
+            isLoading={isLoading}
+          />
         </div>
       </ScrollArea>
     </div>

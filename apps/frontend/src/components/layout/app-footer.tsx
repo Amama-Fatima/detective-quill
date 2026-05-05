@@ -2,7 +2,7 @@ import { Cpu } from "lucide-react";
 
 export function AppFooter() {
   return (
-    <footer className="border-t border-border bg-primary/80 py-3 px-6 z-[1]">
+    <footer className="border-t border-border bg-primary py-3 px-6 z-[1]">
       <div className="mx-auto max-w-5xl flex items-start gap-2.5">
         <Cpu className="h-5 w-5 mt-0.5 flex-shrink-0 text-background" />
         <p className="noir-text text-md text-background leading-relaxed">

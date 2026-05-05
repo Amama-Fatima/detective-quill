@@ -38,7 +38,7 @@ export const DeleteBlueprintButton = ({
         onOpenChange={(open) => setOpenDialogId(open ? blueprintId : null)}
       >
         <DialogTrigger asChild>
-          <div className="cursor-pointer rounded-md p-1 hover:bg-accent">
+          <div className="cursor-pointer rounded-md p-[1px] hover:bg-accent">
             <DeleteIcon />
           </div>
         </DialogTrigger>

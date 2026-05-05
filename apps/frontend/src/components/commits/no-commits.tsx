@@ -8,8 +8,11 @@ export default function NoCommits() {
         No entries on record
       </p>
       <p className="noir-text text-sm text-muted-foreground">
-        Save a commit from the Case Files view to begin tracking this
-        branch&apos;s history.
+        Create a commit to begin tracking this branch&apos;s history.
+      </p>
+
+      <p className="mt-4 text-sm text-primary/80 font-mono border border-dashed border-border/40 rounded px-4 py-3 max-w-sm mx-auto">
+        Note: Commit creation runs via background workers which are not deployed to keep costs low. Set up the project locally to test this feature — see the README for setup instructions.
       </p>
     </div>
   );

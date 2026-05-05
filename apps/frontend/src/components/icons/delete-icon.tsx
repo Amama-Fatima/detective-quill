@@ -1,4 +1,4 @@
-export const DeleteIcon = ({ size = 36, className="!size-8" }) => (
+export const DeleteIcon = ({ size = 24, className="!size-7" }) => (
   <svg
     width={size}
     height={size}

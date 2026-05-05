@@ -75,7 +75,7 @@ export default function BlueprintCard({
             </div>
 
             {isOwner && isActive && (
-              <div className="polaroid-delete-btn">
+              <div className="w-fit absolute bottom-2 right-2 ">
                 <DeleteBlueprintButton
                   blueprintId={blueprint.id}
                   onDelete={onDelete}

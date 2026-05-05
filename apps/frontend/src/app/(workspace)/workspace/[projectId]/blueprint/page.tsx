@@ -51,11 +51,11 @@ export default async function BlueprintPage({ params }: BlueprintPageProps) {
 
         <div className="pt-8">
           <div className="flex items-center gap-4 mb-6">
-            <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-muted-foreground/50 shrink-0">
+            <span className="font-mono text-[9px] tracking-[0.22em] uppercase text-muted-foreground shrink-0">
               All Blueprints
             </span>
             <div className="flex-1 border-t border-border/50" />
-            <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-muted-foreground/35 shrink-0">
+            <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-muted-foreground shrink-0">
               {count} {count === 1 ? "file" : "files"} on record
             </span>
           </div>
