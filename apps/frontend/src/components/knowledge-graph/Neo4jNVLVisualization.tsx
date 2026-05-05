@@ -206,7 +206,7 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
           {errorMsg}
         </p> */}
         <p className="mt-2 text-sm text-primary/90 font-mono border border-dashed border-border/40 rounded px-4 py-3 max-w-sm text-center">
-          Note: Knowledge graph creation runs via background workers which are not deployed to keep monthly costs low for us. Set up the project locally to test this feature — see the README for setup instructions.
+          Note: The LLM pipeline for knowledge graph creation is not deployed to keep costs low. To see this feature, deploy it to Modal.com and run the project locally — see the README for setup instructions.
         </p>
       </div>
     );

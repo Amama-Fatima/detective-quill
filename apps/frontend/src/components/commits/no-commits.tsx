@@ -12,7 +12,9 @@ export default function NoCommits() {
       </p>
 
       <p className="mt-4 text-sm text-primary/80 font-mono border border-dashed border-border/40 rounded px-4 py-3 max-w-sm mx-auto">
-        Note: Commit creation runs via background workers which are not deployed to keep costs low. Set up the project locally to test this feature — see the README for setup instructions.
+        Note: Commit creation runs via background workers. Deployed worker
+        containers may become idle after a period of inactivity. Commits may
+        take a few seconds or minutes to appear after creation.{" "}
       </p>
     </div>
   );

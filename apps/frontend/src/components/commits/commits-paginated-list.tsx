@@ -31,6 +31,10 @@ export default function CommitsPaginatedList({
 
   return (
     <div>
+      <p className="mb-6 text-xs text-primary/80 font-mono border border-dashed border-border/40 rounded px-4 py-3">
+        Note: Commit creation runs via background workers. Deployed worker containers may become idle after a period of inactivity. Commits may take a few seconds or minutes to appear after creation.
+      </p>
+
       <div className="flex items-center gap-4 mb-8">
         <span className="font-mono text-[12px] tracking-[0.22em] uppercase text-foreground shrink-0">
           Commit Log
