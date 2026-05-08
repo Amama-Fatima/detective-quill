@@ -21,7 +21,7 @@ Query the manuscript and knowledge graph using natural language. The query engin
 
 Detective Quill is a monorepo with a microservices backend. All services live in a single git repository, but each is an independently deployable process that communicates over the network. The frontend is a standard web application; the backend, knowledge-graph pipeline, and query-engine are the microservices.
 
-| Service | Language | Role |
+| Service | Language & Framework | Role |
 |---|---|---|
 | `apps/frontend` | TypeScript / Next.js | Web interface |
 | `apps/backend` | TypeScript / NestJS | REST API and business logic |
