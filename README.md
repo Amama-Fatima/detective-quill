@@ -84,6 +84,20 @@ detective-quill/
 └── docs/                 # Architecture diagrams
 ```
 
+## Live Deployments and Architecture
+
+- **Frontend:** Deployed on Vercel  
+  Live at: 
+
+- **Backend API:** Deployed on Google Cloud Platform (GCP)
+
+- **Knowledge Graph NLP Pipeline & Workers:** Deployed on Modal
+
+- **LLM for Query Engine:** Deployed on Modal
+
+- **RabbitMQ Workers:** Hosted on CloudAMQP
+
+
 ## Getting Started
 
 ### Prerequisites
