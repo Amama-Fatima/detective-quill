@@ -87,7 +87,7 @@ detective-quill/
 ## Live Deployments and Architecture
 
 - **Frontend:** Deployed on Vercel  
-  Live at: 
+  Live at: https://www.detectivequill.xyz
 
 - **Backend API:** Deployed on Google Cloud Platform (GCP)
 
