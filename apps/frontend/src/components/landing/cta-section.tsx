@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function CtaSection() {
   return (
@@ -56,11 +57,13 @@ export default function CtaSection() {
         {/* buttons */}
         <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
           {/* primary button */}
-          <button
+          <Link
+            href="/projects"
             className="
               rounded-lg
               bg-primary-foreground
               w-full sm:w-auto
+              inline-flex items-center justify-center
               px-7 py-3.5 sm:px-10 sm:py-4
               noir-text
               text-[16px] sm:text-[17px]
@@ -74,7 +77,7 @@ export default function CtaSection() {
             "
           >
             Start Writing Free
-          </button>
+          </Link>
 
           {/* secondary button */}
           <button

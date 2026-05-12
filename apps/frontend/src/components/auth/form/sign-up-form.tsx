@@ -17,15 +17,14 @@ import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react";
 import { SignUpFormValues, signUpSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import { getPasswordStrength } from "@/lib/utils/auth-utils";
-import ConfirmEmailInstruction from "../msgs-instructions/confirm-email-instruction";
 import { toast } from "sonner";
 
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [signupSuccess, setSignupSuccess] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
+  // const [signupSuccess, setSignupSuccess] = useState(false);
+  // const [userEmail, setUserEmail] = useState("");
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -64,14 +63,7 @@ export function SignUpForm() {
       }
 
       if (data.user) {
-        setSignupSuccess(true);
-        setUserEmail(formData.email);
-
-        // Check if email confirmation is required (I have disabled it for now, enable it if needed)
-        // if (data.user && !data.session) {
-        // } else {
-        //   // User is immediately authenticated (email confirmation disabled)
-        // }
+        window.location.assign(`${window.location.origin}/projects`);
       }
     } catch (err) {
       console.error("Error during sign up:", err);
@@ -81,9 +73,11 @@ export function SignUpForm() {
     }
   };
 
-  if (signupSuccess) {
-    return <ConfirmEmailInstruction />;
-  }
+  // Email confirmation flow is disabled in Supabase.
+  // Keep this block for quick re-enable later if needed.
+  // if (signupSuccess) {
+  //   return <ConfirmEmailInstruction />;
+  // }
 
   return (
     <Form {...form}>

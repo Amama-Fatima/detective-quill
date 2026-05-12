@@ -59,10 +59,12 @@ export const QueryPanel = () => {
         />
         {error && (
           <p className="mt-2 text-sm text-primary/80 font-mono border border-dashed border-border/40 rounded px-4 py-3">
-            Note: Query manuscript requires an LLM deployed to Modal.com, which
-            is not set up on the deployed version to keep costs low. Set up the
-            project locally to test this feature — see the README for setup
-            instructions.
+            Note: The “Query Manuscript” feature (LLM-powered) will be available
+            in a future update on the deployed version of the app. It is
+            currently disabled in deployment to keep costs low. You can still
+            test this feature locally by deploying the LLM pipeline on{" "}
+            <span className="font-medium">Modal.com</span> and running the
+            project locally — see the README for setup instructions.
           </p>
         )}
       </div>

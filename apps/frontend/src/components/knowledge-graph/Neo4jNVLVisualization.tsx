@@ -7,7 +7,11 @@ import { NVL } from "@neo4j-nvl/base";
 import { useNeo4jGraphData } from "@/hooks/use-neo4j-graph-data";
 import { useGraphInteraction } from "@/hooks/use-graph-interaction";
 import { getSceneDescriptionPreview, THEME } from "@/lib/utils/graph-utils";
-import { getNodeVisualConfig, getEntityType, NODE_TYPE_CONFIGS } from "@/lib/utils/node-type-config";
+import {
+  getNodeVisualConfig,
+  getEntityType,
+  NODE_TYPE_CONFIGS,
+} from "@/lib/utils/node-type-config";
 import { GraphLegend } from "./graph-legend";
 import { GraphDetailsPanel } from "./graph-details-panel";
 import { Button } from "../ui/button";
@@ -45,14 +49,29 @@ const NVL_OPTIONS = {
   },
 };
 
-export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string }) {
+export default function Neo4jNVLVisualization({
+  sceneId,
+}: {
+  sceneId?: string;
+}) {
   const nvlRef = useRef<NVL>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
   const [errorMsg, setErrorMsg] = useState("");
 
-  const { nodes: rawNodes, relationships: rawRels, loading, error } = useNeo4jGraphData(sceneId);
-  const { selectedNodeId, detailsContent, setDetailsContent, mouseEventCallbacks } =
-    useGraphInteraction();
+  const {
+    nodes: rawNodes,
+    relationships: rawRels,
+    loading,
+    error,
+  } = useNeo4jGraphData(sceneId);
+  const {
+    selectedNodeId,
+    detailsContent,
+    setDetailsContent,
+    mouseEventCallbacks,
+  } = useGraphInteraction();
 
   const COLLAPSED_SCENE_ID = "__collapsed_scene__";
   const { collapsedNodes, collapsedRels } = useMemo(() => {
@@ -74,7 +93,8 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
     }
 
     const primaryScene =
-      sceneNodes.find((n) => n.properties.scene_id === sceneId) ?? sceneNodes[0];
+      sceneNodes.find((n) => n.properties.scene_id === sceneId) ??
+      sceneNodes[0];
 
     const collapsedSceneNode = {
       ...primaryScene,
@@ -120,7 +140,11 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
         const isSelected = selectedNodeId === node.id;
         const entityType = getEntityType(node.labels, node.properties);
         const isSceneNode = entityType === "Scene";
-        const visual = getNodeVisualConfig(node.labels, node.properties, isSelected);
+        const visual = getNodeVisualConfig(
+          node.labels,
+          node.properties,
+          isSelected,
+        );
         const displayName = NODE_TYPE_CONFIGS[entityType].displayName;
         const tooltipDescription = isSceneNode
           ? getSceneDescriptionPreview(node.properties)
@@ -129,7 +153,9 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
         return {
           id: node.id,
           label: node.properties.name || node.properties.scene_id || node.id,
-          caption: isSceneNode ? (node.properties.scene_id as string) || "" : "",
+          caption: isSceneNode
+            ? (node.properties.scene_id as string) || ""
+            : "",
           properties: node.properties,
           labels: node.labels,
           color: visual.color,
@@ -200,13 +226,18 @@ export default function Neo4jNVLVisualization({ sceneId }: { sceneId?: string })
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-background rounded-lg p-8">
         {/* <div className="text-4xl mb-4 text-destructive/50">✕</div> */}
         <p className="text-md tracking-widest uppercase mb-2 text-destructive font-serif">
-          Graph does not exist or failed to load
+          Graph does not exist yet{" "}
         </p>
         {/* <p className="text-xs text-center max-w-sm text-muted-foreground font-mono">
           {errorMsg}
         </p> */}
         <p className="mt-2 text-sm text-primary/90 font-mono border border-dashed border-border/40 rounded px-4 py-3 max-w-sm text-center">
-          Note: The LLM pipeline for knowledge graph creation is not deployed to keep costs low. To see this feature, deploy it to Modal.com and run the project locally — see the README for setup instructions.
+          Note: Knowledge graph generation and the LLM querying pipeline are
+          currently being prepared for the deployed version of the app and will
+          be available in a future update. For now, you can explore these
+          features locally by deploying the NLP pipeline on{" "}
+          <span className="font-medium">Modal.com</span> and running the project
+          locally — see the README for setup instructions.
         </p>
       </div>
     );

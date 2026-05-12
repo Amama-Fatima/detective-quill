@@ -19,14 +19,11 @@ import { SignInFormValues, signInSchema } from "@/lib/schema";
 import { supabaseBrowserClient } from "@/supabase/browser-client";
 import ConfirmationMessages from "../msgs-instructions/confirmation-messages";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams?.get("redirectTo") ?? "/";
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -50,8 +47,7 @@ export function SignInForm() {
         toast.error("Failed to sign in. Please check your credentials.");
         return;
       }
-      // Redirect manually after successful sign-in
-      window.location.assign(`${window.location.origin}${redirectTo}`);
+      window.location.assign(`${window.location.origin}/projects`);
     } catch (error) {
       toast.error("Invalid email or password");
     } finally {

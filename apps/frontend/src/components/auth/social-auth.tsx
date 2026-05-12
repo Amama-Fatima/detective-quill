@@ -33,16 +33,17 @@ export function SocialAuth({ mode, props }: SocialAuthProps) {
           <ShieldAlert className="h-5 w-5 mt-1.5 flex-shrink-0 text-primary" />
           <div>
             <p className="noir-text text-md text-muted-foreground leading-relaxed">
-              Google OAuth does not work on the deployed site unless you are a
-              registered test user. The app is pending Google verification.
+              Google OAuth on deployed website is an upcoming feature. It will
+              be available in a future update. In the meantime, please use email
+              & password to sign up.
             </p>
-            <p className="noir-text text-md text-muted-foreground leading-relaxed mt-4">
+            {/* <p className="noir-text text-md text-muted-foreground leading-relaxed mt-4">
               {" "}
               Please use email & password to sign up or sign in. You can also
               use fake emails like{" "}
               <code className="text-primary text-sm">test123@gmail.com</code> to
               sign up and test the app.
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

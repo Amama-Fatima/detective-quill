@@ -29,7 +29,7 @@ export const useTextQuery = (): UseTextQueryReturn => {
     }) => queryGraph(question, fsNodeId, projectId),
     onError: (error) => {
       console.error("Error running query:", error);
-      toast.error("Error running query. Please try again.");
+      // toast.error("Error running query. Please try again.");
     },
   });
 

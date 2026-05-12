@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { ManuscriptIcon } from "@/components/icons/manuscript-icon";
@@ -52,7 +53,7 @@ export default function HeroSection() {
       <div className="absolute top-[48%] left-[36%] w-[18px] h-[18px] rounded-full border border-border opacity-100 pointer-events-none" />
       <div className="absolute top-[58%] left-[48%] w-[18px] h-[18px] rounded-full border border-border opacity-100 pointer-events-none" />
       <div className="absolute top-[15%] left-[28%] w-[10px] h-[10px] rounded-full bg-primary opacity-50 pointer-events-none" />
-        <div className="absolute top-[25%] right-[28%] w-[10px] h-[10px] rounded-full bg-primary opacity-50 pointer-events-none" />
+      <div className="absolute top-[25%] right-[28%] w-[10px] h-[10px] rounded-full bg-primary opacity-50 pointer-events-none" />
       <div className="absolute bottom-[22%] right-[20%] w-[22px] h-[22px] rounded-full border border-border opacity-100 pointer-events-none" />
       <div className="absolute bottom-[14%] right-[32%] w-[12px] h-[12px] rounded-full bg-muted-foreground opacity-50 pointer-events-none" />
       <div className="absolute bottom-[30%] right-[12%] w-[16px] h-[16px] rounded-full border border-border opacity-100 pointer-events-none" />
@@ -79,6 +80,7 @@ export default function HeroSection() {
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-[14px]">
           <Button
+            asChild
             className="
               bg-primary
               text-primary-foreground
@@ -95,7 +97,7 @@ export default function HeroSection() {
               cursor-pointer
             "
           >
-            Open a New Case
+            <Link href="/projects">Open a New Case</Link>
           </Button>
 
           <Button
