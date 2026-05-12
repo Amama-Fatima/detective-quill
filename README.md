@@ -11,7 +11,7 @@ A writing platform built for detective crime fiction writers to manage and devel
 Track the evolution of a manuscript through a branching system. Writers can create branches to explore different narrative directions, commit changes, and review the history of their story, similar to how software developers manage code.
 
 - **Knowledge Graph**
-As the manuscript grows, the platform uses an NLP pipeline to extract and map story elements — characters, locations, events, and relationships — into a visual knowledge graph. This gives writers a bird's-eye view of their story's structure and helps surface hidden connections.
+As the manuscript grows, the platform uses an NLP pipeline to extract and map story elements (characters, locations, events, and relationships) into a visual knowledge graph. This gives writers a bird's-eye view of their story's structure and helps surface hidden connections.
 
 - **Search Manuscript**
 Query the manuscript and knowledge graph using natural language. The query engine translates plain-English questions into graph queries, allowing writers to ask things like "which characters were present at the dockyard" and get structured answers.
@@ -21,7 +21,7 @@ Query the manuscript and knowledge graph using natural language. The query engin
 
 Detective Quill is a monorepo with a microservices backend. All services live in a single git repository, but each is an independently deployable process that communicates over the network. The frontend is a standard web application; the backend, knowledge-graph pipeline, and query-engine are the microservices.
 
-| Service | Language | Role |
+| Service | Language & Framework | Role |
 |---|---|---|
 | `apps/frontend` | TypeScript / Next.js | Web interface |
 | `apps/backend` | TypeScript / NestJS | REST API and business logic |
