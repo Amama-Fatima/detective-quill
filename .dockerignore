@@ -1,0 +1,27 @@
+.git
+**/node_modules
+**/dist
+**/coverage
+**/.next
+**/.env
+!**/.env.example
+**/*.log
+**/.pnpm-store
+**/.pnpm-debug.log
+
+# Other apps — only backend + shared-types are needed in the image
+apps/frontend
+apps/knowledge-graph
+apps/query-engine
+knowledge-graph
+query-engine
+
+# Infra / docs
+supabase
+docs
+infra
+
+# Test files
+**/test
+**/*.spec.ts
+**/*.e2e-spec.ts

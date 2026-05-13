@@ -1,0 +1,63 @@
+substitutions:
+  _REGION: asia-southeast1
+  _ARTIFACT_REPO: backend
+  _API_SERVICE: detective-quill-api
+  _WORKER_SERVICE: detective-quill-worker
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    id: build
+    args:
+      - build
+      - -t
+      - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend:$COMMIT_SHA
+      - -t
+      - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend:latest
+      - -f
+      - apps/backend/Dockerfile
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    id: push
+    waitFor: [build]
+    args:
+      - push
+      - --all-tags
+      - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy-api
+    waitFor: [push]
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - $_API_SERVICE
+      - --image=$_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend:$COMMIT_SHA
+      - --region=$_REGION
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=3001
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy-worker
+    waitFor: [push]
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - $_WORKER_SERVICE
+      - --image=$_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend:$COMMIT_SHA
+      - --region=$_REGION
+      - --platform=managed
+      - --no-allow-unauthenticated
+      - --port=3002
+      - --command=node
+      - --args=dist/worker/worker.main
+
+images:
+  - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend:$COMMIT_SHA
+  - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
