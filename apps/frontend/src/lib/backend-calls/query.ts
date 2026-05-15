@@ -1,5 +1,4 @@
-const QUERY_ENGINE_BASE_URL =
-  process.env.NEXT_PUBLIC_QUERY_ENGINE_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 // const QUERY_ENGINE_API_PREFIX =
 //   process.env.NEXT_PUBLIC_QUERY_ENGINE_API_PREFIX || "/version1";
@@ -50,7 +49,7 @@ export async function queryGraph(
 ): Promise<QueryEngineResponse> {
   let response: Response;
   try {
-    response = await fetch(`${QUERY_ENGINE_BASE_URL}/query`, {
+    response = await fetch(`${API_BASE_URL}/query`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -62,9 +61,7 @@ export async function queryGraph(
       } satisfies QueryEngineRequest),
     });
   } catch {
-    throw new Error(
-      "Could not reach query engine.",
-    );
+    throw new Error("Could not reach query engine.");
   }
 
   if (!response.ok) {
