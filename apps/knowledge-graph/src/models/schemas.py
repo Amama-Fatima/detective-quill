@@ -21,6 +21,7 @@ class PipelineMetadata(BaseModel):
     num_entities: int
     num_relationships: int
     num_raw_entities: int
+    timings: Optional[Dict[str, float]] = None
 
 class PipelineResult(BaseModel):
     entities: List[Entity] = Field(default_factory=list)
