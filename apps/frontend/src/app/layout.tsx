@@ -40,7 +40,13 @@ export const metadata: Metadata = {
   title: "Detective's Quill - Crime Fiction Writing Platform",
   description:
     "The ultimate platform for crime fiction novel writers. Create, organize, and publish your mystery stories.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
+
 
 export default function RootLayout({
   children,
