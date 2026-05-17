@@ -6,7 +6,7 @@ const NonWorkspaceLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="mt-17 flex-1">{children}</main>
-      <AppFooter />
+      {/* <AppFooter /> */}
     </div>
   );
 };
