@@ -45,7 +45,6 @@ export default function AcceptRejectProject({
         } the invitation to join ${projectTitle}.`,
       );
       if (accepted) {
-        // Redirect to project workspace
         router.push(`/workspace/${projectId}`);
       }
     } catch (error) {

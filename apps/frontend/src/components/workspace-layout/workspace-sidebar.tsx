@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/constants/project-constants";
 import { ChevronLeftIcon, FolderOpenIcon } from "lucide-react";
 import Image from "next/image";
+import { Button } from "../ui/button";
 
 interface WorkspaceSidebarProps {
   projectId: string;
@@ -71,7 +72,7 @@ export default function WorkspaceSidebar({
           )}
         </Link>
 
-        <button
+        <Button
           onClick={() => onCollapsedChange(!collapsed)}
           className="
             absolute -right-3 top-1/2 -translate-y-1/2
@@ -86,7 +87,7 @@ export default function WorkspaceSidebar({
           <ChevronLeftIcon
             className={`h-5 w-5 cursor-pointer transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}
           />
-        </button>
+        </Button>
       </div>
 
       <nav className="flex-1 px-4 py-6 flex flex-col gap-8 overflow-y-auto overflow-x-hidden">

@@ -52,7 +52,6 @@ function BranchTree({
         const isLast = index === nodes.length - 1;
         return (
           <div key={node.id} className="flex">
-            {/* Ancestor continuation guides */}
             {isLastSiblings.map((ancestorIsLast, i) => (
               <div key={i} className="w-10 shrink-0 flex justify-center">
                 {!ancestorIsLast && (

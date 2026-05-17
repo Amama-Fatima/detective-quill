@@ -99,7 +99,6 @@ const TextEditor = ({
   return (
     <div className="">
       <div className={getContainerClass(focusMode)}>
-        {/* Header - Always visible but styled differently in focus modes */}
         <div
           className={getHeaderClass(focusMode) + " bg-primary text-foreground"}
         >
@@ -119,7 +118,6 @@ const TextEditor = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Focus Mode Controls */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -244,7 +242,6 @@ const TextEditor = ({
           </div>
         </div>
 
-        {/* Editor Content */}
         <div className="flex-1 min-h-0">
           <BlockNoteEditor
             ref={effectiveEditorRef}
