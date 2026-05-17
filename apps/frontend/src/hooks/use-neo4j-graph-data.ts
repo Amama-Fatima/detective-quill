@@ -56,27 +56,11 @@ export function useNeo4jGraphData(sceneId?: string) {
         }
         const result = await session.run(
           `
- MATCH (s:Scene {scene_id: $sceneId})
-          
-          // Get all entities that appear in this scene
-          OPTIONAL MATCH (s)<-[:APPEARS_IN]-(entity)
-          
-          // Get all relationships between entities (CONFRONTED, WORKING_WITH, ESCAPED, etc.)
-          OPTIONAL MATCH (entity)-[r]-(otherEntity)
-          WHERE r IS NOT NULL AND entity IS NOT NULL AND otherEntity IS NOT NULL
-          
-          // Also get relationships from the scene to other nodes (if any)
-          OPTIONAL MATCH (s)-[sceneRel]-(otherNode)
-          
-          // Collect everything
-          WITH COLLECT(DISTINCT s) + COLLECT(DISTINCT entity) + COLLECT(DISTINCT otherEntity) + COLLECT(DISTINCT otherNode) as allNodes,
-               COLLECT(DISTINCT r) + COLLECT(DISTINCT sceneRel) as allRels
-          
-          // Unwind and return all unique paths
-          UNWIND allNodes as node
-          OPTIONAL MATCH (node)-[rel]-(connected)
-          WHERE rel IN allRels
-          RETURN DISTINCT node, rel, connected
+MATCH (s:Scene {scene_id: $sceneId})
+OPTIONAL MATCH (s)<-[:APPEARS_IN]-(entity)
+OPTIONAL MATCH (entity)-[r]-(otherEntity)
+WHERE (otherEntity)-[:APPEARS_IN]->(s)
+RETURN s, entity, otherEntity, r
 `,
           { sceneId: targetSceneId },
         );
@@ -85,30 +69,43 @@ export function useNeo4jGraphData(sceneId?: string) {
         const relMap = new Map();
 
         result.records.forEach((record) => {
-          const n = record.get("node");
-          const r = record.get("rel");
-          const m = record.get("connected");
+          const s = record.get("s");
+          const entity = record.get("entity");
+          const otherEntity = record.get("otherEntity");
+          const r = record.get("r");
 
-          if (n) {
-            const nodeId = n.identity.toString();
+          if (s) {
+            const nodeId = s.identity.toString();
             if (!nodeMap.has(nodeId)) {
               nodeMap.set(nodeId, {
                 id: nodeId,
-                labels: n.labels,
-                properties: n.properties,
-                caption: n.properties.name || n.properties.scene_id || nodeId,
+                labels: s.labels,
+                properties: s.properties,
+                caption: s.properties.name || s.properties.scene_id || nodeId,
               });
             }
           }
 
-          if (m) {
-            const nodeId = m.identity.toString();
+          if (entity) {
+            const nodeId = entity.identity.toString();
             if (!nodeMap.has(nodeId)) {
               nodeMap.set(nodeId, {
                 id: nodeId,
-                labels: m.labels,
-                properties: m.properties,
-                caption: m.properties.name || m.properties.scene_id || nodeId,
+                labels: entity.labels,
+                properties: entity.properties,
+                caption: entity.properties.name || entity.properties.scene_id || nodeId,
+              });
+            }
+          }
+
+          if (otherEntity) {
+            const nodeId = otherEntity.identity.toString();
+            if (!nodeMap.has(nodeId)) {
+              nodeMap.set(nodeId, {
+                id: nodeId,
+                labels: otherEntity.labels,
+                properties: otherEntity.properties,
+                caption: otherEntity.properties.name || otherEntity.properties.scene_id || nodeId,
               });
             }
           }

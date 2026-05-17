@@ -392,14 +392,13 @@ Respond with ONLY valid JSON. No markdown, no explanation.
       "target": "<exact entity name from the provided entity list>",
       "relation_type": "<one allowed relation_type>",
       "when": "<explicit time string or null>",
-      "evidence": "<exact sentence copied from the scene that proves this fact>",
       "confidence": 0.0
     }}
   ]
 }}
 
 Rules:
-- Return at most 5 relationships.
+- Return only 3 relationships.
 - Every relationship must have an exact evidence sentence copied from the scene.
 - Do not invent entities that are not in the provided entity list.
 - If there are no case-relevant facts, return an empty relationships array.
@@ -495,12 +494,12 @@ Rules:
                 )
 
         relationships = _deduplicate_relationships(relationships)
-        if len(relationships) > 5:
+        if len(relationships) > 3:
             logger.info(
-                "CASE_FACT_LIMIT kept=5 dropped=%s reason=max_relationships",
-                len(relationships) - 5,
+                "CASE_FACT_LIMIT kept=3 dropped=%s reason=max_relationships",
+                len(relationships) - 3,
             )
-        relationships = relationships[:5]
+        relationships = relationships[:3]
         validator.log_summary(len(relationships))
         enriched = list(entity_map.values())
         logger.info(
