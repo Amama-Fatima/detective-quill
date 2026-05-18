@@ -15,6 +15,7 @@ TYPE_LABEL_MAP = {
     "GPE":    "Location",
     "LOC":    "Location",
     "NORP":   "Group",
+    "PRODUCT": "Evidence",
 }
 DEFAULT_LABEL = "Entity"
 
@@ -64,6 +65,7 @@ def save_graph_layer5(
             created = 0
             for rel in relationships:
                 session.execute_write(_create_relationship, rel, scene_id)
+                session.execute_write(_create_case_fact, rel, scene_id)
                 created += 1
             logger.info(f"Created {created} relationship edges")
 
@@ -123,11 +125,49 @@ def _create_relationship(tx, rel: Relationship, scene_id: str):
         MATCH (b {{name: $target}})
         MERGE (a)-[r:{rel_type}]->(b)
         SET r.scene_id    = $scene_id,
-            r.when        = $when
+            r.when        = $when,
+            r.category    = $category,
+            r.evidence    = $evidence,
+            r.confidence  = $confidence,
+            r.description = $evidence
         """,
         source=rel.source,
         target=rel.target,
         scene_id=scene_id,
+        when=rel.when,
+        category=rel.category,
+        evidence=rel.evidence,
+        confidence=rel.confidence,
+    )
+
+
+def _create_case_fact(tx, rel: Relationship, scene_id: str):
+    fact_id = f"{scene_id}:{rel.source}:{rel.relation_type}:{rel.target}"
+    tx.run(
+        """
+        MATCH (s:Scene {scene_id: $scene_id})
+        MATCH (a {name: $source})
+        MATCH (b {name: $target})
+        MERGE (f:CaseFact {fact_id: $fact_id})
+        SET f.name        = $name,
+            f.type        = "case_fact",
+            f.category    = $category,
+            f.evidence    = $evidence,
+            f.description = $evidence,
+            f.confidence  = $confidence,
+            f.when        = $when
+        MERGE (f)-[:APPEARS_IN]->(s)
+        MERGE (a)-[:SOURCE_OF]->(f)
+        MERGE (f)-[:TARGETS]->(b)
+        """,
+        fact_id=fact_id,
+        name=rel.relation_type.replace("_", " "),
+        scene_id=scene_id,
+        source=rel.source,
+        target=rel.target,
+        category=rel.category,
+        evidence=rel.evidence,
+        confidence=rel.confidence,
         when=rel.when,
     )
 

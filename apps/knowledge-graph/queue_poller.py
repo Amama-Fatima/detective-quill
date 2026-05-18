@@ -77,6 +77,8 @@ def poll_queue():
         connection = None
         channel = None
         method_frame = None
+        header_frame = None
+        body = None
 
         try:
             connection = pika.BlockingConnection(_build_rabbitmq_params())
@@ -84,7 +86,16 @@ def poll_queue():
             channel.queue_declare(queue=settings.SCENE_ANALYSIS_QUEUE, durable=True)
             channel.queue_declare(queue=settings.SCENE_ANALYSIS_RESULTS_QUEUE, durable=True)
 
-            method_frame, body = channel.basic_get(
+            queue_state = channel.queue_declare(
+                queue=settings.SCENE_ANALYSIS_QUEUE,
+                durable=True,
+                passive=True,
+            )
+            logger.info(
+                f"Queue {settings.SCENE_ANALYSIS_QUEUE} ready. message_count={queue_state.method.message_count}"
+            )
+
+            method_frame, header_frame, body = channel.basic_get(
                 queue=settings.SCENE_ANALYSIS_QUEUE,
                 auto_ack=False
             )
@@ -101,6 +112,9 @@ def poll_queue():
             channel.basic_ack(delivery_tag=delivery_tag)
 
             try:
+                if body is None:
+                    raise ValueError("RabbitMQ returned an empty message body")
+
                 raw_message = json.loads(body.decode("utf-8"))
 
                 # Handle both plain payloads and NestJS event wrapper payloads.

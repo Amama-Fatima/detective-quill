@@ -56,6 +56,31 @@ class NarrativeAnalysisPipeline:
 
         if verbose:
             logger.info(f"Enriched {len(enriched_entities)} entities, found {len(relationships)} relationships")
+            logger.info(
+                "PIPELINE_ENTITY_SUMMARY %s",
+                [
+                    {
+                        "name": entity.name,
+                        "type": entity.type,
+                        "role": entity.role,
+                    }
+                    for entity in enriched_entities
+                ],
+            )
+            logger.info(
+                "PIPELINE_RELATIONSHIP_SUMMARY %s",
+                [
+                    {
+                        "source": rel.source,
+                        "relation": rel.relation_type,
+                        "target": rel.target,
+                        "category": rel.category,
+                        "confidence": rel.confidence,
+                        "evidence": rel.evidence,
+                    }
+                    for rel in relationships
+                ],
+            )
 
         metadata = PipelineMetadata(
             num_entities=len(enriched_entities),
