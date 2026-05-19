@@ -25,6 +25,13 @@ FICTION_FALSE_ORG_WORDS = {
     'thermos', 'kleenex', 'hoover', 'jello',
 }
 
+# Generic person role nouns to filter out
+PERSON_ROLE_NOUNS = {
+    'husband', 'wife',
+    'father', 'mother', 'brother', 'sister', 'son', 'daughter', 'officer', 'sergeant', 'constable', 'visitor', 'patient', 'doctor', 'nurse', 'guard',
+    'partner', 'colleague', 'friend',
+}
+
 
 class EntityPostProcessor:
     def __init__(self):
@@ -143,6 +150,15 @@ class EntityPostProcessor:
             result.append(entity)
         return result
 
+    def remove_generic_role_nouns(self, entities: List[Entity]) -> List[Entity]:
+        result = []
+        for entity in entities:
+            if entity.name.lower() in PERSON_ROLE_NOUNS:
+                logger.debug(f"  Removed generic role noun: '{entity.name}'")
+                continue
+            result.append(entity)
+        return result
+
     def process(self, entities: List[Entity], verbose: bool = True) -> List[Entity]:
         if verbose:
             logger.info(f"  Input: {len(entities)} raw entities")
@@ -151,18 +167,22 @@ class EntityPostProcessor:
         if verbose:
             logger.info(f"  After false-positive removal: {len(entities)} entities")
 
+        entities = self.remove_generic_role_nouns(entities)
+        if verbose:
+            logger.info(f"  After generic role noun removal: {len(entities)} entities")
+
         entities = self.filter_entity_types(entities)
         if verbose:
             logger.info(f"  After filtering: {len(entities)} entities")
-        
+
         entities = self.merge_duplicate_entities(entities)
         if verbose:
             logger.info(f"  After deduplication: {len(entities)} entities")
-        
+
         entities = self.resolve_type_conflicts(entities)
         if verbose:
             logger.info(f"  After type resolution: {len(entities)} entities")
-        
+
         return entities
     
 
