@@ -3,6 +3,7 @@ substitutions:
   _ARTIFACT_REPO: backend
   _API_SERVICE: detective-quill-api
   _WORKER_SERVICE: detective-quill-worker
+  _GATEWAY_SERVICE: detective-quill-gateway
 
 steps:
   - name: gcr.io/cloud-builders/docker
@@ -55,9 +56,45 @@ steps:
       - --command=node
       - --args=dist/worker/worker.main
 
+  - name: gcr.io/cloud-builders/docker
+    id: build-nginx
+    args:
+      - build
+      - -t
+      - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/nginx:$COMMIT_SHA
+      - -t
+      - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/nginx:latest
+      - -f
+      - apps/nginx/Dockerfile
+      - apps/nginx
+
+  - name: gcr.io/cloud-builders/docker
+    id: push-nginx
+    waitFor: [build-nginx]
+    args:
+      - push
+      - --all-tags
+      - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/nginx
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy-gateway
+    waitFor: [push-nginx]
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - $_GATEWAY_SERVICE
+      - --image=$_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/nginx:$COMMIT_SHA
+      - --region=$_REGION
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=8080
+
 images:
   - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend:$COMMIT_SHA
   - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/backend:latest
+  - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/nginx:$COMMIT_SHA
+  - $_REGION-docker.pkg.dev/detective-quill/$_ARTIFACT_REPO/nginx:latest
 
 options:
   logging: CLOUD_LOGGING_ONLY
