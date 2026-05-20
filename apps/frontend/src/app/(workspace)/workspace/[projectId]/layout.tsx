@@ -76,7 +76,7 @@ const WorkspaceLayout = async ({
       {!isAcceptInvitePage && (
         <WorkspaceSidebarShell projectId={projectId}>
           <main className="flex-1">{children}</main>
-          <AppFooter />
+          {/* <AppFooter /> */}
         </WorkspaceSidebarShell>
       )}
 
