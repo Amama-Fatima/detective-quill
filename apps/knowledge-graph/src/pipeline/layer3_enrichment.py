@@ -31,6 +31,7 @@ RELATION_ONTOLOGY: Dict[str, str] = {
     "found_evidence": "investigation",
     "identified": "investigation",
     "contradicted": "investigation",
+    "build_case_against": "investigation",
     # evidence
     "owns": "evidence",
     "carries": "evidence",
@@ -272,13 +273,6 @@ class CaseFactValidator:
             return None
 
         relation_type = _normalize_relation(str(item.get("relation_type", "")))
-        if relation_type in LOW_VALUE_RELATIONS:
-            self._reject("low_value_relation", item, f"relation={relation_type}")
-            return None
-
-        if relation_type not in RELATION_ONTOLOGY:
-            self._reject("outside_ontology", item, f"relation={relation_type}")
-            return None
 
         if _is_generic_entity(source) or _is_generic_entity(target):
             self._reject("generic_endpoint", item, f"source={source} target={target}")
@@ -309,7 +303,7 @@ class CaseFactValidator:
             target=target,
             relation_type=relation_type,
             when=when,
-            category=RELATION_ONTOLOGY[relation_type],
+            category=RELATION_ONTOLOGY.get(relation_type, "other"),
             evidence=evidence,
             confidence=confidence,
         )
@@ -337,7 +331,6 @@ class BatchLLMProcessor:
         scene_text: str,
     ) -> Tuple[List[Entity], List[Relationship]]:
         entity_list_str = _format_entity_list(entities)
-        allowed_relations = ", ".join(sorted(RELATION_ONTOLOGY))
         sentences = _split_sentences(scene_text)
         logger.info(
             "CASE_FACT_INPUT scene_chars=%s sentences=%s candidate_entities=%s",
@@ -364,17 +357,17 @@ class BatchLLMProcessor:
 Entities:
 {entity_list_str}
 
-Extract only case-relevant detective-story facts.
+Extract ONLY the 3 MOST IMPORTANT case-relevant detective-story facts as relationships.
 
 A case-relevant fact helps answer at least one of these:
 - Who committed, suffered, witnessed, discovered, hid, used, or suspected something important?
 - What evidence, weapon, clue, alibi, motive, contradiction, relationship, or meaningful location is revealed?
 - Where was an important person or object during a crime or investigation?
+- If none of these apply, only then consider other social, character, or contextual facts that are highly relevant to the story.
 
 Ignore background motion and atmosphere: breathing, sitting, standing, looking, walking, turning, smiling, ordinary talking, opening doors, holding objects, or decorative actions unless they reveal evidence, motive, alibi, identity, deception, or crime.
 
-Allowed relation_type values only:
-{allowed_relations}
+Focus on relationships between characters, organizations, locations, and objects that relate to the crime or investigation. Choose relation types that naturally describe the interaction or connection.
 
 Respond with ONLY valid JSON. No markdown, no explanation.
 
@@ -398,11 +391,8 @@ Respond with ONLY valid JSON. No markdown, no explanation.
 }}
 
 Rules:
-- Return only 3 relationships.
-- Every relationship must have an exact evidence sentence copied from the scene.
+- Return only 3 most important relationships. Do NOT return more than 3 even if more are valid.
 - Do not invent entities that are not in the provided entity list.
-- If there are no case-relevant facts, return an empty relationships array.
-- Prefer precision over recall. It is better to miss a weak fact than pollute the graph.
 """
 
         logger.info("Batch LLM case-fact call: %s entities", len(entities))

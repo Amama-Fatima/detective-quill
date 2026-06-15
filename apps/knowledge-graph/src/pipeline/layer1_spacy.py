@@ -10,7 +10,7 @@ logger = setup_logger(__name__)
 PERSON_ROLE_NOUNS = {
     'husband', 'wife',
     'father', 'mother', 'brother', 'sister', 'son', 'daughter','officer','sergeant', 'constable', 'visitor', 'patient', 'doctor', 'nurse', 'guard',
-    'partner', 'colleague', 'friend',
+    'partner', 'colleague', 'friend', "policeman"
 }
 
 ITEM_NOUNS = {
