@@ -957,6 +957,94 @@ export type Database = {
           },
         ];
       };
+      story_embeddings: {
+        Row: {
+          chunk_index: number;
+          chunk_text: string;
+          commit_id: string;
+          content_hash: string;
+          created_at: string;
+          embedding: string;
+          fs_node_id: string;
+          id: string;
+          path: string;
+          project_id: string;
+          snapshot_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          chunk_index: number;
+          chunk_text: string;
+          commit_id: string;
+          content_hash: string;
+          created_at?: string;
+          embedding: string;
+          fs_node_id: string;
+          id?: string;
+          path: string;
+          project_id: string;
+          snapshot_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          chunk_index?: number;
+          chunk_text?: string;
+          commit_id?: string;
+          content_hash?: string;
+          created_at?: string;
+          embedding?: string;
+          fs_node_id?: string;
+          id?: string;
+          path?: string;
+          project_id?: string;
+          snapshot_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "story_embeddings_commit_id_fkey";
+            columns: ["commit_id"];
+            isOneToOne: false;
+            referencedRelation: "commits";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "story_embeddings_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "fs_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "story_embeddings_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "project_file_tree";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "story_embeddings_fs_node_id_fkey";
+            columns: ["fs_node_id"];
+            isOneToOne: false;
+            referencedRelation: "project_root_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "story_embeddings_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "story_embeddings_snapshot_id_fkey";
+            columns: ["snapshot_id"];
+            isOneToOne: false;
+            referencedRelation: "commit_snapshots";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_badges: {
         Row: {
           badge_id: number;
@@ -1170,6 +1258,25 @@ export type Database = {
         Returns: {
           date: string;
           total_score: number;
+        }[];
+      };
+      match_story_chunks: {
+        Args: {
+          filter_commit_id?: string;
+          filter_fs_node_id?: string;
+          filter_project_id?: string;
+          match_count: number;
+          query_embedding: number[];
+        };
+        Returns: {
+          chunk_index: number;
+          chunk_text: string;
+          commit_id: string;
+          fs_node_id: string;
+          id: string;
+          path: string;
+          project_id: string;
+          similarity: number;
         }[];
       };
     };

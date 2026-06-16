@@ -62,9 +62,47 @@ export async function queryGraph(
       } satisfies QueryEngineRequest),
     });
   } catch {
-    throw new Error(
-      "Could not reach query engine.",
-    );
+    throw new Error("Could not reach query engine.");
+  }
+
+  if (!response.ok) {
+    let detail = `Query request failed: ${response.status} ${response.statusText}`;
+
+    try {
+      const errorBody = (await response.json()) as
+        | QueryEngineErrorResponse
+        | undefined;
+      if (errorBody?.detail) {
+        detail = errorBody.detail;
+      }
+    } catch {}
+
+    throw new Error(detail);
+  }
+
+  return (await response.json()) as QueryEngineResponse;
+}
+
+export async function queryVector(
+  question: string,
+  fsNodeId: string,
+  projectId: string,
+): Promise<QueryEngineResponse> {
+  let response: Response;
+  try {
+    response = await fetch(`${QUERY_ENGINE_BASE_URL}/query-vector`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        question,
+        fs_node_id: fsNodeId,
+        project_id: projectId,
+      } satisfies QueryEngineRequest),
+    });
+  } catch {
+    throw new Error("Could not reach query engine.");
   }
 
   if (!response.ok) {

@@ -5,21 +5,18 @@ class Settings(BaseSettings):
     app_name: str = "Detective Quill Query Engine"
     api_v1_prefix: str = "version1"
     log_level: str = "INFO"
-    neo4j_uri: str = "bolt://localhost:7687"
-    neo4j_user: str = ""
-    neo4j_password: str = ""
-    llm_model: str = "Qwen2.5-7B-Instruct"
-    llm_api_base: str = ""
-    llm_api_key: str = ""
-    llm_temperature: float = 0.0
-    graph_top_k: int = 30
-    cypher_result_limit: int = 20
     modal_timeout_seconds: int = 100
-    use_modal_nl2cypher: bool = True
-    modal_app_name: str = "detective-quill-nl2cypher"
-    modal_model_class_name: str = "NL2CypherModel"
+    vector_answer_modal_app_name: str = "detective-quill-answer"
+    vector_answer_modal_model_class_name: str = "AnswerModel"
     supabase_url: str = ""
     supabase_service_role_key: str = ""
+    embedding_api_url: str = ""
+    embedding_api_key: str = ""
+    embedding_auth_header: str = "Authorization"
+    embedding_auth_scheme: str = "Bearer"
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_dimensions: int = 384
+    vector_match_count: int = 8
     cors_allow_origins: list[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",

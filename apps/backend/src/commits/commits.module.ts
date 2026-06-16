@@ -7,6 +7,7 @@ import { SnapshotsModule } from "src/snapshots/snapshots.module";
 import { ContributionsModule } from "src/contributions/contributions.module";
 import { CommitKnowledgeGraphModule } from "src/commit-knowledge-graph/commit-knowledge-graph.module";
 import { QueueModule } from "src/queue/queue.module";
+import { StoryEmbeddingsModule } from "src/story-embeddings/story-embeddings.module";
 import { WorkerCommitsService } from "./worker-commits.service";
 
 @Module({
@@ -18,6 +19,7 @@ import { WorkerCommitsService } from "./worker-commits.service";
     ContributionsModule,
     CommitKnowledgeGraphModule,
     QueueModule,
+    StoryEmbeddingsModule,
   ],
   controllers: [CommitsController],
   providers: [WorkerCommitsService],

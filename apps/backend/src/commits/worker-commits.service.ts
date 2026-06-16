@@ -9,6 +9,7 @@ import { WorkerBranchesService } from "src/branches/worker-branches.service";
 import { WorkerSnapshotsService } from "src/snapshots/worker-snapshots.service";
 import { WorkerContributionsService } from "src/contributions/worker-contributions.service";
 import { CommitKnowledgeGraphService } from "src/commit-knowledge-graph/commit-knowledge-graph.service";
+import { StoryEmbeddingsService } from "src/story-embeddings/story-embeddings.service";
 
 @Injectable()
 export class WorkerCommitsService {
@@ -18,6 +19,7 @@ export class WorkerCommitsService {
     private workerSnapshotsService: WorkerSnapshotsService,
     private workerContributionsService: WorkerContributionsService,
     private readonly commitKnowledgeGraphService: CommitKnowledgeGraphService,
+    private readonly storyEmbeddingsService: StoryEmbeddingsService,
   ) {}
 
   async createCommit(
@@ -98,6 +100,19 @@ export class WorkerCommitsService {
       const message = error instanceof Error ? error.message : "Unknown error";
       console.warn(
         `Failed to enqueue commit knowledge graph jobs for commit ${commit.id}: ${message}`,
+      );
+    }
+
+    try {
+      await this.storyEmbeddingsService.syncEmbeddingsForCommit(
+        projectId,
+        commit.id,
+        changed,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.warn(
+        `Failed to sync story embeddings for commit ${commit.id}: ${message}`,
       );
     }
 

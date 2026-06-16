@@ -1,4 +1,4 @@
-"""Custom wrapper around the Modal Qwen NL -> Cypher deployment."""
+"""Custom wrapper around a Modal-hosted text generation model."""
 
 from __future__ import annotations
 
@@ -13,18 +13,25 @@ logger = get_logger(__name__)
 
 
 class ModalQwenLLM:
-    def __init__(self, timeout_seconds: int | None = None) -> None:
+    def __init__(
+        self,
+        app_name: str,
+        model_class_name: str,
+        timeout_seconds: int | None = None,
+    ) -> None:
         self._timeout_seconds = timeout_seconds or settings.modal_timeout_seconds
+        self._app_name = app_name
+        self._model_class_name = model_class_name
 
         try:
             modal_model_class = modal.Cls.from_name(
-                settings.modal_app_name,
-                settings.modal_model_class_name,
+                self._app_name,
+                self._model_class_name,
             )
             self._model_instance = modal_model_class()
         except Exception as exc:
             raise RuntimeError(
-                "Failed to resolve Modal model class. Deploy modal_nl2cypher.py first."
+                f"Failed to resolve Modal model class {self._app_name}/{self._model_class_name}."
             ) from exc
 
         self._executor = ThreadPoolExecutor(max_workers=1)

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import {
-  queryGraph,
+  queryVector,
   type QueryEngineResponse,
 } from "@/lib/backend-calls/query";
 import { toast } from "sonner";
@@ -26,7 +26,7 @@ export const useTextQuery = (): UseTextQueryReturn => {
       question: string;
       fsNodeId: string;
       projectId: string;
-    }) => queryGraph(question, fsNodeId, projectId),
+    }) => queryVector(question, fsNodeId, projectId),
     onError: (error) => {
       console.error("Error running query:", error);
       // toast.error("Error running query. Please try again.");
