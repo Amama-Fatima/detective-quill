@@ -1,143 +1,13 @@
 import json
 import re
 from collections import Counter
+from difflib import SequenceMatcher
 from typing import Dict, List, Optional, Tuple
 
 from src.models.schemas import Entity, Relationship
 from src.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
-
-
-RELATION_ONTOLOGY: Dict[str, str] = {
-    # crime
-    "killed": "crime",
-    "attacked": "crime",
-    "threatened": "crime",
-    "kidnapped": "crime",
-    "poisoned": "crime",
-    "stabbed": "crime",
-    "shot": "crime",
-    "stole": "crime",
-    "blackmailed": "crime",
-    "framed": "crime",
-    # investigation
-    "discovered": "investigation",
-    "suspected": "investigation",
-    "questioned": "investigation",
-    "accused": "investigation",
-    "followed": "investigation",
-    "searched": "investigation",
-    "found_evidence": "investigation",
-    "identified": "investigation",
-    "contradicted": "investigation",
-    # evidence
-    "owns": "evidence",
-    "carries": "evidence",
-    "found_at": "evidence",
-    "used_as_weapon": "evidence",
-    "contains_clue": "evidence",
-    "hid": "evidence",
-    "revealed": "evidence",
-    # social / character context
-    "related_to": "social",
-    "married_to": "social",
-    "works_for": "social",
-    "knows": "social",
-    "lied_to": "social",
-    "betrayed": "social",
-    # location / alibi
-    "present_at": "location",
-    "last_seen_at": "location",
-    "moved_to": "location",
-    "alibi_for": "plot",
-    "motive_against": "plot",
-    "witnessed": "plot",
-    "concealed": "plot",
-}
-
-LOW_VALUE_RELATIONS = {
-    "breathed",
-    "sat",
-    "sat_on",
-    "stood",
-    "walked",
-    "walked_to",
-    "looked",
-    "looked_at",
-    "turned",
-    "smiled",
-    "frowned",
-    "nodded",
-    "sighed",
-    "said",
-    "talked_to",
-    "spoke_to",
-    "entered",
-    "left",
-    "opened",
-    "closed",
-    "held",
-    "touched",
-}
-
-RELATION_ALIASES = {
-    "accuse": "accused",
-    "attack": "attacked",
-    "betray": "betrayed",
-    "blackmail": "blackmailed",
-    "carry": "carries",
-    "conceal": "concealed",
-    "contradict": "contradicted",
-    "discover": "discovered",
-    "find": "found_evidence",
-    "found": "found_evidence",
-    "frame": "framed",
-    "hide": "hid",
-    "identify": "identified",
-    "kidnap": "kidnapped",
-    "kill": "killed",
-    "murder": "killed",
-    "murdered": "killed",
-    "poison": "poisoned",
-    "question": "questioned",
-    "reveal": "revealed",
-    "search": "searched",
-    "shoot": "shot",
-    "stab": "stabbed",
-    "steal": "stole",
-    "suspect": "suspected",
-    "threaten": "threatened",
-    "use_as_weapon": "used_as_weapon",
-    "used_weapon": "used_as_weapon",
-    "witness": "witnessed",
-}
-
-GENERIC_ENTITY_NAMES = {
-    "air",
-    "breath",
-    "chair",
-    "door",
-    "floor",
-    "hand",
-    "head",
-    "room",
-    "table",
-    "window",
-}
-
-ROLE_VALUES = {
-    "detective",
-    "suspect",
-    "victim",
-    "witness",
-    "item",
-    "location",
-    "character",
-    "policeman",
-    "evidence",
-    "other",
-}
 
 
 def _format_entity_list(entities: List[Entity]) -> str:
@@ -149,9 +19,9 @@ def _normalize_text(value: str) -> str:
 
 
 def _normalize_relation(value: str) -> str:
-    value = re.sub(r"[^a-zA-Z0-9_ ]", "", value or "")
-    normalized = "_".join(value.lower().split())
-    return RELATION_ALIASES.get(normalized, normalized)
+    value = re.sub(r"[^a-zA-Z0-9_ -]", "", value or "")
+    value = re.sub(r"\s+", " ", value).strip().lower()
+    return "_".join(value.replace("-", " ").split())
 
 
 def _split_sentences(scene_text: str) -> List[str]:
@@ -192,18 +62,32 @@ def _evidence_in_scene(evidence: str, sentences: List[str]) -> Optional[str]:
     if not normalized_evidence:
         return None
 
+    best_sentence = None
+    best_score = 0.0
     for sentence in sentences:
         normalized_sentence = _normalize_text(sentence)
         if normalized_evidence == normalized_sentence:
             return sentence
         if normalized_evidence in normalized_sentence:
             return sentence
+        if normalized_sentence in normalized_evidence:
+            return sentence
+
+        score = SequenceMatcher(None, normalized_evidence, normalized_sentence).ratio()
+        if score > best_score:
+            best_score = score
+            best_sentence = sentence
+
+    if best_sentence and best_score >= 0.78:
+        logger.info(
+            "NARRATIVE_FACT_EVIDENCE_FUZZY_MATCH score=%.2f evidence=%s matched=%s",
+            best_score,
+            _shorten(evidence, 160),
+            _shorten(best_sentence, 160),
+        )
+        return best_sentence
 
     return None
-
-
-def _is_generic_entity(name: str) -> bool:
-    return _normalize_text(name) in GENERIC_ENTITY_NAMES
 
 
 def _clamp_confidence(value: object) -> float:
@@ -239,11 +123,11 @@ def _deduplicate_relationships(rels: List[Relationship]) -> List[Relationship]:
         seen.add(key)
         result.append(rel)
     if duplicates:
-        logger.info("CASE_FACT_DEDUP removed_duplicates=%s", duplicates)
+        logger.info("NARRATIVE_FACT_DEDUP removed_duplicates=%s", duplicates)
     return result
 
 
-class CaseFactValidator:
+class NarrativeFactValidator:
     def __init__(self, entities: List[Entity], scene_text: str):
         self.entities = entities
         self.sentences = _split_sentences(scene_text)
@@ -254,7 +138,7 @@ class CaseFactValidator:
         self.rejection_counts[reason] += 1
         self.rejection_examples.setdefault(reason, detail)
         logger.info(
-            "CASE_FACT_REJECT reason=%s detail=%s raw=%s",
+            "NARRATIVE_FACT_REJECT reason=%s detail=%s raw=%s",
             reason,
             detail,
             _shorten(item),
@@ -271,17 +155,19 @@ class CaseFactValidator:
             )
             return None
 
-        relation_type = _normalize_relation(str(item.get("relation_type", "")))
-        if relation_type in LOW_VALUE_RELATIONS:
-            self._reject("low_value_relation", item, f"relation={relation_type}")
+        raw_relation = (
+            item.get("relation_type")
+            or item.get("relation")
+            or item.get("relation_label")
+            or ""
+        )
+        relation_type = _normalize_relation(str(raw_relation))
+        relation_words = relation_type.split("_")
+        if not relation_type:
+            self._reject("missing_relation", item, "empty relation label")
             return None
-
-        if relation_type not in RELATION_ONTOLOGY:
-            self._reject("outside_ontology", item, f"relation={relation_type}")
-            return None
-
-        if _is_generic_entity(source) or _is_generic_entity(target):
-            self._reject("generic_endpoint", item, f"source={source} target={target}")
+        if len(relation_words) > 5 or len(relation_type) > 64:
+            self._reject("relation_too_long", item, f"relation={relation_type}")
             return None
 
         evidence = _evidence_in_scene(str(item.get("evidence", "")), self.sentences)
@@ -294,7 +180,7 @@ class CaseFactValidator:
             return None
 
         confidence = _clamp_confidence(item.get("confidence"))
-        if confidence < 0.55:
+        if confidence < 0.5:
             self._reject("low_confidence", item, f"confidence={confidence}")
             return None
 
@@ -309,20 +195,20 @@ class CaseFactValidator:
             target=target,
             relation_type=relation_type,
             when=when,
-            category=RELATION_ONTOLOGY[relation_type],
+            category=None,
             evidence=evidence,
             confidence=confidence,
         )
 
     def log_summary(self, accepted_count: int) -> None:
         logger.info(
-            "CASE_FACT_VALIDATION_SUMMARY accepted=%s rejected=%s reasons=%s",
+            "NARRATIVE_FACT_VALIDATION_SUMMARY accepted=%s rejected=%s reasons=%s",
             accepted_count,
             sum(self.rejection_counts.values()),
             dict(self.rejection_counts),
         )
         for reason, example in self.rejection_examples.items():
-            logger.info("CASE_FACT_REJECT_EXAMPLE reason=%s detail=%s", reason, example)
+            logger.info("NARRATIVE_FACT_REJECT_EXAMPLE reason=%s detail=%s", reason, example)
 
 
 class BatchLLMProcessor:
@@ -337,16 +223,14 @@ class BatchLLMProcessor:
         scene_text: str,
     ) -> Tuple[List[Entity], List[Relationship]]:
         entity_list_str = _format_entity_list(entities)
-        allowed_relations = ", ".join(sorted(RELATION_ONTOLOGY))
-        sentences = _split_sentences(scene_text)
         logger.info(
-            "CASE_FACT_INPUT scene_chars=%s sentences=%s candidate_entities=%s",
+            "NARRATIVE_FACT_INPUT scene_chars=%s sentences=%s candidate_entities=%s",
             len(scene_text),
-            len(sentences),
+            len(_split_sentences(scene_text)),
             len(entities),
         )
         logger.info(
-            "CASE_FACT_ENTITY_CANDIDATES %s",
+            "NARRATIVE_FACT_ENTITY_CANDIDATES %s",
             [
                 {
                     "name": entity.name,
@@ -358,57 +242,59 @@ class BatchLLMProcessor:
         )
 
         prompt = f"""<scene>
-{scene_text[:2200]}
+{scene_text[:2600]}
 </scene>
 
-Entities:
+Candidate entities:
 {entity_list_str}
 
-Extract only case-relevant detective-story facts.
+Extract a compact knowledge graph from the scene.
 
-A case-relevant fact helps answer at least one of these:
-- Who committed, suffered, witnessed, discovered, hid, used, or suspected something important?
-- What evidence, weapon, clue, alibi, motive, contradiction, relationship, or meaningful location is revealed?
-- Where was an important person or object during a crime or investigation?
+Use only the exact candidate entities above. Do not invent entities, objects, or places that are missing from the candidate list.
+Extract relationships that are stated or strongly implied by the scene.
+Prefer story-relevant facts: actions with consequences, discoveries, suspicions, deception, possession, evidence, locations, emotional/social ties, motives, conflicts, and important state changes.
+Skip mundane movement, posture, looking, ordinary speech, and background atmosphere unless it changes what the reader knows about the plot or a character.
 
-Ignore background motion and atmosphere: breathing, sitting, standing, looking, walking, turning, smiling, ordinary talking, opening doors, holding objects, or decorative actions unless they reveal evidence, motive, alibi, identity, deception, or crime.
+For relation labels, write a short natural verb phrase such as "killed", "lied_to", "found", "hid_from", "was_married_to", "owned", or "was_seen_at".
+Do not force labels into a predefined ontology. Use the wording that best fits the scene.
 
-Allowed relation_type values only:
-{allowed_relations}
+For evidence, copy the shortest exact sentence or clause from the scene that supports the relationship.
 
 Respond with ONLY valid JSON. No markdown, no explanation.
 
 {{
   "entities": [
     {{
-      "name": "<exact entity name from the provided entity list>",
-      "role": "<detective|suspect|victim|witness|item|location|character|policeman|evidence|other>",
-      "description": "<one short sentence based only on the scene>"
+      "name": "<exact candidate entity name>",
+      "description": "<one short scene-grounded description, or null>"
     }}
   ],
   "relationships": [
     {{
-      "source": "<exact entity name from the provided entity list>",
-      "target": "<exact entity name from the provided entity list>",
-      "relation_type": "<one allowed relation_type>",
-      "when": "<explicit time string or null>",
-      "confidence": 0.0
+      "source": "<exact candidate entity name>",
+      "target": "<exact candidate entity name>",
+      "relation_type": "<short natural relation label>",
+      "when": "<explicit time phrase, or null>",
+      "evidence": "<exact supporting sentence or clause copied from the scene>",
+      "confidence": 0.85
     }}
   ]
 }}
 
 Rules:
-- Return only 3 relationships.
-- Every relationship must have an exact evidence sentence copied from the scene.
-- Do not invent entities that are not in the provided entity list.
-- If there are no case-relevant facts, return an empty relationships array.
-- Prefer precision over recall. It is better to miss a weak fact than pollute the graph.
+- Every relationship must connect two different candidate entities.
+- The source and target must be copied exactly from the candidate entity list.
+- Every relationship must include exact evidence copied from the scene.
+- Use confidence between 0.5 and 1.0 for relationships you include.
+- Return every clearly supported story-relevant relationship, but avoid duplicates and weak guesses.
+- If no useful relationships are supported, return an empty relationships array.
+- Prefer precision over volume.
 """
 
-        logger.info("Batch LLM case-fact call: %s entities", len(entities))
-        response = self.llm_loader.generate(prompt, max_tokens=900)
+        logger.info("Batch LLM narrative-fact call: %s entities", len(entities))
+        response = self.llm_loader.generate(prompt, max_tokens=1200)
         logger.info(
-            "CASE_FACT_LLM_RAW_RESPONSE chars=%s preview=%s",
+            "NARRATIVE_FACT_LLM_RAW_RESPONSE chars=%s preview=%s",
             len(response),
             _shorten(response, 900),
         )
@@ -439,52 +325,49 @@ Rules:
         raw_entities = data.get("entities", [])
         raw_relationships = data.get("relationships", [])
         logger.info(
-            "CASE_FACT_LLM_PARSED proposed_entities=%s proposed_relationships=%s",
+            "NARRATIVE_FACT_LLM_PARSED proposed_entities=%s proposed_relationships=%s",
             len(raw_entities) if isinstance(raw_entities, list) else "invalid",
             len(raw_relationships) if isinstance(raw_relationships, list) else "invalid",
         )
 
         for item in raw_entities if isinstance(raw_entities, list) else []:
             if not isinstance(item, dict):
-                logger.info("CASE_FACT_ENTITY_REJECT reason=invalid_shape raw=%s", _shorten(item))
+                logger.info("NARRATIVE_FACT_ENTITY_REJECT reason=invalid_shape raw=%s", _shorten(item))
                 continue
 
             canonical = _match_name(str(item.get("name", "")), original_entities)
             if not canonical:
                 logger.info(
-                    "CASE_FACT_ENTITY_REJECT reason=unmatched_name name=%s raw=%s",
+                    "NARRATIVE_FACT_ENTITY_REJECT reason=unmatched_name name=%s raw=%s",
                     item.get("name"),
                     _shorten(item),
                 )
                 continue
 
-            role = _normalize_relation(str(item.get("role", "other")))
-            if role not in ROLE_VALUES:
-                role = "other"
-
-            description = str(item.get("description", "")).strip() or None
-            entity_map[canonical].role = role
+            description = item.get("description")
+            if description is not None:
+                description = str(description).strip() or None
             entity_map[canonical].description = description
+            entity_map[canonical].role = None
             logger.info(
-                "CASE_FACT_ENTITY_ACCEPT name=%s role=%s description=%s",
+                "NARRATIVE_FACT_ENTITY_ACCEPT name=%s description=%s",
                 canonical,
-                role,
                 _shorten(description, 140),
             )
 
-        validator = CaseFactValidator(original_entities, scene_text)
+        validator = NarrativeFactValidator(original_entities, scene_text)
         relationships: List[Relationship] = []
 
         for item in raw_relationships if isinstance(raw_relationships, list) else []:
             if not isinstance(item, dict):
-                logger.info("CASE_FACT_REJECT reason=invalid_shape raw=%s", _shorten(item))
+                logger.info("NARRATIVE_FACT_REJECT reason=invalid_shape raw=%s", _shorten(item))
                 continue
 
             relationship = validator.validate(item)
             if relationship:
                 relationships.append(relationship)
                 logger.info(
-                    "CASE_FACT_ACCEPT source=%s relation=%s target=%s category=%s confidence=%.2f evidence=%s",
+                    "NARRATIVE_FACT_ACCEPT source=%s relation=%s target=%s category=%s confidence=%.2f evidence=%s",
                     relationship.source,
                     relationship.relation_type,
                     relationship.target,
@@ -494,16 +377,10 @@ Rules:
                 )
 
         relationships = _deduplicate_relationships(relationships)
-        if len(relationships) > 3:
-            logger.info(
-                "CASE_FACT_LIMIT kept=3 dropped=%s reason=max_relationships",
-                len(relationships) - 3,
-            )
-        relationships = relationships[:3]
         validator.log_summary(len(relationships))
         enriched = list(entity_map.values())
         logger.info(
-            "Parsed case facts: %s entities, %s accepted relationships",
+            "Parsed narrative facts: %s entities, %s accepted relationships",
             len(enriched),
             len(relationships),
         )
@@ -515,7 +392,7 @@ def enrich_and_extract_batch(
     scene_text: str,
 ) -> Tuple[List[Entity], List[Relationship]]:
     logger.info("=" * 60)
-    logger.info("LAYER 3+4: Case Fact Enrichment + Validated Relationship Extraction")
+    logger.info("LAYER 3+4: Narrative Fact Enrichment + Grounded Relationship Extraction")
     logger.info("=" * 60)
 
     processor = BatchLLMProcessor()
@@ -527,7 +404,7 @@ def enrich_and_extract_batch(
         len(relationships),
     )
     for entity in enriched_entities:
-        logger.debug("  %s (%s) - role: %s", entity.name, entity.type, entity.role)
+        logger.debug("  %s (%s) - description: %s", entity.name, entity.type, entity.description)
     for relationship in relationships:
         logger.debug(
             "  %s --[%s]--> %s",
