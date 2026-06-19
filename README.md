@@ -26,7 +26,7 @@ Detective Quill is a monorepo with a microservices backend. All services live in
 | `apps/frontend` | TypeScript / Next.js | Web interface |
 | `apps/backend` | TypeScript / NestJS | REST API and business logic |
 | `apps/knowledge-graph` | Python | Builds and enriches the story knowledge graph |
-| `apps/query-engine` | FastAPI | Translates natural language queries to graph queries |
+| `apps/query-engine` | FastAPI | Contains the querying endpoints and functionality for creating embeddings |
 
 ### Message Queues
 
