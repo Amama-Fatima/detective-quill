@@ -97,5 +97,5 @@ def embeddings(
 
 
 @app.local_entrypoint()
-def main(text: str = "Detective Quill found a clue in the locked study.") -> None:
+def main(text: str = "Detective found a clue in the locked study.") -> None:
     print(embedding_model.embed.remote([text])[0][:8])

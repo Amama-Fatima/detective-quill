@@ -27,40 +27,17 @@ class VectorChunk:
 
 class VectorRAGService:
     def __init__(self) -> None:
-        self._provider = settings.use.strip().lower()
-        self._llm = (
-            None
-            if self._provider == "open"
-            else ModalQwenLLM(
-                timeout_seconds=settings.modal_timeout_seconds,
-                app_name=settings.vector_answer_modal_app_name,
-                model_class_name=settings.vector_answer_modal_model_class_name,
-            )
+        self._llm = ModalQwenLLM(
+            timeout_seconds=settings.modal_timeout_seconds,
+            app_name=settings.vector_answer_modal_app_name,
+            model_class_name=settings.vector_answer_modal_model_class_name,
         )
-        self._embedding_api_url = (
-            settings.openai_embedding_api_url
-            if self._provider == "open"
-            else settings.embedding_api_url
-        )
-        self._embedding_api_key = (
-            settings.openai_api_key
-            if self._provider == "open"
-            else settings.embedding_api_key
-        )
+        self._embedding_api_url = settings.embedding_api_url
+        self._embedding_api_key = settings.embedding_api_key
         self._embedding_auth_header = settings.embedding_auth_header
         self._embedding_auth_scheme = settings.embedding_auth_scheme
-        self._embedding_model = (
-            settings.openai_embedding_model
-            if self._provider == "open"
-            else settings.embedding_model
-        )
-        self._embedding_dimensions = (
-            settings.openai_embedding_dimensions
-            if self._provider == "open"
-            else settings.embedding_dimensions
-        )
-        self._openai_chat_api_url = settings.openai_chat_api_url
-        self._openai_chat_model = settings.openai_chat_model
+        self._embedding_model = settings.embedding_model
+        self._embedding_dimensions = settings.embedding_dimensions
         self._match_count = settings.vector_match_count
 
     @staticmethod
@@ -174,16 +151,11 @@ JSON RESPONSE:"""
     async def _generate_embedding(self, question: str) -> list[float]:
         if not self._embedding_api_url:
             raise RuntimeError("EMBEDDING_API_URL is required for vector queries.")
-        if self._provider == "open" and not self._embedding_api_key:
-            raise RuntimeError("OPENAI_API_KEY is required when use=open.")
 
         request_body: dict[str, object] = {
             "input": question,
+            "input_type": "query",
         }
-        if self._provider == "modal":
-            request_body["input_type"] = "query"
-        if self._provider == "open":
-            request_body["dimensions"] = self._embedding_dimensions
         if self._embedding_model:
             request_body["model"] = self._embedding_model
 
@@ -238,63 +210,7 @@ JSON RESPONSE:"""
         return await asyncio.to_thread(_call_embedding_api)
 
     async def _generate_answer(self, prompt: str) -> str:
-        if self._provider != "open":
-            if self._llm is None:
-                raise RuntimeError("Modal answer model is not configured.")
-            return self._llm.generate(prompt)
-
-        if not settings.openai_api_key:
-            raise RuntimeError("OPENAI_API_KEY is required when use=open.")
-
-        payload = json.dumps(
-            {
-                "model": self._openai_chat_model,
-                "temperature": 0,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "Return only valid JSON matching the user prompt.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-            }
-        ).encode("utf-8")
-
-        def _call_openai_chat_api() -> str:
-            request = urllib.request.Request(
-                self._openai_chat_api_url,
-                data=payload,
-                method="POST",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {settings.openai_api_key}",
-                },
-            )
-
-            try:
-                with urllib.request.urlopen(request, timeout=90) as response:
-                    body = response.read().decode("utf-8")
-            except urllib.error.HTTPError as exc:
-                body = exc.read().decode("utf-8", errors="ignore")
-                raise RuntimeError(
-                    f"OpenAI chat API failed with status {exc.code}: {body[:500]}"
-                ) from exc
-            except urllib.error.URLError as exc:
-                raise RuntimeError(f"OpenAI chat API request failed: {exc.reason}") from exc
-
-            data = json.loads(body)
-            choices = data.get("choices")
-            if not isinstance(choices, list) or not choices:
-                raise RuntimeError("OpenAI chat API returned an invalid payload")
-
-            message = choices[0].get("message")
-            content = message.get("content") if isinstance(message, dict) else None
-            if not isinstance(content, str) or not content.strip():
-                raise RuntimeError("OpenAI chat API returned an empty answer")
-
-            return content.strip()
-
-        return await asyncio.to_thread(_call_openai_chat_api)
+        return self._llm.generate(prompt)
 
     def _fetch_chunks(
         self,

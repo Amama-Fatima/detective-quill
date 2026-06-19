@@ -24,3 +24,8 @@ apps/query-engine/__pycache__/
 /test
 
 supabase/.temp/
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

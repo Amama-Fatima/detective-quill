@@ -85,7 +85,7 @@ class AnswerModel:
         )
         self._model.eval()
 
-    @modal.method()
+    @modal.method()   
     def generate(self, prompt: str) -> str:
         import torch
 

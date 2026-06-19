@@ -23,18 +23,13 @@ type ChangedFiles = {
   deleted: ChangedFile[];
 };
 
-type EmbeddingProvider = "modal" | "open";
-
 const DEFAULT_EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5";
 const DEFAULT_EMBEDDING_DIMENSIONS = 384;
-const OPENAI_EMBEDDING_API_URL = "https://api.openai.com/v1/embeddings";
-const OPENAI_EMBEDDING_MODEL = "text-embedding-3-small";
 
 @Injectable()
 export class StoryEmbeddingsService {
   private readonly logger = new Logger(StoryEmbeddingsService.name);
 
-  private readonly embeddingProvider: EmbeddingProvider;
   private readonly embeddingApiUrl: string;
   private readonly embeddingApiKey?: string;
   private readonly embeddingAuthHeader: string;
@@ -48,28 +43,15 @@ export class StoryEmbeddingsService {
     private readonly adminSupabaseService: AdminSupabaseService,
     private readonly snapshotsService: WorkerSnapshotsService,
   ) {
-    this.embeddingProvider = this.resolveEmbeddingProvider();
-    this.embeddingApiUrl =
-      this.embeddingProvider === "open"
-        ? (process.env.OPENAI_EMBEDDING_API_URL ?? OPENAI_EMBEDDING_API_URL)
-        : (process.env.EMBEDDING_API_URL ?? "");
-    this.embeddingApiKey =
-      this.embeddingProvider === "open"
-        ? (process.env.OPENAI_API_KEY ?? process.env.EMBEDDING_API_KEY)
-        : process.env.EMBEDDING_API_KEY;
+    this.embeddingApiUrl = process.env.EMBEDDING_API_URL ?? "";
+    this.embeddingApiKey = process.env.EMBEDDING_API_KEY;
     this.embeddingAuthHeader =
       process.env.EMBEDDING_AUTH_HEADER ?? "Authorization";
     this.embeddingAuthScheme = process.env.EMBEDDING_AUTH_SCHEME ?? "Bearer";
     this.embeddingModel =
-      this.embeddingProvider === "open"
-        ? (process.env.OPENAI_EMBEDDING_MODEL ?? OPENAI_EMBEDDING_MODEL)
-        : (process.env.EMBEDDING_MODEL ?? DEFAULT_EMBEDDING_MODEL);
+      process.env.EMBEDDING_MODEL ?? DEFAULT_EMBEDDING_MODEL;
     this.embeddingDimensions = Number(
-      this.embeddingProvider === "open"
-        ? (process.env.OPENAI_EMBEDDING_DIMENSIONS ??
-            process.env.EMBEDDING_DIMENSIONS ??
-            DEFAULT_EMBEDDING_DIMENSIONS)
-        : (process.env.EMBEDDING_DIMENSIONS ?? DEFAULT_EMBEDDING_DIMENSIONS),
+      process.env.EMBEDDING_DIMENSIONS ?? DEFAULT_EMBEDDING_DIMENSIONS,
     );
     this.maxChunkChars = Number(process.env.EMBEDDING_CHUNK_SIZE ?? 1200);
     this.chunkOverlapChars = Number(process.env.EMBEDDING_CHUNK_OVERLAP ?? 200);
@@ -83,13 +65,6 @@ export class StoryEmbeddingsService {
     if (!this.embeddingApiUrl) {
       this.logger.warn(
         "Skipping story embeddings sync: EMBEDDING_API_URL is not configured.",
-      );
-      return { insertedChunks: 0, deletedRows: 0 };
-    }
-
-    if (this.embeddingProvider === "open" && !this.embeddingApiKey) {
-      this.logger.warn(
-        "Skipping story embeddings sync: OPENAI_API_KEY is not configured.",
       );
       return { insertedChunks: 0, deletedRows: 0 };
     }
@@ -294,18 +269,11 @@ export class StoryEmbeddingsService {
   private buildEmbeddingRequestBody(inputs: string[]): Record<string, unknown> {
     const body: Record<string, unknown> = {
       input: inputs.length === 1 ? inputs[0] : inputs,
+      input_type: "document",
     };
-
-    if (this.embeddingProvider === "modal") {
-      body.input_type = "document";
-    }
 
     if (this.embeddingModel) {
       body.model = this.embeddingModel;
-    }
-
-    if (this.embeddingProvider === "open") {
-      body.dimensions = this.embeddingDimensions;
     }
 
     return body;
@@ -351,13 +319,5 @@ export class StoryEmbeddingsService {
 
   private vectorToSqlLiteral(values: number[]): string {
     return `[${values.join(",")}]`;
-  }
-
-  private resolveEmbeddingProvider(): EmbeddingProvider {
-    const rawProvider = (process.env.use ?? process.env.USE ?? "modal")
-      .trim()
-      .toLowerCase();
-
-    return rawProvider === "open" ? "open" : "modal";
   }
 }
