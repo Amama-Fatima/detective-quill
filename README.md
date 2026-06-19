@@ -34,8 +34,6 @@ The backend publishes jobs to RabbitMQ. Lightweight workers (create commit, send
 
 The NLP pipeline (knowledge-graph and query-engine) is deployed on Modal.com, which runs in the cloud. Because of this, a local RabbitMQ instance is not reachable by Modal workers. Modal cannot connect to `localhost:5672` on your machine. For these workers to consume jobs, RabbitMQ must be hosted on a publicly accessible broker (e.g. CloudAMQP). Both the NestJS backend (producer) and the Modal workers (consumers) must point to the same cloud broker URL.
 
-During local development, you can skip Modal entirely and run the Python services directly on your machine, they will consume from your local RabbitMQ the same way any other local process would.
-
 ### Databases
 Supabase serves as the primary database. Neo4j stores and serves the knowledge graph.
 
@@ -79,9 +77,7 @@ detective-quill/
 │   └── query-engine/     # Natural language query service
 ├── packages/
 │   └── shared-types/     # Shared TypeScript types
-├── infra/                # Docker and infrastructure config
 ├── supabase/             # Supabase project config
-└── docs/                 # Architecture diagrams
 ```
 
 ## Live Deployments and Architecture
